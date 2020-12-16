@@ -571,8 +571,8 @@ export class HotspotEditor extends Backbone.View {
                 break;
             }
             default: {
-                const key: string | number = evt.key || evt.keyCode;
-                if (+key === Utils.mouseButtons.right) {
+                const key: number = evt.button;
+                if (key === Utils.mouseButtons.right) {
                     // show context menu
                 } else {
                     $(".shader").css("opacity", opacity.LOW);

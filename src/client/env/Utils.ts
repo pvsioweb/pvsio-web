@@ -485,7 +485,7 @@ export function getKey(charCode: number): string {
     if (charCode === 222) return "'"; // single quote
     return String.fromCharCode(charCode);
 }
-export const mouseButtons = { left: 1, middle: 2, right: 3 };
+export const mouseButtons = { left: 0, middle: 1, right: 2 };
 export function logKeyCode(event: JQuery.KeyboardEventBase): void {
     const key: string | number = event.key || event.keyCode;
     if (typeof key === "number") {

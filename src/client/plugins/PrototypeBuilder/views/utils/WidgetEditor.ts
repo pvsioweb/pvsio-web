@@ -203,20 +203,19 @@ export class WidgetEditor extends Backbone.View {
             });
 
 
-            const evts: WidgetEvents = obj.getEvents();
-            if (evts) {
-                for (const evt in evts) {
-                    this.listenTo(obj, evt, (data: ButtonEventData) => {
-                        const fun: string = data?.fun.replace(previewId, this.widgetData.id);
-                        console.log(fun);
-                        $(`#${name}-evts`).html(`<i class="fa fa-bolt"></i> ${fun}`);
-                        clearTimeout(this.timer);
-                        this.timer = setTimeout(() => {
-                            $(`#${name}-evts`).html("");
-                            this.timer = null;
-                        }, 1200);
-                    });
-                }
+            const evts: string[] = obj.getEvents();
+            for (let i = 0; i < evts?.length; i++) {
+                const evt: string = evts[i];
+                this.listenTo(obj, evt, (data: ButtonEventData) => {
+                    const fun: string = data?.fun.replace(previewId, this.widgetData.id);
+                    console.log(fun);
+                    $(`#${name}-evts`).html(`<i class="fa fa-bolt"></i> ${fun}`);
+                    clearTimeout(this.timer);
+                    this.timer = setTimeout(() => {
+                        $(`#${name}-evts`).html("");
+                        this.timer = null;
+                    }, 1200);
+                });
             }
 
             $(`#${name}-desc`).html(obj.getDescription());

@@ -99,9 +99,10 @@ export type Coords = { top?: number, left?: number, width?: number, height?: num
 export type WidgetDescriptor = {
     id: string,
     type: string,
-    key: string,
+    attr: WidgetAttr,
     coords: Coords,
-    style: HtmlStyle
+    style: HtmlStyle,
+    evts: string[]
 };
 export interface WidgetStyle {
     position?: "absolute" | "relative",
@@ -172,14 +173,9 @@ export type VisibilityOptions =  {
 };
 
 export type BasicEvent = "click" | "dblclick" | "press" | "release";
-export type WidgetEvents = {
-    click?: boolean,
-    dblclick?: boolean,
-    press?: boolean,
-    release?: boolean
-};
+export type WidgetEvents = { [evt in BasicEvent]?: boolean };
 export type WidgetAttr = {
-    [key: string]: string | null
+    [key: string]: string
 };
 
 export abstract class WidgetEVO extends Backbone.Model {
@@ -707,20 +703,6 @@ export abstract class WidgetEVO extends Backbone.Model {
         return this.viz;
     }
 
-    // getStyle2 () {
-    //     let ans = {};
-    //     let _this = this;
-    //     // remove units of numeric values, e.g., font-size is returned as 13 (rather than "13pt")
-    //     Object.keys(this.style).forEach(function (key) {
-    //         let isNumeric = !isNaN(parseFloat(_this.style[key]));
-    //         ans[key] = {
-    //             val: (isNumeric) ? parseFloat(_this.style[key]) : _this.style[key],
-    //             isNumeric: isNumeric
-    //         };
-    //     });
-    //     return ans;
-    // }
-
     getCoordinates (): Coords {
         return {
             top: +(this.top).toFixed(WidgetEVO.MAX_COORDINATES_ACCURACY),
@@ -734,26 +716,31 @@ export abstract class WidgetEVO extends Backbone.Model {
      * Get widget attributes
      * @param opt 
      *      nameReplace {string}: apply a name-replace to the attribute name, where the id of the widget is replaced by the provided string
-     *      keyCode {boolean}: whether to include keyCode in the returned list of attributes 
+     *      keyCode {boolean}: whether to include keyCode in the returned list of attributes
+     *      optionals {string[]}: list of optional attributes --- they will be placed at the end of the returned list 
      */
-    getAttr (opt?: { nameReplace?: string, keyCode?: boolean }): WidgetAttr {
+    getAttr (opt?: { nameReplace?: string, keyCode?: boolean, optionals?: string[] }): WidgetAttr {
         opt = opt || {};
+        opt.optionals = opt.optionals || [];
         const keys: string[] = Object.keys(this.attr)?.sort((a: string, b: string): number => {
             return a < b ? -1 : 1;
         });
         if (keys && keys.length) {
-            if (opt.nameReplace) {
-                const ans: WidgetAttr = {};
-                for (let i in keys) {
-                    const key: string = keys[i];
-                    if (key !== "keyCode" || opt.keyCode) {
-                        ans[key] = this.attr[key]?.replace(this.id, opt.nameReplace);
-                    }
+            const core: WidgetAttr = {};
+            const optionals: WidgetAttr = {};
+            for (let i in keys) {
+                const key: string = keys[i];
+                if (!opt.optionals.includes(key)) {
+                    core[key] = (typeof this.attr[key] === "string" && opt.nameReplace) ?
+                        `${this.attr[key]}`.replace(this.id, opt.nameReplace)
+                            : this.attr[key];
+                } else {
+                    optionals[key] = (typeof this.attr[key] === "string" && opt.nameReplace) ?
+                        `${this.attr[key]}`.replace(this.id, opt.nameReplace)
+                            : this.attr[key];
                 }
-                return ans;
-            } else {
-                return this.attr;
             }
+            return {...core, ...optionals};
         };
         return null;
     }
@@ -762,16 +749,58 @@ export abstract class WidgetEVO extends Backbone.Model {
         return this.id;
     }
 
-    getEvents (): WidgetEvents {
-        return this.evts;
+    getEvents (): string[] {
+        const ans: string[] = [];
+        if (this.evts) {
+            const keys: string[] = Object.keys(this.evts);
+            for (let i in keys) {
+                const evt: string = keys[i];
+                if (this.evts[evt]) {
+                    ans.push(evt);
+                }
+            }
+        }
+        return ans;
+    }
+
+    setEvents (evts: string[]): void {
+        if (evts && evts.length > 0) {
+            this.evts = {};
+            this.enableEvents(evts);
+        } else {
+            this.evts = null;
+        }
+    }
+
+    enableEvents (evts: string[]): void {
+        if (evts && evts.length > 0) {
+            this.evts = this.evts || {};
+            for (let i in evts) {
+                this.evts[evts[i]] = true;
+            }
+        } else {
+            this.evts = null;
+        }
+    }
+
+    disableEvents (evts: string[]): void {
+        if (evts && evts.length > 0) {
+            for (let i in evts) {
+                this.evts = this.evts || {};
+                this.evts[evts[i]] = false;
+            }
+        } else {
+            this.evts = null;
+        }
     }
 
     toJSON (): WidgetDescriptor {
         return {
             id: this.id,
             type: this.alias || this.getType(),
-            key: this.getPrimaryKey(),
+            attr: this.getAttr(),
             coords: this.getCoordinates(),
+            evts: this.getEvents(),
             style: this.getStyle()
         };
     }

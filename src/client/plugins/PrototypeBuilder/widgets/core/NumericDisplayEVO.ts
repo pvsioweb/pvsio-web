@@ -31,7 +31,7 @@
  */
 
 import { BasicDisplayEVO, DisplayOptions } from './BasicDisplayEVO';
-import { Coords } from './WidgetEVO';
+import { Coords, WidgetAttr } from './WidgetEVO';
 
 const selectedFontSize = 1.076; // ratio selectedFont/normalFont for integer digits
 
@@ -128,7 +128,7 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
         this.decimalPointOffset = opt.decimalPointOffset || 0;
 
         // set widget keys
-        this.attr.cursorName = opt.cursorName;
+        this.attr.cursorName = opt.cursorName || "";
     }
 
     /**
@@ -297,6 +297,14 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
         return `Numeric display, suitable for rendering numbers. 
                 Enhances the visibility of decimal point and fractional digits.
                 Provides a cursor for highlighting digits.`;
+    }
+
+    // @override
+    getAttr (opt?: { nameReplace?: string, keyCode?: boolean, optionals?: string[] }): WidgetAttr {
+        opt = opt || {};
+        opt.optionals = opt.optionals || [];
+        opt.optionals = opt.optionals.concat([ "cursorName" ]);
+        return super.getAttr(opt);
     }
 
 }

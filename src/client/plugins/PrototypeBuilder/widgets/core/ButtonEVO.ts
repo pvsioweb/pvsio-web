@@ -39,11 +39,11 @@
  *
  */
 
-import { Coords, BasicEvent, WidgetEVO, WidgetOptions } from "./WidgetEVO";
+import { Coords, BasicEvent, WidgetEVO, WidgetOptions, WidgetAttr } from "./WidgetEVO";
 import { Timer } from "../../../../util/Timer"
 import { ActionsQueue, ActionCallback } from "../ActionsQueue";
 import { Connection } from "../../../../env/Connection";
-import { dimColor } from "../../../../env/Utils";
+import { dimColor, mouseButtons } from "../../../../env/Utils";
 
 const CLICK_RATE = 250; // 250 milliseconds, default interval for repeating button clicks when the button is pressed and held down
                             // going below 250ms may cause multiple unintended activations when pressing the button
@@ -59,7 +59,7 @@ export type ButtonEventData = {
 export interface ButtonOptions extends WidgetOptions {
     toggleButton?: boolean,
     pushButton?: boolean,
-    label?: string,
+    customLabel?: string,
     readBack?: string,
     touchscreenMode?: boolean,
     keyCode?: string,
@@ -112,7 +112,7 @@ export class ButtonEVO extends WidgetEVO {
      *          <li>parent (String): the HTML element where the display will be appended (default is "body")</li>
      *          <li>position (String): standard HTML position attribute indicating the position of the widget with respect to the parent, e.g., "relative", "absolute" (default is "absolute")</li>
      *          <li>pushButton (Bool): if true, the visual aspect of the button resembles a push button, i.e., the button remains selected after clicking the button</li>
-     *          <li>label (String): the button label (default is blank).</li>
+     *          <li>customLabel (String): the button label (default is blank).</li>
      *          <li>dblclick_timeout (Number): timeout, in milliseconds, for detecting double clicks (default is 350ms)</li>
      *          <li>toggleButton (Bool): if true, the visual aspect of the button resembles a toggle button, i.e., the button remains selected after clicking the button</li>
      *          <li>visibleWhen (string): boolean expression indicating when the display is visible. The expression can use only simple comparison operators (=, !=) and boolean constants (true, false). Default is true (i.e., always visible).</li>
@@ -188,8 +188,8 @@ export class ButtonEVO extends WidgetEVO {
 
         // set widget keys
         this.attr.functionName = opt.functionName || id;
-        this.attr.customFunction = opt.customFunction;
-        this.attr.label = opt.label;
+        this.attr.customFunction = opt.customFunction || "";
+        this.attr.customLabel = opt.customLabel || "";
         // this.attr.readBack = opt.readBack;
         this.attr.keyCode = opt.keyCode;
     }
@@ -275,15 +275,19 @@ export class ButtonEVO extends WidgetEVO {
         };
 
         // bind mouse events
-        this.overlay.on("mouseover", () => {
+        this.overlay.on("mouseover", (evt: JQuery.MouseOverEvent) => {
             onMouseOver();
-        }).on("mouseout", () => {
+        }).on("mouseout", (evt: JQuery.MouseOutEvent) => {
             onMouseOut();
-        }).on("mousedown", () => {
-            onMouseDown();
-        }).on("mouseup", () => {
-            onMouseUp();
-        }).on("blur", () => {
+        }).on("mousedown", (evt: JQuery.MouseDownEvent) => {
+            if (evt.button === mouseButtons.left) {
+                onMouseDown();
+            }
+        }).on("mouseup", (evt: JQuery.MouseUpEvent) => {
+            if (evt.button === mouseButtons.left) {
+                onMouseUp();
+            }
+        }).on("blur", (evt: JQuery.BlurEvent) => {
             onBlur();
         });
 
@@ -309,6 +313,13 @@ export class ButtonEVO extends WidgetEVO {
         console.log(fun);
     }
     
+    // @override
+    getAttr (opt?: { nameReplace?: string, keyCode?: boolean, optionals?: string[] }): WidgetAttr {
+        opt = opt || {};
+        opt.optionals = opt.optionals || [];
+        opt.optionals = opt.optionals.concat([ "customFunction", "customLabel", "keyCode" ]);
+        return super.getAttr(opt);
+    }
 
     /**
      * @function <a name="render">render</a>
@@ -342,11 +353,11 @@ export class ButtonEVO extends WidgetEVO {
         state = (state === undefined || state === null)? "" : state;
         // a fixed label is shown if any is specified, otherwise the provided value is displayed
         if (typeof state === "string" || typeof state === "number") {
-            const label: string = this.attr["label"] || `${state}`;
+            const label: string = this.attr["customLabel"] || `${state}`;
             this.base.text(label);
             this.reveal();
         } else if (typeof state === "object" && this.attr?.displayName !== "" && this.evalViz(state)) {
-            const label: string = this.attr["label"] || this.evaluate(this.attr.displayName, state);
+            const label: string = this.attr["customLabel"] || this.evaluate(this.attr.displayName, state);
             this.base.text(label);
             this.reveal();
         } else {
