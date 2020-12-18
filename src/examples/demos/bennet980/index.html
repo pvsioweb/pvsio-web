@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width">
+        <link href="../../node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../node_modules/jquery-toggles/css/toggles.css" rel="stylesheet">
+        <link href="../../node_modules/jquery-toggles/css/themes/toggles-modern.css" rel="stylesheet">
+        <link href="../../node_modules/codemirror/lib/codemirror.css" rel="stylesheet">
+        <link href="../../node_modules/codemirror/addon/fold/foldgutter.css" rel="stylesheet">
+        <link href="../../node_modules/codemirror/addon/hint/show-hint.css" rel="stylesheet">
+        <link href="../../node_modules/codemirror/addon/dialog/dialog.css" rel="stylesheet">
+        <link href="../../node_modules/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/style.css" rel="stylesheet">
+    </head>
+    <body class="noselect" style="background:#dedfdd";>
+        <script src="../../node_modules/jquery/dist/jquery.min.js"></script>
+        <script src="../../node_modules/handlebars/dist/handlebars.min.js"></script>
+        <script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="../../node_modules/underscore/underscore-min.js"></script>
+        <script src="../../node_modules/backbone/backbone.js"></script>
+        <script src="../../node_modules/jquery-toggles/toggles.min.js"></script>
+        <script src="../../lib/d3/d3.js"></script>
+        <script src="../../lib/layout.js"></script>
+        <script src="../../lib/keys.js"></script>
+        <script src="../../node_modules/requirejs/require.js" data-main="index.js"></script>
+
+        <div id="bennet980" class="content" style="display:block; left:100px; position:absolute;">
+            <img src="bennet980.png">
+
+            <div id="mainScreen" class="screen" style="display:block; top:150px; left:88px; position:absolute;">
+                <img src="mainScreen.png">
+                <div style="position:absolute; top:10px; left:200px; height:54px; width:400px; font-size:18px; padding:0; opacity:0.8;; text-align:center; font-weight:bold;">
+                    <span style="color:#a7e0fa; font-size:16px;">Patient Select</span><br>
+                    <span style="color:white; font-size:16px;">Vent startup in progress</span>
+                </div>
+                <div style="position: absolute; top:473px; left:-8px; font-weight:bold; width: 80px; height: 50px; font-size:19px; font-family: sans-serif; color: white; text-align: center; opacity: 0.8;">
+                    Adult
+                </div>
+                <div style="position:absolute; top:120px; left:260px; background-color:#bffcfc; height:249px; width:429px; font-size:18px; padding:10px; padding-top:6px; border-radius:8px; box-shadow:#163268 0px 0px 10px; opacity:0.8;;">
+                    To set up patient and start ventilation, select 'New 
+                    Patient' or 'Same Patient'.
+                    <br><br>
+                    To run SST, change patient circuit or reconfigure the
+                    ventilator, select 'SST'.
+                    <br><br><br>
+                    To view ventilator history and current status, select
+                    logs button.
+                </div>
+            </div>
+            <div id="ventSetupScreen" class="screen" style="display:none; top:150px; left:88px; position:absolute;">
+                <img src="ventSetupScreen.png">
+                <div style="position:absolute; top:10px; left:200px; height:54px; width:400px; font-size:18px; padding:0; opacity:0.8;; text-align:center; font-weight:bold;">
+                    <span style="color:#a7e0fa; font-size:16px;">New Patient Setup</span><br>
+                    <span style="color:white; font-size:16px;">Vent startup in progress</span>
+                </div>
+                <div style="position: absolute; top:473px; left:-8px; font-weight:bold; width: 80px; height: 50px; font-size:19px; font-family: sans-serif; color: white; text-align: center; opacity: 0.8;">
+                    Adult
+                </div>
+                <div style="position:absolute; top:152px; left:246px; height:249px; width:429px; color:white; font-size:18px; padding:10px; padding-top:6px; border-radius:8px; opacity:0.8;">
+                    Press the predicted body weight button or select a 
+                    gender to continue
+                </div>
+            </div>
+            <div id="ventSetup" class="content" style="display:none; top:230px; left:329px; position:absolute;">
+                <img src="ventSetup.png">
+            </div>
+            <div id="connectPatientScreen" class="content" style="display:none; top:150px; left:88px; position:absolute;">
+                <img src="connectPatientScreen.png">
+                <div style="position:absolute; top:10px; left:200px; height:54px; width:400px; font-size:18px; padding:0; opacity:0.8;; text-align:center; font-weight:bold;">
+                    <span style="color:#a7e0fa; font-size:16px;">Waiting for patient connect</span><br>
+                    <span style="color:white; font-size:16px;">Ventilation will begin when connection is detected</span>
+                </div>
+                <div id="wavefom" style="position:absolute; top:83px; left:98px;">
+                    <img src="waveform.gif" style="width:620px;">
+                </div>
+                <div style="position: absolute; top:473px; left:-8px; font-weight:bold; width: 80px; height: 50px; font-size:19px; font-family: sans-serif; color: white; text-align: center; opacity: 0.8;">
+                    Adult
+                </div>
+                <div id="connectPatientScreenDialog" style="position:absolute; top:120px; left:202px; text-align:center; background-color:#2a68d5; color:white; height:249px; width:429px; font-size:18px; padding:40px; border-radius:8px; box-shadow:#163268 0px 0px 10px; opacity:0.8;;">
+                    Patient Connect Confirmation.
+                    <br><br><br>
+                    Please connect patient or press confirm to
+                    start ventilation.
+                </div>
+            </div>
+
+        </div>
+        
+    </body>
+</html>

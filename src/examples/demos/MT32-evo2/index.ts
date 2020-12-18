@@ -230,15 +230,15 @@ class MT32Demo {
     constructor () {
         this.media.mousePointer = new MouseCursor("mousePointer", {
             top:400, left:100
-        }, { parent: "ct64_mouse" });
+        }, { css: { parent: "ct64_mouse" } });
         this.media.mousePointer.render();
         this.media.mousePointer2 = new MouseCursor("mousePointer2", {
             top:400, left:100
-        }, { parent: "ct64_mouse_secondary_screen" });
+        }, { css: { parent: "ct64_mouse_secondary_screen" }});
         this.media.mousePointer2.render();
         this.media.stylus = new Stylus("stylus", {
             top:800, left:60
-        }, { parent: "mt32_stylus" });
+        }, { css: { parent: "mt32_stylus" }});
         // media.stylus.render();
 
         this.mt32.off = new TouchscreenButton("mt32_off", {
@@ -249,10 +249,12 @@ class MT32Demo {
         }, { connection: this.connection,
             customLabel: "",
             customFunction: "set_mt32_off",
-            backgroundColor: "steelblue",
-            opacity: "0.2",
-            borderColor: "white",
-            parent: "device",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0.2,
+                "border-color": "white",
+                parent: "device"
+            },
             visibleWhen: "false",
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
@@ -264,10 +266,12 @@ class MT32Demo {
         }, { connection: this.connection,
             customLabel: "",
             customFunction: "set_mt32_on_battery",
-            backgroundColor: "steelblue",
-            opacity: "0.2",
-            borderColor: "white",
-            parent: "device",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0.2,
+                "border-color": "white",
+                parent: "device"
+            },
             visibleWhen: "false",
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
@@ -279,10 +283,12 @@ class MT32Demo {
         }, { connection: this.connection,
             customLabel: "",
             customFunction: "set_mt32_charging",
-            backgroundColor: "steelblue",
-            opacity: "0.2",
-            borderColor: "white",
-            parent: "device",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0.2,
+                "border-color": "white",
+                parent: "device"
+            },
             visibleWhen: "false",
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
@@ -294,10 +300,12 @@ class MT32Demo {
         }, { connection: this.connection,
             customLabel: "",
             customFunction: "set_mt32_fully_charged",
-            backgroundColor: "steelblue",
-            opacity: "0.2",
-            borderColor: "white",
-            parent: "device",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0.2,
+                "border-color": "white",
+                parent: "device"
+            },
             visibleWhen: "false",
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
@@ -309,10 +317,12 @@ class MT32Demo {
         }, { connection: this.connection,
             customLabel: "",
             customFunction: "set_mt32_charging_error",
-            backgroundColor: "steelblue",
-            opacity: "0.2",
-            borderColor: "white",
-            parent: "device",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0.2,
+                "border-color": "white",
+                parent: "device"
+            },
             visibleWhen: "false",
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
@@ -325,10 +335,12 @@ class MT32Demo {
             left: 226
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0.2",
-            borderColor: "white",
-            parent: "leftPanel",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0.2,
+                "border-color": "white",
+                parent: "leftPanel"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.wireless = new TouchscreenButton("wireless", {
@@ -338,10 +350,12 @@ class MT32Demo {
             left: 226
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0.2",
-            borderColor: "white",
-            parent: "leftPanel",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0.2,
+                "border-color": "white",
+                parent: "leftPanel"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.bluetooth = new TouchscreenButton("bluetooth", {
@@ -351,10 +365,12 @@ class MT32Demo {
             left: 226
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0.2",
-            borderColor: "white",
-            parent: "leftPanel",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0.2,
+                "border-color": "white",
+                parent: "leftPanel"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.battery = new TouchscreenButton("battery", {
@@ -364,10 +380,12 @@ class MT32Demo {
             left: 226
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0.2",
-            borderColor: "white",
-            parent: "leftPanel",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0.2,
+                "border-color": "white",
+                parent: "leftPanel"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.view_alerts = new TouchscreenButton("view_alerts", {
@@ -377,11 +395,13 @@ class MT32Demo {
             left: 228
         }, { connection: this.connection,
             customLabel: "!",
-            backgroundColor: "crimson",
-            opacity: "0.8",
-            fontSize: 48,
-            borderColor: "#000066",
-            parent: "leftPanel",
+            css: {
+                "background-color": "crimson",
+                opacity: 0.8,
+                "font-size": "48px",
+                "border-color": "#000066",
+                parent: "leftPanel"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.leftpanel_back = new TouchscreenButton("back", {
@@ -391,10 +411,12 @@ class MT32Demo {
             left: 226
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0.2",
-            borderColor: "white",
-            parent: "leftPanel",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0.2,
+                "border-color": "white",
+                parent: "leftPanel"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.new_exam = new TouchscreenButton("new_exam", {
@@ -404,10 +426,12 @@ class MT32Demo {
             left: 277
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            borderColor: "white",
-            opacity: "0.2",
-            parent: "homeScreen",
+            css: {
+                "background-color": "steelblue",
+                "border-color": "white",
+                opacity: 0.2,
+                parent: "homeScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.central = new TouchscreenButton("central", {
@@ -417,10 +441,12 @@ class MT32Demo {
             left: 366
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            borderColor: "white",
-            opacity: "0.2",
-            parent: "homeScreen",
+            css: {
+                "background-color": "steelblue",
+                "border-color": "white",
+                opacity: 0.2,
+                parent: "homeScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.settings = new TouchscreenButton("settings", {
@@ -430,10 +456,12 @@ class MT32Demo {
             left: 458
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            borderColor: "white",
-            opacity: "0.2",
-            parent: "homeScreen",
+            css: {
+                "background-color": "steelblue",
+                "border-color": "white",
+                opacity: 0.2,
+                parent: "homeScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.ecg12d = new TouchscreenButton("ecg12d", {
@@ -443,10 +471,12 @@ class MT32Demo {
             left: 277
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            borderColor: "white",
-            opacity: "0.2",
-            parent: "examsScreen",
+            css: {
+                "background-color": "steelblue",
+                "border-color": "white",
+                opacity: 0.2,
+                parent: "examsScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.holter = new TouchscreenButton("holter", {
@@ -456,10 +486,12 @@ class MT32Demo {
             left: 459
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            borderColor: "white",
-            opacity: "0.2",
-            parent: "examsScreen",
+            css: {
+                "background-color": "steelblue",
+                "border-color": "white",
+                opacity: 0.2,
+                parent: "examsScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.confirm_exams = new TouchscreenButton("confirm_exams", {
@@ -470,10 +502,12 @@ class MT32Demo {
         },{ connection: this.connection,
             customLabel: "",
             customFunction: "click_confirm",
-            backgroundColor: "steelblue",
-            borderColor: "white",
-            opacity: "0.2",
-            parent: "confirmHolterScreen",
+            css: {
+                "background-color": "steelblue",
+                "border-color": "white",
+                opacity: 0.2,
+                parent: "confirmHolterScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.test_electrodes = new TouchscreenButton("test_electrodes", {
@@ -483,10 +517,12 @@ class MT32Demo {
             left: 277
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            borderColor: "white",
-            opacity: "0.2",
-            parent: "examsScreen",
+            css: {
+                "background-color": "steelblue",
+                "border-color": "white",
+                opacity: 0.2,
+                parent: "examsScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.download_updates = new TouchscreenButton("download_updates", {
@@ -496,10 +532,12 @@ class MT32Demo {
             left: 277
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            borderColor: "white",
-            opacity: "0.2",
-            parent: "centralScreen",
+            css: {
+                "background-color": "steelblue",
+                "border-color": "white",
+                opacity: 0.2,
+                parent: "centralScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.upload_results = new TouchscreenButton("upload_results", {
@@ -509,10 +547,12 @@ class MT32Demo {
             left: 458
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            borderColor: "white",
-            opacity: "0.2",
-            parent: "centralScreen",
+            css: {
+                "background-color": "steelblue",
+                "border-color": "white",
+                opacity: 0.2,
+                parent: "centralScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.terminate_operating_mode = new TouchscreenButton("terminate_operating_mode", {
@@ -522,10 +562,12 @@ class MT32Demo {
             left: 277
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            borderColor: "white",
-            opacity: "0.2",
-            parent: "centralScreen",
+            css: {
+                "background-color": "steelblue",
+                "border-color": "white",
+                opacity: 0.2,
+                parent: "centralScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.connection_settings = new TouchscreenButton("connection_settings", {
@@ -535,10 +577,12 @@ class MT32Demo {
             left: 275
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            borderColor: "white",
-            opacity: "0.2",
-            parent: "settingsScreen",
+            css: {
+                "background-color": "steelblue",
+                "border-color": "white",
+                opacity: 0.2,
+                parent: "settingsScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.ecg_settings = new TouchscreenButton("ecg_settings", {
@@ -548,10 +592,12 @@ class MT32Demo {
             left: 458
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            borderColor: "white",
-            opacity: "0.2",
-            parent: "settingsScreen",
+            css: {
+                "background-color": "steelblue",
+                "border-color": "white",
+                opacity: 0.2,
+                parent: "settingsScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.security_settings = new TouchscreenButton("security_settings", {
@@ -561,10 +607,12 @@ class MT32Demo {
             left: 275
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            borderColor: "white",
-            opacity: "0.2",
-            parent: "settingsScreen",
+            css: {
+                "background-color": "steelblue",
+                "border-color": "white",
+                opacity: 0.2,
+                parent: "settingsScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.system_settings = new TouchscreenButton("system_settings", {
@@ -574,10 +622,12 @@ class MT32Demo {
             left: 458
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            borderColor: "white",
-            opacity: "0.2",
-            parent: "settingsScreen",
+            css: {
+                "background-color": "steelblue",
+                "border-color": "white",
+                opacity: 0.2,
+                parent: "settingsScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.info = new TouchscreenButton("info", {
@@ -587,10 +637,12 @@ class MT32Demo {
             left: 275
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            borderColor: "white",
-            opacity: "0.2",
-            parent: "settingsScreen",
+            css: {
+                "background-color": "steelblue",
+                "border-color": "white",
+                opacity: 0.2,
+                parent: "settingsScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.confirm_patient_details = new TouchscreenButton("confirm", {
@@ -600,10 +652,12 @@ class MT32Demo {
             left: 550
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            borderColor: "white",
-            opacity: "0.2",
-            parent: "checkPatientScreen",
+            css: {
+                "background-color": "steelblue",
+                "border-color": "white",
+                opacity: 0.2,
+                parent: "checkPatientScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.quit_monitoring = new TouchscreenButton("quit", {
@@ -613,10 +667,12 @@ class MT32Demo {
             left: 230
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0.2",
-            borderColor: "#000066",
-            parent: "monitoringScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0.2,
+                "border-color": "#000066",
+                parent: "monitoringScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.rec = new TouchscreenButton("rec", {
@@ -626,10 +682,12 @@ class MT32Demo {
             left: 230
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0",
-            borderColor: "#000066",
-            parent: "monitoringScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0,
+                "border-color": "#000066",
+                parent: "monitoringScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.repeat_exam = new TouchscreenButton("repeat", {
@@ -639,10 +697,12 @@ class MT32Demo {
             left: 287
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0.2",
-            borderColor: "#000066",
-            parent: "resultsScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0.2,
+                "border-color": "#000066",
+                parent: "resultsScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.view_interpretation = new TouchscreenButton("mt32_view_interpretation", {
@@ -652,10 +712,12 @@ class MT32Demo {
             left: 287
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0.2",
-            borderColor: "#000066",
-            parent: "resultsScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0.2,
+                "border-color": "#000066",
+                parent: "resultsScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.physio = new TouchscreenButton("mt32_physio", {
@@ -665,10 +727,12 @@ class MT32Demo {
             left: 287
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0.2",
-            borderColor: "#000066",
-            parent: "resultsScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0.2,
+                "border-color": "#000066",
+                parent: "resultsScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.tick = new TouchscreenButton("mt32_tick", {
@@ -684,10 +748,12 @@ class MT32Demo {
             top: 588,
             left: 550
         }, { connection: this.connection,
-            backgroundColor: "steelblue",
-            opacity: "0.2",
-            borderColor: "white",
-            parent: "MT32-screens",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0.2,
+                "border-color": "white",
+                parent: "MT32-screens"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.back_edit_patient = new TouchscreenButton("back_edit_patient", {
@@ -698,10 +764,12 @@ class MT32Demo {
         }, { connection: this.connection,
             customLabel: "",
             functionName: "back",
-            backgroundColor: "steelblue",
-            opacity: "0.2",
-            borderColor: "white",
-            parent: "leftpanel_mt32EditPatientScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0.2,
+                "border-color": "white",
+                parent: "leftpanel_mt32EditPatientScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.edit_patient = new TouchscreenButton("mt32_edit_patient", {
@@ -710,7 +778,9 @@ class MT32Demo {
             top: 588,
             left: 368
         }, { connection: this.connection,
-            parent: "checkPatientScreen",
+            css: {
+                parent: "checkPatientScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.new_patient = new TouchscreenButton("mt32_new_patient", {
@@ -719,7 +789,7 @@ class MT32Demo {
             top: 588,
             left: 458
         }, { connection: this.connection,
-            parent: "checkPatientScreen",
+            css: { parent: "checkPatientScreen" },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.recordLED = new LED("mt32_recordLED", {
@@ -728,8 +798,10 @@ class MT32Demo {
             top: 424,
             left: 240
         }, {
-            color: "red",
-            parent: "monitoringScreen",
+            css: {
+                color: "red",
+                parent: "monitoringScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.recPercentage = new BasicDisplay("recPercentage", {
@@ -738,10 +810,12 @@ class MT32Demo {
             top: 457,
             left: 232
         }, {
-            backgroundColor: "transparent",
-            fontColor: "white",
-            fontSize: 12,
-            parent: "monitoringScreen",
+            css: {
+                "background-color": "transparent",
+                color: "white",
+                "font-size": "12px",
+                parent: "monitoringScreen"
+            },
             displayName: "",
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
@@ -752,10 +826,12 @@ class MT32Demo {
             left: 227
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0",
-            borderColor: "#000066",
-            parent: "editPhysioScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0,
+                "border-color": "#000066",
+                parent: "editPhysioScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.dataentry_1 = new TouchscreenButton("mt32_dataentry_1", {
@@ -765,10 +841,12 @@ class MT32Demo {
             left: 297
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0",
-            borderColor: "#000066",
-            parent: "editPhysioScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0,
+                "border-color": "#000066",
+                parent: "editPhysioScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.dataentry_2 = new TouchscreenButton("mt32_dataentry_2", {
@@ -778,10 +856,12 @@ class MT32Demo {
             left: 365
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0",
-            borderColor: "#000066",
-            parent: "editPhysioScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0,
+                "border-color": "#000066",
+                parent: "editPhysioScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.dataentry_3 = new TouchscreenButton("mt32_dataentry_3", {
@@ -791,10 +871,12 @@ class MT32Demo {
             left: 434
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0",
-            borderColor: "#000066",
-            parent: "editPhysioScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0,
+                "border-color": "#000066",
+                parent: "editPhysioScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.dataentry_4 = new TouchscreenButton("mt32_dataentry_4", {
@@ -804,10 +886,12 @@ class MT32Demo {
             left: 297
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0",
-            borderColor: "#000066",
-            parent: "editPhysioScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0,
+                "border-color": "#000066",
+                parent: "editPhysioScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.dataentry_5 = new TouchscreenButton("mt32_dataentry_5", {
@@ -817,10 +901,12 @@ class MT32Demo {
             left: 365
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0",
-            borderColor: "#000066",
-            parent: "editPhysioScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0,
+                "border-color": "#000066",
+                parent: "editPhysioScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.dataentry_6 = new TouchscreenButton("mt32_dataentry_6", {
@@ -830,10 +916,12 @@ class MT32Demo {
             left: 434
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0",
-            borderColor: "#000066",
-            parent: "editPhysioScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0,
+                "border-color": "#000066",
+                parent: "editPhysioScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.dataentry_7 = new TouchscreenButton("mt32_dataentry_7", {
@@ -843,10 +931,12 @@ class MT32Demo {
             left: 297
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0",
-            borderColor: "#000066",
-            parent: "editPhysioScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0,
+                "border-color": "#000066",
+                parent: "editPhysioScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.dataentry_8 = new TouchscreenButton("mt32_dataentry_8", {
@@ -856,10 +946,12 @@ class MT32Demo {
             left: 365
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0",
-            borderColor: "#000066",
-            parent: "editPhysioScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0,
+                "border-color": "#000066",
+                parent: "editPhysioScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.dataentry_9 = new TouchscreenButton("mt32_dataentry_9", {
@@ -869,10 +961,12 @@ class MT32Demo {
             left: 434
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0",
-            borderColor: "#000066",
-            parent: "editPhysioScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0,
+                "border-color": "#000066",
+                parent: "editPhysioScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.dataentry_0 = new TouchscreenButton("mt32_dataentry_0", {
@@ -882,10 +976,12 @@ class MT32Demo {
             left: 503
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0",
-            borderColor: "#000066",
-            parent: "editPhysioScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0,
+                "border-color": "#000066",
+                parent: "editPhysioScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.dataentry_POINT = new TouchscreenButton("mt32_dataentry_POINT", {
@@ -895,10 +991,12 @@ class MT32Demo {
             left: 503
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0",
-            borderColor: "#000066",
-            parent: "editPhysioScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0,
+                "border-color": "#000066",
+                parent: "editPhysioScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.dataentry_confirm = new TouchscreenButton("mt32_dataentry_confirm", {
@@ -909,10 +1007,12 @@ class MT32Demo {
         }, { connection: this.connection,
             customLabel: "",
             functionName: "confirm",
-            backgroundColor: "steelblue",
-            opacity: "0",
-            borderColor: "#000066",
-            parent: "editPhysioScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0,
+                "border-color": "#000066",
+                parent: "editPhysioScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.save_results = new TouchscreenButton("mt32_save_results", {
@@ -923,10 +1023,12 @@ class MT32Demo {
         }, { connection: this.connection,
             customLabel: "",
             functionName: "confirm",
-            backgroundColor: "steelblue",
-            opacity: "0",
-            borderColor: "#000066",
-            parent: "resultsScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0,
+                "border-color": "#000066",
+                parent: "resultsScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.confirm_upload = new TouchscreenButton("mt32_confirm_upload", {
@@ -937,10 +1039,12 @@ class MT32Demo {
         }, { connection: this.connection,
             customLabel: "",
             functionName: "confirm",
-            backgroundColor: "steelblue",
-            opacity: "0",
-            borderColor: "#000066",
-            parent: "sendingResultsScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0,
+                "border-color": "#000066",
+                parent: "sendingResultsScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.back_interpretation = new TouchscreenButton("back_interpretation", {
@@ -951,10 +1055,12 @@ class MT32Demo {
         }, { connection: this.connection,
             customLabel: "",
             functionName: "back",
-            backgroundColor: "steelblue",
-            opacity: "0.2",
-            borderColor: "white",
-            parent: "interpretationScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0.2,
+                "border-color": "white",
+                parent: "interpretationScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
 
@@ -966,12 +1072,14 @@ class MT32Demo {
             left: 66
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "black",
-            opacity: 0,
-            borderColor: "#000066",
-            borderWidth: 4,
-            borderRadius: 20,
-            parent: "MT32-right",
+            css: {
+                "background-color": "black",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-width": "4px",
+                "border-radius": "20px",
+                parent: "MT32-right"
+            },
             toggleButton: true,
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
@@ -982,12 +1090,14 @@ class MT32Demo {
             left: 66
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "black",
-            opacity: "0",
-            borderColor: "#000066",
-            borderWidth: 4,
-            borderRadius: 20,
-            parent: "MT32-right",
+            css: {
+                "background-color": "black",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-width": "4px",
+                "border-radius": "20px",
+                parent: "MT32-right"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.confirm_poweroff = new TouchscreenButton("confirm_poweroff", {
@@ -998,10 +1108,12 @@ class MT32Demo {
         }, { connection: this.connection,
             customLabel: "",
             customFunction: "click_confirm",
-            backgroundColor: "steelblue",
-            opacity: "0",
-            borderColor: "#000066",
-            parent: "confirmPowerOffScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0,
+                "border-color": "#000066",
+                parent: "confirmPowerOffScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.confirm_syncdone = new TouchscreenButton("confirm_syncdone", {
@@ -1012,10 +1124,12 @@ class MT32Demo {
         }, { connection: this.connection,
             customLabel: "",
             customFunction: "click_confirm",
-            backgroundColor: "steelblue",
-            opacity: "0",
-            borderColor: "#000066",
-            parent: "downloadingUpdatesScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0,
+                "border-color": "#000066",
+                parent: "downloadingUpdatesScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.toggleLP = new TouchscreenButton("mt32_toggleLP", {
@@ -1025,10 +1139,12 @@ class MT32Demo {
             left: 230
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "white",
-            opacity: "0",
-            borderColor: "#000066",
-            parent: "monitoringScreen",
+            css: {
+                "background-color": "white",
+                opacity: 0,
+                "border-color": "#000066",
+                parent: "monitoringScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.toggleHP = new TouchscreenButton("mt32_toggleHP", {
@@ -1038,10 +1154,12 @@ class MT32Demo {
             left: 230
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "white",
-            opacity: "0",
-            borderColor: "#000066",
-            parent: "monitoringScreen",
+            css: {
+                "background-color": "white",
+                opacity: 0,
+                "border-color": "#000066",
+                parent: "monitoringScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.toggle_gain = new TouchscreenButton("mt32_toggle_gain", {
@@ -1051,10 +1169,12 @@ class MT32Demo {
             left: 332
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "white",
-            opacity: "0",
-            borderColor: "#000066",
-            parent: "monitoringScreen",
+            css: {
+                "background-color": "white",
+                opacity: 0,
+                "border-color": "#000066",
+                parent: "monitoringScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.toggle_speed = new TouchscreenButton("mt32_toggle_speed", {
@@ -1064,10 +1184,12 @@ class MT32Demo {
             left: 434
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "white",
-            opacity: "0",
-            borderColor: "#000066",
-            parent: "monitoringScreen",
+            css: {
+                "background-color": "white",
+                opacity: 0,
+                "border-color": "#000066",
+                parent: "monitoringScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.toggle_trace = new TouchscreenButton("mt32_toggle_trace", {
@@ -1077,10 +1199,12 @@ class MT32Demo {
             left: 536
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "white",
-            opacity: "0",
-            borderColor: "#000066",
-            parent: "monitoringScreen",
+            css: {
+                "background-color": "white",
+                opacity: 0,
+                "border-color": "#000066",
+                parent: "monitoringScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         // buttons emulating a syncronisation channel between mt32 and ct64
@@ -1098,12 +1222,14 @@ class MT32Demo {
             left: 905
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            borderWidth: "4px",
-            parent: "ct64LoginScreen",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                "border-width": "4px",
+                parent: "ct64LoginScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.select_patient = new TouchscreenButton("select_patient", {
@@ -1113,10 +1239,12 @@ class MT32Demo {
             left: 16
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0",
-            borderColor: "#000066",
-            parent: "patientsScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0,
+                "border-color": "#000066",
+                parent: "patientsScreen"
+            },
             toggleButton: true,
             visibleWhen: "this.ct64.known_patient = TRUE",
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
@@ -1128,10 +1256,12 @@ class MT32Demo {
             left: 190
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0",
-            borderColor: "#000066",
-            parent: "secondary_new_message",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0,
+                "border-color": "#000066",
+                parent: "secondary_new_message"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.new_ecg = new TouchscreenButton("new_ecg", {
@@ -1141,12 +1271,14 @@ class MT32Demo {
             left: 1070
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            borderWidth: "4px",
-            parent: "patientMGMScreen",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                "border-width": "4px",
+                parent: "patientMGMScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.new_holter = new TouchscreenButton("new_holter", {
@@ -1156,12 +1288,14 @@ class MT32Demo {
             left: 1197
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            borderWidth: "4px",
-            parent: "patientMGMScreen",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                "border-width": "4px",
+                parent: "patientMGMScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.send_request_to_doctor = new TouchscreenButton("send_request_to_doctor", {
@@ -1171,12 +1305,14 @@ class MT32Demo {
             left: 1233
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            borderWidth: "4px",
-            parent: "requestReportScreen",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                "border-width": "4px",
+                parent: "requestReportScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.select_device = new TouchscreenButton("select_device", {
@@ -1186,10 +1322,12 @@ class MT32Demo {
             left: 63
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0",
-            borderColor: "#000066",
-            parent: "newMonitoringSessionScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0,
+                "border-color": "#000066",
+                parent: "newMonitoringSessionScreen"
+            },
             toggleButton: true,
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
@@ -1200,12 +1338,14 @@ class MT32Demo {
             left: 1198
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            borderWidth: "4px",
-            parent: "newMonitoringSessionScreen",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                "border-width": "4px",
+                parent: "newMonitoringSessionScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.continue_holter_config = new TouchscreenButton("continue_holter_config", {
@@ -1216,12 +1356,14 @@ class MT32Demo {
         }, { connection: this.connection,
             customLabel: "",
             customFunction: "click_continue",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            borderWidth: "4px",
-            parent: "holterConfigScreen",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                "border-width": "4px",
+                parent: "holterConfigScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.new_patient = new TouchscreenButton("new_patient", {
@@ -1231,12 +1373,14 @@ class MT32Demo {
             left: 1250
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            borderWidth: "4px",
-            parent: "patientsScreen",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                "border-width": "4px",
+                parent: "patientsScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.patients_screen = new TouchscreenButton("patients_screen", {
@@ -1246,11 +1390,13 @@ class MT32Demo {
             left: 271
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "ct64-navigation-bar",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "ct64-navigation-bar"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.monitoring = new TouchscreenButton("monitoring", {
@@ -1260,11 +1406,13 @@ class MT32Demo {
             left: 355
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "ct64-navigation-bar",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "ct64-navigation-bar"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.upload_exams = new TouchscreenButton("upload_exams", {
@@ -1274,11 +1422,13 @@ class MT32Demo {
             left: 462
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "ct64-navigation-bar",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "ct64-navigation-bar"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.choose_exams_to_be_uploaded = new TouchscreenButton("choose_exams_to_be_uploaded", {
@@ -1288,11 +1438,13 @@ class MT32Demo {
             left: 32
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "uploadExamsScreen",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "uploadExamsScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.new_monitoring_session = new TouchscreenButton("new_monitoring_session", {
@@ -1302,11 +1454,13 @@ class MT32Demo {
             left: 1158
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "ct64-monitoringScreen",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "ct64-monitoringScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.date_time_filters = new TouchscreenButton("date_time_filters", {
@@ -1316,11 +1470,13 @@ class MT32Demo {
             left: 16
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "ct64-monitoringScreen",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "ct64-monitoringScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.select_exam_data_hub = new TouchscreenButton("select_exam_data_hub", {
@@ -1330,11 +1486,13 @@ class MT32Demo {
             left: 16
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "ct64-monitoringScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "ct64-monitoringScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.view_ecg = new TouchscreenButton("view_ecg", {
@@ -1344,11 +1502,13 @@ class MT32Demo {
             left: 33
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "ecgMonitoringMenu",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "ecgMonitoringMenu"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.HES = new TouchscreenButton("HES", {
@@ -1358,11 +1518,13 @@ class MT32Demo {
             left: 186
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "ecgMonitoringMenu",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "ecgMonitoringMenu"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.view_physio = new TouchscreenButton("view_physio", {
@@ -1372,11 +1534,13 @@ class MT32Demo {
             left: 268
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "ecgMonitoringMenu",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "ecgMonitoringMenu"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.write_report = new TouchscreenButton("write_report", {
@@ -1386,11 +1550,13 @@ class MT32Demo {
             left: 416
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "ecgMonitoringMenu",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "ecgMonitoringMenu"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.write_report2 = new TouchscreenButton("write_report2", {
@@ -1400,11 +1566,13 @@ class MT32Demo {
             left: 405
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "secondary_ecgAnalysisResultsScreen",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "secondary_ecgAnalysisResultsScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.select_doctor = new TouchscreenButton("select_doctor", {
@@ -1414,11 +1582,13 @@ class MT32Demo {
             left: 274
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "requestReportScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "requestReportScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.select_exam_data_holter = new TouchscreenButton("select_exam_data_holter", {
@@ -1428,11 +1598,13 @@ class MT32Demo {
             left: 16
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "ct64-monitoringScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "ct64-monitoringScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.select_exam_data_hub_alt = new TouchscreenButton("select_exam_data_hub_alt", {
@@ -1443,11 +1615,13 @@ class MT32Demo {
         }, { connection: this.connection,
             customLabel: "",
             functionName: "select_exam_data_hub",
-            backgroundColor: "steelblue",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "paziente-esami",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "paziente-esami"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.select_visit = new TouchscreenButton("select_visit", {
@@ -1457,11 +1631,13 @@ class MT32Demo {
             left: 274
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "newMonSessionScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "newMonSessionScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.holter_duration = new TouchscreenButton("holter_duration", {
@@ -1471,11 +1647,13 @@ class MT32Demo {
             left: 284
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "holterConfigScreen",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "holterConfigScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.holter_derivation = new TouchscreenButton("holter_derivation", {
@@ -1485,11 +1663,13 @@ class MT32Demo {
             left: 284
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "holterConfigScreen",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "holterConfigScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.holter_accelerometer = new TouchscreenButton("holter_accelerometer", {
@@ -1499,11 +1679,13 @@ class MT32Demo {
             left: 277
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "holterConfigScreen",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "holterConfigScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.select_ecg2d_new_pt = new TouchscreenButton("select_ecg2d_new_pt", {
@@ -1513,11 +1695,13 @@ class MT32Demo {
             left: 0
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "visits_menu",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "visits_menu"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.continue_yes_no = new TouchscreenButton("continue_yes_no", {
@@ -1528,11 +1712,13 @@ class MT32Demo {
         }, { connection: this.connection,
             customLabel: "",
             customFunction: "click_continue",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "yes_no",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "yes_no"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.browse_medicaltech = new TouchscreenButton("browse_medicaltech", {
@@ -1542,10 +1728,12 @@ class MT32Demo {
             left: 65
         }, { connection: this.connection,
             customLabel: "",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "browser-navbar",
+            css: {
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "browser-navbar"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.select_report_status = new TouchscreenButton("select_report_status", {
@@ -1555,11 +1743,13 @@ class MT32Demo {
             left: 274
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "compileReportScreen",
+            css: {
+                "background-color": "steelblue",
+            opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "compileReportScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.save_report = new TouchscreenButton("save_report", {
@@ -1569,11 +1759,13 @@ class MT32Demo {
             left: 1235
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "compileReportScreen",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "compileReportScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.save_report2 = new TouchscreenButton("save_report2", {
@@ -1583,11 +1775,13 @@ class MT32Demo {
             left: 1235
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "secondary_compileReportScreen",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "secondary_compileReportScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.view_patient_profile = new TouchscreenButton("view_patient_profile", {
@@ -1597,11 +1791,13 @@ class MT32Demo {
             left: 34
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "patientMenu",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "patientMenu"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.view_exams = new TouchscreenButton("view_exams", {
@@ -1611,11 +1807,13 @@ class MT32Demo {
             left: 179
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "patientMenu",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "patientMenu"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.view_medical_report = new TouchscreenButton("view_medical_report", {
@@ -1625,11 +1823,13 @@ class MT32Demo {
             left: 48
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "steelblue",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "archiveMedicalReportsScreen",
+            css: {
+                "background-color": "steelblue",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "archiveMedicalReportsScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.view_anamnesi = new TouchscreenButton("view_anamnesi", {
@@ -1639,11 +1839,13 @@ class MT32Demo {
             left: 275
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "patientMenu",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "patientMenu"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.view_archived_medical_reports = new TouchscreenButton("view_archived_medical_reports", {
@@ -1653,11 +1855,13 @@ class MT32Demo {
             left: 390
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "patientMenu",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "patientMenu"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.ct64_back = new TouchscreenButton("ct64_back", {
@@ -1667,11 +1871,13 @@ class MT32Demo {
             left: 32
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "medicalReportScreen",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "medicalReportScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.ct64_inserisci_anamnesi = new TouchscreenButton("ct64_inserisci_anamnesi", {
@@ -1681,11 +1887,13 @@ class MT32Demo {
             left: 1220
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "inserimentoAnamnesiScreen",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "inserimentoAnamnesiScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.select_holter_folders = new TouchscreenButton("select_holter_folders", {
@@ -1695,10 +1903,12 @@ class MT32Demo {
             left: 307
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "steelblue",
-            parent: "ct64-file-browser",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "steelblue",
+                parent: "ct64-file-browser"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.select_ecg_file = new TouchscreenButton("select_ecg_file", {
@@ -1708,10 +1918,12 @@ class MT32Demo {
             left: 307
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "steelblue",
-            parent: "ct64-file-browser",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "steelblue",
+                parent: "ct64-file-browser"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.open = new TouchscreenButton("ct64_open", {
@@ -1721,11 +1933,13 @@ class MT32Demo {
             left: 973
         }, { connection: this.connection,
             customLabel: "",
-            backgroundColor: "transparent",
-            opacity: "0",
-            borderColor: "#000066",
-            borderRadius: "6px",
-            parent: "uploadExamsScreen",
+            css: {
+                "background-color": "transparent",
+                opacity: 0,
+                "border-color": "#000066",
+                "border-radius": "6px",
+                parent: "uploadExamsScreen"
+            },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
 
@@ -1826,10 +2040,10 @@ class MT32Demo {
                 { speak: "Instruzioni per eseguire un esame ECG a 12 derivazioni con un nuovo dispositivo MT32.", timeStamp: 4000 },
                 { speak: "Consideriamo in questa fase il caso semplice, in cui i dati anagrafici del paziente sono già presenti sulla centrale this.ct64.", timeStamp: 12000 },
                 { speak: "Fai doppio click sull'anagrafica desiderata.", timeStamp: 18000 },
-                { click: this.ct64.select_patient, timeStamp: 23000, timeout: 3000, borderColor: "white", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top: 0, left: 200 } }},
+                { click: this.ct64.select_patient, timeStamp: 23000, timeout: 3000, "border-color": "white", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top: 0, left: 200 } }},
                 { speak: "La centrale mostrerà una pagina che permette di accedere a una lista di azioni e ai dati del paziente.", timeStamp: 26500 },
                 { speak: "Dalla lista di azioni disponibili, clicca Nuovo ECG.", timeStamp: 34000 },
-                { click: this.ct64.new_ecg, timeStamp: 36000, timeout: 2000, borderColor: "blue", cursor: { type: this.media.mousePointer, offset: { top: 0, left: 0 } }},
+                { click: this.ct64.new_ecg, timeStamp: 36000, timeout: 2000, "border-color": "blue", cursor: { type: this.media.mousePointer, offset: { top: 0, left: 0 } }},
 
                 { speak: "A questo punto, prendi il dispositivo.", timeStamp: 40000 },
                 { trans: "#device", transform: "translate(0px,0px)scale(1)", timeStamp: 41000, duration: 1000 },
@@ -1840,8 +2054,8 @@ class MT32Demo {
                 { trans: ".MT32-case-rightside", transform: "rotateY(0deg)translateZ(0px)translateY(0px)skewY(0deg)scaleY(1)", duration: 1600, timeStamp: 46000 },
                 { reveal: "#MT32-right", timeStamp: 46000 },
                 { reveal: this.mt32.power_btn, timeStamp: 46000 },
-                { select: this.mt32.power_btn, timeStamp: 48000, borderColor: "white", classed: "blink" },
-                { deselect: this.mt32.power_btn, timeStamp: 50000, borderColor: "white", classed: "blink" },
+                { select: this.mt32.power_btn, timeStamp: 48000, "border-color": "white", classed: "blink" },
+                { deselect: this.mt32.power_btn, timeStamp: 50000, "border-color": "white", classed: "blink" },
                 { click: this.mt32.power_btn, timeStamp: 50000 },
                 { trans: ".MT32-case-rightside", transform: "rotateY(22deg)translateZ(-10px)translateY(-12px)skewY(10deg)scaleY(0.9)", duration: 1400, timeStamp: 51000 },
                 { trans: "#MT32-screens", transform: "rotateY(0deg)translateZ(0px)translateY(0px)translateX(0px)skewY(0deg)scaleY(1)", duration: 1600, timeStamp: 51000 },
@@ -1849,7 +2063,7 @@ class MT32Demo {
 
                 { speak: "Quindi, clicca Centrale.", timeStamp: 53000 },
                 { reveal: this.media.stylus, timeStamp: 53000 },
-                { click: this.mt32.central, timeStamp: 55000, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus, offset: { top: 0, left: 120 } }},
+                { click: this.mt32.central, timeStamp: 55000, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus, offset: { top: 0, left: 120 } }},
                 { speak: "Clicca Scarica aggiornamenti.", timeStamp: 57000 },
                 { click: this.mt32.download_updates, timeStamp: 58000, timeout: 1000, cursor: { type: this.media.stylus, offset: { top: 0, left: 120} }},
                 { hide: this.media.stylus, timeStamp: 62000 },
@@ -1859,14 +2073,14 @@ class MT32Demo {
                 { speak: "Per inviare il comando di conferma, seleziona il dispositivo dalla centrale.", timeStamp: 80000 },
                 { click: this.ct64.select_device, timeStamp: 84000, timeout: 2000, cursor: { type: this.media.mousePointer, offset: { top: 0, left: 200 } }},
                 { speak: "Quindi, clicca Continua.", timeStamp: 86000 },
-                { click: this.ct64.continue, timeStamp: 88000, timeout: 2000, borderColor: "blue", cursor: { type: this.media.mousePointer, offset: { top: 0, left: 0 } }},
+                { click: this.ct64.continue, timeStamp: 88000, timeout: 2000, "border-color": "blue", cursor: { type: this.media.mousePointer, offset: { top: 0, left: 0 } }},
                 { speak: "Il dispositivo riceverà la conferma in pochi secondi.", timeStamp: 90000 },
                 { speak: "Clicca Conferma sul dispositivo, per completare l'associazione.", timeStamp: 96000 },
 
                 { reveal: this.media.stylus, timeStamp: 96000 },
-                { click: this.mt32.confirm_syncdone, timeStamp: 99000, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus, offset: { top: 0, left: 120} }},
+                { click: this.mt32.confirm_syncdone, timeStamp: 99000, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus, offset: { top: 0, left: 120} }},
                 { speak: "Clicca sul logo médicàl téc per andare alla pagina principale.", timeStamp: 103000 },
-                { click: this.mt32.home, timeStamp: 105000, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.home, timeStamp: 105000, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
 
                 { speak: "Ora il dispositivo è in modalità operativa ECG12D. HUB, ed è quindi pronto per essere utilizzato per un esame ECG.", timeStamp: 107000},
                 { hide: this.media.stylus, timeStamp: 113000 },
@@ -1877,74 +2091,74 @@ class MT32Demo {
 
                 { reveal: this.media.stylus, timeStamp: 124000 },
                 { speak: "Poi, clicca Nuovo Esame.", timeStamp: 126500 },
-                { click: this.mt32.new_exam, timeStamp: 128000, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
-                { speak: "Nella nuova pagina, Clicca ECG12D.", timeStamp: 131000, borderColor: "white" },
-                { click: this.mt32.ecg12d, timeStamp: 134000, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.new_exam, timeStamp: 128000, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
+                { speak: "Nella nuova pagina, Clicca ECG12D.", timeStamp: 131000, "border-color": "white" },
+                { click: this.mt32.ecg12d, timeStamp: 134000, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
                 { speak: "Il dispositivo mostrerà l'anagrafica del paziente ricevuta dalla centrale.", timeStamp: 137500 },
                 { speak: "Verifica i dati del paziente.", timeStamp: 140000 },
                 { speak: "Se necessario, puoi modificare i dati anagrafici direttamente dal dispositivo.", timeStamp: 142000 },
-                { click: this.mt32.edit_patient, timeStamp: 148000, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
-                { click: this.mt32.back_edit_patient, timeStamp: 151800, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.edit_patient, timeStamp: 148000, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.back_edit_patient, timeStamp: 151800, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
                 { speak: "Clicca Conferma per iniziare l'esame ECG.", timeStamp: 156000 },
-                { click: this.mt32.confirm_patient_details, timeStamp: 158000, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.confirm_patient_details, timeStamp: 158000, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
                 { speak: "Attendi che l'icona di allerta si spenga. Questo indica l'andata a regime del segnale ECG.", timeStamp: 161000 },
                 { move: this.media.stylus, top: this.mt32.toggleLP.getPosition().top - 30, left: this.mt32.toggleLP.getPosition().left + 300, timeStamp: 162000 },
 
                 { speak: "A lato del display, sono disponibili due filtri che possono migliorare la visualizzazione del segnale.", timeStamp: 170000 },
                 { move: this.media.stylus, top: this.mt32.toggleLP.getPosition().top, left: this.mt32.toggleLP.getPosition().left, timeStamp: 171000 },
                 { speak: "Ad esempio, clicca il primo pulsante per abilitare un filtro passa basso.", timeStamp: 174000 },
-                { click: this.mt32.toggleLP, timeStamp: 179000, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.toggleLP, timeStamp: 179000, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
                 { speak: "Clicca di nuovo il pulsante per disabilitare il filtro.", timeStamp: 181000 },
-                { click: this.mt32.toggleLP, timeStamp: 183000, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.toggleLP, timeStamp: 183000, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
 
                 { move: this.media.stylus, top: this.mt32.toggle_gain.getPosition().top, left: this.mt32.toggle_gain.getPosition().left - 50, timeStamp: 190000 },
                 { speak: "Nella parte bassa del display viene visualizzata la frequenza cardiaca.", timeStamp: 190000 },
 
                 { speak: "Il secondo pulsante consente di configurare la sensibilità del segnale.", timeStamp: 195000 },
-                { click: this.mt32.toggle_gain, timeStamp: 197000, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
-                { click: this.mt32.toggle_gain, timeStamp: 200000, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
-                { click: this.mt32.toggle_gain, timeStamp: 204000, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.toggle_gain, timeStamp: 197000, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.toggle_gain, timeStamp: 200000, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.toggle_gain, timeStamp: 204000, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
 
                 { speak: "Il terzo pulsante agisce sulla scala temporale del segnale.", timeStamp: 206000 },
                 { move: this.media.stylus, top: this.mt32.toggle_speed.getPosition().top, left: this.mt32.toggle_speed.getPosition().left, timeStamp: 207000 },
-                { click: this.mt32.toggle_speed, timeStamp: 208000, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
-                { click: this.mt32.toggle_speed, timeStamp: 212000, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.toggle_speed, timeStamp: 208000, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.toggle_speed, timeStamp: 212000, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
 
                 { speak: "In fine, il quarto pulsante consente di visualizzare una terna differente di derivazioni.", timeStamp: 214000 },
-                { click: this.mt32.toggle_trace, timeStamp: 215500, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.toggle_trace, timeStamp: 215500, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
                 { speak: "Premi a lungo il pulsante per visualizzare una sola derivazione alla volta.", timeStamp: 218000 },
-                { click: this.mt32.toggle_trace, timeStamp: 219500, timeout: 3000, borderColor: "white", cursor: { type: this.media.stylus, longpress: true }},
+                { click: this.mt32.toggle_trace, timeStamp: 219500, timeout: 3000, "border-color": "white", cursor: { type: this.media.stylus, longpress: true }},
                 { speak: "Premi di nuovo a lungo il pulsante per tornare alla visualizzazione di tre derivazioni.", timeStamp: 225000 },
-                { click: this.mt32.toggle_trace, timeStamp: 228000, timeout: 3000, borderColor: "white", cursor: { type: this.media.stylus, longpress: true }},
+                { click: this.mt32.toggle_trace, timeStamp: 228000, timeout: 3000, "border-color": "white", cursor: { type: this.media.stylus, longpress: true }},
 
                 { speak: "Per cominciare l'acquisizione del segnale ECG, clicca il pulsante rec.", timeStamp: 232000 },
-                { click: this.mt32.rec, timeStamp: 236000, timeout: 1500, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.rec, timeStamp: 236000, timeout: 1500, "border-color": "white", cursor: { type: this.media.stylus }},
                 { move: this.media.stylus, top: this.mt32.view_interpretation.getPosition().top, left: this.mt32.view_interpretation.getPosition().left + this.mt32.view_interpretation.getSize().width, timeStamp: 240000 },
 
                 { speak: "Al termine dell'acquisizione si passa automaticamente alla pagina Risultato.", timeStamp: 241000 },
                 { speak: "In questa pagina, puoi visionare l'esito dell'algoritmo interpretativo dell'acquisizione.", timeStamp: 248000 },
-                { click: this.mt32.view_interpretation, timeStamp: 251500, timeout: 2000, borderColor: "white", cursor: { type: this.media.stylus, offset: { top: -10, left: this.mt32.view_interpretation.getSize().width - 10 } }},
-                { click: this.mt32.back_interpretation, timeStamp: 256500, timeout: 2000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.view_interpretation, timeStamp: 251500, timeout: 2000, "border-color": "white", cursor: { type: this.media.stylus, offset: { top: -10, left: this.mt32.view_interpretation.getSize().width - 10 } }},
+                { click: this.mt32.back_interpretation, timeStamp: 256500, timeout: 2000, "border-color": "white", cursor: { type: this.media.stylus }},
 
                 { speak: "Puoi anche inserire dati fisiologici, rilevanti per l'esame.", timeStamp: 260000 },
-                { click: this.mt32.physio, timeStamp: 262000, timeout: 2000, borderColor: "white", cursor: { type: this.media.stylus, offset: { top: -10, left: this.mt32.physio.getSize().width - 10 } }},
+                { click: this.mt32.physio, timeStamp: 262000, timeout: 2000, "border-color": "white", cursor: { type: this.media.stylus, offset: { top: -10, left: this.mt32.physio.getSize().width - 10 } }},
                 { speak: "Seleziona dal menu a tendina il tipo di dato fisiologico che vuoi inserire. Ad esempio, temperatura.", timeStamp: 264000, cursor: { type: this.media.stylus }},
-                { click: this.mt32.choose_physio, timeStamp: 266000, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus, offset: { top: -10, left: 20} }},
-                { click: this.mt32.choose_physio, timeStamp: 268000, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus, offset: { top: -10, left: 20} }},
+                { click: this.mt32.choose_physio, timeStamp: 266000, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus, offset: { top: -10, left: 20} }},
+                { click: this.mt32.choose_physio, timeStamp: 268000, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus, offset: { top: -10, left: 20} }},
 
                 { speak: "Poi, usa il tastierino numerico per inserire il valore desiderato.", timeStamp: 270000 },
-                { click: this.mt32.dataentry_3, timeStamp: 271000, timeout: 500, borderColor: "white", cursor: { type: this.media.stylus, speed: 300 }},
-                { click: this.mt32.dataentry_6, timeStamp: 271500, timeout: 500, borderColor: "white", cursor: { type: this.media.stylus, speed: 300 }},
-                { click: this.mt32.dataentry_POINT, timeStamp: 272200, timeout: 500, borderColor: "white", cursor: { type: this.media.stylus, speed: 300 }},
-                { click: this.mt32.dataentry_8, timeStamp: 273000, timeout: 500, borderColor: "white", cursor: { type: this.media.stylus, speed: 300 }},
+                { click: this.mt32.dataentry_3, timeStamp: 271000, timeout: 500, "border-color": "white", cursor: { type: this.media.stylus, speed: 300 }},
+                { click: this.mt32.dataentry_6, timeStamp: 271500, timeout: 500, "border-color": "white", cursor: { type: this.media.stylus, speed: 300 }},
+                { click: this.mt32.dataentry_POINT, timeStamp: 272200, timeout: 500, "border-color": "white", cursor: { type: this.media.stylus, speed: 300 }},
+                { click: this.mt32.dataentry_8, timeStamp: 273000, timeout: 500, "border-color": "white", cursor: { type: this.media.stylus, speed: 300 }},
 
                 { speak: "Infine, clicca Conferma.", timeStamp: 275000 },
-                { click: this.mt32.dataentry_confirm, timeStamp: 277000, timeout: 2000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.dataentry_confirm, timeStamp: 277000, timeout: 2000, "border-color": "white", cursor: { type: this.media.stylus }},
                 { speak: "Se ritieni necessario ripetere l'esame, clicca Ripetizione.", timeStamp: 280000 },
-                { select: this.mt32.repeat_exam, timeStamp: 281000, borderColor: "white", classed: "blink2" },
-                { deselect: this.mt32.repeat_exam, timeStamp: 283000, borderColor: "white", classed: "blink2" },
+                { select: this.mt32.repeat_exam, timeStamp: 281000, "border-color": "white", classed: "blink2" },
+                { deselect: this.mt32.repeat_exam, timeStamp: 283000, "border-color": "white", classed: "blink2" },
                 { speak: "Altrimenti, clicca Conclusione.", timeStamp: 284000 },
-                { click: this.mt32.save_results, timeStamp: 286000, timeout: 2000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.save_results, timeStamp: 286000, timeout: 2000, "border-color": "white", cursor: { type: this.media.stylus }},
 
                 { speak: "A questo punto, l'esame è stato salvato sul dispositivo MT32.", timeStamp: 289000 },
                 { speak: "Per caricare l'esame sulla centrale CT64, procedi come segue.", timeStamp: 294000 },
@@ -1953,11 +2167,11 @@ class MT32Demo {
 
                 { move: this.media.stylus, top: this.mt32.upload_results.getPosition().top, left: this.mt32.upload_results.getPosition().left + 100, timeStamp: 306000 },
                 { speak: "Il numero tra parentesi sul pulsante Invio Risultati indica quanti esami sono attualmente salvati sul dispositivo MT32.", timeStamp: 307000 },
-                { click: this.mt32.upload_results, timeStamp: 314000, timeout: 4000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.upload_results, timeStamp: 314000, timeout: 4000, "border-color": "white", cursor: { type: this.media.stylus }},
                 { speak: "Clicca Invio Risultati.", timeStamp: 316000 },
                 { speak: "In pochi secondi tutti gli esami saranno caricati sulla centrale.", timeStamp: 318000 },
                 { speak: "Al termine dell'invio, clicca Conferma.", timeStamp: 331000 },
-                { click: this.mt32.confirm_upload, timeStamp: 334000, timeout: 2000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.confirm_upload, timeStamp: 334000, timeout: 2000, "border-color": "white", cursor: { type: this.media.stylus }},
                 { speak: "Noterai che il pulsante Invio Risultati è ora disabilitato. Questo indica che tutti gli esami sono stati inviati correttamente alla centrale this.ct64.", timeStamp: 336000 },
                 { move: this.media.stylus, timeStamp: 337000, top: this.mt32.upload_results.getPosition().top, left: this.mt32.upload_results.getPosition().left },
 
@@ -1975,14 +2189,14 @@ class MT32Demo {
                 { speak: "Comparirà una pagina per confermare l'operazione di spegnimento.", timeStamp: 360000 },
                 { reveal: this.media.stylus, timeStamp: 364000 },
                 { speak: "Clicca Conferma per confermare lo spegnimento del dispositivo.", timeStamp: 365000 },
-                { click: this.mt32.confirm_poweroff, timeStamp: 365000, timeout: 2000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.confirm_poweroff, timeStamp: 365000, timeout: 2000, "border-color": "white", cursor: { type: this.media.stylus }},
 
                 { speak: "Per visionare gli esami del paziente sulla centrale, seleziona Monitoraggi.", timeStamp: 368000 },
                 { hide: this.media.stylus, timeStamp: 370000 },
-                { click: this.ct64.monitoring, timeStamp: 371000, timeout: 2000, borderColor: "blue", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
+                { click: this.ct64.monitoring, timeStamp: 371000, timeout: 2000, "border-color": "blue", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
                 { speak: "La pagina mostra la lista di tutti gli esami svolti.", timeStamp: 373000 },
                 { speak: "Nella lista, troverai anche l'esame ECG che hai appena inviato.", timeStamp: 378000 },
-                { select: this.ct64.select_exam_data_holter,  timeStamp: 380000, timeout: 16000, classed: "blink2", borderColor: "green", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}}
+                { select: this.ct64.select_exam_data_holter,  timeStamp: 380000, timeout: 16000, classed: "blink2", "border-color": "green", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}}
             ]).play();
         } else if (dm === Demo.HOLTER_EXAM) {
             $("body").css("overflow", "hidden");
@@ -1994,18 +2208,18 @@ class MT32Demo {
                 { speak: "Instruzioni per eseguire un esame Hólter con un nuovo dispositivo MT32.", timeStamp: 6000 },
                 { speak: "Per effettuare questo tipo di esame, i dati anagrafici del paziente devono essere già presenti sulla centrale this.ct64.", timeStamp: 12000 },
                 { speak: "Fai doppio click sull'anagrafica del paziente.", timeStamp: 18000 },
-                { click: this.ct64.select_patient, timeStamp: 23000, timeout: 3000, borderColor: "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top: 0, left: 200 } }},
+                { click: this.ct64.select_patient, timeStamp: 23000, timeout: 3000, "border-color": "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top: 0, left: 200 } }},
                 { speak: "La centrale mostrerà una pagina che permette di accedere a una lista di azioni e ai dati del paziente.", timeStamp: 26500 },
                 { speak: "Dalla lista di azioni disponibili, clicca Nuovo Hólter.", timeStamp: 34000 },
-                { click: this.ct64.new_holter, timeStamp: 36000, timeout: 2000, borderColor: "blue", cursor: { type: this.media.mousePointer, offset: { top: 0, left: 0 } }},
+                { click: this.ct64.new_holter, timeStamp: 36000, timeout: 2000, "border-color": "blue", cursor: { type: this.media.mousePointer, offset: { top: 0, left: 0 } }},
 
                 { speak: "Nella nuova pagina, seleziona Durata Esame e Derivazione Precordiale che intendi utilizzare.", timeStamp: 40000 },
-                { select: this.ct64.holter_duration, timeStamp: 40500, timeout: 1000, borderColor: "blue", classed: "blink2", cursor: { type: this.media.mousePointer } },
-                { select: this.ct64.holter_derivation, timeStamp: 41500, timeout: 1000, borderColor: "blue", classed: "blink2", cursor: { type: this.media.mousePointer } },
+                { select: this.ct64.holter_duration, timeStamp: 40500, timeout: 1000, "border-color": "blue", classed: "blink2", cursor: { type: this.media.mousePointer } },
+                { select: this.ct64.holter_derivation, timeStamp: 41500, timeout: 1000, "border-color": "blue", classed: "blink2", cursor: { type: this.media.mousePointer } },
                 { speak: "Inotre, seleziona Attiva Accelerómetro se intendi attivare l'acquisizione dei dati acceleromètrici.", timeStamp: 45000 },
-                { select: this.ct64.holter_accelerometer, timeStamp: 46000, timeout: 1000, borderColor: "blue", classed: "blink2", cursor: { type: this.media.mousePointer } },
+                { select: this.ct64.holter_accelerometer, timeStamp: 46000, timeout: 1000, "border-color": "blue", classed: "blink2", cursor: { type: this.media.mousePointer } },
                 { speak: "Poi, clicca Continua.", timeStamp: 53000 },
-                { click: this.ct64.continue_holter_config, timeStamp: 54000, timeout: 1000, borderColor: "blue", cursor: { type: this.media.mousePointer, offset: { top: 0, left: 0 }} },
+                { click: this.ct64.continue_holter_config, timeStamp: 54000, timeout: 1000, "border-color": "blue", cursor: { type: this.media.mousePointer, offset: { top: 0, left: 0 }} },
 
                 { speak: "A questo punto, prendi il dispositivo.", timeStamp: 56500 },
                 { trans: "#device", transform: "translate(0px,0px)scale(1)", timeStamp: 57000, duration: 1000 },
@@ -2016,8 +2230,8 @@ class MT32Demo {
                 { trans: ".MT32-case-rightside", transform: "rotateY(0deg)translateZ(0px)translateY(0px)skewY(0deg)scaleY(1)", duration: 1600, timeStamp: 61000 },
                 { reveal: "#MT32-right", timeStamp: 61000 },
                 { reveal: this.mt32.power_btn, timeStamp: 61000 },
-                { select: this.mt32.power_btn, timeStamp: 63000, borderColor: "white", classed: "blink" },
-                { deselect: this.mt32.power_btn, timeStamp: 65000, borderColor: "white", classed: "blink" },
+                { select: this.mt32.power_btn, timeStamp: 63000, "border-color": "white", classed: "blink" },
+                { deselect: this.mt32.power_btn, timeStamp: 65000, "border-color": "white", classed: "blink" },
                 { click: this.mt32.power_btn, timeStamp: 65000 },
                 { trans: ".MT32-case-rightside", transform: "rotateY(22deg)translateZ(-10px)translateY(-12px)skewY(10deg)scaleY(0.9)", duration: 1400, timeStamp: 66500 },
                 { trans: "#MT32-screens", transform: "rotateY(0deg)translateZ(0px)translateY(0px)translateX(0px)skewY(0deg)scaleY(1)", duration: 1600, timeStamp: 66500 },
@@ -2025,7 +2239,7 @@ class MT32Demo {
 
                 { speak: "Quando il dispositivo è acceso, Clicca Centrale.", timeStamp: 41000 + holterParamsSpeechDuration },
                 { reveal: this.media.stylus, timeStamp: 44000 + holterParamsSpeechDuration },
-                { click: this.mt32.central, timeStamp: 45000 + holterParamsSpeechDuration, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus, offset: { top: 0, left: 120 } }},
+                { click: this.mt32.central, timeStamp: 45000 + holterParamsSpeechDuration, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus, offset: { top: 0, left: 120 } }},
                 { speak: "Clicca Scarica aggiornamenti.", timeStamp: 47000 + holterParamsSpeechDuration },
                 { click: this.mt32.download_updates, timeStamp: 48000 + holterParamsSpeechDuration, timeout: 1000, cursor: { type: this.media.stylus, offset: { top: 0, left: 120} }},
                 { hide: this.media.stylus, timeStamp: 52000 + holterParamsSpeechDuration },
@@ -2035,14 +2249,14 @@ class MT32Demo {
                 { speak: "Per inviare il comando di conferma, seleziona il dispositivo dalla centrale.", timeStamp: 70000 + holterParamsSpeechDuration },
                 { click: this.ct64.select_device, timeStamp: 74000 + holterParamsSpeechDuration, timeout: 2000, cursor: { type: this.media.mousePointer, offset: { top: 0, left: 200 } }},
                 { speak: "Quindi, clicca Continua.", timeStamp: 76000 + holterParamsSpeechDuration },
-                { click: this.ct64.continue, timeStamp: 78000 + holterParamsSpeechDuration, timeout: 2000, borderColor: "blue", cursor: { type: this.media.mousePointer, offset: { top: 0, left: 0 } }},
+                { click: this.ct64.continue, timeStamp: 78000 + holterParamsSpeechDuration, timeout: 2000, "border-color": "blue", cursor: { type: this.media.mousePointer, offset: { top: 0, left: 0 } }},
                 { speak: "Il dispositivo riceverà la conferma in pochi secondi.", timeStamp: 80000 + holterParamsSpeechDuration },
                 { speak: "Clicca Conferma sul dispositivo, per completare l'associazione.", timeStamp: 86000 + holterParamsSpeechDuration },
 
                 { reveal: this.media.stylus, timeStamp: 86000 + holterParamsSpeechDuration },
-                { click: this.mt32.confirm_syncdone, timeStamp: 89000 + holterParamsSpeechDuration, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus, offset: { top: 0, left: 120} }},
+                { click: this.mt32.confirm_syncdone, timeStamp: 89000 + holterParamsSpeechDuration, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus, offset: { top: 0, left: 120} }},
                 { speak: "Quindi, Clicca sul logo médicàl téc per andare alla pagina principale.", timeStamp: 92500 + holterParamsSpeechDuration },
-                { click: this.mt32.home, timeStamp: 95000 + holterParamsSpeechDuration, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.home, timeStamp: 95000 + holterParamsSpeechDuration, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
 
                 { speak: "Ora il dispositivo è in modalità operativa Hólter, ed è quindi pronto per essere utilizzato.", timeStamp: 96000 + holterParamsSpeechDuration },
                 { hide: this.media.stylus, timeStamp: 103000 + holterParamsSpeechDuration },
@@ -2054,17 +2268,17 @@ class MT32Demo {
 
                 { reveal: this.media.stylus, timeStamp: 114000 + holterParamsSpeechDuration },
                 { speak: "Quindi, clicca Nuovo Esame.", timeStamp: 116000 + holterParamsSpeechDuration },
-                { click: this.mt32.new_exam, timeStamp: 118000 + holterParamsSpeechDuration, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
-                { speak: "Nella nuova pagina, Clicca Hólter.", timeStamp: 121000 + holterParamsSpeechDuration, borderColor: "white" },
-                { click: this.mt32.holter, timeStamp: 124000 + holterParamsSpeechDuration, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.new_exam, timeStamp: 118000 + holterParamsSpeechDuration, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
+                { speak: "Nella nuova pagina, Clicca Hólter.", timeStamp: 121000 + holterParamsSpeechDuration, "border-color": "white" },
+                { click: this.mt32.holter, timeStamp: 124000 + holterParamsSpeechDuration, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
                 { speak: "Il dispositivo mostrerà l'anagrafica del paziente ricevuta dalla centrale.", timeStamp: 127500 + holterParamsSpeechDuration },
                 { speak: "Verifica i dati del paziente.", timeStamp: 130000 + holterParamsSpeechDuration },
 
                 // { speak: "Se necessario, puoi modificare i dati anagrafici direttamente dal dispositivo.", timeStamp: 132000 + holterParamsSpeechDuration - warp },
-                // { click: this.mt32.edit_patient, timeStamp: 138000 + holterParamsSpeechDuration - warp, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
-                // { click: this.mt32.back_edit_patient, timeStamp: 141800 + holterParamsSpeechDuration - warp, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
+                // { click: this.mt32.edit_patient, timeStamp: 138000 + holterParamsSpeechDuration - warp, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
+                // { click: this.mt32.back_edit_patient, timeStamp: 141800 + holterParamsSpeechDuration - warp, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
                 { speak: "Clicca Conferma per confermare i dati del paziente.", timeStamp: 145500 + holterParamsSpeechDuration - offset13 },
-                { click: this.mt32.confirm_patient_details, timeStamp: 148000 + holterParamsSpeechDuration - offset13, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.confirm_patient_details, timeStamp: 148000 + holterParamsSpeechDuration - offset13, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
 
                 { speak: "Attendi che l'icona di allerta si spenga.", timeStamp: 150000 + holterParamsSpeechDuration - offset13 },
                 { move: this.media.stylus, top: this.mt32.toggleLP.getPosition().top - 30, left: this.mt32.toggleLP.getPosition().left + 300, timeStamp: 152000 + holterParamsSpeechDuration - offset13 },
@@ -2073,37 +2287,37 @@ class MT32Demo {
                 { speak: "A lato del display, sono disponibili due filtri che possono migliorare la visualizzazione del segnale.", timeStamp: 160000 + holterParamsSpeechDuration - offset13 },
                 { move: this.media.stylus, top: this.mt32.toggleLP.getPosition().top, left: this.mt32.toggleLP.getPosition().left, timeStamp: 161000 + holterParamsSpeechDuration - offset13 },
                 { speak: "Ad esempio, clicca il primo pulsante per abilitare un filtro passa basso.", timeStamp: 164000 + holterParamsSpeechDuration - offset13 },
-                { click: this.mt32.toggleLP, timeStamp: 169000 + holterParamsSpeechDuration - offset13, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.toggleLP, timeStamp: 169000 + holterParamsSpeechDuration - offset13, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
                 { speak: "Clicca di nuovo il pulsante per disabilitare il filtro.", timeStamp: 171000 + holterParamsSpeechDuration - offset13 },
-                { click: this.mt32.toggleLP, timeStamp: 173000 + holterParamsSpeechDuration - offset13, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.toggleLP, timeStamp: 173000 + holterParamsSpeechDuration - offset13, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
 
                 { move: this.media.stylus, top: this.mt32.toggle_gain.getPosition().top, left: this.mt32.toggle_gain.getPosition().left - 50, timeStamp: 180000 + holterParamsSpeechDuration - offset13 },
                 { speak: "Nella parte bassa del display viene visualizzata la frequenza cardiaca.", timeStamp: 180000 + holterParamsSpeechDuration - offset13 },
 
                 { speak: "Il secondo pulsante consente di configurare la sensibilità del segnale.", timeStamp: 185000 + holterParamsSpeechDuration - offset13 },
-                { click: this.mt32.toggle_gain, timeStamp: 187000 + holterParamsSpeechDuration - offset13, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
-                { click: this.mt32.toggle_gain, timeStamp: 190000 + holterParamsSpeechDuration - offset13, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
-                { click: this.mt32.toggle_gain, timeStamp: 194000 + holterParamsSpeechDuration - offset13, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.toggle_gain, timeStamp: 187000 + holterParamsSpeechDuration - offset13, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.toggle_gain, timeStamp: 190000 + holterParamsSpeechDuration - offset13, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.toggle_gain, timeStamp: 194000 + holterParamsSpeechDuration - offset13, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
 
                 { speak: "Il terzo pulsante agisce sulla scala temporale del segnale.", timeStamp: 196000 + holterParamsSpeechDuration - offset13 },
                 { move: this.media.stylus, top: this.mt32.toggle_speed.getPosition().top, left: this.mt32.toggle_speed.getPosition().left, timeStamp: 197000 + holterParamsSpeechDuration - offset13 },
-                { click: this.mt32.toggle_speed, timeStamp: 198000 + holterParamsSpeechDuration - offset13, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
-                { click: this.mt32.toggle_speed, timeStamp: 202000 + holterParamsSpeechDuration - offset13, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.toggle_speed, timeStamp: 198000 + holterParamsSpeechDuration - offset13, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.toggle_speed, timeStamp: 202000 + holterParamsSpeechDuration - offset13, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
 
                 { speak: "In fine, il quarto pulsante consente di visualizzare una terna differente di derivazioni.", timeStamp: 204000 + holterParamsSpeechDuration - offset13 },
-                { click: this.mt32.toggle_trace, timeStamp: 205500 + holterParamsSpeechDuration - offset13, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.toggle_trace, timeStamp: 205500 + holterParamsSpeechDuration - offset13, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
                 { speak: "Premi a lungo il pulsante per visualizzare una sola derivazione alla volta.", timeStamp: 208000 + holterParamsSpeechDuration - offset13 },
-                { click: this.mt32.toggle_trace, timeStamp: 209500 + holterParamsSpeechDuration - offset13, timeout: 3000, borderColor: "white", cursor: { type: this.media.stylus, longpress: true }},
+                { click: this.mt32.toggle_trace, timeStamp: 209500 + holterParamsSpeechDuration - offset13, timeout: 3000, "border-color": "white", cursor: { type: this.media.stylus, longpress: true }},
                 { speak: "Premi di nuovo a lungo il pulsante per tornare alla visualizzazione di tre derivazioni.", timeStamp: 215000 + holterParamsSpeechDuration - offset13 },
-                { click: this.mt32.toggle_trace, timeStamp: 218000 + holterParamsSpeechDuration - offset13, timeout: 3000, borderColor: "white", cursor: { type: this.media.stylus, longpress: true }},
+                { click: this.mt32.toggle_trace, timeStamp: 218000 + holterParamsSpeechDuration - offset13, timeout: 3000, "border-color": "white", cursor: { type: this.media.stylus, longpress: true }},
 
                 { speak: "Dopo aver verificato la qualità del segnale, clicca il pulsante rec.", timeStamp: 222000 + holterParamsSpeechDuration - offset13 },
-                { click: this.mt32.rec, timeStamp: 226000 + holterParamsSpeechDuration - offset13, timeout: 1500, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.rec, timeStamp: 226000 + holterParamsSpeechDuration - offset13, timeout: 1500, "border-color": "white", cursor: { type: this.media.stylus }},
                 { move: this.media.stylus, top: this.mt32.view_interpretation.getPosition().top, left: this.mt32.view_interpretation.getPosition().left + this.mt32.view_interpretation.getSize().width, timeStamp: 230000 + holterParamsSpeechDuration - offset13 },
 
                 { speak: "Comparirà una finestra di conferma.", timeStamp: 231000 + holterParamsSpeechDuration - offset13 },
                 { speak: "Clicca conferma, per cominciare la registrazione Hólter.", timeStamp: 234000 + holterParamsSpeechDuration - offset13 },
-                { click: this.mt32.confirm_exams, timeStamp: 237000 + holterParamsSpeechDuration - offset13, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.confirm_exams, timeStamp: 237000 + holterParamsSpeechDuration - offset13, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
                 { speak: "Il display del dispositivo si spegnerà, e la registrazione Hólter verrà effettuata per la durata impostata in fase di configurazione dell'esame. In questo caso, 24 ore.", timeStamp: 238000 + holterParamsSpeechDuration - offset13 },
                 { hide: this.media.stylus, timeStamp: 240000 + holterParamsSpeechDuration - offset13 },
 
@@ -2113,12 +2327,12 @@ class MT32Demo {
                 { trans: ".MT32-case-rightside", transform: "rotateY(0deg)translateZ(0px)translateY(0px)skewY(0deg)scaleY(1)", duration: 1600, timeStamp: 256000 + holterParamsSpeechDuration - offset13 },
                 { trans: "#MT32-cable5", transform: "rotateY(-22deg) translateZ(-183px) translateY(-10px) translateX(-19px) skewY(-10deg) scaleY(1.4)", duration: 1400, timeStamp: 256000 + holterParamsSpeechDuration - offset13 },
                 { reveal: this.mt32.power_btn, timeStamp: 258000 + holterParamsSpeechDuration - offset13 },
-                { select: this.mt32.power_btn, timeStamp: 258000 + holterParamsSpeechDuration - offset13, borderColor: "white", classed: "blink" },
-                { deselect: this.mt32.power_btn, timeStamp: 261000 + holterParamsSpeechDuration - offset13, borderColor: "white", classed: "blink" },
+                { select: this.mt32.power_btn, timeStamp: 258000 + holterParamsSpeechDuration - offset13, "border-color": "white", classed: "blink" },
+                { deselect: this.mt32.power_btn, timeStamp: 261000 + holterParamsSpeechDuration - offset13, "border-color": "white", classed: "blink" },
 
                 { speak: "Durante l'esame, puoi eseguire brevi registrazioni vocali premendo a lungo il pulsante Voice Recorder che si trova a lato del dispositivo.", timeStamp: 262000 + holterParamsSpeechDuration - offset13 },
                 { reveal: this.mt32.record_btn, timeStamp: 266000 + holterParamsSpeechDuration - offset13 },
-                { click: this.mt32.record_btn, timeStamp: 266000 + holterParamsSpeechDuration - offset13, timeout: 5000, borderColor: "white", classed: "blink" },
+                { click: this.mt32.record_btn, timeStamp: 266000 + holterParamsSpeechDuration - offset13, timeout: 5000, "border-color": "white", classed: "blink" },
                 { reveal: "#record_voice", timeStamp: 271000 + holterParamsSpeechDuration - offset13 },
 
                 { speak: "Quando il LED frontale del dispositivo diventa blu lampeggiante, la registrazione vocale è attiva.", timeStamp: 272500 + holterParamsSpeechDuration - offset13 },
@@ -2143,10 +2357,10 @@ class MT32Demo {
 
                 { move: this.media.stylus, top: this.mt32.upload_results.getPosition().top, left: this.mt32.upload_results.getPosition().left + 100, timeStamp: 333000 + holterParamsSpeechDuration - offset15 },
                 { speak: "Il numero tra parentesi sul pulsante Invio Risultati indica quanti esami sono attualmente salvati sul dispositivo MT32.", timeStamp: 334000 + holterParamsSpeechDuration - offset15 },
-                { click: this.mt32.upload_results, timeStamp: 341000 + holterParamsSpeechDuration - offset15, timeout: 4000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.upload_results, timeStamp: 341000 + holterParamsSpeechDuration - offset15, timeout: 4000, "border-color": "white", cursor: { type: this.media.stylus }},
                 { speak: "Clicca Invio Risultati. In pochi secondi tutti gli esami saranno caricati sulla centrale.", timeStamp: 343000 + holterParamsSpeechDuration - offset15 },
                 { speak: "Al termine dell'invio, clicca Conferma.", timeStamp: 357000 + holterParamsSpeechDuration - offset15 },
-                { click: this.mt32.confirm_upload, timeStamp: 360000 + holterParamsSpeechDuration - offset15, timeout: 2000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.confirm_upload, timeStamp: 360000 + holterParamsSpeechDuration - offset15, timeout: 2000, "border-color": "white", cursor: { type: this.media.stylus }},
                 { speak: "Noterai che il pulsante Invio Risultati è ora disabilitato. Questo indica che tutti gli esami sono stati inviati correttamente alla centrale this.ct64.", timeStamp: 362000 + holterParamsSpeechDuration - offset15 },
                 { move: this.media.stylus, timeStamp: 363000 + holterParamsSpeechDuration - offset15, top: this.mt32.upload_results.getPosition().top, left: this.mt32.upload_results.getPosition().left },
 
@@ -2158,8 +2372,8 @@ class MT32Demo {
                 { trans: ".MT32-case-rightside", transform: "rotateY(0deg)translateZ(0px)translateY(0px)skewY(0deg)scaleY(1)", duration: 1600, timeStamp: 401000-offset15 },
                 { trans: "#MT32-cable5", transform: "rotateY(-22deg) translateZ(-183px) translateY(-10px) translateX(-19px) skewY(-10deg) scaleY(1.4)", duration: 1400, timeStamp: 401000-offset15 },
                 { reveal: this.mt32.power_btn, timeStamp: 403000-offset15 },
-                { select: this.mt32.power_btn, timeStamp: 403000-offset15, borderColor: "white", classed: "blink" },
-                { deselect: this.mt32.power_btn, timeStamp: 407000-offset15, borderColor: "white", classed: "blink" },
+                { select: this.mt32.power_btn, timeStamp: 403000-offset15, "border-color": "white", classed: "blink" },
+                { deselect: this.mt32.power_btn, timeStamp: 407000-offset15, "border-color": "white", classed: "blink" },
                 { click: this.mt32.power_btn, timeStamp: 407000-offset15 },
                 { trans: ".MT32-case-rightside", transform: "rotateY(22deg)translateZ(-10px)translateY(-12px)skewY(10deg)scaleY(0.9)", duration: 1400, timeStamp: 408000-offset15 },
                 { trans: "#MT32-screens", transform: "rotateY(0deg)translateZ(0px)translateY(0px)translateX(0px)skewY(0deg)scaleY(1)", duration: 1600, timeStamp: 408000-offset15 },
@@ -2167,14 +2381,14 @@ class MT32Demo {
                 { speak: "Comparirà una pagina per confermare l'operazione di spegnimento.", timeStamp: 410000-offset15 },
                 { reveal: this.media.stylus, timeStamp: 415000-offset15 },
                 { speak: "Clicca Conferma per confermare lo spegnimento del dispositivo.", timeStamp: 416000-offset15 },
-                { click: this.mt32.confirm_poweroff, timeStamp: 416000-offset15, timeout: 2000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.confirm_poweroff, timeStamp: 416000-offset15, timeout: 2000, "border-color": "white", cursor: { type: this.media.stylus }},
                 { hide: this.media.stylus, timeStamp: 418000-offset15 },
 
                 { speak: "Infine, per visionare gli esami del paziente sulla centrale, seleziona Monitoraggi.", timeStamp: 420000-offset15 },
-                { click: this.ct64.monitoring, timeStamp: 421000-offset15, timeout: 2000, borderColor: "blue", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
+                { click: this.ct64.monitoring, timeStamp: 421000-offset15, timeout: 2000, "border-color": "blue", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
                 { speak: "La pagina mostra la lista di tutti gli esami svolti.", timeStamp: 425000-offset15 },
                 { speak: "Nella lista, troverai anche l'esame Hólter che hai appena inviato.", timeStamp: 430000-offset15 },
-                { select: this.ct64.select_exam_data_holter,  timeStamp: 433000-offset15, timeout: 16000, classed: "blink2", borderColor: "green", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}}
+                { select: this.ct64.select_exam_data_holter,  timeStamp: 433000-offset15, timeout: 16000, classed: "blink2", "border-color": "green", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}}
             ]).play();
         } else if (dm === Demo.TERMINATE_HUB_MODE) {
             player.load([
@@ -2190,9 +2404,9 @@ class MT32Demo {
 
                 { reveal: this.media.stylus, timeStamp: 26000 },
                 { speak: "Clicca conferma per completare l'operazione.", timeStamp: 26000},
-                { click: this.mt32.confirm_upload, timeStamp: 28000, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus, offset: { top: 0, left: 120} }},
+                { click: this.mt32.confirm_upload, timeStamp: 28000, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus, offset: { top: 0, left: 120} }},
                 { speak: "Clicca sul logo médicàl téc per andare alla pagina principale.", timeStamp: 30000 },
-                { click: this.mt32.home, timeStamp: 32000, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.home, timeStamp: 32000, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
 
                 { speak: "Potrai verificare che la modalità operativa non è piu presente sul dispositivo MT32.", timeStamp: 34000},
                 { speak: "Applica la stessa procedura per terminare le altre modalità operative.", timeStamp: 40000}
@@ -2215,9 +2429,9 @@ class MT32Demo {
 
                     { reveal: this.media.stylus, timeStamp: 26000 },
                     { speak: "Select confirm to complete the request.", timeStamp: 26000},
-                    { click: this.mt32.confirm_upload, timeStamp: 28000, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus, offset: { top: 0, left: 120} }},
+                    { click: this.mt32.confirm_upload, timeStamp: 28000, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus, offset: { top: 0, left: 120} }},
                     { speak: "Finally, click on the M logo to go to the main page.", timeStamp: 30000 },
-                    { click: this.mt32.home, timeStamp: 32000, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
+                    { click: this.mt32.home, timeStamp: 32000, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
 
                     { speak: "You can confirm that the operating mode has ended by checking that the message at the bottom of the main screen indicates none.", timeStamp: 34000}
                 ]).play();
@@ -2254,10 +2468,10 @@ class MT32Demo {
                 { trans: "#MT32-sdcard", zIndex: 2, timeStamp: 18000, transform: "translateX(1132px) translateY(421px) rotateX(26deg) rotateZ(-104deg) skewX(-13deg) translateZ(-300px) scale(0.2, 0.5)"},
 
                 { speak: "Nel pannello di navigazione della centrale CT64, clicca Upload Esami.", timeStamp: 24000 },
-                { click: this.ct64.upload_exams, timeStamp: 25000, timeout: 1000, borderColor: "blue", classed: "blink", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
+                { click: this.ct64.upload_exams, timeStamp: 25000, timeout: 1000, "border-color": "blue", classed: "blink", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
 
                 { speak: "Nella nuova schermata, clicca il pulsante Upload Esami.", timeStamp: 30000 },
-                { click: this.ct64.choose_exams_to_be_uploaded, timeStamp: 31000, timeout: 1000, borderColor: "blue", classed: "blink", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
+                { click: this.ct64.choose_exams_to_be_uploaded, timeStamp: 31000, timeout: 1000, "border-color": "blue", classed: "blink", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
                 { speak: "Verrà aperta una nuova finestra con cui puoi cercare e scegliere gli esami da caricare sulla centrale this.ct64.", timeStamp: 34000 },
                 { move: this.media.mousePointer, top: 170, left: 444, timeStamp: 36000 },
 
@@ -2273,9 +2487,9 @@ class MT32Demo {
                 { speak: "Una conseguenza importante è che la ricerca degli esami di interesse va fatta usando la data e l'ora dell'esame. E non! in base a nome e cognome del paziente.", timeStamp: 65000 },
                 { move: this.media.mousePointer, top: 301, left: 684, timeStamp: 76000 },
 
-                { select: this.ct64.select_ecg_file, timeStamp: 78000, borderColor: "steelblue", classed: "blink" },
+                { select: this.ct64.select_ecg_file, timeStamp: 78000, "border-color": "steelblue", classed: "blink" },
                 { speak: "Quando hai selezionati i faill di interesse, clicca il pulsante Apri.", timeStamp: 84000 },
-                { click: this.ct64.open, timeStamp: 86000, timeout: 1000, borderColor: "blue", classed: "blink", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
+                { click: this.ct64.open, timeStamp: 86000, timeout: 1000, "border-color": "blue", classed: "blink", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
                 { reveal: "#uploading", timeStamp: 89000 },
                 { speak: "I faill verranno caricati sulla centrale in pochi secondi.", timeStamp: 90000 }
             ]).play();
@@ -2316,10 +2530,10 @@ class MT32Demo {
                     { trans: "#MT32-sdcard", zIndex: 2, timeStamp: 18000, transform: "translateX(1132px) translateY(421px) rotateX(26deg) rotateZ(-104deg) skewX(-13deg) translateZ(-300px) scale(0.2, 0.5)"},
 
                     { speak: "From the top panel of the main page, click Upload Exams.", timeStamp: 24000 },
-                    { click: this.ct64.upload_exams, timeStamp: 25000, timeout: 1000, borderColor: "blue", classed: "blink", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
+                    { click: this.ct64.upload_exams, timeStamp: 25000, timeout: 1000, "border-color": "blue", classed: "blink", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
 
                     { speak: "On the new screen, click Upload Exams.", timeStamp: 30000 },
-                    { click: this.ct64.choose_exams_to_be_uploaded, timeStamp: 31000, timeout: 1000, borderColor: "blue", classed: "blink", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
+                    { click: this.ct64.choose_exams_to_be_uploaded, timeStamp: 31000, timeout: 1000, "border-color": "blue", classed: "blink", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
                     { speak: "A new window will be opened that allows you to choose which E-C-G exams you want to upload to the central server.", timeStamp: 34000 },
                     { move: this.media.mousePointer, top: 170, left: 444, timeStamp: 36000 },
 
@@ -2335,9 +2549,9 @@ class MT32Demo {
                     { speak: "Because of this, if you want to search a specific exam, you will need to search it based on hour and date of the exam, as opposed to searching for the patient's name.", timeStamp: 65000 },
                     { move: this.media.mousePointer, top: 301, left: 684, timeStamp: 76000 },
 
-                    { select: this.ct64.select_ecg_file, timeStamp: 78000, borderColor: "steelblue", classed: "blink" },
+                    { select: this.ct64.select_ecg_file, timeStamp: 78000, "border-color": "steelblue", classed: "blink" },
                     { speak: "When you have found the exams you want to upload, click on Open.", timeStamp: 84000 },
-                    { click: this.ct64.open, timeStamp: 86000, timeout: 1000, borderColor: "blue", classed: "blink", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
+                    { click: this.ct64.open, timeStamp: 86000, timeout: 1000, "border-color": "blue", classed: "blink", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
                     { reveal: "#uploading", timeStamp: 89000 },
                     { speak: "The selected exams will be uploaded to the central server in few seconds.", timeStamp: 90000 }
                 ]).play();
@@ -2346,9 +2560,9 @@ class MT32Demo {
             player.load([
                 { speak: "Istruzioni per inserire e consultare l'anamnesi del paziente.", timeStamp: 4000 },
                 { speak: "Nella home page della centrale CT64, fai doppio click sull'anagrafe desiderata.", timeStamp: 8000 },
-                { click: this.ct64.select_patient, timeStamp: 13500, timeout: 2000, borderColor: "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top:0, left:100}}},
+                { click: this.ct64.select_patient, timeStamp: 13500, timeout: 2000, "border-color": "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top:0, left:100}}},
                 { speak: "Poi, nella pagina Gestione Paziente, clicca Anamnesi.", timeStamp: 15500 },
-                { click: this.ct64.view_anamnesi, timeStamp: 18000, timeout: 2000, borderColor: "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
+                { click: this.ct64.view_anamnesi, timeStamp: 18000, timeout: 2000, "border-color": "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
                 { speak: "Verrà visualizzata una scheda con l'anamnesi del paziente selezionato.", timeStamp: 21000 },
                 { speak: "Se la scheda è vuota, come in questo caso, vuol dire che è la prima volta che viene inserita una anamnesi per il paziente selezionato.", timeStamp: 26000 },
                 { speak: "Per inserire i dati dell'anamnesi, utilizza i campi messi a disposizione nella scheda.", timeStamp: 34000 },
@@ -2362,13 +2576,13 @@ class MT32Demo {
                 { input: "#pressione_min", value: "82", timeStamp: 46000 },
                 { speak: "Quindi, fai click sul pulsante Aggiorna per salvare i dati.", timeStamp: 48000 },
                 { scroll: "#PATIENT_SCREENS", timeStamp: 50000, offset: 800 },
-                { click: this.ct64.ct64_inserisci_anamnesi, timeStamp: 52000, timeout: 2000, borderColor: "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top:-780, left:0}}},
+                { click: this.ct64.ct64_inserisci_anamnesi, timeStamp: 52000, timeout: 2000, "border-color": "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top:-780, left:0}}},
                 { speak: "A questo punto, i dati che hai inserito sono stati salvati sulla centrale this.ct64.", timeStamp: 48000 },
                 { speak: "Puoi verificare il corretto salvataggio dei dati cliccando su Archivio Anamnesi.", timeStamp: 52000 },
                 { scroll: "#PATIENT_SCREENS", timeStamp: 56000, offset: -800 },
-                { click: this.ct64.view_archived_medical_reports, timeStamp: 57000, timeout: 2000, borderColor: "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
+                { click: this.ct64.view_archived_medical_reports, timeStamp: 57000, timeout: 2000, "border-color": "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
                 { speak: "Nella lista, troverai anche l'anamnesi che hai appena salvato.", timeStamp: 59000 },
-                { click: this.ct64.view_medical_report, timeStamp: 62000, timeout: 5000, borderColor: "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top:0, left:400}}},
+                { click: this.ct64.view_medical_report, timeStamp: 62000, timeout: 5000, "border-color": "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top:0, left:400}}},
                 { speak: "Fai click sulla anamnesi per visualizzare i dati salvati.", timeStamp: 64000 }
             ]).play();
         } else if (dm === Demo.TEST_ELECTRODES_HUB) {
@@ -2379,9 +2593,9 @@ class MT32Demo {
                 { reveal: this.media.stylus, timeStamp: 100 },
                 { speak: "Per ottenere ECG di buona qualità, è molto importante la corretta applicazione degli elettrodi.", timeStamp: 4000 },
                 { speak: "Per verificare la corretta applicazione degli elettrodi, clicca Nuovo Esame.", timeStamp: 11000 },
-                { click: this.mt32.new_exam, timeStamp: 15000, timeout: 1500, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.new_exam, timeStamp: 15000, timeout: 1500, "border-color": "white", cursor: { type: this.media.stylus }},
                 { speak: "Poi, Clicca Test Elettrodi.", timeStamp: 16000 },
-                { click: this.mt32.test_electrodes, timeStamp: 19000, timeout:1500, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.test_electrodes, timeStamp: 19000, timeout:1500, "border-color": "white", cursor: { type: this.media.stylus }},
                 { speak: "Nella pagina viene suggerito il posizionamento degli elettrodi e controllata la qualità di connessione.", timeStamp: 22000 },
                 { hide: this.media.stylus, timeStamp: 23000 },
                 { speak: "Gli elettrodi sono identificati da pallini colorati.", timeStamp: 28000 },
@@ -2392,22 +2606,22 @@ class MT32Demo {
             player.load([
                 { speak: "Istruzioni per creare il profilo di un nuovo paziente nella centrale this.ct64.", timeStamp: 4000 },
                 { speak: "Nella pagina Pazienti, fai click su Nuovo.", timeStamp: 10000 },
-                { click: this.ct64.new_patient, timeStamp: 13000, timeout: 2000, borderColor: "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
+                { click: this.ct64.new_patient, timeStamp: 13000, timeout: 2000, "border-color": "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
                 { speak: "Verrà visualizzata una schermata che consente l'inserimento dei dati del nuovo paziente.", timeStamp: 14000 }
             ]).play();
         } else if (dm === Demo.VIEW_INTERPRETATION_HUB) {
             player.load([
                 { speak: "Instruzioni per ricercare. consultare. e refertare esami ECG salvati sulla centrale this.ct64.", timeStamp: 4000 },
                 { speak: "Nella home page della centrale CT64, fai doppio click sull'anagrafe desiderata.", timeStamp: 10000 },
-                { click: this.ct64.select_patient, timeStamp: 16000, timeout: 2000, borderColor: "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top:0, left:100}}},
+                { click: this.ct64.select_patient, timeStamp: 16000, timeout: 2000, "border-color": "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top:0, left:100}}},
                 { speak: "Quindi, nella pagina Gestione Paziente, clicca Esami.", timeStamp: 18000 },
-                { click: this.ct64.view_exams, timeStamp: 20000, timeout: 3000, borderColor: "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
+                { click: this.ct64.view_exams, timeStamp: 20000, timeout: 3000, "border-color": "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
                 { speak: "La nuova schermata presenta la lista di tutti gli esami effettuati per il paziente selezionato.", timeStamp: 24000 },
                 { speak: "Per ogni esame, viene indicato il tipo d'esame. la data di inizio e fine dell'esame.", timeStamp: 28000 },
                 { move: this.media.mousePointer, top: 248, left: 84, timeStamp: 33000 },
                 { move: this.media.mousePointer, top: 248, left: 384, timeStamp: 34500 },
                 { speak: "Quando hai individuato l'esame di interesse, fai doppio click.", timeStamp: 36000 },
-                { click: this.ct64.select_exam_data_hub_alt, timeStamp: 38000, timeout: 4000, borderColor: "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top:0, left:300}}},
+                { click: this.ct64.select_exam_data_hub_alt, timeStamp: 38000, timeout: 4000, "border-color": "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top:0, left:300}}},
                 { speak: "Verrà aperta una nuova schermata con il tracciato dell'esame.", timeStamp: 42000 },
                 { move: this.media.mousePointer, top: 325, left: 195, timeStamp: 48000 },
                 { speak: "Nella parte superiore della schermata sono disponibili parametri che permettono di personalizzare vari aspetti della visualizzazione del tracciato, come ad esempio il guadagno in ampiezza. la velocità. e le derivazioni di interesse.", timeStamp: 48000 },
@@ -2467,26 +2681,26 @@ class MT32Demo {
                 { speak: "Torniamo ora nella parte superiore della schermata.", timeStamp: 204200 },
                 { scroll: "#MONITORING_SCREENS", timeStamp: 209000, offset: -1400 },
                 { speak: "Facendo click su h-e-s puoi visualizzare il risultato dell'algoritmo interpretativo.", timeStamp: 211000 },
-                { click: this.ct64.HES, timeStamp: 212000, timeout: 2000, borderColor: "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
+                { click: this.ct64.HES, timeStamp: 212000, timeout: 2000, "border-color": "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
                 { speak: "Poi, facendo click su Dati Fisiologici, puoi visualizzare i dati fisiologici inseriti al momento dell'esame.", timeStamp: 216000 },
-                { click: this.ct64.view_physio, timeStamp: 220000, timeout: 2000, borderColor: "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
+                { click: this.ct64.view_physio, timeStamp: 220000, timeout: 2000, "border-color": "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
                 { speak: "Infine, fai click su Refertazione per fare la refertazione dell'esame.", timeStamp: 225000 },
-                { click: this.ct64.write_report, timeStamp: 226000, timeout: 2000, borderColor: "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
+                { click: this.ct64.write_report, timeStamp: 226000, timeout: 2000, "border-color": "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
                 { speak: "In questo caso, l'operatore non ha l'autorizzazione per refertare. Viene quindi mostrata una schermata in cui è possibile selezionare il medico specialista a cui chiedere la refertazione.", timeStamp: 230000 },
                 { move: this.media.mousePointer, top: 387, left: 800, timeStamp: 240000 },
-                { click: this.ct64.select_doctor, timeStamp: 242000, timeout: 2000, borderColor: "blue", classed: "blink", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
+                { click: this.ct64.select_doctor, timeStamp: 242000, timeout: 2000, "border-color": "blue", classed: "blink", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
                 { speak: "Fai click su Salva per inviare la richiesta al medico specialista.", timeStamp: 246500 },
-                { click: this.ct64.send_request_to_doctor, timeStamp: 248000, timeout: 2000, borderColor: "blue", classed: "blink", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
+                { click: this.ct64.send_request_to_doctor, timeStamp: 248000, timeout: 2000, "border-color": "blue", classed: "blink", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
                 { move: this.media.mousePointer2, top: 257, left: 130, timeStamp: 248000 },
                 { trans: "#content", transform: "translateX(-2000px)", timeStamp: 252000 },
                 { speak: "Il medico specialista riceverà una email di notifica con un link per accedere alla centrale this.ct64.", timeStamp: 254000 },
-                { click: this.ct64.check_email, timeStamp: 264000, timeout: 2000, borderColor: "blue", classed: "blink", cursor: { type: this.media.mousePointer2, offset: { top:0, left:300}}},
+                { click: this.ct64.check_email, timeStamp: 264000, timeout: 2000, "border-color": "blue", classed: "blink", cursor: { type: this.media.mousePointer2, offset: { top:0, left:300}}},
                 { hide: "#secondary_new_message", timeStamp: 266000 },
                 { reveal: "#secondary_ecgAnalysisResultsScreen", timeStamp: 266000 },
                 { speak: "Utilizzando il link, il medico specialista potrà visionare l'esame ECG del paziente.", timeStamp: 266000 },
                 { scroll: "#secondary_ecgAnalysisResultsScreen", timeStamp: 268500, offset: 600 },
                 { scroll: "#secondary_ecgAnalysisResultsScreen", timeStamp: 271000, offset: -600 },
-                { click: this.ct64.write_report2, timeStamp: 273000, timeout: 1000, borderColor: "blue", classed: "blink", cursor: { type: this.media.mousePointer2, offset: { top:0, left:0}}},
+                { click: this.ct64.write_report2, timeStamp: 273000, timeout: 1000, "border-color": "blue", classed: "blink", cursor: { type: this.media.mousePointer2, offset: { top:0, left:0}}},
                 { hide: "#secondary_ecgAnalysisResultsScreen", timeStamp: 275000 },
                 { reveal: "#secondary_compileReportScreen", timeStamp: 275000 },
                 { speak: "Ed inserire quindi la diagnosi.", timeStamp: 275000 },
@@ -2498,7 +2712,7 @@ class MT32Demo {
                 { scroll: "#secondary_compileReportScreen", timeStamp: 281000, offset: 690 },
                 { input: "#secondary_recommended_exams", value: "Nessuno", timeStamp: 282000 },
                 { speak: "Facendo click su Salva, il medico specialista completa la refertazione.", timeStamp: 286000 },
-                { click: this.ct64.save_report2, timeStamp: 290000, timeout: 4000, borderColor: "blue", classed: "blink2", cursor: { type: this.media.mousePointer2, offset: { top:-670, left:0}}},
+                { click: this.ct64.save_report2, timeStamp: 290000, timeout: 4000, "border-color": "blue", classed: "blink2", cursor: { type: this.media.mousePointer2, offset: { top:-670, left:0}}},
                 { speak: "La centrale CT64 renderà automaticamente disponibile all'operatore la refertazione effettuata dal medico specialista.", timeStamp: 292000 },
                 { trans: "#content", transform: "translateX(0px)", timeStamp: 295000 },
                 { hide: "#requestReportScreen", timeStamp: 295000 },
@@ -2521,11 +2735,11 @@ class MT32Demo {
                 { speak: "Il terminale paziente MT32 Multi è un dispositivo elettrocardiografico portatile multifunzione.", timeStamp: 34000 },
 
                 { reveal: this.media.stylus, timeStamp: 36000 },
-                { click: this.mt32.new_exam, timeStamp: 38000, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
-                { click: this.mt32.ecg12d, timeStamp: 42000, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.new_exam, timeStamp: 38000, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.ecg12d, timeStamp: 42000, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
                 { speak: "Il terminale fornisce una funzione di elettrocardiografo a 12 derivazioni ECG. una funzione Hólter da 24 a 120 ore. Una funzione Telehólter o Event-Recórdèr. e una funzione Hub.", timeStamp: 42000 },
 
-                { click: this.mt32.confirm_patient_details, timeStamp: 46000, timeout: 1000, borderColor: "white", cursor: { type: this.media.stylus }},
+                { click: this.mt32.confirm_patient_details, timeStamp: 46000, timeout: 1000, "border-color": "white", cursor: { type: this.media.stylus }},
                 { hide: this.media.stylus, timeStamp: 48000 },
 
                 { speak: "Il terminale può essere abbinato ad altri dispositivi per il monitoraggio di parametri fisiologici del paziente, come ad esempio temperatura. pressione arteriosa. e dati ematici", timeStamp: 50000 },
@@ -2533,11 +2747,11 @@ class MT32Demo {
 
                 { trans: "#CT64", transform: "translate(0px,-100px)scale(1.2)", timeStamp: 70000, duration: 1000 },
                 { speak: "La centrale di Telemedicina CT64 è in grado di configurare. raccogliere. gestire. elaborare. ed archiviare i dati provenienti dal terminale paziente MT32 MULTI via Web.", timeStamp: 72000 },
-                { click: this.ct64.select_patient, timeStamp: 76000, timeout: 2000, borderColor: "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top: 0, left: 200 } }},
-                { click: this.ct64.view_exams, timeStamp: 80000, timeout: 1000, borderColor: "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
+                { click: this.ct64.select_patient, timeStamp: 76000, timeout: 2000, "border-color": "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top: 0, left: 200 } }},
+                { click: this.ct64.view_exams, timeStamp: 80000, timeout: 1000, "border-color": "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top:0, left:0}}},
 
                 { speak: "La centrale fornisce inoltre funzioni per la lettura, l'analisi e la refertazione dei segnali cardiaci e fisiologici.", timeStamp: 84000 },
-                { click: this.ct64.select_exam_data_hub_alt, timeStamp: 88000, timeout: 1000, borderColor: "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top:0, left:300}}},
+                { click: this.ct64.select_exam_data_hub_alt, timeStamp: 88000, timeout: 1000, "border-color": "blue", classed: "blink2", cursor: { type: this.media.mousePointer, offset: { top:0, left:300}}},
                 { trans: "#CT64", transform: "translateY(0px)scale(1)", timeStamp: 94000, duration: 0 },
 
                 { speak: "Il terminale MT32 e la centrale CT64 sono abbinati al Sistema di Riabilitazione Cardiologica Domiciliare RICARDO. Destinato alla riabilitazione dei pazienti reduci da infarto.", timeStamp: 94000 },

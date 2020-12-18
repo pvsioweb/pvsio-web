@@ -1,11 +1,10 @@
 import * as Backbone from 'backbone';
 import { WidgetManager } from '../../WidgetManager';
 import { createDialog, setDialogTitle, uuid } from '../../../../env/Utils';
-import { Coords, HtmlStyle, WidgetEvents, WidgetEVO, WidgetAttr } from '../../widgets/core/WidgetEVO';
+import { Coords, CSS, WidgetEVO, WidgetAttr } from '../../widgets/core/WidgetEVO';
 import { HotspotData } from './HotspotEditor';
 import { WidgetClassDescriptor } from '../../widgets/widgets';
 import { ButtonEventData } from '../../widgets/core/ButtonEVO';
-import { preview } from '../../forms/widgetPreviewer';
 
 
 export interface WidgetEditorOptions extends Backbone.ViewOptions {
@@ -157,9 +156,8 @@ export class WidgetEditor extends Backbone.View {
         for (let i = 0; i < widgets.length; i++) {
             const name: string = widgets[i].name;
             const coords: Coords = { width, height };
-            const opt = { parent: `${name}-preview` };
             const previewId: string = uuid();
-            const obj: WidgetEVO = new widgets[i].cons(previewId, coords, opt);
+            const obj: WidgetEVO = new widgets[i].cons(previewId, coords, { css: { parent: `${name}-preview` } });
 
             const style: string = Handlebars.compile(styleTemplate)({
                 style: obj.getStyle()
@@ -168,7 +166,7 @@ export class WidgetEditor extends Backbone.View {
             $(`#${name}-style input`).on("input", (evt: JQuery.ChangeEvent) => {
                 const value: string = evt.currentTarget?.value;
                 const key: string = evt.currentTarget?.name;
-                let style: HtmlStyle = {};
+                let style: CSS = {};
                 if (key) {
                     style[key] = value;
                     obj.setStyle(style);

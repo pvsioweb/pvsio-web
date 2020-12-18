@@ -77,14 +77,15 @@ export class TouchScreenEVO extends ButtonEVO {
     constructor (id: string, coords: Coords, opt?: TouchScreenOptions) {
         super(id, coords, { ...opt, touchscreenMode: true });
         opt = opt || {};
+        opt.css = opt.css || {};
 
         // override default button style
-        this.style["background-color"] = opt.backgroundColor || "steelblue";
-        this.style["font-color"] = opt.fontColor || "white";
+        this.css["background-color"] = opt.css["background-color"] || "steelblue";
+        this.css["font-color"] = opt.css["font-color"] || "white";
         this.type = opt.type || "touchscreendisplay";
 
         // override default button style
-        this.setStyle(this.style);
+        this.setStyle(this.css);
 
         // set widget keys
         this.attr.displayName = opt.displayName || id;

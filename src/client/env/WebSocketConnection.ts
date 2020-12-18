@@ -50,12 +50,14 @@ export class WebSocketConnection extends EventDispatcher implements Connection {
         return this.isOnCloud() ? 0 : 8082;
     }
     protected getServerUrl (): string {
+        const protocol: string = this.isOnCloud() ? "wss" : "ws";
         return window.location.href.indexOf("file") === 0 ?
-            ("ws://localhost") 
-                : ("ws://" + window.location.hostname);
+            (`${protocol}://localhost`) 
+                : (`${protocol}://${window.location.hostname}`);
     }
     getUrl (): string {
-        return this.getServerAddress().replace("ws://", "http://");
+        return this.isOnCloud() ? this.getServerAddress().replace("wss://", "https://")
+            : this.getServerAddress().replace("ws://", "http://");
     }
     protected getServerAddress (): string {
         return (this.serverPort) ?

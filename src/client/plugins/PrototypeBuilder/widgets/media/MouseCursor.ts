@@ -30,7 +30,7 @@
  *
  */
 
-import { Coords, WidgetEVO, img_template } from "../core/WidgetEVO";
+import { Coords, WidgetEVO, img_template, WidgetOptions } from "../core/WidgetEVO";
 
 export const mouse_template: string = `
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
@@ -66,17 +66,17 @@ export class MouseCursor extends WidgetEVO {
      * @memberof module:MouseCursor
      * @instance
      */
-    constructor (id: string, coords: Coords, opt?) {
+    constructor (id: string, coords: Coords, opt?: WidgetOptions) {
         super(id, coords, opt);
         opt = opt || {};
+        opt.css = opt.css || {};
 
         // set widget type
         this.type = this.type || "MouseCursor";
 
         // override default style options of WidgetEVO as necessary before creating the DOM element with the constructor of module WidgetEVO
-        opt.backgroundColor = "transparent";
-        opt.zIndex = opt.zIndex || "inherit";
-        opt.opacity = opt.opacity || 0.9;
+        this.css["background-color"] = "transparent";
+        this.css.opacity = opt.css.opacity || 0.9;
 
         // invoke createHTMLElement to create the widget
         super.createHTMLElement();

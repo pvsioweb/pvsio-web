@@ -72,7 +72,7 @@ export type Action = {
     trans?: string,
     transform?: string,
     zIndex?: number,
-    borderColor?: string,
+    "border-color"?: string,
     classed?: string,
     opacity?: number,
     top?: number,
@@ -183,7 +183,7 @@ export class Player {
             } else {
                 if (typeof widget === "string") {
                     const attr = {
-                        "border-color": action.borderColor || "white",
+                        "border-color": action["border-color"] || "white",
                         "class": action.classed
                     }
                     this.prevAttr[widget] = {
@@ -194,7 +194,7 @@ export class Player {
                     $(widget).attr("class", attr.class);
                 } else {
                     widget.select({
-                        borderColor: action.borderColor || "white",
+                        borderColor: action["border-color"] || "white",
                         classed: action.classed
                     });
                 }

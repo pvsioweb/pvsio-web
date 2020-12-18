@@ -17,8 +17,8 @@ export class RemoteControllerEVO extends WidgetEVO {
     constructor (id: string, coords: Coords, opt?) {
         super(id, coords, opt);
         opt = opt || {};
-        this.style["font-color"] = opt.fontColor || "black";
-        this.style["overflow"] = "visible";
+        this.css["font-color"] = opt.fontColor || "black";
+        this.css["overflow"] = "visible";
 
         coords = coords || { top: 0, left: 0, width: 200, height: 40 };
 

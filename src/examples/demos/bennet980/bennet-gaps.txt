@@ -1,0 +1,8 @@
+bennet gaps
+
+- units: does it really use kg as main unit for weight?
+- unclear which input is controlled by the knob -- multiple buttons can be selected at the same time, e.g., weight and peep
+- unclear how to move back to the previous screen?
+- unclear how to confirm values (e.g., by pressing the knob?)
+
+- can be used to teach waveforms in different distress situations

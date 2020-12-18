@@ -39,7 +39,7 @@
  *
  */
 
-import { Coords, BasicEvent, WidgetEVO, WidgetOptions, WidgetAttr } from "./WidgetEVO";
+import { Coords, BasicEvent, WidgetEVO, WidgetOptions, WidgetAttr, CSS } from "./WidgetEVO";
 import { Timer } from "../../../../util/Timer"
 import { ActionsQueue, ActionCallback } from "../ActionsQueue";
 import { Connection } from "../../../../env/Connection";
@@ -53,7 +53,7 @@ const DBLCLICK_TIMEOUT = 350; // 350 milliseconds, default (and minimum) timeout
 export type ButtonEvent = BasicEvent;
 export type ButtonEventData = {
     evt: BasicEvent,
-    fun: string // function to be invoked when a given event is triggered
+    fun: string // name of the prototype function to be invoked when a given event is triggered
 };
 
 export interface ButtonOptions extends WidgetOptions {
@@ -74,6 +74,7 @@ export class ButtonEVO extends WidgetEVO {
     protected toggleButton: boolean;
     protected pushButton: boolean;
     protected touchscreenMode: boolean = false;
+    protected lineHeight: number;
 
     protected rate: number;
     protected dblclick_timeout: number;
@@ -134,16 +135,17 @@ export class ButtonEVO extends WidgetEVO {
         super(id, coords, opt);
 
         opt = opt || {};
+        opt.css = opt.css || {};
+
         // override default style options of WidgetEVO as necessary before creating the DOM element with the constructor of module WidgetEVO
         this.type = opt.type || "button";
-        this.style["background-color"] = opt.backgroundColor || "transparent";
-        this.style["font-color"] = opt.fontColor || "black";
-        this.style["font-size"] = opt.fontSize || 12;
-        this.style["cursor"] = opt.cursor || "pointer";
-        this.style["border-width"] = (!isNaN(parseFloat(`${opt.borderRadius}`))) ? `${parseFloat(`${opt.borderWidth}`)}[x]` : (opt.borderColor) ? "1px" : "0px";
-        this.style["border-radius"] = (!isNaN(parseFloat(`${opt.borderRadius}`))) ? `${parseFloat(`${opt.borderRadius}`)}px` : "4px";
-        this.style["z-index"] = opt.zIndex || 1; // z-index for buttons should be at least 1, so they are placed over display widgets
-        this.style["overlay-color"] = opt.overlayColor || "steelblue";
+        this.css["background-color"] = opt.css["background-color"] || "transparent";
+        this.css.color = opt.css.color || "white";
+        this.css["cursor"] = opt.css.cursor || "pointer";
+        this.css["z-index"] = opt.css["z-index"] || "1"; // z-index for buttons should be at least 1, so they are placed over display widgets
+        // this.css["overlay-color"] = opt.css["overlay-color"] || "steelblue";
+        this.lineHeight = parseFloat(opt.css["line-height"]) || this.height;
+
         this.connection = opt.connection;
 
         // create the basic widget
@@ -194,10 +196,6 @@ export class ButtonEVO extends WidgetEVO {
         this.attr.keyCode = opt.keyCode;
     }
 
-    protected getOverlayColor (): string {
-        return this.style["background-color"] === "transparent" ? "steelblue" : this.style["background-color"];
-    }
-
     protected installHandlers() {
         const onButtonPress = () => {
             if (this.evts.press) {
@@ -220,10 +218,9 @@ export class ButtonEVO extends WidgetEVO {
         };
 
         const onMouseOver = () => {
-            if ((this.toggleButton || this.pushButton) && this.isSelected) {
-                this.select({ opacity: 0.8, backgroundColor: this.getOverlayColor() });
-            } else {
-                this.select({ opacity: 0.4, backgroundColor: this.getOverlayColor() }); 
+            // this.select({ opacity: this.css.opacity || 0.8, backgroundColor: this.getOverlayColor() });
+            if (!this.isSelected) {
+                this.select();
             }
             this.hover = true;
         };
@@ -233,7 +230,8 @@ export class ButtonEVO extends WidgetEVO {
                 : this.toggleButton ? !this.isSelected
                     : true;
             if (this.isSelected) {
-                this.select({ opacity: 0.8, backgroundColor: dimColor(this.getOverlayColor()) });
+                // this.select({ opacity: this.css.opacity || 0.8, backgroundColor: dimColor(this.getOverlayColor()) });
+                this.select();
             } else { this.deselect(); }
         };
         const onMouseUp = () => {
@@ -242,7 +240,8 @@ export class ButtonEVO extends WidgetEVO {
                 : this.toggleButton ? this.isSelected
                     : false;
             if (this.isSelected) {
-                this.select({ opacity: 0.8, backgroundColor: this.getOverlayColor() });
+                // this.select({ opacity: this.css.opacity || 0.8, backgroundColor: dimColor(this.getOverlayColor()) });
+                this.select();
             } else {
                 if (this.hover) {
                     onMouseOver();
@@ -263,7 +262,8 @@ export class ButtonEVO extends WidgetEVO {
         };
         const onBlur = () => {
             if (this.isSelected || (this.hover && !this.toggleButton)) {
-                this.select({ opacity: 0.8, backgroundColor: this.getOverlayColor() });
+                // this.select({ opacity: 0.8, backgroundColor: this.getOverlayColor() });
+                this.select();
             } else { this.deselect(); }
             if (this._tick) { onButtonRelease(); }
             this.hover = false;
@@ -271,6 +271,7 @@ export class ButtonEVO extends WidgetEVO {
         const onMouseOut = () => {
             if (!this.isSelected) { this.deselect(); }
             if (this._tick) { onButtonRelease(); }
+            // this.overlay.css({ opacity: 0 });
             this.hover = false;
         };
 
@@ -304,10 +305,12 @@ export class ButtonEVO extends WidgetEVO {
 
     protected btn_action(evt: ButtonEvent, opt?: { functionName?: string, customFunction?: string, callback?: ActionCallback }) {
         opt = opt || {};
-        const callback: ActionCallback = opt.callback || this.callback;
-        const fun: string = opt.customFunction || this.attr.customFunction || (evt + "_" + this.attr.functionName);
-        ActionsQueue.queueGUIAction(fun, this.connection, callback);
         this.deselect();
+
+        const fun: string = opt.customFunction || this.attr.customFunction || (evt + "_" + this.attr.functionName);
+        const callback: ActionCallback = opt.callback || this.callback;
+        ActionsQueue.queueGUIAction(fun, this.connection, callback);
+        
         const data: ButtonEventData = { evt, fun };
         this.trigger(evt, data);
         console.log(fun);
@@ -341,24 +344,24 @@ export class ButtonEVO extends WidgetEVO {
      * @memberof module:ButtonEVO
      * @instance
      */
-    render (state?: string | number | {}, opt?: ButtonOptions): void {
+    render (state?: string | number | {}, opt?: CSS): void {
         // set style
         opt = opt || {};
-        // handle options that need units
-        opt["font-size"] = (opt.fontSize || this.style["font-size"]) + "px";
-        opt["border-width"] = (opt.borderWidth) ? opt.borderWidth + "px" : this.style["border-width"];
-        this.setStyle({ ...this.style, ...opt });
+        this.setStyle({ ...this.css, ...opt });
+
+        // set line height so text is vertically centered
+        this.base.css("line-height", `${this.lineHeight}px`);
 
         // render content
         state = (state === undefined || state === null)? "" : state;
         // a fixed label is shown if any is specified, otherwise the provided value is displayed
         if (typeof state === "string" || typeof state === "number") {
             const label: string = this.attr["customLabel"] || `${state}`;
-            this.base.text(label);
+            this.base.html(label);
             this.reveal();
         } else if (typeof state === "object" && this.attr?.displayName !== "" && this.evalViz(state)) {
             const label: string = this.attr["customLabel"] || this.evaluate(this.attr.displayName, state);
-            this.base.text(label);
+            this.base.html(label);
             this.reveal();
         } else {
             this.hide();

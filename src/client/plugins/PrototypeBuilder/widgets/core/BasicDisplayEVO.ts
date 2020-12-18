@@ -27,9 +27,9 @@
  *
  */
 
-import { Coords, WidgetEVO, WidgetOptions, WidgetStyle } from "./WidgetEVO";
+import { Coords, WidgetEVO, WidgetOptions, CSS } from "./WidgetEVO";
 
-export interface DisplayOptions extends WidgetOptions, WidgetStyle {
+export interface DisplayOptions extends WidgetOptions {
     displayName?: string
 }
 
@@ -69,14 +69,15 @@ export class BasicDisplayEVO extends WidgetEVO {
         super(id, coords, opt);
 
         opt = opt || {};
+        opt.css = opt.css || {};
 
         // override default style options of WidgetEVO as necessary before creating the DOM element with the constructor of module WidgetEVO
         this.type = opt.type || "display";
-        this.style["background-color"] = opt.backgroundColor || "black";
-        this.style.color = opt.color || "white";
-        this.style.cursor = opt.cursor || "default";
-        this.style.overflow = opt.overflow || "hidden";
-        
+        this.css["background-color"] = opt.css["background-color"] || "black";
+        this.css.color = opt.css.color || "white";
+        this.css.cursor = opt.css.cursor || "default";
+        this.css.overflow = opt.css.overflow || "hidden";
+                
         // set display key
         this.attr.displayName = opt.displayName || id;
     }
@@ -102,31 +103,24 @@ export class BasicDisplayEVO extends WidgetEVO {
      * @memberof module:BasicDisplayEVO
      * @instance
      */
-    render (state: string | {}, opt?: WidgetOptions): void {
+    render (state?: string | number | {}, opt?: CSS): void {
         if (!this.rendered) {
             // invoke createHTMLElement to create the widget
             super.createHTMLElement();
         }
         // set style
-        opt = opt || {};
-        opt["background-color"] = opt.backgroundColor || this.style["background-color"];
-        opt["font-size"] = (opt.fontSize || this.style["font-size"]) + "px";
-        opt["font-family"] = opt.fontFamily || this.style["font-family"];
-        opt.color = opt.fontColor || this.style.color;
-        opt["text-align"] = opt.align || this.style["text-align"];
-        opt["border-width"] = (opt.borderWidth) ? opt.borderWidth + "px" : this.style["border-width"];
-        opt["border-style"] = opt.borderStyle || this.style["border-style"];
-        opt["border-radius"] = (isNaN(parseFloat(`${opt.borderRadius}`))) ? this.style["border-radius"] : opt.borderRadius;
-        opt["border-color"] = opt.borderColor || this.style["border-color"];
-        this.setStyle(opt);
+        this.setStyle({ ...this.css, ...opt });
+
+        // set line height so text is properly centered
+        this.base.css("line-height", `${this.height}px`);
 
         // render content
         state = (state === undefined || state === null)? "" : state;
         if (typeof state === "string" || typeof state === "number") {
-            this.base.text(state);
+            this.base.html(`${state}`);
             this.reveal();
         } else if (typeof state === "object" && this.attr?.displayName !== "" && this.evalViz(state)) {
-            this.base.text(this.evaluate(this.attr.displayName, state));
+            this.base.html(this.evaluate(this.attr.displayName, state));
             this.reveal();
         } else {
             this.hide();

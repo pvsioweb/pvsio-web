@@ -30,7 +30,7 @@
  *
  */
 
-import { Coords, WidgetEVO, img_template } from "../core/WidgetEVO";
+import { Coords, WidgetEVO, img_template, CSS, WidgetOptions } from "../core/WidgetEVO";
 import { stylus_white } from "./StylusTemplate";
 
 export class Stylus extends WidgetEVO {
@@ -56,7 +56,7 @@ export class Stylus extends WidgetEVO {
      * @memberof module:Stylus
      * @instance
      */
-    constructor (id: string, coords: Coords, opt?) {
+    constructor (id: string, coords: Coords, opt?: WidgetOptions) {
         super(id, coords, opt);
         coords = coords || {};
         opt = opt || {};
@@ -67,9 +67,9 @@ export class Stylus extends WidgetEVO {
         // adjust position, based on the stylus size: the coordinates are indicating the position of the stylus pointer
         this.width = 40;
         this.height = 640;
-        this.style = this.style || {};
-        this.style["margin-top"] = `${-(this.height)}px`;
-        this.style["margin-left"] = `-12px`;
+        this.css = this.css || {};
+        this.css["margin-top"] = `${-(this.height)}px`;
+        this.css["margin-left"] = `-12px`;
 
         // store initial position
         this.initial_position = {
@@ -78,15 +78,14 @@ export class Stylus extends WidgetEVO {
         };
 
         // override default style options of WidgetEVO as necessary before creating the DOM element with the constructor of module WidgetEVO
-        opt.backgroundColor = "transparent";
-        opt.zIndex = opt.zIndex || "inherit";
-        opt.opacity = opt.opacity || 1;
+        this.css["background-color"] = "transparent";
+        this.css.opacity = opt.css.opacity || 1;
 
         // invoke WidgetEVO constructor to create the widget
         super.createHTMLElement();
 
         // append the pointer image to the base layer
-        var dom = Handlebars.compile(img_template, { noEscape: true })({
+        const dom = Handlebars.compile(img_template, { noEscape: true })({
             svg: stylus_white
         });
         this.base.append(dom);
@@ -114,12 +113,12 @@ export class Stylus extends WidgetEVO {
         opt.fw_move = opt.fw_move || this.fw_move;
         this.move({ top: this.top + opt.fw_move, left: this.left - opt.fw_move }, {
             duration: 200,
-            rotation: true
+            rotation: "auto"
         });
         setTimeout(() => {
             this.move({ top: this.top - opt.fw_move, left: this.left + opt.fw_move }, {
                 duration: 500,
-                rotation: true
+                rotation: "auto"
             });
         }, 500);
         return this.reveal();
@@ -136,12 +135,12 @@ export class Stylus extends WidgetEVO {
         opt.fw_move = opt.fw_move || 20;
         this.move({ top: this.top + opt.fw_move, left: this.left - opt.fw_move }, {
             duration: 200,
-            rotation: true
+            rotation: "auto"
         });
         setTimeout(() => {
             this.move({ top: this.top - opt.fw_move, left: this.left + opt.fw_move }, {
                 duration: 500,
-                rotation: true
+                rotation: "auto"
             });
         }, 2500);
         return this.reveal();
@@ -159,15 +158,15 @@ export class Stylus extends WidgetEVO {
      * @memberof module:Stylus
      * @instance
      */
-    move (coords: Coords, opt?: { rotation?: number | boolean, duration?: number, transitionTimingFunction?: "ease-in" | "ease-out" }) {
+    move (coords: Coords, opt?: CSS) {
         super.move(coords, opt);
         if (this.div && this.div[0]) {
             opt = opt || {};
             // the translation needs to be normalised by the top / left attributes of the div
             opt.duration = opt.duration || 1000;
             opt.transitionTimingFunction = opt.transitionTimingFunction || "ease-out";
-            opt.rotation = (opt.rotation !== undefined) ? opt.rotation : true;
-            const rotation_val: number = (typeof opt.rotation === "number" || opt.rotation) ? 35 : 0;
+            opt.rotation = (opt.rotation !== undefined) ? opt.rotation : "auto";
+            const rotation_val: number = (opt.rotation === "auto") ? 35 : 0;
             this.base.css("transform", "rotate(" + rotation_val + "deg)")
                 .css("transform-origin", "bottom")
                 .css("transition-duration", opt.duration + "ms")
@@ -215,7 +214,7 @@ export class Stylus extends WidgetEVO {
         if (this.div && this.div[0] && this.div.css("display") === "block") {
             this.div.animate({ "opacity": 0 }, 250);
             setTimeout(() => {
-                this.move(this.initial_position, { rotation: false });
+                this.move(this.initial_position, { rotation: "0deg" });
                 this.div.css("display", "none");
             }, 260);
         }

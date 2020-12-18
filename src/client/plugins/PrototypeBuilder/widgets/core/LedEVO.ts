@@ -22,7 +22,7 @@
  *
  */
 import { ActionCallback } from "../ActionsQueue";
-import { WidgetOptions, Coords, WidgetEVO, WidgetStyle } from "./WidgetEVO";
+import { WidgetOptions, Coords, WidgetEVO, CSS, Renderable } from "./WidgetEVO";
 
 export interface LedOptions extends WidgetOptions {
     ledName?: string,
@@ -72,19 +72,19 @@ export class LedEVO extends WidgetEVO {
 
         coords.width = coords.width || coords.height || 1;
         coords.height = coords.height || coords.width || 1;
-        const maxWidth: number = parseFloat($(opt.parent).css("width")) || coords.width;
-        const maxHeight: number = parseFloat($(opt.parent).css("height")) || coords.height;
+        const maxWidth: number = parseFloat(`$(opt.parent).css("width")`) || coords.width;
+        const maxHeight: number = parseFloat(`$(opt.parent).css("height")`) || coords.height;
 
         this.radius = Math.min(coords.width, coords.height, maxWidth, maxHeight) / 2;
-        opt.marginLeft = coords.width / 2 - this.radius;
-        opt.marginTop = coords.height / 2 - this.radius;
+        const marginLeft: number = coords.width / 2 - this.radius;
+        const marginTop = coords.height / 2 - this.radius;
 
         // override default style options of WidgetEVO as necessary before creating the DOM element with the constructor of module WidgetEVO
         this.type = opt.type || "led";
-        this.style["background-color"] = opt.color || opt.backgroundColor || COLOR.brightGreen;
-        this.style.cursor = opt.cursor || "default";
-        this.style["border-radius"] = opt.borderRadius || this.radius;
-        this.style.overflow = "visible";
+        this.css["background-color"] = opt.css["color"] || opt.css["background-color"] || COLOR.brightGreen;
+        this.css.cursor = opt.css.cursor || "default";
+        this.css["border-radius"] = opt.css["border-radius"] || `${this.radius}px`;
+        this.css.overflow = "visible";
         
         // create the DOM element
         super.createHTMLElement();
@@ -95,10 +95,10 @@ export class LedEVO extends WidgetEVO {
         });
 
         // delete unnecessary style options
-        delete this.style["font-size"];
-        delete this.style["font-family"];
-        delete this.style["text-align"];
-        delete this.style["white-space"];
+        delete this.css["font-size"];
+        delete this.css["font-family"];
+        delete this.css["text-align"];
+        delete this.css["white-space"];
 
         // set display key
         this.attr = {
@@ -127,15 +127,9 @@ export class LedEVO extends WidgetEVO {
      * @memberof module:LedEVO
      * @instance
      */
-    render (state: string | {}, opt?: WidgetStyle): void {
+    render (state: Renderable, opt?: CSS): void {
         // set style
-        opt = opt || {};
-        opt["background-color"] = opt.color || opt.backgroundColor || this.style["background-color"];
-        opt["border-width"] = (opt.borderWidth) ? opt.borderWidth + "px" : this.style["border-width"];
-        opt["border-style"] = opt.borderStyle || this.style["border-style"];
-        opt["border-radius"] = (opt.borderRadius === undefined) ? this.style["border-radius"] : `${opt.borderRadius}`;
-        opt["border-color"] = opt.borderColor || this.style["border-color"];
-        this.setStyle(opt);
+        this.setStyle({ ...this.css, ...opt });
 
         // update style, if necessary
         state = (state === undefined || state === null) ? "" : state;

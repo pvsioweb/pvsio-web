@@ -81,7 +81,7 @@ export const widget_template: string = `
      style="position:{{position}}; width:{{width}}px; height:{{height}}px; top:{{top}}px; left:{{left}}px; z-index:{{zIndex}}; overflow:{{overflow}};"
      class="{{type}} noselect{{#if blinking}} blink{{/if}}">
     <div id="{{id}}_base"
-         style="position:absolute; width:{{width}}px; height:{{height}}px; line-height:{{height}}px; z-index:inherit; {{#each style}} {{@key}}:{{this}};{{/each}}"
+         style="position:absolute; width:{{width}}px; height:{{height}}px; line-height:{{line-height}}px; z-index:inherit; {{#each style}} {{@key}}:{{this}};{{/each}}"
          class="{{type}}_base {{id}}_base"></div>
     <div id="{{id}}_overlay"
          style="position:absolute; width:{{width}}px; height:{{height}}px; background-color:{{style.overlay-color}}; border-radius:{{style.border-radius}}; cursor:{{style.cursor}}; opacity:0; z-index:inherit;"
@@ -94,71 +94,86 @@ export const img_template: string = `
 {{#if img}}<img src="{{img}}" style="z-index:inherit;opacity:{{opacity}};transform-origin:{{transformOrigin}};">{{/if}}
 {{#if svg}}{{svg}}{{/if}}
 `;
-
+export type Renderable = string | number | {};
 export type Coords = { top?: number, left?: number, width?: number, height?: number };
 export type WidgetDescriptor = {
     id: string,
     type: string,
     attr: WidgetAttr,
     coords: Coords,
-    style: HtmlStyle,
+    style: CSS,
     evts: string[]
 };
-export interface WidgetStyle {
+// export interface WidgetStyle {
+//     position?: "absolute" | "relative",
+//     parent?: string,
+//     cursor?: string,
+//     backgroundColor?: string,
+//     fontSize?: number | string,
+//     fontFamily?: string,
+//     fontColor?: string, // equivalent to "color"
+//     color?: string,
+//     align?: string,
+//     borderWidth?: number | string,
+//     borderStyle?: string,
+//     borderRadius?: number | string,
+//     borderColor?: string,
+//     overflow?: "hidden" | "visible",
+//     opacity?: number | string,
+//     blinking?: boolean,
+//     marginLeft?: number | string,
+//     marginTop?: number | string,
+//     duration?: number | string,
+//     overlayColor?: string,
+//     transitionTimingFunction?: "ease-in" | "ease-out",
+//     transformOrigin?: "center"
+//     zIndex?: number | string,
+//     letterSpacing?: number | string,
+//     whiteSpace?: "normal" | "nowrap",
+//     lineHeight?: string,
+//     paddingTop?: string,
+//     paddingLeft?: string,
+//     paddingRight?: string,
+//     paddingBottom?: string,
+// }
+export interface CSS {
+    parent?: "body" | string,
     position?: "absolute" | "relative",
-    parent?: string,
-    cursor?: string,
-    backgroundColor?: string,
-    fontSize?: number | string,
-    fontFamily?: string,
-    fontColor?: string, // equivalent to "color"
-    color?: string,
-    align?: string,
-    borderWidth?: number | string,
-    borderStyle?: string,
-    borderRadius?: number | string,
-    borderColor?: string,
-    overflow?: "hidden" | "visible",
-    opacity?: number | string,
-    blinking?: boolean,
-    marginLeft?: number | string,
-    marginTop?: number | string,
-    duration?: number | string,
-    overlayColor?: string,
-    transitionTimingFunction?: "ease-in" | "ease-out",
-    transformOrigin?: "center"
-    zIndex?: number | string,
-    letterSpacing?: number | string
-}
-export interface HtmlStyle {
-    position?: "absolute" | "relative",
-    parent?: string,
     cursor?: string,
     "background-color"?: string,
-    "font-size"?: number | string,
+    "font-size"?: string,
     "font-family"?: string,
     "font-color"?: string, // equivalent to "color"
     "color"?: string,
     align?: string,
-    "border-width"?: number | string,
+    "border-width"?: string,
     "border-style"?: string,
-    "border-radius"?: number | string,
+    "border-radius"?: string,
     "border-color"?: string,
     overflow?: "hidden" | "visible",
-    opacity?: number | string,
-    "margin-left"?: number | string,
-    "margin-top"?: number | string,
-    "z-index"?: number | string,
-    "letter-spacing"?: number | string,
+    opacity?: number,
+    "margin-left"?: string,
+    "margin-top"?: string,
+    "z-index"?: string,
+    "letter-spacing"?: string,
+    "white-space"?: "normal" | "nowrap",
+    "line-height"?: string,
+    "padding-top"?: string,
+    "padding-left"?: string,
+    "padding-right"?: string,
+    "padding-bottom"?: string,
+    [key: string]: string | number,
+
     // animation options
     "overlay-color"?: string,
-    duration?: number | string,
-    rotation?: number | boolean,
-    blinking?: boolean,
+    duration?: number,
+    rotation?: string,
+    blinking?: string,
     transitionTimingFunction?: "ease-in" | "ease-out",
     transformOrigin?: "center"
 }
-export interface WidgetOptions extends WidgetStyle {
+export interface WidgetOptions {
+    css?: CSS,
     visibleWhen?: string,
     enabledWhen?: string,
     type?: string, // widget type, e.g., button, display
@@ -194,7 +209,7 @@ export abstract class WidgetEVO extends Backbone.Model {
     viz: VisibilityOptions;
     position: "absolute" | "relative";
     zIndex: number;
-    style: HtmlStyle = {};
+    css: CSS = {};
 
     widget_template: string;
 
@@ -242,11 +257,13 @@ export abstract class WidgetEVO extends Backbone.Model {
     constructor (id: string, coords: Coords, opt?: WidgetOptions) {
         super();
         opt = opt || {};
+        opt.css = opt.css || {};
         coords = coords || {};
         this.id = id;
         this.type = opt.type || "widget";
-        opt.parent = (opt.parent) ? ("#" + opt.parent) : "body"
-        this.parent = opt.parent;
+        this.parent = (opt.css.parent) ? 
+            opt.css.parent.startsWith("#") || opt.css.parent.startsWith(".") ? 
+                opt.css.parent : ("#" + opt.css.parent) : "body";
         this.top = coords.top || 0;
         this.left = coords.left || 0;
         this.width = (isNaN(coords.width)) ? 32 : coords.width;
@@ -255,35 +272,26 @@ export abstract class WidgetEVO extends Backbone.Model {
             visible: opt.visibleWhen || "true", // default: always enabled/visible
             enabled: opt.enabledWhen || "true"
         };
-        this.position = opt.position || "absolute";
-        this.zIndex = opt.zIndex !== undefined ? parseFloat(`${opt.zIndex}`) : 0;
+
+        this.position = opt.css.position || "absolute";
 
         // visual style
-        opt.borderWidth = +opt.borderWidth || 0;
-        opt.fontSize = !isNaN(parseFloat(`${opt.fontSize}`)) && parseFloat(`${opt.fontSize}`) < this.height - opt.borderWidth - this.fontPadding ? 
-            opt.fontSize 
-                : this.height - opt.borderWidth - this.fontPadding;
-        opt.borderStyle = (opt.borderStyle) ? opt.borderStyle : (opt.borderRadius || opt.borderWidth) ? "solid" : "none";
-        opt.borderWidth = (!isNaN(+opt.borderWidth)) ? opt.borderWidth : (opt.borderColor) ? 2 : 0;
-        this.style = {};
-        this.style["background-color"] = opt.backgroundColor || "transparent";
-        this.style["font-size"] = parseFloat(`${opt.fontSize}`) + "px";
-        this.style["font-family"] = opt.fontFamily || "sans-serif";
-        this.style.color = opt.fontColor || "white";
-        this.style["text-align"] = opt.align || "center";
-        this.style["border-width"] = (isNaN(parseFloat(`${opt.borderWidth}`))) ? "0px" : `${parseFloat(`${opt.borderWidth}`)}px`;
-        this.style["border-style"] = opt.borderStyle || "none";
-        this.style["border-radius"] = (isNaN(parseFloat(`${opt.borderRadius}`))) ? "0px" : `${parseFloat(`${opt.borderRadius}`)}px`;
-        this.style["border-color"] = opt.borderColor || "steelblue";
-        this.style.overflow = opt.overflow || "hidden";
-        this.style["margin-left"] = (isNaN(parseFloat(`${opt.marginLeft}`))) ? "0px" : `${parseFloat(`${opt.marginLeft}`)}px`;
-        this.style["margin-top"] = (isNaN(parseFloat(`${opt.marginTop}`))) ? "0px" : `${parseFloat(`${opt.marginTop}`)}px`;
-        this.style["white-space"] = "nowrap";
-        this.style.opacity = isNaN(parseFloat(`${opt.opacity}`)) ? 1 : parseFloat(`${opt.opacity}`);
-        this.style.blinking = opt.blinking || false;
-        this.style.cursor = opt.cursor || "default";
-        this.style["overlay-color"] = opt.overlayColor || opt["overlay-color"] || "transparent";
-        this.style["z-index"] = opt.zIndex || 0;
+        const borderWidth: number = parseFloat(opt.css["border-width"]) || 0;
+        const fontSize: number = !isNaN(parseFloat(`${opt.css["font-size"]}`)) && parseFloat(`${opt.css["font-size"]}`) < this.height - borderWidth - this.fontPadding ? 
+            parseFloat(`${opt.css["font-size"]}`)
+                : this.height - borderWidth - this.fontPadding;
+
+        this.css = { ...opt.css };
+        // set the initial value of some core style options if they are not provided
+        this.css["background-color"] = opt.css["background-color"] || "transparent";
+        this.css["font-size"] = fontSize + "px";
+        this.css["font-family"] = opt.css["font-family"] || "sans-serif";
+        this.css.color = opt.css.color || "white";
+        this.css["text-align"] = opt.css["text-align"] || "center";
+        this.css.overflow = opt.css.overflow || "hidden";
+        this.css["white-space"] = opt.css["white-space"] || "nowrap";
+        this.css.blinking = opt.css.blinking || "false";
+        this.css["overlay-color"] = opt.css["overlay-color"] || "transparent";
 
         this.widget_template = opt.widget_template || widget_template;
     }
@@ -300,7 +308,7 @@ export abstract class WidgetEVO extends Backbone.Model {
         this.div = $("#" + this.id);
         this.base = $("#" + this.id + "_base");
         this.overlay = $("#" + this.id + "_overlay");
-        this.setStyle(this.style);
+        this.setStyle(this.css);
 
         this.hide();
     }
@@ -311,7 +319,7 @@ export abstract class WidgetEVO extends Backbone.Model {
      * @memberof module:WidgetEVO
      * @instance
      */
-    render (state?: string | {}, opt?: WidgetOptions): void {
+    render (state?: Renderable, opt?: CSS): void {
         return this.reveal();
     }
 
@@ -322,8 +330,8 @@ export abstract class WidgetEVO extends Backbone.Model {
      * @memberof module:WidgetEVO
      * @instance
      */
-    renderSample (opt?): void {
-        this.render(opt);
+    renderSample (opt?: CSS): void {
+        this.render(null, opt);
     }
 
     /**
@@ -369,7 +377,7 @@ export abstract class WidgetEVO extends Backbone.Model {
      * @memberof module:WidgetEVO
      * @instance
      */
-    move (coords: Coords, opt?: WidgetOptions): void {
+    move (coords: Coords, opt?: CSS): void {
         opt = opt || {};
         // console.log(coords);
         if (this.div && this.div[0]) {
@@ -383,7 +391,7 @@ export abstract class WidgetEVO extends Backbone.Model {
                 "top": this.top + "px",
                 "left": this.left + "px",
                 "transition-timing-function": opt.transitionTimingFunction
-            }, opt.duration);
+            }, +opt.duration);
         }
         this.reveal();
     }
@@ -398,7 +406,7 @@ export abstract class WidgetEVO extends Backbone.Model {
      * @memberof module:WidgetEVO
      * @instance
      */
-    resize (size: { height?: number, width?: number}, opt?: WidgetOptions): void {
+    resize (size: { height?: number, width?: number}, opt?: CSS): void {
         // console.log(coords);
         if (this.div && this.div[0]) {
             size = size || {};
@@ -409,19 +417,19 @@ export abstract class WidgetEVO extends Backbone.Model {
             this.width = (isNaN(size.width)) ? this.width : parseFloat(size.width.toFixed(WidgetEVO.MAX_COORDINATES_ACCURACY));
 
             // update font size
-            opt.borderWidth = +opt.borderWidth || 0;
-            opt.fontSize = !isNaN(+opt.fontSize) && +opt.fontSize < this.height - opt.borderWidth - this.fontPadding ? 
-                opt.fontSize 
-                    : this.height - opt.borderWidth - this.fontPadding;
-            this.style["font-size"] = opt.fontSize + "px";
+            const borderWidth: number = parseFloat(opt["border-width"]) || 0;
+            const fontSize: number = !isNaN(parseFloat(opt["font-size"])) && parseFloat(opt["font-size"]) < this.height - borderWidth - this.fontPadding ? 
+                parseFloat(opt["font-size"]) 
+                    : this.height - borderWidth - this.fontPadding;
+            this.css["font-size"] = fontSize + "px";
 
             if (opt.duration) {
-                this.div.animate({ "height": this.height + "px", "width": this.width + "px", "transition-timing-function": opt.transitionTimingFunction }, opt.duration);
-                this.base.css("font-size", this.style["font-size"]).animate({ "line-height": this.height + "px", "height": this.height + "px", "width": this.width + "px", "transition-timing-function": opt.transitionTimingFunction }, opt.duration);
-                this.overlay.animate({ "height": this.height + "px", "width": this.width + "px", "transition-timing-function": opt.transitionTimingFunction }, opt.duration);
+                this.div.animate({ "height": this.height + "px", "width": this.width + "px", "transition-timing-function": opt.transitionTimingFunction }, +opt.duration);
+                this.base.css("font-size", this.css["font-size"]).animate({ "line-height": this.height + "px", "height": this.height + "px", "width": this.width + "px", "transition-timing-function": opt.transitionTimingFunction }, +opt.duration);
+                this.overlay.animate({ "height": this.height + "px", "width": this.width + "px", "transition-timing-function": opt.transitionTimingFunction }, +opt.duration);
             } else {
                 this.div.css("height", this.height + "px").css("width", this.width + "px");
-                this.base.css("line-height", this.height + "px").css("height", this.height + "px").css("width", this.width + "px").css("font-size", this.style["font-size"]);
+                this.base.css("line-height", this.height + "px").css("height", this.height + "px").css("width", this.width + "px").css("font-size", this.css["font-size"]);
                 this.overlay.css("height", this.height + "px").css("width", this.width + "px");
             }
         }
@@ -439,18 +447,20 @@ export abstract class WidgetEVO extends Backbone.Model {
      * @memberof module:WidgetEVO
      * @instance
      */
-    rotate (deg: string | number, opt?: WidgetOptions): void {
+    rotate (deg: string | number, opt?: CSS): void {
         if (this.div && this.div[0]) {
             deg = (isNaN(parseFloat(`${deg}`))) ? 0 : parseFloat(`${deg}`);
             opt = opt || {};
             opt.duration = opt.duration || 0;
             opt.transitionTimingFunction = opt.transitionTimingFunction || "ease-in";
             opt.transformOrigin = opt.transformOrigin || "center";
-            this.div.animate({
-                "transform": "rotate(" + deg + "deg)",
-                "transform-origin": opt.transformOrigin,
-                "transition-timing-function": opt.transitionTimingFunction
-            }, opt.duration);
+            this.div.css({
+                "transform": `rotate(${deg}deg)`,
+                "transform-origin": opt.transformOrigin
+            });
+            if (opt.duration) {
+                this.div.css({ "transition": `all ${opt.duration}ms ${opt.transitionTimingFunction} 0s` });
+            }
         }
         this.reveal();
     }
@@ -550,19 +560,19 @@ export abstract class WidgetEVO extends Backbone.Model {
      * @memberof module:WidgetEVO
      * @instance
      */
-    setStyle (style: HtmlStyle): void {
+    setStyle (style: CSS): void {
         style = style || {};
         for(const key in style) {
             // store style info
-            this.style[key] = style[key];
+            this.css[key] = style[key];
             // update style
             this.base.css(key, style[key]);
-            if (key === "z-index" || key === "overlayColor" || key === "overlay-color") {
+            if (key === "z-index" || key === "overlay-color" || key === "border-radius") {
                 // set z-index of the overlay, otherwise the overlay may fall under base
                 this.overlay.css(key, style[key]);
             }
         }
-        if (style.blinking) {
+        if (style.blinking && style.blinking !== "false") {
             this.base.addClass("blinking");
         }
     }
@@ -582,8 +592,8 @@ export abstract class WidgetEVO extends Backbone.Model {
      * @instance
      */
     invertColors (): void {
-        this.base.css("background-color", this.style["font-color"]);
-        this.base.css("color", this.style["background-color"]);
+        this.base.css("background-color", this.css["font-color"]);
+        this.base.css("color", this.css["background-color"]);
     }
 
     /**
@@ -597,14 +607,19 @@ export abstract class WidgetEVO extends Backbone.Model {
         opt = opt || {};
         opt.opacity = (isNaN(opt.opacity)) ? 0.5 : opt.opacity;
         const borderColor: string = this.base.css("background-color") === "transparent" ? "yellow" : this.base.css("background-color");
-        this.base.css({
-            "background-color": opt.backgroundColor || dimColor(this.base.css("background-color")),
-            opacity: opt.opacity
-        });
+        const overlayColor: string = this.css['overlay-color'] || "transparent";
+        // this.base.css({
+        //     "background-color": opt.backgroundColor || dimColor(this.base.css("background-color")),
+        //     opacity: opt.opacity
+        // });
         if (opt.classed) { this.base.addClass(opt.classed); }
-        this.overlay.css("background-color", "transparent");
+        this.overlay.css({ "background-color": overlayColor });
         this.overlay.css({ "box-shadow": `0px 0px 10px ${opt.borderColor || borderColor}`, opacity: 1 });
         // this.overlay.css({ border: `1px solid ${opt.borderColor || borderColor}`, opacity: 1 });
+    }
+
+    protected getOverlayColor (): string {
+        return this.css["background-color"] === "transparent" ? "steelblue" : this.css["background-color"];
     }
 
     /**
@@ -614,7 +629,7 @@ export abstract class WidgetEVO extends Backbone.Model {
      * @instance
      */
     deselect (): void {
-        this.setStyle(this.style);
+        this.setStyle(this.css);
         this.overlay.css({ opacity: 0 });
     }
 
@@ -684,15 +699,15 @@ export abstract class WidgetEVO extends Backbone.Model {
         return this.type;
     }
 
-    getStyle (): HtmlStyle | null {
-        const keys: string[] = Object.keys(this.style)?.sort((a: string, b: string): number => {
+    getStyle (): CSS | null {
+        const keys: string[] = Object.keys(this.css)?.sort((a: string, b: string): number => {
             return a < b ? -1 : 1;
         });
         if (keys && keys.length) {
-            const ans: HtmlStyle = {};
+            const ans: CSS = {};
             for (let i in keys) {
                 const key: string = keys[i];
-                ans[key] = this.style[key];
+                ans[key] = this.css[key];
             }
             return ans;
         }
