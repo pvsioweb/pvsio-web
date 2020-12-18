@@ -53,7 +53,8 @@ export interface NumericDisplayOptions extends DisplayOptions {
     css?: NumericCSS,
     maxDecimalDigits?: number,
     maxIntegerDigits?: number,
-    decimalPointOffset?: number
+    decimalPointOffset?: number,
+    decimalFontRatio?: number
 };
 
 export interface NumericCSS extends CSS {
@@ -120,7 +121,8 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
         
         // add widget-specific style attributes
         this.letterSpacing = parseFloat(this.css["font-size"]) || 1;
-        this.css["decimal-font-size"] = opt.css["decimal-font-size"] || `${parseFloat(this.css["font-size"]) * 0.8}px`;
+        const decimalFontRatio: number = opt.decimalFontRatio || 0.7;
+        this.css["decimal-font-size"] = opt.css["decimal-font-size"] || `${parseFloat(this.css["font-size"]) * decimalFontRatio}px`;
         const decimalLetterSpacing: number = parseFloat(this.css["decimal-font-size"]) * 0.8;
         this.css["decimal-letter-spacing"] = opt.css["decimal-letter-spacing"] || `${decimalLetterSpacing}px`;
 
@@ -159,10 +161,11 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
     render (state?: Renderable, opt?: NumericCSS): void {
         if (state !== null && state !== undefined) {
             // set style
-            this.setStyle({ ...this.css, ...opt }); // opt overrides this.css
-            let borderWidth: number = this.css["border"] ? parseFloat(/\d+px/.exec(`${this.css["border"]}`)[0])
-                : this.css["border-width"] ? parseFloat(this.css["border-width"])
-                    : 0;
+            this.setCSS({ ...this.css, ...opt }); // opt overrides this.css
+            const matchBorder: RegExpMatchArray = opt?.css && opt.css["border"] ? /\d+px/.exec(opt.css["border"]) : null;
+            let borderWidth: number = opt["border-width"] ? parseFloat(`${opt["border-width"]}`)
+                : matchBorder ? parseFloat(matchBorder[0]) 
+                    : 0;    
             borderWidth = isNaN(borderWidth) ? 0 : borderWidth;
 
             // set content
@@ -188,7 +191,8 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
                     whole: [], 
                     frac: [],
                     point: (disp.indexOf(".") >= 0),
-                    whole_zeropadding: [], frac_zeropadding: [],
+                    whole_zeropadding: [],
+                    frac_zeropadding: [],
                     max_integer_digits: this.maxIntegerDigits,
                     max_decimal_digits: this.maxDecimalDigits,
                     cursorPos: 0
@@ -243,7 +247,7 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
                     digits: desc.whole_zeropadding.concat(desc.whole),
                     width: (desc.max_integer_digits) * this.letterSpacing,
                     height: this.height - 2 * borderWidth,
-                    "margin-top": `-${borderWidth}px`,
+                    "margin-top": `${-borderWidth}px`,
                     left: parseFloat(point_style.left) - parseFloat(point_style.width),
                     "letter-spacing": this.letterSpacing.toFixed(2),
                     color: this.css.color,
@@ -255,7 +259,7 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
                     digits: frac_digits,
                     width: ((desc.max_decimal_digits) * parseFloat(`${this.css["decimal-letter-spacing"]}`)).toFixed(2),
                     height: this.height - 2 * borderWidth,
-                    "margin-top": `-${borderWidth / 2}px`,
+                    "margin-top": `${-(borderWidth / 2)}px`,
                     left: (parseFloat(point_style.left) + parseFloat(point_style.width)).toFixed(2),
                     "letter-spacing": parseFloat(`${this.css["decimal-letter-spacing"]}`).toFixed(2),
                     color: this.css.color,

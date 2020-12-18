@@ -39,22 +39,15 @@
  *
  */
 
-import { Coords, BasicEvent, WidgetEVO, WidgetOptions, WidgetAttr, CSS } from "./WidgetEVO";
+import { Coords, BasicEvent, WidgetEVO, WidgetOptions, WidgetAttr, CSS, BasicEventData } from "./WidgetEVO";
 import { Timer } from "../../../../util/Timer"
 import { ActionsQueue, ActionCallback } from "../ActionsQueue";
 import { Connection } from "../../../../env/Connection";
-import { dimColor, mouseButtons } from "../../../../env/Utils";
+import { mouseButtons } from "../../../../env/Utils";
 
 const CLICK_RATE = 250; // 250 milliseconds, default interval for repeating button clicks when the button is pressed and held down
                             // going below 250ms may cause multiple unintended activations when pressing the button
 const DBLCLICK_TIMEOUT = 350; // 350 milliseconds, default (and minimum) timeout for detecting double clicks
-
-
-export type ButtonEvent = BasicEvent;
-export type ButtonEventData = {
-    evt: BasicEvent,
-    fun: string // name of the prototype function to be invoked when a given event is triggered
-};
 
 export interface ButtonOptions extends WidgetOptions {
     toggleButton?: boolean,
@@ -142,7 +135,7 @@ export class ButtonEVO extends WidgetEVO {
         this.css["background-color"] = opt.css["background-color"] || "transparent";
         this.css.color = opt.css.color || "white";
         this.css["cursor"] = opt.css.cursor || "pointer";
-        this.css["z-index"] = opt.css["z-index"] || "1"; // z-index for buttons should be at least 1, so they are placed over display widgets
+        this.css["z-index"] = opt.css["z-index"] || 1; // z-index for buttons should be at least 1, so they are placed over display widgets
         // this.css["overlay-color"] = opt.css["overlay-color"] || "steelblue";
         this.lineHeight = parseFloat(opt.css["line-height"]) || this.height;
 
@@ -303,7 +296,7 @@ export class ButtonEVO extends WidgetEVO {
         }
     }
 
-    protected btn_action(evt: ButtonEvent, opt?: { functionName?: string, customFunction?: string, callback?: ActionCallback }) {
+    protected btn_action(evt: BasicEvent, opt?: { functionName?: string, customFunction?: string, callback?: ActionCallback }) {
         opt = opt || {};
         this.deselect();
 
@@ -311,7 +304,7 @@ export class ButtonEVO extends WidgetEVO {
         const callback: ActionCallback = opt.callback || this.callback;
         ActionsQueue.queueGUIAction(fun, this.connection, callback);
         
-        const data: ButtonEventData = { evt, fun };
+        const data: BasicEventData = { evt, fun };
         this.trigger(evt, data);
         console.log(fun);
     }
@@ -347,7 +340,7 @@ export class ButtonEVO extends WidgetEVO {
     render (state?: string | number | {}, opt?: CSS): void {
         // set style
         opt = opt || {};
-        this.setStyle({ ...this.css, ...opt });
+        this.setCSS({ ...this.css, ...opt });
 
         // set line height so text is vertically centered
         this.base.css("line-height", `${this.lineHeight}px`);
@@ -380,7 +373,7 @@ export class ButtonEVO extends WidgetEVO {
 
     getDescription (): string {
         return `Button widget, a semi-transparent element that captures user interactions with physical buttons.
-            Click events are registered when the button is pressed.`;
+            Click events are emitted when the button is pressed.`;
     }
 
 

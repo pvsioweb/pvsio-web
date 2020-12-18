@@ -19,9 +19,9 @@ export interface HotspotEditorOptions extends Backbone.ViewOptions {
 
 // constants
 export enum zIndex {
-    BACK = 0,
-    NORMAL = 1,
-    FRONT = 2
+    BACK = 100,
+    NORMAL = 101,
+    FRONT = 102
 };
 export enum opacity {
     LOW = 0.4,
@@ -33,18 +33,18 @@ const markerOverlayTemplate: string = `
 <div class="marker-tooltip noselect" style="display:block; z-index:100; position:absolute; background-color:white; color:black; opacity:0.8; padding:2px 8px; border-radius:8px;">
     <div class="marker-tooltip-label" style="display:block; z-index:100;"></div>
 </div>
-<div class="marker-areas" style="display:block; z-index:100; opacity:0.9; background-color:green;"></div>
+<div class="marker-areas" style="position:absolute; top:0px; left:0px; display:block; z-index:100; opacity:0.9; background-color:green;"></div>
 `;
 // the marker has only one active corner for resize (tl), as this makes everything much easier to implement and bring little or no usability issue.
 const markerTemplate: string = `
-<div class="marker" coords="{ top: 0, left: 0, width: 0, height: 0 }" id="{{id}}" style="top:{{top}}px; left:{{left}}px; width:{{width}}px; height:{{height}}px; position:absolute;">
-    <div class="shader" style="margin-left:-1px; margin-top:-1px; width:100%; height:100%; background:lightseagreen; position:absolute; opacity:0.4; border: 1px solid yellow; cursor:pointer;"></div>
-    <div class="tl corner" style="width:16px; height:16px; top:0px; left:0px; position:absolute; cursor:nw-resize; margin-left:-6px; margin-top:-6px; border-top: 6px solid green; border-left: 6px solid green; opacity:0.7;"></div>
+<div class="marker" coords="{ top: 0, left: 0, width: 0, height: 0 }" id="{{id}}" style="z-index:100; top:{{top}}px; left:{{left}}px; width:{{width}}px; height:{{height}}px; position:absolute;">
+    <div class="shader" style="z-index:100; margin-left:-1px; margin-top:-1px; width:100%; height:100%; background:lightseagreen; position:absolute; opacity:0.4; border: 1px solid yellow; cursor:pointer;"></div>
+    <div class="tl corner" style="z-index:100; width:16px; height:16px; top:0px; left:0px; position:absolute; cursor:nw-resize; margin-left:-6px; margin-top:-6px; border-top: 6px solid green; border-left: 6px solid green; opacity:0.7;"></div>
 </div>
 `;
 
 // utility functions
-export function getCoords (elem: JQuery<HTMLElement>): Coords {
+export function getCoords (elem: JQuery<HTMLElement>): Coords<number> {
     return {
         top: +parseFloat(elem.css("top")).toFixed(0),
         left: +parseFloat(elem.css("left")).toFixed(0),
@@ -52,7 +52,7 @@ export function getCoords (elem: JQuery<HTMLElement>): Coords {
         height: +parseFloat(elem.css("height")).toFixed(0),
     };
 }
-export function getMouseCoords (evt: JQuery.MouseUpEvent | JQuery.MouseOverEvent | JQuery.MouseMoveEvent | JQuery.MouseDownEvent, $el: JQuery<HTMLElement>): Coords {
+export function getMouseCoords (evt: JQuery.MouseUpEvent | JQuery.MouseOverEvent | JQuery.MouseMoveEvent | JQuery.MouseDownEvent, $el: JQuery<HTMLElement>): Coords<number> {
     const offset: JQuery.Coordinates = $el.offset()
     const top: number = +(evt?.pageY - offset?.top).toFixed(0);
     const left: number = +(evt?.pageX - offset?.left).toFixed(0);
@@ -65,8 +65,8 @@ export function getMouseCoords (evt: JQuery.MouseUpEvent | JQuery.MouseOverEvent
 // Utility classes
 abstract class HotspotHandler {
     protected $el: JQuery<HTMLElement>;
-    protected initialMarkerCoords?: Coords;
-    protected dragStartCoords?: Coords;
+    protected initialMarkerCoords?: Coords<number>;
+    protected dragStartCoords?: Coords<number>;
     protected $marker?: JQuery<HTMLElement>;
     protected $corner?: JQuery<HTMLElement>;
     constructor ($el: JQuery<HTMLElement>) {
@@ -75,8 +75,8 @@ abstract class HotspotHandler {
     activate (desc: {
         $activeMarker: JQuery<HTMLElement>, 
         $activeCorner?: JQuery<HTMLElement>, 
-        initialMarkerCoords?: Coords, 
-        draftStartCoords?: Coords 
+        initialMarkerCoords?: Coords<number>, 
+        draftStartCoords?: Coords<number>
     }): boolean {
         this.$marker = desc.$activeMarker;
         this.$corner = desc.$activeCorner;
@@ -93,9 +93,9 @@ abstract class HotspotHandler {
     onMouseDown (evt: JQuery.MouseDownEvent): void {};
     onMouseMove (evt: JQuery.MouseMoveEvent): void {};
     onMouseUp (evt: JQuery.MouseUpEvent): void {};
-    protected resizeHotspot (evt: JQuery.MouseMoveEvent | JQuery.MouseUpEvent): Coords {
-        const mousePosition: Coords = getMouseCoords(evt, this.$el);
-        const offset: Coords = {
+    protected resizeHotspot (evt: JQuery.MouseMoveEvent | JQuery.MouseUpEvent): Coords<number> {
+        const mousePosition: Coords<number> = getMouseCoords(evt, this.$el);
+        const offset: Coords<number> = {
             left: mousePosition.left - this.dragStartCoords.left,
             top: mousePosition.top - this.dragStartCoords.top
         };
@@ -131,11 +131,11 @@ class ResizeHandler extends HotspotHandler {
     }
     onMouseUp (evt: JQuery.MouseUpEvent) {
         if (this.dragStartCoords) {
-            const offset: Coords = this.resizeHotspot(evt);
+            const offset: Coords<number> = this.resizeHotspot(evt);
             this.dragStartCoords = null;
 
-            const widgetCoords: Coords = JSON.parse(this.$marker.attr("coords"));
-            const finalWidgetCoords: Coords = {
+            const widgetCoords: Coords<number> = JSON.parse(this.$marker.attr("coords"));
+            const finalWidgetCoords: Coords<number> = {
                 left: widgetCoords.left + offset.left,
                 top: widgetCoords.top + offset.top,
                 width: widgetCoords.width - offset.left,
@@ -161,8 +161,8 @@ class MoveHandler extends HotspotHandler {
     }
     onMouseMove (evt: JQuery.MouseMoveEvent) {
         if (this.dragStartCoords) {
-            const mousePosition: Coords = getMouseCoords(evt, this.$el);
-            const offset: Coords = {
+            const mousePosition: Coords<number> = getMouseCoords(evt, this.$el);
+            const offset: Coords<number> = {
                 left: mousePosition.left - this.dragStartCoords.left,
                 top: mousePosition.top - this.dragStartCoords.top
             };
@@ -174,8 +174,8 @@ class MoveHandler extends HotspotHandler {
     }
     onMouseUp (evt: JQuery.MouseUpEvent) {
         if (this.dragStartCoords) {
-            const mousePosition: Coords = getMouseCoords(evt, this.$el);
-            const offset: Coords = {
+            const mousePosition: Coords<number> = getMouseCoords(evt, this.$el);
+            const offset: Coords<number> = {
                 left: mousePosition.left - this.dragStartCoords.left,
                 top: mousePosition.top - this.dragStartCoords.top
             };
@@ -185,8 +185,8 @@ class MoveHandler extends HotspotHandler {
             });
             this.dragStartCoords = null;
 
-            const widgetCoords: Coords = JSON.parse(this.$marker.attr("coords"));
-            const finalWidgetCoords: Coords = {
+            const widgetCoords: Coords<number> = JSON.parse(this.$marker.attr("coords"));
+            const finalWidgetCoords: Coords<number> = {
                 left: +(widgetCoords.left + offset.left).toFixed(0),
                 top: +(widgetCoords.top + offset.top).toFixed(0),
                 width: +(widgetCoords.width).toFixed(0),
@@ -208,7 +208,7 @@ export class HotspotEditor extends Backbone.View {
 
     protected mode: "create" | "move" | "resize" | null = null;
 
-    protected anchorCoords: Coords;
+    protected anchorCoords: Coords<number>;
 
     protected dblClick: number = 0;
     // protected imageViewId: string;
@@ -265,11 +265,11 @@ export class HotspotEditor extends Backbone.View {
         };
     }
     showName (evt: JQuery.MouseOverEvent | JQuery.MouseOverEvent | JQuery.MouseMoveEvent): void {
-        const coords: Coords = getMouseCoords(evt, this.$el);
+        const coords: Coords<number> = getMouseCoords(evt, this.$el);
         this.info().css({ display: "block", top: `${coords.top + this.tooltipMargin}px`, left: `${coords.left + this.tooltipMargin}px`, background: "whitesmoke", color: "black" });
         this.label().html(`${evt?.target?.id}`);
     }
-    showCoords (coords: Coords): void {
+    showCoords (coords: Coords<number>): void {
         this.info().css({ display: "block", top: `${coords.top + this.tooltipMargin}px`, left: `${coords.left + this.tooltipMargin}px`, background: "whitesmoke", color: "black" });
         this.label().html(`top:${coords.top}px<br>left:${coords.left}px`);
     }
@@ -277,7 +277,7 @@ export class HotspotEditor extends Backbone.View {
         this.info().css({ display: "none" });
     }
     protected mouseEventHandler (evt: JQuery.MouseDownEvent | JQuery.MouseOverEvent | JQuery.MouseMoveEvent): void {
-        const mousePosition: Coords = getMouseCoords(evt, this.$el);
+        const mousePosition: Coords<number> = getMouseCoords(evt, this.$el);
         this.anchorCoords = this.anchorCoords || mousePosition;
         const width: number = Math.abs(this.anchorCoords?.left - mousePosition?.left);
         const height: number = Math.abs(this.anchorCoords?.top - mousePosition?.top);
@@ -315,7 +315,7 @@ export class HotspotEditor extends Backbone.View {
             left: mousePosition.left
         }, `width:${width.toFixed(0)}px<br>height:${height.toFixed(0)}px`);
     }
-    showInfo (coords: Coords, info: string): void {
+    showInfo (coords: Coords<number>, info: string): void {
         this.info().css({ display: "block", top: `${coords.top + this.tooltipMargin}px`, left: `${coords.left + this.tooltipMargin}px`, background: "black", color: "white" });
         this.label().html(info);
     }
@@ -374,7 +374,7 @@ export class HotspotEditor extends Backbone.View {
                 if (this.anchorCoords) {
                     this.mouseEventHandler(evt);
                 } else {
-                    const coords: Coords = getMouseCoords(evt, this.$el);
+                    const coords: Coords<number> = getMouseCoords(evt, this.$el);
                     this.showCoords(coords);
                 }
                 break;
@@ -424,12 +424,12 @@ export class HotspotEditor extends Backbone.View {
                                 $(".marker").css("z-index", zIndex.NORMAL);
                                 $activeMarker.css("z-index", zIndex.FRONT);
                                 // increase visibility of the marker under the cursor
-                                $shader.css({ opacity: opacity.HIGH });
+                                $shader.css({ opacity: opacity.HIGH, "box-shadow": "yellow 0px 0px 10px" });
                             }
                         }).on("mouseout", (evt: JQuery.MouseOutEvent) => {
                             if (this.mode === null) {
                                 $activeMarker.css("z-index", zIndex.NORMAL);
-                                $shader.css({ opacity: opacity.LOW });
+                                $shader.css({ opacity: opacity.LOW, "box-shadow": "yellow 0px 0px 0px" });
                             }
                         }).on("mousedown", (evt: JQuery.MouseDownEvent) => {
                             if (this.mode === null) {
@@ -465,13 +465,13 @@ export class HotspotEditor extends Backbone.View {
                             } else {
                                 switch (this.mode) {
                                     case "move": {
-                                        const coords: Coords = getMouseCoords(evt, this.$el);
+                                        const coords: Coords<number> = getMouseCoords(evt, this.$el);
                                         this.showCoords(coords);
                                         this.moveHandler.onMouseUp(evt);
                                         break;
                                     }
                                     case "resize": {
-                                        const coords: Coords = getMouseCoords(evt, this.$el);
+                                        const coords: Coords<number> = getMouseCoords(evt, this.$el);
                                         this.showCoords(coords);
                                         this.resizeHandler.onMouseUp(evt);
                                         break;
@@ -510,13 +510,13 @@ export class HotspotEditor extends Backbone.View {
                         }).on("mouseup", (evt: JQuery.MouseUpEvent) => {
                             switch (this.mode) {
                                 case "move": {
-                                    const coords: Coords = getMouseCoords(evt, this.$el);
+                                    const coords: Coords<number> = getMouseCoords(evt, this.$el);
                                     this.showCoords(coords);
                                     this.moveHandler.onMouseUp(evt); 
                                     break; 
                                 }
                                 case "resize": {
-                                    const coords: Coords = getMouseCoords(evt, this.$el);
+                                    const coords: Coords<number> = getMouseCoords(evt, this.$el);
                                     this.showCoords(coords);
                                     this.resizeHandler.onMouseUp(evt);
                                     break;
@@ -528,7 +528,7 @@ export class HotspotEditor extends Backbone.View {
                             this.resizeHandler.deactivate();
                             this.mode = null; // end move mode
                             
-                            const coords: Coords = getMouseCoords(evt, this.$el);
+                            const coords: Coords<number> = getMouseCoords(evt, this.$el);
                             this.showCoords(coords);
                         });
 
@@ -596,7 +596,7 @@ export class HotspotEditor extends Backbone.View {
                 if (this.anchorCoords) {
                     this.mouseEventHandler(evt);
                 } else {
-                    const coords: Coords = getMouseCoords(evt, this.$el);
+                    const coords: Coords<number> = getMouseCoords(evt, this.$el);
                     this.showCoords(coords);
                 }
             }

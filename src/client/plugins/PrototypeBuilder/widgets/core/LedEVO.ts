@@ -68,16 +68,15 @@ export class LedEVO extends WidgetEVO {
         super(id, coords, opt);
 
         opt = opt || {};
+        opt.css = opt.css || {};
         coords = coords || {};
 
-        coords.width = coords.width || coords.height || 1;
-        coords.height = coords.height || coords.width || 1;
-        const maxWidth: number = parseFloat(`$(opt.parent).css("width")`) || coords.width;
-        const maxHeight: number = parseFloat(`$(opt.parent).css("height")`) || coords.height;
+        const width: number = parseFloat(`${coords.width}`) || parseFloat(`${coords.height}`) || 1;
+        const height = parseFloat(`${coords.height}`) || parseFloat(`${coords.width}`) || 1;
+        const maxWidth: number = parseFloat($(opt.css.parent).css("width")) || width;
+        const maxHeight: number = parseFloat($(opt.css.parent).css("height")) || height;
 
-        this.radius = Math.min(coords.width, coords.height, maxWidth, maxHeight) / 2;
-        const marginLeft: number = coords.width / 2 - this.radius;
-        const marginTop = coords.height / 2 - this.radius;
+        this.radius = Math.min(width, height, maxWidth, maxHeight) / 2;
 
         // override default style options of WidgetEVO as necessary before creating the DOM element with the constructor of module WidgetEVO
         this.type = opt.type || "led";
@@ -129,14 +128,14 @@ export class LedEVO extends WidgetEVO {
      */
     render (state: Renderable, opt?: CSS): void {
         // set style
-        this.setStyle({ ...this.css, ...opt });
+        this.setCSS({ ...this.css, ...opt });
 
         // update style, if necessary
         state = (state === undefined || state === null) ? "" : state;
         if (typeof state === "string") {
-            this.setStyle({ "background-color": state });
+            this.setCSS({ "background-color": state });
         } else if (typeof state === "object" && this.attr.ledName !== "" && this.evalViz(state)) {
-            this.setStyle({ "background-color": this.evaluate(this.attr.ledName, state) });
+            this.setCSS({ "background-color": this.evaluate(this.attr.ledName, state) });
         }
 
         this.reveal();

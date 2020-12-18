@@ -42,13 +42,13 @@ import { View } from './views/View';
 
 const prototypeBuilderBody: string = `
 <div id="{{id}}" class="row d-flex">
-    <div id="{{id}}-left" class="container-fluid no-gutters" style="overflow-x:hidden;min-width:10px;">
+    <div id="{{id}}-left" class="container-fluid no-gutters" style="overflow-x:hidden; width:30%; min-width:10px;">
         <div class="widgets">Widgets</div>
         <div id="{{id}}-widget-list" class="widget-list list-group"></div>
         <div id="{{id}}-timers-list" class="list-group"></div>
     </div>
     <div id="{{id}}-resize-bar" style="width:6px;background-color:#4c4c4c;"></div>
-    <div id="{{id}}-central" class="flex-grow-1 no-gutters" style="position:relative; overflow:hidden;">
+    <div id="{{id}}-central" class="flex-grow-1 no-gutters" style="position:relative; width:66%; overflow:hidden;">
         <div class="card">
             <div class="card-header" style="margin-top:-14px;">
                 <ul class="nav nav-tabs card-header-tabs d-flex flex-nowrap prototype-screen-list">

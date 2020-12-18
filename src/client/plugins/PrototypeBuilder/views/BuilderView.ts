@@ -13,6 +13,8 @@ import { HotspotEditor, HotspotEditorEvents, HotspotData } from './utils/Hotspot
 
 import { View, BuilderViewOptions } from './View';
 import { WidgetData, WidgetEditor, WidgetEditorEvents } from './utils/WidgetEditor';
+import { WidgetClassDescriptor, widgets } from '../widgets/widgets';
+import { Constructable } from '../../../env/PVSioWeb';
 
 export const contentTemplate: string = `
 <div class="image-div container-fluid" style="padding-left:0;">
@@ -55,7 +57,22 @@ export class BuilderView extends View {
         return new Promise((resolve, reject) => {
             const editor: WidgetEditor = new WidgetEditor(this.widgetManager, data);
             editor.on(WidgetEditorEvents.ok, (data: WidgetData) => {
-                resolve(true);
+                if (data) {
+                    console.log(data);
+                    if (data.type) {
+                        const desc: WidgetClassDescriptor = widgets.find((desc: WidgetClassDescriptor) => {
+                            return desc.name === data.type;
+                        });
+                        console.log(desc);
+                        if (desc) {
+                            const widget: WidgetEVO = new desc.cons(data.id, data.coords, data.opt);
+                            widget.renderSample();
+                            console.log(widget);
+                            return resolve(true);
+                        }
+                    }
+                }
+                return resolve(false);
             });
             editor.on(WidgetEditorEvents.cancel, (data: WidgetData) => {
                 resolve(false);
@@ -96,18 +113,20 @@ export class BuilderView extends View {
 
         this.$el.find(".use-whiteboard-btn").on("click", (evt: JQuery.ClickEvent) => {
 
+            const minWidth: number = 800;
+            const minHeight: number = 400;
+
             const imageElement: HTMLImageElement = new Image();
             imageElement.src = Utils.whiteGif;
-            imageElement.width = 800;
-            imageElement.height = 600;
+            const width: number = parseFloat($(".tab-pane.active .image-div").css("width")) || minWidth;
+            const height: number = parseFloat($(".tab-pane.active .image-div").css("height")) || minHeight;
+            imageElement.width = width < minWidth ? minWidth : width;
+            imageElement.height = height < minHeight ? minHeight : height;
             this.$imageDiv.html(imageElement);
             this.$imageDiv.css({ border: "1px solid black" });
 
-            const $image: JQuery<HTMLImageElement> = this.$imageDiv.find("img");
-            $image.attr("id", this.id).addClass(this.viewId);
-
             this.hotspots = new HotspotEditor(this.widgetManager, {
-                el: $image[0],
+                el: this.$imageDiv.find("img")[0],
                 overlay: this.$imageOverlay[0]
             });
             // install handlers for hotspot events

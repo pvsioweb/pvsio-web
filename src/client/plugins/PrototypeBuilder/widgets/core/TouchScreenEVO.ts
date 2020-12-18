@@ -85,7 +85,7 @@ export class TouchScreenEVO extends ButtonEVO {
         this.type = opt.type || "touchscreendisplay";
 
         // override default button style
-        this.setStyle(this.css);
+        this.setCSS(this.css);
 
         // set widget keys
         this.attr.displayName = opt.displayName || id;
@@ -103,6 +103,6 @@ export class TouchScreenEVO extends ButtonEVO {
 
     getDescription (): string {
         return `Touchscreen display, renders touch-screen elements.
-            Click events are registered when the element is released.`;
+            Click events are emitted when the element is released.`;
     }
 }

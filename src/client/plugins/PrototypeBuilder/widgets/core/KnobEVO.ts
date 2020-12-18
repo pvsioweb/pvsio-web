@@ -20,7 +20,7 @@ export class KnobEVO extends ButtonEVO {
         opt.css = opt.css || {};
 
         // reset css
-        const size: number = Math.min(coords.width, coords.height) || 64;
+        const size: number = Math.min(this.width, this.height) || 64;
         this.css["border-radius"] = `${size}px`;
         this.css.opacity = opt.css.opacity || 1;
         this.css["font-size"] = "0px";
@@ -73,10 +73,17 @@ export class KnobEVO extends ButtonEVO {
 
     // @override
     render (state?: string | number | {}, opt?: CSS): void {
-        this.setStyle({ ...this.css, ...opt });
+        this.setCSS({ ...this.css, ...opt });
         // TODO: check visibility of the widget before revealing the widget
         this.reveal();
     }
+
+    getDescription (): string {
+        return `Knob widget, emulates buttons that can be rotated and pressed.
+            The mouse wheel can be used to rotate the knob.
+            Rotate events are emitted when the button is pressed.`;
+    }
+
 }
 
 function getKnobImage(size: number): string {

@@ -77,7 +77,7 @@ export class BasicDisplayEVO extends WidgetEVO {
         this.css.color = opt.css.color || "white";
         this.css.cursor = opt.css.cursor || "default";
         this.css.overflow = opt.css.overflow || "hidden";
-                
+
         // set display key
         this.attr.displayName = opt.displayName || id;
     }
@@ -109,7 +109,7 @@ export class BasicDisplayEVO extends WidgetEVO {
             super.createHTMLElement();
         }
         // set style
-        this.setStyle({ ...this.css, ...opt });
+        this.setCSS({ ...this.css, ...opt });
 
         // set line height so text is properly centered
         this.base.css("line-height", `${this.height}px`);
@@ -160,7 +160,7 @@ export class BasicDisplayEVO extends WidgetEVO {
      * @instance
      */
     renderGlyphicon (icon, opt) {
-        this.setStyle(opt);
+        this.setCSS(opt);
         if (icon) {
             this.base.addClass("blink glyphicon " + icon).css("font-family", "");
         }

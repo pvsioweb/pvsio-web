@@ -73,8 +73,8 @@ export class Stylus extends WidgetEVO {
 
         // store initial position
         this.initial_position = {
-            top: coords.top,
-            left: coords.left
+            top: this.top,
+            left: this.left
         };
 
         // override default style options of WidgetEVO as necessary before creating the DOM element with the constructor of module WidgetEVO
@@ -186,7 +186,7 @@ export class Stylus extends WidgetEVO {
     select (opt?: { opacity?: number, overlayColor?: string, classed?: string, "background-color"?: string }) {
         opt = opt || {};
         opt.opacity = (isNaN(+opt.opacity)) ? 1 : opt.opacity;
-        return this.setStyle(opt);
+        return this.setCSS(opt);
     };
 
     /**

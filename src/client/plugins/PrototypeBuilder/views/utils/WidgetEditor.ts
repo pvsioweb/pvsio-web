@@ -1,10 +1,9 @@
 import * as Backbone from 'backbone';
 import { WidgetManager } from '../../WidgetManager';
 import { createDialog, setDialogTitle, uuid } from '../../../../env/Utils';
-import { Coords, CSS, WidgetEVO, WidgetAttr } from '../../widgets/core/WidgetEVO';
+import { Coords, CSS, WidgetEVO, WidgetAttr, BasicEventData, VizOptions, WidgetOptions } from '../../widgets/core/WidgetEVO';
 import { HotspotData } from './HotspotEditor';
 import { WidgetClassDescriptor } from '../../widgets/widgets';
-import { ButtonEventData } from '../../widgets/core/ButtonEVO';
 
 
 export interface WidgetEditorOptions extends Backbone.ViewOptions {
@@ -13,6 +12,8 @@ export interface WidgetEditorOptions extends Backbone.ViewOptions {
 };
 
 export interface WidgetData extends HotspotData {
+    type?: string, // constructor name
+    opt?: WidgetOptions
 };
 
 export const WidgetEditorEvents = {
@@ -20,13 +21,14 @@ export const WidgetEditorEvents = {
     cancel: "cancel"
 };
 
+// all input forms must have attributes "name" and "value", as they will be used to identify key and value of coords, attr, css
 const containerTemplate: string = `
 <div class="card">
     <div class="card-header">
         <ul class="nav nav-tabs card-header-tabs d-flex flex-nowrap widget-list">
             {{#each widgets}}
             <li class="nav-item">
-                <a draggable="false" class="nav-link{{#if @first}} active{{/if}}" id="{{name}}-tab" data-toggle="tab" href="#{{name}}" role="tab" aria-controls="{{name}}" aria-selected="true">{{name}}</a>
+                <a draggable="false" name="{{name}}" class="widget-class nav-link{{#if @first}} active{{/if}}" id="{{name}}-tab" data-toggle="tab" href="#{{name}}" role="tab" aria-controls="{{name}}" aria-selected="true">{{name}}</a>
             </li>
             {{/each}}
         </ul>
@@ -50,11 +52,11 @@ const containerTemplate: string = `
                     </small>
                 </div>
                 <div class="col-md-6 ml-auto" style="height:400px; overflow:auto;">
-                    <div class="input-group input-group-sm">
+                    <div class="widget-id input-group input-group-sm">
                         <div class="input-group-prepend" style="min-width:40%;">
                             <span class="input-group-text" style="width:100%;">ID</span>
                         </div>
-                        <input type="text" class="widget-id form-control" value="{{../id}}" placeholder="{{../id}}" aria-label="{{../id}}" aria-describedby="{{name}}-id">
+                        <input type="text" class="form-control" value="{{../id}}" placeholder="{{../id}}" aria-label="{{../id}}" aria-describedby="{{name}}-id">
                     </div>
 
                     <br>
@@ -71,14 +73,14 @@ const containerTemplate: string = `
                             <div class="input-group-prepend" style="min-width:40%;">
                                 <span class="input-group-text" id="{{@key}}-label" style="width:100%;">{{@key}}</span>
                             </div>
-                            <input type="text" class="form-control" value="{{this}}px" placeholder="{{this}}px" aria-label="{{this}}" aria-describedby="{{@key}}-label">
+                            <input type="text" class="form-control" name="{{@key}}" value="{{this}}px" placeholder="{{this}}px" aria-label="{{this}}" aria-describedby="{{@key}}-label">
                         </div>
                         {{/each}}
                     </div>
 
                     <br>
 
-                    <div id="{{name}}-style" class="widget-style"></div>
+                    <div id="{{name}}-css" class="widget-css"></div>
 
                     <br>
 
@@ -145,7 +147,7 @@ export class WidgetEditor extends Backbone.View {
             widgets: { [name: string]: any },
             coords: Coords
         } = { widgets, ...this.widgetData };
-        console.log(data);
+        // console.log(data);
         const container: string = Handlebars.compile(containerTemplate)(data);
         this.$dialog = createDialog({
             content: container,
@@ -159,24 +161,30 @@ export class WidgetEditor extends Backbone.View {
             const previewId: string = uuid();
             const obj: WidgetEVO = new widgets[i].cons(previewId, coords, { css: { parent: `${name}-preview` } });
 
-            const style: string = Handlebars.compile(styleTemplate)({
-                style: obj.getStyle()
+            const css: CSS = obj.getCSS({
+                all: true,
+                replace: { 
+                    parent: "#Main .image-div"
+                }
             });
-            $(`#${name}-style`).html(style);
-            $(`#${name}-style input`).on("input", (evt: JQuery.ChangeEvent) => {
-                const value: string = evt.currentTarget?.value;
+            const style: string = Handlebars.compile(styleTemplate)({
+                style: css
+            });
+            $(`#${name}-css`).html(style);
+            $(`#${name}-css input`).on("input", (evt: JQuery.ChangeEvent) => {
                 const key: string = evt.currentTarget?.name;
-                let style: CSS = {};
                 if (key) {
+                    const value: string = evt.currentTarget?.value;
+                    const style: CSS = {};
                     style[key] = value;
-                    obj.setStyle(style);
+                    obj.setCSS(style);
                     obj.renderSample();
                 }
-                console.log(key, value);
             });
 
+            let vizOp: VizOptions = obj.getViz();
             const viz: string = Handlebars.compile(vizTemplate)({
-                viz: obj.getViz()
+                viz: vizOp
             });
             $(`#${name}-viz`).html(viz);
 
@@ -204,7 +212,7 @@ export class WidgetEditor extends Backbone.View {
             const evts: string[] = obj.getEvents();
             for (let i = 0; i < evts?.length; i++) {
                 const evt: string = evts[i];
-                this.listenTo(obj, evt, (data: ButtonEventData) => {
+                this.listenTo(obj, evt, (data: BasicEventData) => {
                     const fun: string = data?.fun.replace(previewId, this.widgetData.id);
                     console.log(fun);
                     $(`#${name}-evts`).html(`<i class="fa fa-bolt"></i> ${fun}`);
@@ -225,7 +233,7 @@ export class WidgetEditor extends Backbone.View {
 
     setWidgetName (name: string): void {
         this.widgetData.id = name;
-        this.$dialog.find(".widget-id").val(name);
+        this.$dialog.find(".widget-id input").val(name);
         this.updateDialogTitle();
     }
 
@@ -233,8 +241,55 @@ export class WidgetEditor extends Backbone.View {
         setDialogTitle("Editing widget " + this.widgetData.id)
     }
 
+    protected getDialogObject<T> (elem: string): T {
+        const elems: JQuery<HTMLElement> = this.$dialog.find(`.active .widget-${elem} input`);
+        let res = {};
+        for (let i = 0; i < elems.length; i++) {
+            const name: string = elems[i].getAttribute("name");
+            if (name) {
+                const value: string = elems[i].getAttribute("value");
+                res[name] = value;
+            }
+        }
+        return <T> res;
+    }
+    protected getDialogCoords (): Coords<number> {
+        const coords: Coords = this.getDialogObject<Coords>("coords");
+        const ans: Coords<number> = {};
+        for (let i in coords) {
+            ans[i] = parseFloat(coords[i]);
+        }
+        return ans;
+    }
+    protected getDialogCSS (): CSS {
+        return this.getDialogObject<CSS>("css");
+    }
+    protected getDialogAttr (): WidgetAttr {
+        return this.getDialogObject<WidgetAttr>("attr");
+    }
+    protected getDialogViz (): VizOptions {
+        return this.getDialogObject<VizOptions>("viz");
+    }
+    protected getDialogWidgetId (): string {
+        return this.$dialog.find(".widget-id input").attr("value");
+    }
+    protected getDialogWidgetName (): string {
+        return this.$dialog.find(".widget-class.active").attr("name");
+    }
+
     protected installHandlers (): void {
         this.$dialog.find(".ok-btn").on("click", (evt: JQuery.ClickEvent) => {
+            this.widgetData = {
+                type: this.getDialogWidgetName(),
+                id: this.getDialogWidgetId(),
+                coords: this.getDialogCoords(),
+                opt: {
+                    css: this.getDialogCSS(),
+                    viz: this.getDialogViz(),
+                    ...this.getDialogAttr()
+                }
+            };
+            // console.log(this.widgetData);
             // trigger event
             this.trigger(WidgetEditorEvents.ok, this.widgetData);
             // delete dialog

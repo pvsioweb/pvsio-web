@@ -232,8 +232,8 @@ class Bennet980 {
                             this.gui.ventSetup.tpl.move({ top: 456, left: -48 });
                             this.gui.ventSetup.vsens.move({ top: 391, left: 146 });
                             this.gui.ventSetup.o2.move({ top: 391, left: 208 });
-                            this.gui.ventSetup.peep.move({ top: 4561, left: 208 });
-                            this.gui.ventSetup.ppeak.move({ top: 4561, left: 146 });
+                            this.gui.ventSetup.peep.move({ top: 456, left: 208 });
+                            this.gui.ventSetup.ppeak.move({ top: 456, left: 146 });
                             this.gui.ventSetup.ppeak.hide();
                             this.onMessageReceived(err, res);
                         }
@@ -538,8 +538,8 @@ class Bennet980 {
                                 this.gui.ventSetup.tpl.move({ top: 456, left: -48 });
                                 this.gui.ventSetup.vsens.move({ top: 391, left: 146 });
                                 this.gui.ventSetup.o2.move({ top: 391, left: 208 });
-                                this.gui.ventSetup.peep.move({ top: 4561, left: 208 });
-                                this.gui.ventSetup.ppeak.move({ top: 4561, left: 146 });
+                                this.gui.ventSetup.peep.move({ top: 456, left: 208 });
+                                this.gui.ventSetup.ppeak.move({ top: 456, left: 146 });
                                 this.gui.ventSetup.ppeak.hide();
                                 break;
                             }

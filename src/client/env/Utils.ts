@@ -359,12 +359,12 @@ export type SimpleExpression = { type: "boolexpr" | "constexpr", binop?: string,
  * Lightweight parser for simple expressions with boolean constants (true/false)
  * and equality/inequality operators between attributes and constants, e.g., attr = const, attr != const
  */
-export function simpleExpressionParser (expr: string): {
+export function simpleExpressionParser (expr: string | boolean): {
     res: SimpleExpression,
     err?: string
 } {
     const ans = { res: null, err: null };
-    if (expr) {
+    if (typeof expr === "string") {
         if (expr.indexOf("!=") >= 0) {
             ans.res = expr.split("!=");
             ans.res = { type: "boolexpr", binop: "!=", attr: ans.res[0].trim(), constant: ans.res[1].trim() };
@@ -376,9 +376,10 @@ export function simpleExpressionParser (expr: string): {
         } else if (expr.toLowerCase() === "false") {
             ans.res = { type: "constexpr", constant: "false" };
         }
-        return ans;
-    }
-    ans.err = "unsupported expression " + expr;
+    } else {
+        // boolean expression
+        ans.res = { type: "constexpr", constant: `${expr}` };
+    } 
     return ans;
 }
 

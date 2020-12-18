@@ -255,7 +255,7 @@ class MT32Demo {
                 "border-color": "white",
                 parent: "device"
             },
-            visibleWhen: "false",
+            viz: { visible: false },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.on_battery = new TouchscreenButton("mt32_on_battery", {
@@ -272,7 +272,7 @@ class MT32Demo {
                 "border-color": "white",
                 parent: "device"
             },
-            visibleWhen: "false",
+            viz: { visible: "false" },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.charging = new TouchscreenButton("mt32_charging", {
@@ -289,7 +289,7 @@ class MT32Demo {
                 "border-color": "white",
                 parent: "device"
             },
-            visibleWhen: "false",
+            viz: { visible: "false" },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.fully_charged = new TouchscreenButton("mt32_fully_charged", {
@@ -306,7 +306,7 @@ class MT32Demo {
                 "border-color": "white",
                 parent: "device"
             },
-            visibleWhen: "false",
+            viz: { visible: "false" },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.charging_error = new TouchscreenButton("mt32_charging_error", {
@@ -323,7 +323,7 @@ class MT32Demo {
                 "border-color": "white",
                 parent: "device"
             },
-            visibleWhen: "false",
+            viz: { visible: "false" },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
 
@@ -1246,7 +1246,7 @@ class MT32Demo {
                 parent: "patientsScreen"
             },
             toggleButton: true,
-            visibleWhen: "this.ct64.known_patient = TRUE",
+            viz: { visible: "this.ct64.known_patient = TRUE" },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.check_email = new TouchscreenButton("check_email", {
