@@ -86,7 +86,7 @@ export const widget_template: string = `
          style="position:absolute; width:{{width}}px; height:{{height}}px; line-height:{{css.line-height}}px; {{#each css}} {{@key}}:{{this}};{{/each}}"
          class="{{type}}_base {{id}}_base"></div>
     <div id="{{id}}_overlay"
-         style="position:absolute; width:{{width}}px; height:{{height}}px; background-color:{{css.overlay-color}}; {{#if css.z-index}}z-index:{{css.z-index}};{{/if}} border-radius:{{css.border-radius}}; cursor:{{css.cursor}}; opacity:0;"
+         style="position:absolute; width:{{width}}px; height:{{height}}px; {{#if css.z-index}}z-index:{{css.z-index}};{{/if}} border-radius:{{css.border-radius}}; cursor:{{css.cursor}}; opacity:0;"
          class="{{type}}_overlay {{id}}_overlay"></div>
 </div>`;
 
@@ -337,7 +337,7 @@ export abstract class WidgetEVO extends Backbone.Model {
         this.css.overflow = opt.css.overflow || "visible";
         this.css["white-space"] = opt.css["white-space"] || "nowrap";
         this.css.blinking = opt.css.blinking === "true" ? "true" : undefined;
-        this.css["overlay-color"] = opt.css["overlay-color"] || "transparent";
+        this.css["overlay-color"] = opt.css["overlay-color"] || "yellow"; // this is the color of the halo shown around the button when e.g., the mouse is over the button
 
         this.widget_template = opt.widget_template || widget_template;
     }
@@ -621,7 +621,6 @@ export abstract class WidgetEVO extends Backbone.Model {
                     this.div.css(key, style[key]);
                     break;
                 }
-                case "overlay-color":
                 case "border-radius": {
                     this.overlay.css(key, style[key]);
                     this.base.css(key, style[key]);
@@ -665,30 +664,20 @@ export abstract class WidgetEVO extends Backbone.Model {
     /**
      * @function <a name="select">select</a>
      * @description Selects the widget -- useful to highlight the widget programmaticaly.
-     * @param style {Object} Set of valid HTML5 attributes characterising the visual appearance of the widget.
+     * @param opt {CSS} HTML5 attributes characterising the visual appearance of the widget.
      * @memberof module:WidgetEVO
      * @instance
      */
-    select (opt?: { opacity?: number, borderColor?: string, classed?: string, backgroundColor?: string }): void {
+    select (opt?: CSS): void {
         opt = opt || {};
-        opt.opacity = (isNaN(opt.opacity)) ? 0.5 : opt.opacity;
-        const color: string = opt.backgroundColor || this.base.css("background-color");
-        const borderColor: string = this.isTransparent(color) ? "yellow" : color;
-        const overlayColor: string = this.css['overlay-color'] || "transparent";
-        // this.base.css({
-        //     "background-color": opt.backgroundColor || dimColor(this.base.css("background-color")),
-        //     opacity: opt.opacity
-        // });
-        if (opt.classed) { this.base.addClass(opt.classed); }
-        this.overlay.css({ "background-color": overlayColor });
-        this.overlay.css({ "box-shadow": `0px 0px 10px ${opt.borderColor || borderColor}`, opacity: 1 });
-        // this.overlay.css({ border: `1px solid ${opt.borderColor || borderColor}`, opacity: 1 });
+        const overlayColor: string = this.css['overlay-color'] || "yellow";
+        this.base.css({
+            ...this.css, 
+            "background-color": dimColor(this.css["background-color"], 8),
+            ...opt });
+        if (opt.classed) { this.base.addClass(<string> opt.classed); };
+        this.overlay.css({ "box-shadow": `0px 0px 10px ${overlayColor}`, opacity: 1 });
     }
-
-    // protected overlayColor (): string {
-    //     const color: string =  this.css["background-color"];
-    //     return this.isTransparent(color) ? "steelblue" : color;
-    // }
 
     /**
      * @function <a name="deselect">deselect</a>

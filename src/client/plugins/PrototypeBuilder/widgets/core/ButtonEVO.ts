@@ -64,8 +64,6 @@ export interface ButtonOptions extends WidgetOptions {
 }
 
 export class ButtonEVO extends WidgetEVO {
-    protected toggleButton: boolean;
-    protected pushButton: boolean;
     protected touchscreenMode: boolean = false;
     protected lineHeight: number;
 
@@ -77,53 +75,10 @@ export class ButtonEVO extends WidgetEVO {
     protected _tick_listener: () => void;
     protected _tick: () => void;
 
-    protected isSelected: boolean = false;
     protected hover: boolean = false;
 
     protected connection: Connection;
 
-    /**
-     * @function <a name="ButtonEVO">ButtonEVO</a>
-     * @description Constructor.
-     * @param id {String} The ID of the touchscreen button.
-     * @param coords {Object} The four coordinates (top, left, width, height) of the display, specifying
-     *        the left, top corner, and the width and height of the (rectangular) widget area.
-     *        Default is { top: 0, left: 0, width: 32, height: 20 }.
-     * @param opt {Object} Options:
-     *          <li>blinking (bool): whether the button is blinking (default is false, i.e., does not blink)</li>
-     *          <li>align (String): text align: "center", "right", "left", "justify" (default is "center")</li>
-     *          <li>backgroundColor (String): background display color (default is transparent)</li>
-     *          <li>borderColor (String): border color, must be a valid HTML5 color (default is "steelblue")</li>
-     *          <li>borderRadius (Number|String): border radius, must be a number or a valid HTML5 border radius, e.g., 2, "2px", etc. (default is 0, i.e., square border)</li>
-     *          <li>borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid", "dotted", "dashed", etc. (default is "none")</li>
-     *          <li>borderWidth (Number): border width (if option borderColor !== null then the default border is 2px, otherwise 0px, i.e., no border)</li>
-     *          <li>buttonReadback (String): playback text reproduced with synthesised voice wheneven an action is performed with the button.</li>
-     *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
-     *          <li>fontFamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
-     *          <li>fontSize (Number): font size (default is (coords.height - opt.borderWidth) / 2 )</li>
-     *          <li>opacity (Number): opacity of the button. Valid range is [0..1], where 0 is transparent, 1 is opaque (default is opaque)</li>
-     *          <li>overlayColor (String): color of the semi-transparent overlay layer used indicating mouse over button, button pressed, etc (default is steelblue)</li>
-     *          <li>parent (String): the HTML element where the display will be appended (default is "body")</li>
-     *          <li>position (String): standard HTML position attribute indicating the position of the widget with respect to the parent, e.g., "relative", "absolute" (default is "absolute")</li>
-     *          <li>pushButton (Bool): if true, the visual aspect of the button resembles a push button, i.e., the button remains selected after clicking the button</li>
-     *          <li>customLabel (String): the button label (default is blank).</li>
-     *          <li>dblclick_timeout (Number): timeout, in milliseconds, for detecting double clicks (default is 350ms)</li>
-     *          <li>toggleButton (Bool): if true, the visual aspect of the button resembles a toggle button, i.e., the button remains selected after clicking the button</li>
-     *          <li>visibleWhen (string): boolean expression indicating when the display is visible. The expression can use only simple comparison operators (=, !=) and boolean constants (true, false). Default is true (i.e., always visible).</li>
-     *          <li>zIndex (String): z-index property of the widget (default is 1)</li>
-     *                  The following additional attributes define which events are triggered when the button is activated:
-     *          <li>evts (String|Array[String]): actions associated to the widget. Can be either "click", or "press/release" (default is "click").
-     *                             Actions can be specified either as a string and using an array of strings (this is useful for backwards compatibility with old prototypes)
-     *                             The function associated with the widget is given by the widget name prefixed with the action name.
-     *                             In the case of "press/release", the widget is associated to two functions: press_<id> and release_<id>.</li>
-     *          <li>customFunctionText (String): overrides the standard action name associated with click events.</li>
-     *          <li>functionText (String): defines the action names associated with the widget.
-     *                                     The indicated name is prefixed with the string indicated in opt.evts.</li>
-     *          <li>keyCode (Number): binds the widget to keyboard keyCodes. Use e.g., http://keycode.info/, to see keyCodes</li>
-     *          <li>rate (Number): interval, in milliseconds, for repeating button clicks when the button is pressed and held down (default is 250ms)</li>
-     * @memberof module:ButtonEVO
-     * @instance
-     */
     constructor (id: string, coords: Coords, opt?: ButtonOptions) {
         super(id, coords, opt);
 
@@ -145,8 +100,6 @@ export class ButtonEVO extends WidgetEVO {
         super.createHTMLElement();
 
         // add button-specific functionalities
-        this.toggleButton = !!opt.toggleButton;
-        this.pushButton = !!opt.pushButton;
         this.touchscreenMode = opt.touchscreenMode;
         this.rate = (isNaN(opt.rate)) ? CLICK_RATE : Math.max(CLICK_RATE, opt.rate);
         this.dblclick_timeout = (isNaN(opt.dblclick_timeout)) ? DBLCLICK_TIMEOUT : Math.max(DBLCLICK_TIMEOUT, opt.rate);
@@ -190,115 +143,92 @@ export class ButtonEVO extends WidgetEVO {
     }
 
     protected installHandlers() {
-        const onButtonPress = () => {
-            if (this.evts.press) {
-                this.pressAndHold();
-            } else if (this.evts.click && !this.touchscreenMode) {
-                this.click();  // mechanical buttons register a click when the button is pressed
-            }
-        };
-        const onButtonRelease = () => {
-            if (this.evts.release) {
-                this.release();
-            } else if (this.evts.click && this.touchscreenMode) {
-                this.click();  // touchscreen buttons register a click when the button is released
-            }
-        };
-        const onButtonDoubleClick = () => {
-            if (this.evts.dblclick) {
-                this.dblclick();
-            }
-        };
-
-        const onMouseOver = () => {
-            // this.select({ opacity: this.css.opacity || 0.8, backgroundColor: this.getOverlayColor() });
-            if (!this.isSelected) {
-                this.select();
-            }
-            this.hover = true;
-        };
-        const onMouseDown = () => {
-            onButtonPress();
-            this.isSelected = this.pushButton ? true 
-                : this.toggleButton ? !this.isSelected
-                    : true;
-            if (this.isSelected) {
-                // this.select({ opacity: this.css.opacity || 0.8, backgroundColor: dimColor(this.getOverlayColor()) });
-                this.select();
-            } else { this.deselect(); }
-        };
-        const onMouseUp = () => {
-            onButtonRelease();
-            this.isSelected = this.pushButton ? true
-                : this.toggleButton ? this.isSelected
-                    : false;
-            if (this.isSelected) {
-                // this.select({ opacity: this.css.opacity || 0.8, backgroundColor: dimColor(this.getOverlayColor()) });
-                this.select();
-            } else {
-                if (this.hover) {
-                    onMouseOver();
-                } else {
-                    this.deselect(); 
-                }
-            }
-            // the following code is the dblclick handler
-            if (this.dblclick_timer) {
-                onButtonDoubleClick();
-                clearInterval(this.dblclick_timer);
-                this.dblclick_timer = null;
-            } else {
-                this.dblclick_timer = setTimeout(() => {
-                    this.dblclick_timer = null;
-                }, this.dblclick_timeout);
-            }
-        };
-        const onBlur = () => {
-            if (this.isSelected || (this.hover && !this.toggleButton)) {
-                // this.select({ opacity: 0.8, backgroundColor: this.getOverlayColor() });
-                this.select();
-            } else { this.deselect(); }
-            if (this._tick) { onButtonRelease(); }
-            this.hover = false;
-        };
-        const onMouseOut = () => {
-            if (!this.isSelected) { this.deselect(); }
-            if (this._tick) { onButtonRelease(); }
-            // this.overlay.css({ opacity: 0 });
-            this.hover = false;
-        };
-
         // bind mouse events
         this.overlay.on("mouseover", (evt: JQuery.MouseOverEvent) => {
-            onMouseOver();
+            this.hover = true;
+            this.onMouseOver();
         }).on("mouseout", (evt: JQuery.MouseOutEvent) => {
-            onMouseOut();
+            this.hover = false;
+            this.onMouseOut();
         }).on("mousedown", (evt: JQuery.MouseDownEvent) => {
             if (evt.button === mouseButtons.left) {
-                onMouseDown();
+                this.onMouseDown();
             }
         }).on("mouseup", (evt: JQuery.MouseUpEvent) => {
             if (evt.button === mouseButtons.left) {
-                onMouseUp();
+                this.onMouseUp();
             }
         }).on("blur", (evt: JQuery.BlurEvent) => {
-            onBlur();
+            this.hover = false;
+            this.onBlur();
         });
 
         // bind key events
         if (this.attr.keyCode) {
             $(document).on("keydown", (event: JQuery.Event) => {
-                onMouseDown();
+                this.onMouseDown();
             });
             $(document).on("keyup", (event: JQuery.Event) => {
-                onMouseUp();
+                this.onMouseUp();
             });
         }
     }
 
+    protected onButtonPress (): void {
+        if (this.evts.press) {
+            this.pressAndHold();
+        } else if (this.evts.click && !this.touchscreenMode) {
+            this.click();  // mechanical buttons register a click when the button is pressed
+        }
+    };
+    protected onButtonRelease (): void {
+        if (this.evts.release) {
+            this.release();
+        } else if (this.evts.click && this.touchscreenMode) {
+            this.click();  // touchscreen buttons register a click when the button is released
+        }
+    };
+    protected onButtonDoubleClick (): void {
+        if (this.evts.dblclick) {
+            this.dblclick();
+        }
+    };
+    protected onMouseOver (): void {
+        this.select();
+    };
+    protected onMouseOut (): void {
+        this.deselect();
+        if (this._tick) { this.onButtonRelease(); }
+    };
+    protected onMouseDown (): void {
+        this.onButtonPress();
+        this.select({ "background-color": this.css["background-color"] });
+    };
+    protected onMouseUp (): void {
+        this.onButtonRelease();
+        if (this.hover) {
+            this.onMouseOver();
+        } else {
+            this.deselect(); 
+        }
+        // the following code is the dblclick handler
+        if (this.dblclick_timer) {
+            this.onButtonDoubleClick();
+            clearInterval(this.dblclick_timer);
+            this.dblclick_timer = null;
+        } else {
+            this.dblclick_timer = setTimeout(() => {
+                this.dblclick_timer = null;
+            }, this.dblclick_timeout);
+        }
+    };
+    protected onBlur (): void {
+        this.deselect();
+        if (this._tick) { this.onButtonRelease(); }
+    };
+
     protected btn_action(evt: BasicEvent, opt?: { functionName?: string, customFunction?: string, callback?: ActionCallback }) {
         opt = opt || {};
-        this.deselect();
 
         const fun: string = opt.customFunction || this.attr.customFunction || (evt + "_" + this.attr.functionName);
         const callback: ActionCallback = opt.callback || this.callback;
@@ -383,9 +313,8 @@ export class ButtonEVO extends WidgetEVO {
      * @memberof module:ButtonEVO
      * @instance
      */
-    click (opt?) {
+    click (opt?: ButtonOptions): void {
         this.btn_action("click", opt);
-        return this;
     }
 
     /**
@@ -394,9 +323,8 @@ export class ButtonEVO extends WidgetEVO {
      * @memberof module:ButtonEVO
      * @instance
      */
-    dblclick (opt?) {
+    dblclick (opt?: ButtonOptions): void {
         this.btn_action("dblclick", opt);
-        return this;
     }
 
     /**
@@ -405,9 +333,8 @@ export class ButtonEVO extends WidgetEVO {
      * @memberof module:ButtonEVO
      * @instance
      */
-    press (opt?) {
+    press (opt?: ButtonOptions): void {
         this.btn_action("press", opt);
-        return this;
     }
 
     /**
@@ -416,14 +343,13 @@ export class ButtonEVO extends WidgetEVO {
      * @memberof module:ButtonEVO
      * @instance
      */
-    pressAndHold (opt?) {
+    pressAndHold (opt?: ButtonOptions): void {
         this._tick = () => {
             this.press(opt);
         };
         this._timer.addListener("TimerTicked", this._tick_listener);
         this.press(opt);
         this._timer.interval(this.rate).start();
-        return this;
     }
 
     /**
@@ -432,12 +358,11 @@ export class ButtonEVO extends WidgetEVO {
      * @memberof module:ButtonEVO
      * @instance
      */
-    release (opt?) {
+    release (opt?: ButtonOptions): void {
         this.btn_action("release", opt);
         this._tick = null;
         this._timer.reset();
         this._timer.removeListener("TimerTicked", this._tick_listener);
-        return this;
     }
 
 }
