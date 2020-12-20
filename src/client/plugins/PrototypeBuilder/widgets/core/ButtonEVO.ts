@@ -196,6 +196,9 @@ export class ButtonEVO extends WidgetEVO {
                 $(document).on("touchmove", (evt: JQuery.TouchMoveEvent) => {
                     this.onMouseDrag(evt);
                 });
+                $(document).on("touchend", (evt: JQuery.TouchEndEvent) => {
+                    this.touchStart = null;
+                });
             }
         });
 
