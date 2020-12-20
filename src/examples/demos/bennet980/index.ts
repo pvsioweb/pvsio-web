@@ -282,7 +282,7 @@ class Bennet980 {
                         this.gui.ventSetupScreen.male.select();
                         this.gui.ventSetupScreen.female.deselect();
                         this.gui.ventSetupScreen.height.select();
-                        // enter gender and weight                        
+                        // enter gender and height                       
                         this.state.screen = "ventSetupScreenGH";
                         this.render();
                     }
@@ -307,7 +307,7 @@ class Bennet980 {
                         this.gui.ventSetupScreen.female.select();
                         this.gui.ventSetupScreen.male.deselect();
                         this.gui.ventSetupScreen.height.select();
-                        // enter gender and weight                        
+                        // enter gender and height                       
                         this.state.screen = "ventSetupScreenGH";
                         this.render();
                     }
@@ -338,6 +338,9 @@ class Bennet980 {
                             this.gui.ventSetupScreen.male.deselect();
                         }
                         this.gui.ventSetupScreen.height.select();
+                        // enter gender and height                        
+                        this.state.screen = "ventSetupScreenGH";
+                        this.render();
                     }
                 })
             },
