@@ -834,6 +834,10 @@ class Bennet980 {
             }
         }
         this.gui.knob.render();
+
+        // hide buttons that are not simulated in the current version of the demo
+        this.gui.mainScreen.samePatient.hide();
+        this.gui.mainScreen.sst.hide();
     }
 
     async activate(): Promise<void> {
