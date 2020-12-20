@@ -6,6 +6,7 @@
 import { WebSocketConnection } from '../../../client/env/WebSocketConnection';
 
 import { ToggleButtonEVO } from '../../../client/plugins/PrototypeBuilder/widgets/core/ToggleButtonEVO';
+import { PushButtonEVO } from '../../../client/plugins/PrototypeBuilder/widgets/core/PushButtonEVO';
 import { KnobEVO } from '../../../client/plugins/PrototypeBuilder/widgets/core/KnobEVO';
 
 type Mode = "mainScreen" | "ventSetupScreen" | "ventSetupScreenGH" | "ventSetupScreenW"
@@ -35,8 +36,8 @@ class Bennet980 {
             cancel: ToggleButtonEVO,
             start: ToggleButtonEVO,
             weight: ToggleButtonEVO,
-            male: ToggleButtonEVO,
-            female: ToggleButtonEVO,
+            male: PushButtonEVO,
+            female: PushButtonEVO,
             height: ToggleButtonEVO
         },
         ventSetup: {
@@ -262,15 +263,15 @@ class Bennet980 {
                         this.render();
                     }
                 }),
-                male:  new ToggleButtonEVO("male", {
+                male:  new PushButtonEVO("male", {
                     top: 293, left: 137, width: 38, height: 48
                 }, { 
                     connection: this.connection,
                     pushButton: true,
-                    activeColor: "transparent",
+                    activeColor: "#031d3f",
                     css: {
                         opacity: 0.9,
-                        "background-color": "transparent",
+                        "background-color": "#093876",
                         "border-radius": "8px",
                         parent: "ventSetupScreen"
                     },
@@ -287,15 +288,15 @@ class Bennet980 {
                         this.render();
                     }
                 }),
-                female:  new ToggleButtonEVO("female", {
+                female:  new PushButtonEVO("female", {
                     top: 293, left: 183, width: 38, height: 48
                 }, { 
                     connection: this.connection,
                     pushButton: true,
-                    activeColor: "transparent",
+                    activeColor: "#031d3f",
                     css: {
                         opacity: 0.9,
-                        "background-color": "transparent",
+                        "background-color": "#093876",
                         "border-radius": "8px",
                         parent: "ventSetupScreen"
                     },
@@ -738,6 +739,16 @@ class Bennet980 {
                     } else {
                         this.gui.ventSetupScreen.height.hide();
                     }
+                    break;
+                }
+                case "female": {
+                    const label: string = `<div style="font-size:35px; height:16px;"><i class="fa fa-female"></i></div>`;
+                    this.gui.ventSetupScreen.female.render(label);
+                    break;
+                }
+                case "male": {
+                    const label: string = `<div style="font-size:35px; height:16px;"><i class="fa fa-male"></i></div>`;
+                    this.gui.ventSetupScreen.male.render(label);
                     break;
                 }
                 case "start": {
