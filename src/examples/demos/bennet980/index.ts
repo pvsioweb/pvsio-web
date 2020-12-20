@@ -617,6 +617,7 @@ class Bennet980 {
                                 const delta = val * 0.5;
                                 const newVal: number = this.state.height + delta;
                                 this.state.height = ( newVal >= 0) ? newVal : 0;
+                                break;
                             }
                             case "ventSetupPeep": {
                                 const delta = val * 0.1;
