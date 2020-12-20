@@ -44,31 +44,52 @@ export class KnobEVO extends ButtonEVO {
         return this.delta;
     }
 
+    protected onMouseWheel (delta: number): void {
+        this.delta = delta > 0 ? 1 : delta < 0 ? -1 : 0;
+        this.rotation += delta / 8;
+        this.rotate(this.rotation);
+
+        const fun: string = this.attr.customFunction || ("rotate_" + this.attr.functionName);
+        const callback: ActionCallback = this.callback;
+        ActionsQueue.queueGUIAction(fun, this.connection, callback);
+
+        const data: KnobEventData = {
+            evt: "rotate",
+            fun,
+            val: this.rotation
+        };
+        this.trigger("rotate", data);
+        console.log(data);
+    };
+
     protected installHandlers() {
         super.installHandlers();
-        const onMouseWheel = (evt: WheelEvent) => {
-            evt.preventDefault();
-            this.delta = evt.deltaY > 0 ? 1 : evt.deltaY < 0 ? -1 : 0;
-            this.rotation += evt.deltaY / 8;
-            this.rotate(this.rotation);
-
-            const fun: string = this.attr.customFunction || ("rotate_" + this.attr.functionName);
-            const callback: ActionCallback = this.callback;
-            ActionsQueue.queueGUIAction(fun, this.connection, callback);
-    
-            const data: KnobEventData = {
-                evt: "rotate",
-                fun,
-                val: this.rotation
-            };
-            this.trigger("rotate", data);
-            console.log(data);
-        };
         // bind mouse wheel events
         this.overlay[0].addEventListener("wheel", (evt: WheelEvent) => {
-            onMouseWheel(evt);
+            evt.preventDefault();
+            this.onMouseWheel(evt.deltaY);
         });
-        
+        // bind single touch events (drag left/right emulate mouse wheel on mobile devices)
+        this.overlay.on("touchstart", (evt: JQuery.TouchStartEvent) => {
+            if (evt.changedTouches?.length) {
+                const touchStart = {
+                    top: evt.changedTouches[0].pageY || 0,
+                    left: evt.changedTouches[0].pageX || 0
+                };
+                this.overlay.on("touchmove", (evt: JQuery.TouchMoveEvent) => {
+                    if (evt.changedTouches?.length) {
+                        const top: number = evt.changedTouches[0].pageY;
+                        const left: number = evt.changedTouches[0].pageX;
+                        const deltaX: number = left - touchStart.left;
+                        if (Math.abs(deltaX) > 32) {
+                            this.onMouseWheel(deltaX);
+                            touchStart.top = top;
+                            touchStart.left = left;
+                        }
+                    }
+                });
+            }
+        });
     }
 
     // @override
