@@ -3,25 +3,16 @@
  * @author Patrick Oladimeji
  * @date 6/20/13 10:45:57 AM
  */
-import { FileDescriptor, uuid } from "./Utils";
-import { Connection, PVSioWebRequest, PVSioWebCallBack, OpenFileDialog } from "./Connection";
-import { EventDispatcher } from "./EventDispatcher";
-import { LayoutManager } from "./LayoutManager";
-
-export const WebSocketConnectionEvents = {
-    ConnectionOpened: "ConnectionOpened",
-    ConnectionClosed: "ConnectionClosed",
-    ConnectionTimedOut: "ConnectionTimedOut",
-    UserAuthenticated: "UserAuthenticated",
-    NoConnection: "NoConnection"
-};
+import { Connection, PVSioWebRequest, PVSioWebCallBack } from './Connection';
+import * as Backbone from 'backbone';
+import { uuid } from './Utils';
+import { ConnectionEvents } from './LoopbackConnection';
 
 const dbg: boolean = true;
 
-// import { EventDispatcher } from "../util/eventDispatcher";
-// import * as PVSioStateParser from "../util/PVSioStateParser";
+export const WebSocketConnectionEvents = ConnectionEvents;
 
-export class WebSocketConnection extends EventDispatcher implements Connection {
+export class WebSocketConnection extends Backbone.Model implements Connection {
 
     protected serverUrl: string = "ws://localhost";
     protected serverPort: number = 8082;
@@ -82,7 +73,7 @@ export class WebSocketConnection extends EventDispatcher implements Connection {
                             // console.log("Sending keepalive message...");
                         }, this.keepAliveInterval);
                     }
-                    this.fire({ type: WebSocketConnectionEvents.ConnectionOpened, event });
+                    this.trigger(ConnectionEvents.ConnectionOpened, event);
                     resolve(true);
                 };
                 this.ws.onerror = (event: ErrorEvent) => {
@@ -188,7 +179,7 @@ export class WebSocketConnection extends EventDispatcher implements Connection {
         }
     };
 
-    registerReceiver (channelID, cb) {
+    registerReceiver (channelID, cb: PVSioWebCallBack) {
         if (!this.receiversRegistry[channelID]) {
             this.receiversRegistry[channelID] = [];
         }

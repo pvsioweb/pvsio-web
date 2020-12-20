@@ -49,7 +49,7 @@ export class PushButtonEVO extends ButtonEVO {
     protected refresh (): void {
         const backgroundColor: string = this.activeFlag ? this.activeColor : this.inactiveColor;
         this.css["background-color"] = backgroundColor;
-        this.activeFlag || this.hover ? super.select({ "background-color": backgroundColor }) : super.deselect();
+        this.activeFlag || this.hoverFlag ? super.select({ "background-color": backgroundColor }) : super.deselect();
     }
 
     protected onMouseOver (): void {

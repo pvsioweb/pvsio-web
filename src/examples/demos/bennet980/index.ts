@@ -3,7 +3,7 @@
  * @author Paolo Masci
  * @date 2020/12/16
  */
-import { WebSocketConnection } from '../../../client/env/WebSocketConnection';
+import { LoopbackConnection as Connection } from '../../../client/env/LoopbackConnection';
 
 import { ToggleButtonEVO } from '../../../client/plugins/PrototypeBuilder/widgets/core/ToggleButtonEVO';
 import { PushButtonEVO } from '../../../client/plugins/PrototypeBuilder/widgets/core/PushButtonEVO';
@@ -22,7 +22,7 @@ function cm2in (cm: number): number {
 }
 
 class Bennet980 {
-    protected connection: WebSocketConnection = new WebSocketConnection();
+    protected connection: Connection = new Connection();
 
     // gui layout
     protected gui: {

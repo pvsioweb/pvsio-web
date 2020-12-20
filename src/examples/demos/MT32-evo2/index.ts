@@ -9,7 +9,7 @@ import { LedEVO as LED } from '../../../client/plugins/PrototypeBuilder/widgets/
 import { MouseCursor } from '../../../client/plugins/PrototypeBuilder/widgets/media/MouseCursor';
 import { Stylus } from '../../../client/plugins/PrototypeBuilder/widgets/media/Stylus';
 
-import { ActionsQueue } from '../../../client/plugins/PrototypeBuilder/widgets/ActionsQueue';
+import { ActionsQueue } from '../../../client/env/ActionsQueue';
 
 import { Player } from '../../../client/util/playback/Player';
 
@@ -3459,7 +3459,7 @@ class MT32Demo {
     async activate(): Promise<void> {
 
         //register event listener for websocket connection from the client
-        this.connection.addListener(WebSocketConnectionEvents.ConnectionOpened, (e) => {
+        this.connection.on(WebSocketConnectionEvents.ConnectionOpened, (evt?) => {
             console.log("web socket connected");
             //start pvs process
             const req: StartPvsProcessRequest = {
@@ -3536,7 +3536,7 @@ class MT32Demo {
 
                 $(".content").css("display", "block");
             });
-        }).addListener(WebSocketConnectionEvents.ConnectionClosed, (e) => {
+        }).on(WebSocketConnectionEvents.ConnectionClosed, (evt?) => {
             console.log("web socket closed");
         });
         // .addListener(WebSocketEvents.ProcessExited, function (e) {

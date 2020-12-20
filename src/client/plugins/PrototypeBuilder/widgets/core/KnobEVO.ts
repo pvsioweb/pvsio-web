@@ -1,4 +1,4 @@
-import { ActionCallback, ActionsQueue } from "../ActionsQueue";
+import { ActionCallback, ActionsQueue } from "../../../../env/ActionsQueue";
 import { ButtonEVO, ButtonOptions } from "./ButtonEVO";
 import { Coords, img_template, CSS, BasicEvent } from "./WidgetEVO";
 
@@ -69,27 +69,6 @@ export class KnobEVO extends ButtonEVO {
             evt.preventDefault();
             this.onMouseWheel(evt.deltaY);
         });
-        // bind single touch events (drag left/right emulate mouse wheel on mobile devices)
-        this.overlay.on("touchstart", (evt: JQuery.TouchStartEvent) => {
-            if (evt.changedTouches?.length) {
-                const touchStart = {
-                    top: evt.changedTouches[0].pageY || 0,
-                    left: evt.changedTouches[0].pageX || 0
-                };
-                this.overlay.on("touchmove", (evt: JQuery.TouchMoveEvent) => {
-                    if (evt.changedTouches?.length) {
-                        const top: number = evt.changedTouches[0].pageY;
-                        const left: number = evt.changedTouches[0].pageX;
-                        const deltaX: number = left - touchStart.left;
-                        if (Math.abs(deltaX) > 32) {
-                            this.onMouseWheel(deltaX);
-                            touchStart.top = top;
-                            touchStart.left = left;
-                        }
-                    }
-                });
-            }
-        });
     }
 
     // @override
@@ -99,6 +78,33 @@ export class KnobEVO extends ButtonEVO {
         this.reveal();
     }
 
+    // @override
+    protected onMouseDrag (evt?: JQuery.MouseMoveEvent | JQuery.TouchMoveEvent): void {
+        console.log("mousedrag");
+        if (this.dragStart) {
+            const top: number = evt.pageY;
+            const left: number = evt.pageX;
+            const deltaX: number = left - this.dragStart.left;
+            if (Math.abs(deltaX) > 8) {
+                this.onMouseWheel(deltaX);
+                this.dragStart.top = top;
+                this.dragStart.left = left;
+            }
+        } else if (this.touchStart) {
+            if (evt.changedTouches?.length) {
+                const top: number = evt.changedTouches[0].pageY;
+                const left: number = evt.changedTouches[0].pageX;
+                const deltaX: number = left - this.touchStart.left;
+                if (Math.abs(deltaX) > 32) {
+                    this.onMouseWheel(deltaX);
+                    this.touchStart.top = top;
+                    this.touchStart.left = left;
+                }
+            }
+        }
+    }
+
+    // @override
     getDescription (): string {
         return `Knob widget, emulates buttons that can be rotated and pressed.
             The mouse wheel can be used to rotate the knob.

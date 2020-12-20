@@ -1,7 +1,7 @@
 /**
  * Manages a queue of messages to send to the server
  */
-import { Connection, SendCommandRequest } from '../../../env/Connection';
+import { Connection, SendCommandRequest } from './Connection';
 export type ActionCallback = (err: string | null, res: {}) => void;
 export class ActionsQueue {
     static guiActions: Promise<any> = Promise.resolve();
@@ -18,7 +18,7 @@ export class ActionsQueue {
                     if (err) {
                         reject(err);
                     } else {
-                        console.log(res);
+                        // console.log(res);
                         resolve(res);
                     }
                 });
@@ -37,16 +37,7 @@ export class ActionsQueue {
      */
     static queueGUIAction (action: string, connection: Connection, cb: ActionCallback) {
         ActionsQueue.guiActions = ActionsQueue.guiActions.then((res) => {
-            const guiActionPromise = ActionsQueue.getGUIActionPromise(action, connection, cb);
-            return guiActionPromise;
-        }).catch((err) => {
-            if (!(typeof err.message === "string" && err.message.indexOf("No resolution for tick") >= 0)) {
-                if (err.code === "EPIPE") {
-                    console.log("Unable to evaluate command in PVSio :/");
-                } else {
-                    console.error(err);
-                }
-            }
+            return ActionsQueue.getGUIActionPromise(action, connection, cb);
         });
     };
 

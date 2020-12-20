@@ -10,7 +10,7 @@
 // import * as StateParser from "../../../util/PVSioStateParser";
 import * as Utils from '../../../../env/Utils';
 import { dimColor } from "../../../../env/Utils";
-import { ActionCallback } from "../ActionsQueue";
+import { ActionCallback } from "../../../../env/ActionsQueue";
 import { Connection } from "../../../../env/Connection";
 import * as Backbone from 'backbone';
 

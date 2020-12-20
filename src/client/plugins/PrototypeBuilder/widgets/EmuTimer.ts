@@ -8,7 +8,7 @@
 import * as Widget from './Widget';
 import { Recorder } from '../../../util/ActionRecorder';
 import { Timer } from "../../../util/Timer";
-import { ActionCallback, ActionsQueue } from "./ActionsQueue";
+import { ActionCallback, ActionsQueue } from "../../../env/ActionsQueue";
 import { Connection } from '../../../env/Connection';
 
 export interface WidgetOptions extends Widget.WidgetOptions {

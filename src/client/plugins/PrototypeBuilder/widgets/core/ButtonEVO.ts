@@ -41,7 +41,7 @@
 
 import { Coords, BasicEvent, WidgetEVO, WidgetOptions, WidgetAttr, CSS, BasicEventData } from "./WidgetEVO";
 import { Timer } from "../../../../util/Timer"
-import { ActionsQueue, ActionCallback } from "../ActionsQueue";
+import { ActionsQueue, ActionCallback } from "../../../../env/ActionsQueue";
 import { Connection } from "../../../../env/Connection";
 import { mouseButtons } from "../../../../env/Utils";
 
@@ -75,7 +75,12 @@ export class ButtonEVO extends WidgetEVO {
     protected _tick_listener: () => void;
     protected _tick: () => void;
 
-    protected hover: boolean = false;
+    // flags
+    protected hoverFlag: boolean = false;
+    protected mouseDownFlag: boolean = false;
+
+    protected dragStart: { top: number, left: number };
+    protected touchStart: { top: number, left: number };
 
     protected connection: Connection;
 
@@ -145,22 +150,53 @@ export class ButtonEVO extends WidgetEVO {
     protected installHandlers() {
         // bind mouse events
         this.overlay.on("mouseover", (evt: JQuery.MouseOverEvent) => {
-            this.hover = true;
-            this.onMouseOver();
+            this.hoverFlag = true;
+            this.onMouseOver(evt);
         }).on("mouseout", (evt: JQuery.MouseOutEvent) => {
-            this.hover = false;
-            this.onMouseOut();
+            this.hoverFlag = false;
+            this.onMouseOut(evt);
         }).on("mousedown", (evt: JQuery.MouseDownEvent) => {
+            this.mouseDownFlag = true;
             if (evt.button === mouseButtons.left) {
-                this.onMouseDown();
+                this.onMouseDown(evt);
+                // add mousemove event listener so we can handle drag events
+                this.dragStart = {
+                    top: evt.pageY || 0,
+                    left: evt.pageX || 0
+                };
+                this.overlay.on("mousemove", (evt: JQuery.MouseMoveEvent) => {
+                    this.onMouseMove(evt);
+                });
+                // we need to attach the listener to the document, otherwise the event is cancelled when the mouse exits the div of the button
+                $(document).on("mousemove", (evt: JQuery.MouseMoveEvent) => {
+                    this.onMouseDrag(evt);
+                });
+                $(document).on("mouseup", (evt: JQuery.MouseUpEvent) => {
+                    this.dragStart = null;
+                });
             }
         }).on("mouseup", (evt: JQuery.MouseUpEvent) => {
+            this.mouseDownFlag = false;
             if (evt.button === mouseButtons.left) {
-                this.onMouseUp();
+                this.onMouseUp(evt);
             }
         }).on("blur", (evt: JQuery.BlurEvent) => {
-            this.hover = false;
-            this.onBlur();
+            this.hoverFlag = false;
+            this.onBlur(evt);
+        });
+
+        // add touch events, so the button is mobile device friendly
+        this.overlay.on("touchstart", (evt: JQuery.TouchStartEvent) => {
+            console.log("touchstart");
+            if (evt.changedTouches?.length) {
+                this.touchStart = {
+                    top: evt.changedTouches[0].pageY || 0,
+                    left: evt.changedTouches[0].pageX || 0
+                };
+                $(document).on("touchmove", (evt: JQuery.TouchMoveEvent) => {
+                    this.onMouseDrag(evt);
+                });
+            }
         });
 
         // bind key events
@@ -193,20 +229,26 @@ export class ButtonEVO extends WidgetEVO {
             this.dblclick();
         }
     };
-    protected onMouseOver (): void {
+    protected onMouseMove (evt?: JQuery.MouseMoveEvent): void {
+        // do nothing, this function will be overridden by derived classes
+    }
+    protected onMouseDrag (evt?: JQuery.MouseMoveEvent | JQuery.TouchMoveEvent): void {
+        // do nothing, this function will be overridden by derived classes
+    }
+    protected onMouseOver (evt?: JQuery.MouseOverEvent): void {
         this.select();
     };
-    protected onMouseOut (): void {
+    protected onMouseOut (evt?: JQuery.MouseOutEvent): void {
         this.deselect();
         if (this._tick) { this.onButtonRelease(); }
     };
-    protected onMouseDown (): void {
+    protected onMouseDown (evt?: JQuery.MouseDownEvent): void {
         this.onButtonPress();
         this.select({ "background-color": this.css["background-color"] });
     };
-    protected onMouseUp (): void {
+    protected onMouseUp (evt?: JQuery.MouseUpEvent): void {
         this.onButtonRelease();
-        if (this.hover) {
+        if (this.hoverFlag) {
             this.onMouseOver();
         } else {
             this.deselect(); 
@@ -222,7 +264,7 @@ export class ButtonEVO extends WidgetEVO {
             }, this.dblclick_timeout);
         }
     };
-    protected onBlur (): void {
+    protected onBlur (evt?: JQuery.BlurEvent): void {
         this.deselect();
         if (this._tick) { this.onButtonRelease(); }
     };
