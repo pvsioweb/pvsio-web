@@ -1,8 +1,7 @@
-bennet gaps
+bennett / user manual / gaps
 
-- units: does it really use kg as main unit for weight?
-- unclear which input is controlled by the knob -- multiple buttons can be selected at the same time, e.g., weight and peep
-- unclear how to move back to the previous screen?
-- unclear how to confirm values (e.g., by pressing the knob?)
-
-- can be used to teach waveforms in different distress situations
+- it is unclear how to confirm values (e.g., by pressing the knob? by tapping the value after entering it?)
+- it is unclear if this ventilator has timeouts on data entry, i.e., is data entry discarded if the value is not confirmed within x seconds? The manual does not say anything, but other ventilators and nearly all medical devices I've seen use timeout for data entry, so this one probably uses timeouts as well.
+- changing weight/height/gender triggers automatic changes to other ventilator settings (e.g., changing patient weight leads to changes to Vmax, changing patient height leads to changes to patient height). The manual does not explain when this happens. The nurse may not notice these changes, or create frustration during data entry because certain ventilator settings need to be re-entered if a golden data entry sequence is not followed.
+- data entry has different increment steps for different ranges --- this may create inconsistent behaviour like in the bbraun pumps
+- it is surprising to see that ventilators in the US use Kg and cm as primary units for weight and height. Inches and pounds are displayed as secondary units, using smaller fonts. It is unclear if and how this behaviour can be changed.

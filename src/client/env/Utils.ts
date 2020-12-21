@@ -549,3 +549,7 @@ export function dimColor(col: string, level?: number) {
 
     return "#" + (g | (b << 8) | (r << 16)).toString(16);
 }
+export function fontOutlineStyle (col: string): string {
+    col = col || "black";
+    return `-webkit-text-fill-color: transparent; -webkit-text-stroke: 1px ${col};`;
+}

@@ -21,7 +21,7 @@ export class ToggleButtonEVO extends PushButtonEVO {
     }
 
     protected onMouseDown (): void {
-        // mouse down events toggle the button status
+        // mouse down events toggle button status
         this.toggle();
         this.click();
     }

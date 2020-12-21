@@ -7,12 +7,12 @@ import { LoopbackConnection as Connection } from '../../../client/env/LoopbackCo
 
 import { ToggleButtonEVO } from '../../../client/plugins/PrototypeBuilder/widgets/core/ToggleButtonEVO';
 import { PushButtonEVO } from '../../../client/plugins/PrototypeBuilder/widgets/core/PushButtonEVO';
-import { KnobEVO } from '../../../client/plugins/PrototypeBuilder/widgets/core/KnobEVO';
+import { DialEVO } from '../../../client/plugins/PrototypeBuilder/widgets/core/DialEVO';
 
 type Mode = "mainScreen" | "ventSetupScreen" | "ventSetupScreenGH" | "ventSetupScreenW"
     | "ventSetupPeep" | "ventSetupO2" | "ventSetupVsens" | "ventSetupPpeak"
     | "ventSetupVmax" | "ventSetupVt" | "ventSetupF" | "ventSetupTpl"
-    | "connectPatientScreen" | "ventSetupRamp";
+    | "connectPatientScreen" | "ventSetupRamp" | "readyScreen";
 
 function kg2lb (kg: number): number {
     return Math.floor(kg * 2.205);
@@ -26,7 +26,7 @@ class Bennet980 {
 
     // gui layout
     protected gui: {
-        knob: KnobEVO,
+        dial: DialEVO,
         mainScreen: {
             newPatient: ToggleButtonEVO,
             samePatient: ToggleButtonEVO,
@@ -129,11 +129,11 @@ class Bennet980 {
                 }, { 
                     connection: this.connection,
                     customLabel: "New Patient",
+                    parent: "mainScreen",
                     css: {
                         "background-color": "#073b80",
                         "border-color": "steelblue",
                         opacity: 0.9,
-                        parent: "mainScreen",
                         "font-size": "16px",
                         "border-radius": "8px",
                         "white-space": "normal",
@@ -150,11 +150,11 @@ class Bennet980 {
                 }, { 
                     connection: this.connection,
                     customLabel: "Same Patient",
+                    parent: "mainScreen",
                     css: {
                         "background-color": "#073b80",
                         "border-color": "steelblue",
                         opacity: 0.9,
-                        parent: "mainScreen",
                         "font-size": "16px",
                         "border-radius": "8px",
                         "white-space": "normal",
@@ -167,11 +167,11 @@ class Bennet980 {
                 }, { 
                     connection: this.connection,
                     customLabel: "SST",
+                    parent: "mainScreen",
                     css: {
                         "background-color": "#073b80",
                         "border-color": "steelblue",
                         opacity: 0.9,
-                        parent: "mainScreen",
                         "font-size": "16px",
                         "border-radius": "8px",
                         "white-space": "normal",
@@ -187,11 +187,11 @@ class Bennet980 {
                 }, { 
                     connection: this.connection,
                     customLabel: "Cancel",
+                    parent: "ventSetupScreen",
                     css: {
                         "background-color": "#073b80",
                         "border-color": "steelblue",
                         opacity: 0.9,
-                        parent: "ventSetupScreen",
                         "font-size": "20px",
                         "border-radius": "8px",
                         "white-space": "normal",
@@ -206,11 +206,11 @@ class Bennet980 {
                     top: 401, left: 580, width: 140, height: 36
                 }, { 
                     connection: this.connection,
+                    parent: "ventSetupScreen",
                     css: {
                         "background-color": "#073b80",
                         "border-color": "steelblue",
                         opacity: 0.9,
-                        parent: "ventSetupScreen",
                         "font-size": "20px",
                         "border-radius": "8px",
                         "white-space": "normal",
@@ -243,11 +243,11 @@ class Bennet980 {
                 }, { 
                     connection: this.connection,
                     toggleButton: true,
+                    parent: "ventSetupScreen",
                     css: {
                         opacity: 0.9,
                         "background-color": "#073b80",
                         "border-color": "steelblue",
-                        parent: "ventSetupScreen",
                         "font-size": "24px",
                         "border-radius": "8px",
                         "white-space": "normal",
@@ -257,9 +257,14 @@ class Bennet980 {
                         this.state.ready = true;
                         // select button
                         this.deselectButtons({ exclude: ["male", "female"] });
-                        this.gui.ventSetupScreen.weight.select();
-                        // enter weight
-                        this.state.screen = "ventSetupScreenW";
+                        if (this.state.screen === "ventSetupScreenW") {
+                            // toggle
+                            this.state.screen = "readyScreen";
+                        } else {
+                            this.gui.ventSetupScreen.weight.select();
+                            // enter weight
+                            this.state.screen = "ventSetupScreenW";
+                        }
                         this.render();
                     }
                 }),
@@ -267,13 +272,13 @@ class Bennet980 {
                     top: 293, left: 137, width: 38, height: 48
                 }, { 
                     connection: this.connection,
-                    pushButton: true,
+                    
                     activeColor: "#031d3f",
+                    parent: "ventSetupScreen",
                     css: {
                         opacity: 0.9,
                         "background-color": "#093876",
-                        "border-radius": "8px",
-                        parent: "ventSetupScreen"
+                        "border-radius": "8px"
                     },
                     callback: (err?, res?) =>  {
                         this.state.ready = true;
@@ -292,13 +297,12 @@ class Bennet980 {
                     top: 293, left: 183, width: 38, height: 48
                 }, { 
                     connection: this.connection,
-                    pushButton: true,
                     activeColor: "#031d3f",
+                    parent: "ventSetupScreen",
                     css: {
                         opacity: 0.9,
                         "background-color": "#093876",
-                        "border-radius": "8px",
-                        parent: "ventSetupScreen"
+                        "border-radius": "8px"
                     },
                     callback: (err?, res?) =>  {
                         this.state.ready = true;
@@ -317,12 +321,11 @@ class Bennet980 {
                     top: 352, left: 145, width: 66, height: 54
                 }, { 
                     connection: this.connection,
-                    toggleButton: true,
+                    parent: "ventSetupScreen",
                     css: {
                         opacity: 0.9,
                         "background-color": "#073b80",
                         "border-color": "steelblue",
-                        parent: "ventSetupScreen",
                         "font-size": "24px",
                         "border-radius": "8px",
                         "white-space": "normal",
@@ -350,12 +353,11 @@ class Bennet980 {
                     top: 230, left: 310, width: 60, height: 54
                 }, { 
                     connection: this.connection,
-                    pushButton: true,
+                    parent: "ventSetup",
                     css: {
                         opacity: 0.9,
                         "background-color": "#073b80",
                         "border-color": "steelblue",
-                        parent: "ventSetup",
                         "font-size": "24px",
                         "border-radius": "8px",
                         "white-space": "normal",
@@ -364,8 +366,13 @@ class Bennet980 {
                     callback: (err?, res?) =>  {
                         this.state.quickStartFlag = false;
                         this.deselectButtons({ exclude: ["male", "female"] });
-                        this.gui.ventSetup.peep.select();
-                        this.state.screen = "ventSetupPeep";
+                        if (this.state.screen === "ventSetupPeep") {
+                            // toggle
+                            this.state.screen = "readyScreen";
+                        } else {
+                            this.gui.ventSetup.peep.select();
+                            this.state.screen = "ventSetupPeep";
+                        }
                         this.render();
                     }
                 }),
@@ -373,12 +380,12 @@ class Bennet980 {
                     top: 167, left: 310, width: 60, height: 54
                 }, { 
                     connection: this.connection,
-                    pushButton: true,
+                    
+                    parent: "ventSetup",
                     css: {
                         opacity: 0.9,
                         "background-color": "#073b80",
                         "border-color": "steelblue",
-                        parent: "ventSetup",
                         "font-size": "24px",
                         "border-radius": "8px",
                         "white-space": "normal",
@@ -387,8 +394,13 @@ class Bennet980 {
                     callback: (err?, res?) =>  {
                         this.state.quickStartFlag = false;
                         this.deselectButtons({ exclude: ["male", "female"] });
-                        this.gui.ventSetup.o2.select();
-                        this.state.screen = "ventSetupO2";
+                        if (this.state.screen === "ventSetupO2") {
+                            // toggle
+                            this.state.screen = "readyScreen";
+                        } else {
+                            this.gui.ventSetup.o2.select();
+                            this.state.screen = "ventSetupO2";
+                        }
                         this.render();
                     }
                 }),
@@ -396,12 +408,12 @@ class Bennet980 {
                     top: 167, left: 246, width: 60, height: 54
                 }, { 
                     connection: this.connection,
-                    pushButton: true,
+                    
+                    parent: "ventSetup",
                     css: {
                         opacity: 0.9,
                         "background-color": "#073b80",
                         "border-color": "steelblue",
-                        parent: "ventSetup",
                         "font-size": "24px",
                         "border-radius": "8px",
                         "white-space": "normal",
@@ -410,8 +422,13 @@ class Bennet980 {
                     callback: (err?, res?) =>  {
                         this.state.quickStartFlag = false;
                         this.deselectButtons({ exclude: ["male", "female"] });
-                        this.gui.ventSetup.vsens.select();
-                        this.state.screen = "ventSetupVsens";
+                        if (this.state.screen === "ventSetupVsens") {
+                            // toggle
+                            this.state.screen = "readyScreen";
+                        } else {
+                            this.gui.ventSetup.vsens.select();
+                            this.state.screen = "ventSetupVsens";
+                        }
                         this.render();
                     }
                 }),
@@ -419,12 +436,12 @@ class Bennet980 {
                     top: 167, left: 373, width: 60, height: 54
                 }, { 
                     connection: this.connection,
-                    pushButton: true,
+                    
+                    parent: "ventSetup",
                     css: {
                         opacity: 0.9,
                         "background-color": "#073b80",
                         "border-color": "steelblue",
-                        parent: "ventSetup",
                         "font-size": "24px",
                         "border-radius": "8px",
                         "white-space": "normal",
@@ -433,8 +450,13 @@ class Bennet980 {
                     callback: (err?, res?) =>  {
                         this.state.quickStartFlag = false;
                         this.deselectButtons({ exclude: ["male", "female"] });
-                        this.gui.ventSetup.ppeak.select();
-                        this.state.screen = "ventSetupPpeak";
+                        if (this.state.screen === "ventSetupPpeak") {
+                            // toggle
+                            this.state.screen = "readyScreen";
+                        } else {
+                            this.gui.ventSetup.ppeak.select();
+                            this.state.screen = "ventSetupPpeak";
+                        }
                         this.render();
                     }
                 }),
@@ -442,12 +464,12 @@ class Bennet980 {
                     top: 167, left: 132, width: 60, height: 54
                 }, { 
                     connection: this.connection,
-                    pushButton: true,
+                    
+                    parent: "ventSetup",
                     css: {
                         opacity: 0.9,
                         "background-color": "#073b80",
                         "border-color": "steelblue",
-                        parent: "ventSetup",
                         "font-size": "24px",
                         "border-radius": "8px",
                         "white-space": "normal",
@@ -456,8 +478,13 @@ class Bennet980 {
                     callback: (err?, res?) =>  {
                         this.state.quickStartFlag = false;
                         this.deselectButtons({ exclude: ["male", "female"] });
-                        this.gui.ventSetup.vmax.select();
-                        this.state.screen = "ventSetupVmax";
+                        if (this.state.screen === "ventSetupVmax") {
+                            // toggle
+                            this.state.screen = "readyScreen";
+                        } else {
+                            this.gui.ventSetup.vmax.select();
+                            this.state.screen = "ventSetupVmax";
+                        }
                         this.render();
                     }
                 }),
@@ -465,12 +492,12 @@ class Bennet980 {
                     top: 167, left: 70, width: 60, height: 54
                 }, { 
                     connection: this.connection,
-                    pushButton: true,
+                    
+                    parent: "ventSetup",
                     css: {
                         opacity: 0.9,
                         "background-color": "#073b80",
                         "border-color": "steelblue",
-                        parent: "ventSetup",
                         "font-size": "24px",
                         "border-radius": "8px",
                         "white-space": "normal",
@@ -479,8 +506,13 @@ class Bennet980 {
                     callback: (err?, res?) =>  {
                         this.state.quickStartFlag = false;
                         this.deselectButtons({ exclude: ["male", "female"] });
-                        this.gui.ventSetup.vt.select();
-                        this.state.screen = "ventSetupVt";
+                        if (this.state.screen === "ventSetupVt") {
+                            // toggle
+                            this.state.screen = "readyScreen";
+                        } else {
+                            this.gui.ventSetup.vt.select();
+                            this.state.screen = "ventSetupVt";
+                        }
                         this.render();
                     }
                 }),
@@ -488,12 +520,12 @@ class Bennet980 {
                     top: 167, left: 8, width: 60, height: 54
                 }, { 
                     connection: this.connection,
-                    pushButton: true,
+                    
+                    parent: "ventSetup",
                     css: {
                         opacity: 0.9,
                         "background-color": "#073b80",
                         "border-color": "steelblue",
-                        parent: "ventSetup",
                         "font-size": "24px",
                         "border-radius": "8px",
                         "white-space": "normal",
@@ -502,8 +534,13 @@ class Bennet980 {
                     callback: (err?, res?) =>  {
                         this.state.quickStartFlag = false;
                         this.deselectButtons({ exclude: ["male", "female"] });
-                        this.gui.ventSetup.f.select();
-                        this.state.screen = "ventSetupF";
+                        if (this.state.screen === "ventSetupF") {
+                            // toggle
+                            this.state.screen = "readyScreen";
+                        } else {
+                            this.gui.ventSetup.f.select();
+                            this.state.screen = "ventSetupF";
+                        }
                         this.render();
                     }
                 }),
@@ -511,12 +548,11 @@ class Bennet980 {
                     top: 230, left: 132, width: 60, height: 54
                 }, { 
                     connection: this.connection,
-                    pushButton: true,
+                    parent: "ventSetup",
                     css: {
                         opacity: 0.9,
                         "background-color": "#073b80",
                         "border-color": "steelblue",
-                        parent: "ventSetup",
                         "font-size": "24px",
                         "border-radius": "8px",
                         "white-space": "normal",
@@ -525,8 +561,13 @@ class Bennet980 {
                     callback: (err?, res?) =>  {
                         this.state.quickStartFlag = false;
                         this.deselectButtons({ exclude: ["male", "female"] });
-                        this.gui.ventSetup.ramp.select();
-                        this.state.screen = "ventSetupRamp";
+                        if (this.state.screen === "ventSetupRamp") {
+                            // toggle
+                            this.state.screen = "readyScreen";
+                        } else {
+                            this.gui.ventSetup.ramp.select();
+                            this.state.screen = "ventSetupRamp";
+                        }
                         this.render();
                     }
                 }),
@@ -534,12 +575,11 @@ class Bennet980 {
                     top: 230, left: 70, width: 60, height: 54
                 }, { 
                     connection: this.connection,
-                    pushButton: true,
+                    parent: "ventSetup",
                     css: {
                         opacity: 0.9,
                         "background-color": "#073b80",
                         "border-color": "steelblue",
-                        parent: "ventSetup",
                         "font-size": "24px",
                         "border-radius": "8px",
                         "white-space": "normal",
@@ -548,8 +588,13 @@ class Bennet980 {
                     callback: (err?, res?) =>  {
                         this.state.quickStartFlag = false;
                         this.deselectButtons({ exclude: ["male", "female"] });
-                        this.gui.ventSetup.tpl.select();
-                        this.state.screen = "ventSetupTpl";
+                        if (this.state.screen === "ventSetupTpl") {
+                            // toggle
+                            this.state.screen = "readyScreen";
+                        } else {
+                            this.gui.ventSetup.tpl.select();
+                            this.state.screen = "ventSetupTpl";
+                        }
                         this.render();
                     }
                 })
@@ -560,11 +605,11 @@ class Bennet980 {
                 }, { 
                     connection: this.connection,
                     customLabel: "Confirm",
+                    parent: "connectPatientScreenDialog",
                     css: {
                         "background-color": "#073b80",
                         "border-color": "steelblue",
                         opacity: 0.9,
-                        parent: "connectPatientScreenDialog",
                         "font-size": "20px",
                         "border-radius": "8px",
                         "white-space": "normal",
@@ -605,34 +650,30 @@ class Bennet980 {
                     }
                 })
             },
-            knob: new KnobEVO("knob", { top: 795, left: 538, width: 105, height: 105 }, {
+            dial: new DialEVO("dial", { top: 795, left: 538, width: 105, height: 105 }, {
                 connection: this.connection,
                 callback: (err?, res?: { command?: string }) =>  {
-                    if (res?.command === "rotate_knob") {
-                        const val: number = this.gui.knob.getDelta();
+                    if (res?.command === "rotate_dial") {
+                        const delta: number = this.gui.dial.getDelta();
                         switch (this.state.screen) {
                             case "ventSetupScreenW": {
-                                const delta = val * 0.5;
                                 const newVal: number = this.state.weight + delta;
                                 this.state.weight = ( newVal >= 0) ? newVal : 0;
                                 break;
                             }
                             case "ventSetupScreenGH": {
-                                const delta = val * 0.5;
                                 const newVal: number = this.state.height + delta;
                                 this.state.height = ( newVal >= 0) ? newVal : 0;
                                 break;
                             }
                             case "ventSetupPeep": {
-                                const delta = val * 0.1;
-                                const newVal: number = this.state.peep + delta;
+                                const newVal: number = this.state.peep + delta * 0.1;
                                 this.state.peep = newVal < this.range.peep.min ? this.range.peep.min
                                     : newVal > this.range.peep.max ? this.range.peep.max
                                         : newVal; 
                                 break;
                             }
                             case "ventSetupO2": {
-                                const delta = val * 0.5;
                                 const newVal: number = this.state.o2 + delta;
                                 this.state.o2 = newVal < this.range.o2.min ? this.range.o2.min
                                     : newVal > this.range.o2.max ? this.range.o2.max
@@ -640,43 +681,37 @@ class Bennet980 {
                                 break;
                             }
                             case "ventSetupVsens": {
-                                const delta = val * 0.1;
-                                const newVal: number = this.state.vsens + delta;
+                                const newVal: number = this.state.vsens + delta * 0.1;
                                 this.state.vsens = ( newVal >= 0) ? newVal : 0; 
                                 break;
                             }
                             case "ventSetupPpeak": {
-                                const delta = val * 0.5;
                                 const newVal: number = this.state.ppeak + delta;
                                 this.state.ppeak = ( newVal >= 0) ? newVal : 0; 
                                 break;
                             }
                             case "ventSetupVmax": {
-                                const delta = val * 0.5;
                                 const newVal: number = this.state.vmax + delta;
                                 this.state.vmax = ( newVal >= 0) ? newVal : 0; 
                                 break;
                             }
                             case "ventSetupVt": {
-                                const delta = val * 0.5;
                                 const newVal: number = this.state.vt + delta;
                                 this.state.vt = ( newVal >= 0) ? newVal : 0; 
                                 break;
                             }
                             case "ventSetupF": {
-                                const delta = val * 0.5;
                                 const newVal: number = this.state.f + delta;
                                 this.state.f = ( newVal >= 0) ? newVal : 0; 
                                 break;
                             }
                             case "ventSetupTpl": {
-                                const delta = val * 0.1;
-                                const newVal: number = this.state.tpl + delta;
+                                const newVal: number = this.state.tpl + delta * 0.1;
                                 this.state.tpl = ( newVal >= 0) ? newVal : 0; 
                                 break;
                             }
                             case "ventSetupRamp": {
-                                this.state.ramp = val <= 0; 
+                                this.state.ramp = delta <= 0; 
                                 break;
                             }
                             default: {
@@ -833,7 +868,7 @@ class Bennet980 {
                 this.gui.connectPatientScreen[i].render();
             }
         }
-        this.gui.knob.render();
+        this.gui.dial.render();
 
         // hide buttons that are not simulated in the current version of the demo
         this.gui.mainScreen.samePatient.hide();

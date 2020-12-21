@@ -83,7 +83,7 @@ export const widget_template: string = `
      style="position:absolute; width:{{width}}px; height:{{height}}px; top:{{top}}px; left:{{left}}px; z-index:{{css.z-index}}; overflow:{{css.overflow}};"
      class="{{type}} noselect{{#if css.blinking}} blink{{/if}}">
     <div id="{{id}}_base"
-         style="position:absolute; width:{{width}}px; height:{{height}}px; line-height:{{css.line-height}}px; {{#each css}} {{@key}}:{{this}};{{/each}}"
+         style="position:absolute; width:{{width}}px; height:{{height}}px; line-height:{{css.line-height}}; {{#each css}} {{@key}}:{{this}};{{/each}}"
          class="{{type}}_base {{id}}_base"></div>
     <div id="{{id}}_overlay"
          style="position:absolute; width:{{width}}px; height:{{height}}px; {{#if css.z-index}}z-index:{{css.z-index}};{{/if}} border-radius:{{css.border-radius}}; cursor:{{css.cursor}}; opacity:0;"
@@ -140,7 +140,6 @@ export type WidgetDescriptor = {
 
 // keys and type
 export const cssKeys = {
-    parent: [ "body", "string" ],
     position: [ "absolute", "relative" ],
     cursor: [ "string" ],
     "background-color": [ "string" ],
@@ -171,7 +170,6 @@ export const cssKeys = {
 };
 
 export interface CSS {
-    parent?: "body" | string,
     position?: "absolute" | "relative",
     cursor?: string,
     "background-color"?: string,
@@ -212,6 +210,7 @@ export interface CSS {
     [key: string]: string | number,
 }
 export interface WidgetOptions {
+    parent?: "body" | string,
     css?: CSS,
     viz?: VizOptions,
     type?: string, // widget type, e.g., button, display
@@ -303,9 +302,9 @@ export abstract class WidgetEVO extends Backbone.Model {
         coords = coords || {};
         this.id = id;
         this.type = opt.type || "widget";
-        this.parent = (opt.css.parent) ? 
-            opt.css.parent.startsWith("#") || opt.css.parent.startsWith(".") ? 
-                opt.css.parent : ("#" + opt.css.parent) : "body";
+        this.parent = (opt.parent) ? 
+            opt.parent.startsWith("#") || opt.parent.startsWith(".") ? 
+                opt.parent : ("#" + opt.parent) : "body";
         this.top = parseFloat(`${coords.top}`) || 0;
         this.left = parseFloat(`${coords.left}`) || 0;
         this.width = isNaN(parseFloat(`${coords.width}`)) ? 32 : parseFloat(`${coords.width}`);
@@ -358,6 +357,11 @@ export abstract class WidgetEVO extends Backbone.Model {
 
         this.hide();
     }
+
+    /**
+     * Installs event handlers
+     */
+    protected installHandlers (): void {}
 
     /**
      * @function <a name="render">render</a>
@@ -615,7 +619,7 @@ export abstract class WidgetEVO extends Backbone.Model {
         for(const key in style) {
             // store style info
             this.css[key] = style[key];
-            // update style
+            // update DOM
             switch (key) {
                 case "z-index": {
                     this.div.css(key, style[key]);
@@ -626,14 +630,19 @@ export abstract class WidgetEVO extends Backbone.Model {
                     this.base.css(key, style[key]);
                     break;
                 }
+                case "blinking": {
+                    if (style[key] && style[key] !== "false") {
+                        this.base.addClass(key);
+                    } else {
+                        this.base.removeClass(key);
+                    }
+                    break;
+                }
                 default: {
                     this.base.css(key, style[key]);
                     break;
                 }
             }
-        }
-        if (style.blinking && style.blinking !== "false") {
-            this.base.addClass("blinking");
         }
         this.base.css("position", "absolute"); // position of the base should always be absolute
     }

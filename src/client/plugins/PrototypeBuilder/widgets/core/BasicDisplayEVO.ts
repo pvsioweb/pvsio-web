@@ -112,7 +112,8 @@ export class BasicDisplayEVO extends WidgetEVO {
         this.setCSS({ ...this.css, ...opt });
 
         // set line height so text is properly centered
-        this.base.css("line-height", `${this.height}px`);
+        const lineHeight: number = parseFloat(this.css["line-height"]) || this.height;
+        this.base.css("line-height", `${lineHeight}px`);
 
         // render content
         state = (state === undefined || state === null)? "" : state;

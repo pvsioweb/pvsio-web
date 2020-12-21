@@ -55,7 +55,7 @@ export interface ButtonOptions extends WidgetOptions {
     customLabel?: string,
     readBack?: string,
     touchscreenMode?: boolean,
-    keyCode?: string,
+    keyCodes?: string, // comma-separated list of keycodes. first keycode is key down, second is key up
     evts?: BasicEvent | BasicEvent[],
     functionName?: string,
     customFunction?: string,
@@ -136,15 +136,15 @@ export class ButtonEVO extends WidgetEVO {
             } else { console.error("Error in ButtonEVO: undefined handler for tick function."); }
         }
 
-        // install action handlers
-        this.installHandlers();
-
         // set widget keys
         this.attr.functionName = opt.functionName || id;
         this.attr.customFunction = opt.customFunction || "";
         this.attr.customLabel = opt.customLabel || "";
         // this.attr.readBack = opt.readBack;
-        this.attr.keyCode = opt.keyCode;
+        this.attr.keyCodes = opt.keyCodes;
+
+        // install action handlers
+        this.installHandlers();
     }
 
     protected installHandlers() {
@@ -173,6 +173,7 @@ export class ButtonEVO extends WidgetEVO {
                 });
                 $(document).on("mouseup", (evt: JQuery.MouseUpEvent) => {
                     this.dragStart = null;
+                    this.mouseDownFlag = false;
                 });
             }
         }).on("mouseup", (evt: JQuery.MouseUpEvent) => {
@@ -186,31 +187,58 @@ export class ButtonEVO extends WidgetEVO {
         });
 
         // add touch events, so the button is mobile device friendly
-        this.overlay.on("touchstart", (evt: JQuery.TouchStartEvent) => {
-            console.log("touchstart");
-            if (evt.changedTouches?.length) {
-                this.touchStart = {
-                    top: evt.changedTouches[0].pageY || 0,
-                    left: evt.changedTouches[0].pageX || 0
-                };
-                $(document).on("touchmove", (evt: JQuery.TouchMoveEvent) => {
-                    this.onMouseDrag(evt);
-                });
-                $(document).on("touchend", (evt: JQuery.TouchEndEvent) => {
-                    this.touchStart = null;
-                });
+        $(document).on("touchstart", (evt: JQuery.TouchStartEvent) => {
+            if (this.hoverFlag) {
+                console.log("touchstart");
+                if (evt.changedTouches?.length) {
+                    this.touchStart = {
+                        top: evt.changedTouches[0].pageY || 0,
+                        left: evt.changedTouches[0].pageX || 0
+                    };
+                }
             }
+        });
+        $(document).on("touchmove", (evt: JQuery.TouchMoveEvent) => {
+            if (this.hoverFlag) {
+                this.onMouseDrag(evt);
+            }
+        });
+        $(document).on("touchend", (evt: JQuery.TouchEndEvent) => {
+            this.touchStart = null;
         });
 
         // bind key events
-        if (this.attr.keyCode) {
-            $(document).on("keydown", (event: JQuery.Event) => {
-                this.onMouseDown();
+        if (this.attr.keyCodes) {
+            const codes: string[] = this.attr?.keyCodes?.split(",").map((key: string) => {
+                return key.trim();
+            }).filter((key:string) => {
+                return key !== "";
             });
-            $(document).on("keyup", (event: JQuery.Event) => {
-                this.onMouseUp();
-            });
+            if (codes?.length > 0) {
+                $(document).on("keydown", (evt: JQuery.KeyDownEvent) => {
+                    this.touchStart = null;
+                    this.dragStart = null;
+                    if (codes.includes(evt.key)) {
+                        this.onKeyDown(evt);
+                    }
+                });
+                $(document).on("keyup", (evt: JQuery.KeyUpEvent) => {
+                    this.touchStart = null;
+                    this.dragStart = null;
+                    if (codes.includes(evt.key)) {
+                        this.onKeyUp(evt);
+                    }
+                });
+            }
         }
+    }
+
+    protected onKeyDown (evt?: JQuery.KeyDownEvent): void {
+        this.onMouseDown();
+    }
+
+    protected onKeyUp (evt?: JQuery.KeyUpEvent): void {
+        this.onMouseUp();
     }
 
     protected onButtonPress (): void {

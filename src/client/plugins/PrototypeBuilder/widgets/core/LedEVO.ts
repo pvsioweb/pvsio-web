@@ -73,8 +73,8 @@ export class LedEVO extends WidgetEVO {
 
         const width: number = parseFloat(`${coords.width}`) || parseFloat(`${coords.height}`) || 1;
         const height = parseFloat(`${coords.height}`) || parseFloat(`${coords.width}`) || 1;
-        const maxWidth: number = parseFloat($(opt.css.parent).css("width")) || width;
-        const maxHeight: number = parseFloat($(opt.css.parent).css("height")) || height;
+        const maxWidth: number = parseFloat($(opt.parent).css("width")) || width;
+        const maxHeight: number = parseFloat($(opt.parent).css("height")) || height;
 
         this.radius = Math.min(width, height, maxWidth, maxHeight) / 2;
 
