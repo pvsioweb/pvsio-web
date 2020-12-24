@@ -82,17 +82,20 @@ export const widget_template: string = `
 <div id="{{id}}"
      style="position:absolute; width:{{width}}px; height:{{height}}px; top:{{top}}px; left:{{left}}px; z-index:{{css.z-index}}; overflow:{{css.overflow}};"
      class="{{type}} noselect{{#if css.blinking}} blink{{/if}}">
+     <div id="{{id}}_img"
+        style="position:absolute;"
+        class="img"></div>
     <div id="{{id}}_base"
-         style="position:absolute; width:{{width}}px; height:{{height}}px; line-height:{{css.line-height}}; {{#each css}} {{@key}}:{{this}};{{/each}}"
-         class="{{type}}_base {{id}}_base"></div>
+         style="position:absolute; width:{{width}}px; height:{{height}}px; {{#each css}} {{@key}}:{{this}};{{/each}}"
+         class="base"></div>
     <div id="{{id}}_overlay"
          style="position:absolute; width:{{width}}px; height:{{height}}px; {{#if css.z-index}}z-index:{{css.z-index}};{{/if}} border-radius:{{css.border-radius}}; cursor:{{css.cursor}}; opacity:0;"
-         class="{{type}}_overlay {{id}}_overlay"></div>
+         class="overlay"></div>
 </div>`;
 
 export const img_template: string = `
-{{#if template_description}}<!-- Template for embedding an image in the div -->{{/if}}
-{{#if img}}<img src="{{img}}" style="z-index:inherit;opacity:{{opacity}};transform-origin:{{transformOrigin}};">{{/if}}
+{{#if template_description}}<!-- Template for embedding an image in a div -->{{/if}}
+{{#if img}}<img src="{{img}}" style="position:absolute; opacity:{{opacity}}; transform-origin:{{transformOrigin}};">{{/if}}
 {{#if svg}}{{svg}}{{/if}}
 `;
 export type Renderable = string | number | {};
@@ -254,9 +257,10 @@ export abstract class WidgetEVO extends Backbone.Model {
 
     widget_template: string;
 
-    div: JQuery<HTMLDivElement>;
-    base: JQuery<HTMLDivElement>;
-    overlay: JQuery<HTMLDivElement>;
+    $div: JQuery<HTMLDivElement>;
+    $img: JQuery<HTMLElement>;
+    $base: JQuery<HTMLElement>;
+    $overlay: JQuery<HTMLElement>;
     marker: JQuery<HTMLElement>;
 
     evts: WidgetEvents = null;
@@ -268,32 +272,11 @@ export abstract class WidgetEVO extends Backbone.Model {
         return "wdg" + Utils.uuid("Wxxxx");    
     }
     /**
-     * @function <a name="ButtonEVO">ButtonEVO</a>
-     * @description Constructor.
-     * @param id {String} The ID of the touchscreen button.
-     * @param coords {Object} The four coordinates (top, left, width, height) of the display, specifying
-     *        the left, top corner, and the width and height of the (rectangular) widget.
-     * @param opt {Object} Style options defining the visual appearance of the widget.
-     *                     Options can be given either as standard html style attributes or using the following widget attributes:
-     *          <li>blinking (bool): whether the button is blinking (default is false, i.e., does not blink)</li>
-     *          <li>align (String): text align: "center", "right", "left", "justify" (default is "center")</li>
-     *          <li>backgroundColor (String): background display color (default is "transparent")</li>
-     *          <li>borderColor (String): border color, must be a valid HTML5 color (default is "steelblue")</li>
-     *          <li>borderRadius (Number|String): border radius, must be a number or a valid HTML5 border radius, e.g., 2, "2px", etc. (default is 0, i.e., square border)</li>
-     *          <li>borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid", "dotted", "dashed", etc. (default is "none")</li>
-     *          <li>borderWidth (Number): border width (if option borderColor !== null then the default border is 2px, otherwise 0px, i.e., no border)</li>
-     *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
-     *          <li>fontFamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
-     *          <li>fontSize (Number): font size (default is (coords.height - opt.borderWidth) / 2 ))</li>
-     *          <li>marginLeft (Number): left margin (default is 0)</li>
-     *          <li>marginTop (Number): top margin (default is 0)</li>
-     *          <li>opacity (Number): opacity of the button. Valid range is [0..1], where 0 is transparent, 1 is opaque (default is 0.9, i.e., semi-opaque)</li>
-     *          <li>parent (String): the HTML element where the display will be appended (default is "body")</li>
-     *          <li>position (String): standard HTML position attribute indicating the position of the widget with respect to the parent, e.g., "relative", "absolute" (default is "absolute")</li>
-     *          <li>visibleWhen (String): boolean expression indicating when the display is visible. The expression can use only simple comparison operators (=, !=) and boolean constants (true, false). Default is true (i.e., always visible).</li>
-     *          <li>zIndex (String): z-index property of the widget (default is 1)</li>
-     * @memberof module:WidgetEVO
-     * @instance
+     * Creates an instance of the widget.
+     * The widget is attached to the DOM only with the render function is invoked for the first time.
+     * DOM elements are created using createHTMLElement. Handlers associated to the DOM elements are installed with installHandlers.
+     * All derived class should use createHTMLElement to create additional DOM elements and installHandlers to install handlers.
+     * The render function in all derived classes should start with an invocation of the render function from WidgetEVO, otherwise $div $img $base $overlay are not initialized.
      */
     constructor (id: string, coords: Coords, opt?: WidgetOptions) {
         super();
@@ -302,9 +285,10 @@ export abstract class WidgetEVO extends Backbone.Model {
         coords = coords || {};
         this.id = id;
         this.type = opt.type || "widget";
-        this.parent = (opt.parent) ? 
-            opt.parent.startsWith("#") || opt.parent.startsWith(".") ? 
-                opt.parent : ("#" + opt.parent) : "body";
+        opt.parent = opt.parent || "body";
+        opt.parent = opt.parent === "body" || opt.parent.startsWith("#") || opt.parent.startsWith(".") ? opt.parent
+            : `#${opt.parent}`;
+        this.parent = opt.parent;
         this.top = parseFloat(`${coords.top}`) || 0;
         this.left = parseFloat(`${coords.left}`) || 0;
         this.width = isNaN(parseFloat(`${coords.width}`)) ? 32 : parseFloat(`${coords.width}`);
@@ -336,30 +320,32 @@ export abstract class WidgetEVO extends Backbone.Model {
         this.css.overflow = opt.css.overflow || "visible";
         this.css["white-space"] = opt.css["white-space"] || "nowrap";
         this.css.blinking = opt.css.blinking === "true" ? "true" : undefined;
-        this.css["overlay-color"] = opt.css["overlay-color"] || "yellow"; // this is the color of the halo shown around the button when e.g., the mouse is over the button
+        this.css["overlay-color"] = opt.css["overlay-color"] || "yellow"; // this is the color of the halo shown around the widget when e.g., the mouse is over the button
+        this.css["z-index"] = opt.css["z-index"] || 0;
 
         this.widget_template = opt.widget_template || widget_template;
     }
 
-    createHTMLElement (): void {
-        this.rendered = true;
-
+    /**
+     * Creates HTML elements
+     */
+    protected createHTMLElement (): void {
         const res: string = Handlebars.compile(this.widget_template, { noEscape: true })(this);
         if (!$(this.parent)[0]) {
             console.error("Error: " + this.parent + " does not exist. Widget '" + this.id + "' cannot be attached to DOM :((");
         }
 
         $(this.parent).append(res);
-        this.div = $("#" + this.id);
-        this.base = $("#" + this.id + "_base");
-        this.overlay = $("#" + this.id + "_overlay");
+        this.$div = $("#" + this.id);
+        this.$img = this.$div.find(".img");
+        this.$base = this.$div.find(".base");
+        this.$overlay = this.$div.find(".overlay");
         this.setCSS(this.css);
-
-        this.hide();
+        this.rendered = true;
     }
 
     /**
-     * Installs event handlers
+     * Installs event handlers, e.g., for click events, mouse over, etc.
      */
     protected installHandlers (): void {}
 
@@ -370,7 +356,10 @@ export abstract class WidgetEVO extends Backbone.Model {
      * @instance
      */
     render (state?: Renderable, opt?: CSS): void {
-        return this.reveal();
+        if (!this.rendered) {
+            this.createHTMLElement();
+            this.installHandlers();
+        }
     }
 
     /**
@@ -398,9 +387,9 @@ export abstract class WidgetEVO extends Backbone.Model {
      * @instance
      */
     reveal (): void {
-        if (this.div && this.div[0]) {
+        if (this.$div && this.$div[0]) {
             // console.log("revealing widget " + this.id);
-            this.div.css("display", "block");
+            this.$div.css("display", "block");
         }
     }
 
@@ -411,9 +400,9 @@ export abstract class WidgetEVO extends Backbone.Model {
      * @instance
      */
     hide (): void {
-        if (this.div && this.div[0]) {
+        if (this.$div && this.$div[0]) {
             // console.log("hiding widget " + this.id);
-            this.div.css("display", "none");
+            this.$div.css("display", "none");
         }
     }
 
@@ -430,14 +419,14 @@ export abstract class WidgetEVO extends Backbone.Model {
     move (coords: Coords, opt?: CSS): void {
         opt = opt || {};
         // console.log(coords);
-        if (this.div && this.div[0]) {
+        if (this.$div && this.$div[0]) {
             coords = coords || {};
             // opt = normalise_options(opt);
             opt.duration = opt.duration || 0;
             opt.transitionTimingFunction = opt.transitionTimingFunction || "ease-out";
             this.top = isNaN(parseFloat(`${coords.top}`)) ? this.top : +parseFloat(`${coords.top}`).toFixed(WidgetEVO.MAX_COORDINATES_ACCURACY);
             this.left = isNaN(parseFloat(`${coords.left}`)) ? this.left : +parseFloat(`${coords.left}`).toFixed(WidgetEVO.MAX_COORDINATES_ACCURACY);
-            this.div.animate({
+            this.$div.animate({
                 "top": this.top + "px",
                 "left": this.left + "px",
                 "transition-timing-function": opt.transitionTimingFunction
@@ -456,15 +445,15 @@ export abstract class WidgetEVO extends Backbone.Model {
      * @memberof module:WidgetEVO
      * @instance
      */
-    resize (size: { height?: number | string, width?: number | string}, opt?: CSS): void {
+    resize (coords: Coords, opt?: CSS): void {
         // console.log(coords);
-        if (this.div && this.div[0]) {
-            size = size || {};
+        if (this.$div && this.$div[0]) {
+            coords = coords || {};
             opt = opt || {};
             opt.duration = opt.duration || 0;
             opt.transitionTimingFunction = opt.transitionTimingFunction || "ease-out";
-            this.height = isNaN(parseFloat(`${size.height}`)) ? this.height : +parseFloat(`${size.height}`).toFixed(WidgetEVO.MAX_COORDINATES_ACCURACY);
-            this.width = isNaN(parseFloat(`${size.width}`)) ? this.width : +parseFloat(`${size.width}`).toFixed(WidgetEVO.MAX_COORDINATES_ACCURACY);
+            this.height = isNaN(parseFloat(`${coords.height}`)) ? this.height : +parseFloat(`${coords.height}`).toFixed(WidgetEVO.MAX_COORDINATES_ACCURACY);
+            this.width = isNaN(parseFloat(`${coords.width}`)) ? this.width : +parseFloat(`${coords.width}`).toFixed(WidgetEVO.MAX_COORDINATES_ACCURACY);
 
             // update font size
             const matchBorder: RegExpMatchArray = /\d+px/.exec(opt?.border);
@@ -478,14 +467,15 @@ export abstract class WidgetEVO extends Backbone.Model {
             this.css["font-size"] = fontSize + "px";
 
             if (opt.duration) {
-                this.div.animate({ "height": this.height + "px", "width": this.width + "px", "transition-timing-function": opt.transitionTimingFunction }, +opt.duration);
-                this.base.css("font-size", this.css["font-size"]).animate({ "line-height": this.height + "px", "height": this.height + "px", "width": this.width + "px", "transition-timing-function": opt.transitionTimingFunction }, +opt.duration);
-                this.overlay.animate({ "height": this.height + "px", "width": this.width + "px", "transition-timing-function": opt.transitionTimingFunction }, +opt.duration);
+                this.$div.animate({ "height": this.height + "px", "width": this.width + "px", "transition-timing-function": opt.transitionTimingFunction }, +opt.duration);
+                this.$base.css("font-size", this.css["font-size"]).animate({ "line-height": this.height + "px", "height": this.height + "px", "width": this.width + "px", "transition-timing-function": opt.transitionTimingFunction }, +opt.duration);
+                this.$overlay.animate({ "height": this.height + "px", "width": this.width + "px", "transition-timing-function": opt.transitionTimingFunction }, +opt.duration);
             } else {
-                this.div.css("height", this.height + "px").css("width", this.width + "px");
-                this.base.css("line-height", this.height + "px").css("height", this.height + "px").css("width", this.width + "px").css("font-size", this.css["font-size"]);
-                this.overlay.css("height", this.height + "px").css("width", this.width + "px");
+                this.$div.css("height", this.height + "px").css("width", this.width + "px");
+                this.$base.css("line-height", this.height + "px").css("height", this.height + "px").css("width", this.width + "px").css("font-size", this.css["font-size"]);
+                this.$overlay.css("height", this.height + "px").css("width", this.width + "px");
             }
+            this.move(coords, opt); // resize may change the top/left position of the widget
         }
         this.reveal();
     }
@@ -502,18 +492,18 @@ export abstract class WidgetEVO extends Backbone.Model {
      * @instance
      */
     rotate (deg: string | number, opt?: CSS): void {
-        if (this.div && this.div[0]) {
+        if (this.$div && this.$div[0]) {
             deg = (isNaN(parseFloat(`${deg}`))) ? 0 : parseFloat(`${deg}`);
             opt = opt || {};
             opt.duration = opt.duration || 0;
             opt.transitionTimingFunction = opt.transitionTimingFunction || "ease-in";
             opt.transformOrigin = opt.transformOrigin || "center";
-            this.div.css({
+            this.$div.css({
                 "transform": `rotate(${deg}deg)`,
                 "transform-origin": opt.transformOrigin
             });
             if (opt.duration) {
-                this.div.css({ "transition": `all ${opt.duration}ms ${opt.transitionTimingFunction} 0s` });
+                this.$div.css({ "transition": `all ${opt.duration}ms ${opt.transitionTimingFunction} 0s` });
             }
         }
         this.reveal();
@@ -526,8 +516,8 @@ export abstract class WidgetEVO extends Backbone.Model {
      * @instance
      */
     remove (): void {
-        if (this.div && this.div[0]) {
-            this.div.remove();
+        if (this.$div && this.$div[0]) {
+            this.$div.remove();
         }
     }
 
@@ -622,29 +612,35 @@ export abstract class WidgetEVO extends Backbone.Model {
             // update DOM
             switch (key) {
                 case "z-index": {
-                    this.div.css(key, style[key]);
+                    this.$div.css(key, style[key]);
+                    break;
+                }
+                case "width":
+                case "height": {
+                    this.$overlay.css(key, `${parseFloat(`${style[key]}`)}px`);
+                    this.$base.css(key, `${parseFloat(`${style[key]}`)}px`);
                     break;
                 }
                 case "border-radius": {
-                    this.overlay.css(key, style[key]);
-                    this.base.css(key, style[key]);
+                    this.$overlay.css(key, style[key]);
+                    this.$base.css(key, style[key]);
                     break;
                 }
                 case "blinking": {
                     if (style[key] && style[key] !== "false") {
-                        this.base.addClass(key);
+                        this.$base.addClass(key);
                     } else {
-                        this.base.removeClass(key);
+                        this.$base.removeClass(key);
                     }
                     break;
                 }
                 default: {
-                    this.base.css(key, style[key]);
+                    this.$base.css(key, style[key]);
                     break;
                 }
             }
         }
-        this.base.css("position", "absolute"); // position of the base should always be absolute
+        this.$base.css("position", "absolute"); // position of the base should always be absolute
     }
 
     setAttr (attr: WidgetAttr): void {
@@ -662,8 +658,8 @@ export abstract class WidgetEVO extends Backbone.Model {
      * @instance
      */
     invertColors (): void {
-        this.base.css("background-color", this.css["font-color"]);
-        this.base.css("color", this.css["background-color"]);
+        this.$base.css("background-color", this.css["font-color"]);
+        this.$base.css("color", this.css["background-color"]);
     }
 
     isTransparent (color: string): boolean {
@@ -680,12 +676,12 @@ export abstract class WidgetEVO extends Backbone.Model {
     select (opt?: CSS): void {
         opt = opt || {};
         const overlayColor: string = this.css['overlay-color'] || "yellow";
-        this.base.css({
+        this.$base.css({
             ...this.css, 
             "background-color": dimColor(this.css["background-color"], 8),
             ...opt });
-        if (opt.classed) { this.base.addClass(<string> opt.classed); };
-        this.overlay.css({ "box-shadow": `0px 0px 10px ${overlayColor}`, opacity: 1 });
+        if (opt.classed) { this.$base.addClass(<string> opt.classed); };
+        this.$overlay.css({ "box-shadow": `0px 0px 10px ${overlayColor}`, opacity: 1 });
     }
 
     /**
@@ -696,7 +692,7 @@ export abstract class WidgetEVO extends Backbone.Model {
      */
     deselect (): void {
         this.setCSS(this.css);
-        this.overlay.css({ opacity: 0 });
+        this.$overlay.css({ opacity: 0 });
     }
 
     /**

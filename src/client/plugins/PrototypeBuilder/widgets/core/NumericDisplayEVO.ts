@@ -38,14 +38,14 @@ const selectedFontSize = 1.076; // ratio selectedFont/normalFont for integer dig
 export const digitsTemplate: string = `
 {{#if template_description}}<!-- Template defining the visual appearance of integer and fractional part of a numeric display widget -->{{/if}}
 <div class="{{type}}_whole_part" style="position:absolute; left:0px; margin-left:{{whole.margin-left}}px; width:{{whole.width}}px; height:{{whole.height}}px; {{#if whole.margin-top}}margin-top:{{whole.margin-top}};{{/if}} text-align:right; display:inline-flex;">{{#each whole.digits}}
-    <div style="border-radius:2px;text-align:center; width:{{../whole.letter-spacing}}px; min-width:{{../whole.letter-spacing}}px; max-width:{{../whole.letter-spacing}}px; font-size:{{font-size}}px;{{#if selected}} color:{{../whole.background-color}}; background-color:{{../whole.color}}; transform:scale(0.94);{{else}} color:{{../whole.color}}; background-color:{{../whole.background-color}};{{/if}}">{{val}}</div>{{/each}}
+    <div style="position:absolute; border-radius:2px;text-align:center; width:{{../whole.letter-spacing}}px; min-width:{{../whole.letter-spacing}}px; max-width:{{../whole.letter-spacing}}px; margin-left:{{margin-left}}px; font-size:{{font-size}}px;{{#if selected}} color:{{../whole.background-color}}; background-color:{{../whole.color}}; transform:scale(0.94);{{else}} color:{{../whole.color}}; background-color:{{../whole.background-color}};{{/if}}">{{val}}</div>{{/each}}
 </div>
 
 {{#if point.viz}}<div class="{{type}}_decimal_point" style="position:absolute; text-align:center; margin-left:{{point.margin-left}}px; left:{{point.left}}px; width:{{point.width}}px; min-width:{{point.width}}px; max-width:{{point.width}}px; height:{{point.height}}px; text-align:center; font-size:{{point.font-size}}px;">
 &bull;</div>{{/if}}
 
 {{#if frac.viz}}<div class="{{type}}_frac_part" style="position:absolute; left:{{frac.left}}px; width:{{frac.width}}px; height:{{frac.height}}px; {{#if frac.margin-top}}margin-top:{{frac.margin-top}};{{/if}} text-align:left; display:inline-flex;">{{#each frac.digits}}
-    <div style="border-radius:2px; text-align:center; width:{{../frac.letter-spacing}}px; min-width:{{../frac.letter-spacing}}px; max-width:{{../frac.letter-spacing}}px; font-size:{{font-size}}px;{{#if selected}} color:{{../frac.background-color}}; background-color:{{../frac.color}}{{else}} color:{{../frac.color}}; background-color:{{../frac.background-color}}{{/if}}">{{val}}</div>{{/each}}
+    <div style="position:absolute; border-radius:2px; text-align:center; width:{{../frac.letter-spacing}}px; min-width:{{../frac.letter-spacing}}px; max-width:{{../frac.letter-spacing}}px; margin-left:{{margin-left}}px; font-size:{{font-size}}px;{{#if selected}} color:{{../frac.background-color}}; background-color:{{../frac.color}}{{else}} color:{{../frac.color}}; background-color:{{../frac.background-color}}{{/if}}">{{val}}</div>{{/each}}
 </div>{{/if}}`;
 
 export interface NumericDisplayOptions extends DisplayOptions {
@@ -117,7 +117,7 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
         this.css["background-color"] = (opt.css["background-color"] && opt.css["background-color"] !== "transparent") ? opt.css["background-color"] : "black";
 
         // invoke BasicDisplayEVO constructor to create the widget
-        super.createHTMLElement();
+        // super.createHTMLElement();
         
         // add widget-specific style attributes
         this.letterSpacing = parseFloat(this.css["font-size"]) || 1;
@@ -159,6 +159,7 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
      * @instance
      */
     render (state?: Renderable, opt?: NumericCSS): void {
+        super.render();
         if (state !== null && state !== undefined) {
             // set style
             this.setCSS({ ...this.css, ...opt }); // opt overrides this.css
@@ -197,15 +198,27 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
                     max_decimal_digits: this.maxDecimalDigits,
                     cursorPos: 0
                 };
-                desc.whole = parts[0].split("").map((d) => {
-                    return { val: d, selected: false, "font-size": parseFloat(`${this.css["font-size"]}`) };
+                const fontSize: number = parseFloat(`${this.css["font-size"]}`);
+                desc.whole = parts[0].split("").map((d: string, index: number) => {
+                    return { 
+                        val: d, 
+                        selected: false, 
+                        "font-size": fontSize,
+                        "margin-left": index * this.letterSpacing
+                    };
                 });
                 if (parts.length > 1) {
-                    desc.frac = parts[1].split("").map((d) => {
-                        return { val: d, selected: false, "font-size": parseFloat(`${this.css["decimal-font-size"]}`) };
+                    const decimalFontSize: number = parseFloat(`${this.css["decimal-font-size"]}`);
+                    desc.frac = parts[1].split("").map((d: string, index: number) => {
+                        return { 
+                            val: d, 
+                            selected: false, 
+                            "font-size": decimalFontSize,
+                            "margin-left": index * this.letterSpacing
+                        };
                     });
                 }
-                const cursorName: string = `${opt.cursorName}` || this.attr.cursorName;
+                const cursorName: string = <string> opt.cursorName || this.attr.cursorName;
                 desc.cursorPos = parseInt(this.evaluate(cursorName, state));
                 if (!isNaN(desc.cursorPos)) {
                     if (desc.cursorPos >= 0) {
@@ -273,8 +286,8 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
                     frac: frac_style,
                     point: point_style
                 });
-                this.base.empty();
-                this.base.append(dom).css("line-height", `${this.height}px`);
+                this.$base.empty();
+                this.$base.append(dom).css("line-height", `${this.height}px`);
             }
         }
         this.reveal();

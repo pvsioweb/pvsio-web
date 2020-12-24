@@ -6,6 +6,9 @@ import { LedEVO } from './core/LedEVO';
 import { NumericDisplayEVO } from './core/NumericDisplayEVO';
 import { TouchScreenEVO } from './core/TouchScreenEVO';
 import { DialEVO } from './core/DialEVO';
+import { SelectorEVO } from './core/SelectorEVO';
+import { PushButtonEVO } from './core/PushButtonEVO';
+import { ToggleButtonEVO } from './core/ToggleButtonEVO';
 
 export type WidgetClassDescriptor = {
     name: string,
@@ -14,9 +17,12 @@ export type WidgetClassDescriptor = {
 
 export const widgets: WidgetClassDescriptor[] = [
     { name: "Display", cons: BasicDisplayEVO },
-    { name: "Button", cons: ButtonEVO },
-    { name: "LED", cons: LedEVO },
     { name: "Numeric", cons: NumericDisplayEVO },
+    { name: "Button", cons: ButtonEVO },
+    { name: "PushButton", cons: PushButtonEVO },
+    { name: "ToggleButton", cons: ToggleButtonEVO },
     { name: "TouchScreen", cons: TouchScreenEVO },
-    { name: "Knob", cons: DialEVO }
+    { name: "Dial", cons: DialEVO },
+    { name: "Selector", cons: SelectorEVO },
+    { name: "LED", cons: LedEVO }
 ];

@@ -85,7 +85,7 @@ export class MouseCursor extends WidgetEVO {
         const dom: string = Handlebars.compile(img_template, { noEscape: true })({
             svg: mouse_template
         });
-        this.base.append(dom);
+        this.$base.append(dom);
     }
 
     /**

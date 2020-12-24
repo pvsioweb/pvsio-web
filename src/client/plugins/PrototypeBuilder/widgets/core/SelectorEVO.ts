@@ -1,7 +1,6 @@
-import { ActionCallback, ActionsQueue } from "../../../../env/ActionsQueue";
-import { ButtonEVO, ButtonOptions } from "./ButtonEVO";
+import { ButtonOptions } from "./ButtonEVO";
 import { DialEVO, DialOptions } from "./DialEVO";
-import { Coords, img_template, CSS, BasicEvent } from "./WidgetEVO";
+import { Coords, CSS } from "./WidgetEVO";
 
 export interface SelectorOptions extends DialOptions {
     turns: number[] // angles (deg) identifying selector rotations. First value is treated as initial rotation value.
@@ -15,16 +14,17 @@ export class SelectorEVO extends DialEVO {
     constructor (id: string, coords: Coords, opt?: SelectorOptions) {
         super(id, { width: 64, height: 64, ...coords }, { svg: selectorImage, ...opt });
 
-        opt = opt || { turns: [0] };
         opt.css = opt.css || {};
+        opt = opt || { turns: [0, 45] };
         this.turns = opt.turns;
-
-        // reset css
         const size: number = Math.min(this.width, this.height) || 64;
         this.css["border-radius"] = `${size}px`;
         this.css.opacity = opt.css.opacity || 1;
-        this.css["font-size"] = "0px";
-        
+        this.css["font-size"] = "0px";        
+    }
+
+    protected createHTMLElement (opt?: SelectorOptions): void {
+        super.createHTMLElement();
         const initialRotation: number = this.turns?.length ? this.turns[0] : 0;
         if (initialRotation) {
             this.rotate(initialRotation)

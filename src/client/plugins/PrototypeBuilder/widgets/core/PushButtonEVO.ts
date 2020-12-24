@@ -21,9 +21,10 @@ export class PushButtonEVO extends ButtonEVO {
         this.activeColor = opt.activeColor || "black";
         this.inactiveColor = this.css["background-color"];
         this.type = opt.type || "pushbutton";
+    }
 
-        // override default button style
-        this.setCSS(this.css);
+    isActive (): boolean {
+        return this.activeFlag;
     }
 
     /**
@@ -60,8 +61,10 @@ export class PushButtonEVO extends ButtonEVO {
     }
     protected onMouseDown (): void {
         // mouse down events toggle the button status
-        this.activeFlag = true;
-        this.click();
+        if (!this.activeFlag) {
+            this.activeFlag = true;
+            this.click();    
+        }
     }
     protected onMouseUp (): void {
         this.refresh();

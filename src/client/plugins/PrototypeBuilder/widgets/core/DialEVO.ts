@@ -17,7 +17,9 @@ export class DialEVO extends ButtonEVO {
     protected rotation: number = 0;
     protected delta: number = 0;
     
+    protected size: number;
     protected step: number = 10; // deg
+    protected svg: (size: number) => string;
     
     constructor (id: string, coords: Coords, opt?: DialOptions) {
         super(id, { width: 64, height: 64, ...coords }, { keyCodes: "ArrowUp, ArrowDown", ...opt });
@@ -25,22 +27,31 @@ export class DialEVO extends ButtonEVO {
         opt = opt || {};
         opt.css = opt.css || {};
 
-        // reset css
-        const size: number = Math.min(this.width, this.height) || 64;
-        this.css["border-radius"] = `${size}px`;
-        this.css.opacity = opt.css.opacity || 1;
-        this.css["font-size"] = "0px";
-        
-        // append the pointer image to the base layer
-        const dom: string = Handlebars.compile(img_template, { noEscape: true })({
-            svg: opt.svg ? opt.svg(size) : dialImage(size)
-        });
-        this.div.append(dom);
-        this.base.css({ height: `${size}px`, width: `${size}px`, "margin-left": `${(this.width - size) / 2}px` })
-        this.overlay.css({ "border-radius": `${size}px`});
-        this.overlay.css({ height: `${size}px`, width: `${size}px`, "margin-left": `${(this.width - size) / 2}px` })
+        this.size = Math.min(this.width, this.height) || 64;
+        this.svg = opt.svg || dialImage;
 
-        this.render();
+        // reset css
+        this.css["border-radius"] = `${this.size}px`;
+        this.css.opacity = opt.css.opacity || 1;
+        this.css["font-size"] = "0px";        
+    }
+
+    protected createHTMLElement (): void {
+        super.createHTMLElement();
+        const size: number = Math.min(this.width, this.height) || 64;
+        // append the pointer image to the base layer
+        const img: string = Handlebars.compile(img_template, { noEscape: true })({
+            svg: this.svg(this.size)
+        });
+        this.$img.append(img);
+        this.recenter();
+    }
+
+    protected recenter (): void {
+        this.$img.css({ height: `${this.size}px`, width: `${this.size}px`, "margin-left": `${(this.width - this.size) / 2}px` })
+        this.$base.css({ height: `${this.size}px`, width: `${this.size}px`, "margin-left": `${(this.width - this.size) / 2}px` })
+        this.$overlay.css({ "border-radius": `${this.size}px`});
+        this.$overlay.css({ height: `${this.size}px`, width: `${this.size}px`, "margin-left": `${(this.width - this.size) / 2}px` })
     }
 
     getRotation (): number {
@@ -48,6 +59,19 @@ export class DialEVO extends ButtonEVO {
     }
     getDelta (): number {
         return this.delta;
+    }
+
+    //@override
+    resize (coords: Coords, opt?: CSS): void {
+        if (coords) {
+            super.resize(coords);
+            this.size = Math.min(this.width, this.height) || 64;
+            const img: string = Handlebars.compile(img_template, { noEscape: true })({
+                svg: this.svg(this.size)
+            });
+            this.$img.html(img);
+            this.recenter();
+        }
     }
 
     protected onMouseWheel (): void {
@@ -91,7 +115,7 @@ export class DialEVO extends ButtonEVO {
     protected installHandlers() {
         super.installHandlers();
         // bind mouse wheel events
-        this.overlay[0].addEventListener("wheel", (evt: WheelEvent) => {
+        this.$overlay[0].addEventListener("wheel", (evt: WheelEvent) => {
             evt.preventDefault();
             this.delta = evt.deltaY > 0 ? 1
                 : evt.deltaY < 0 ? -1

@@ -25,7 +25,7 @@ export const WidgetEditorEvents = {
 const containerTemplate: string = `
 <div class="card">
     <div class="card-header">
-        <ul class="nav nav-tabs card-header-tabs d-flex flex-nowrap widget-list">
+        <ul class="nav nav-tabs card-header-tabs d-flex flex-nowrap widget-list" style="overflow-x:auto; overflow-y:hidden;">
             {{#each widgets}}
             <li class="nav-item">
                 <a draggable="false" name="{{name}}" class="widget-class nav-link{{#if @first}} active{{/if}}" id="{{name}}-tab" data-toggle="tab" href="#{{name}}" role="tab" aria-controls="{{name}}" aria-selected="true">{{name}}</a>
@@ -159,13 +159,10 @@ export class WidgetEditor extends Backbone.View {
             const name: string = widgets[i].name;
             const coords: Coords = { width, height };
             const previewId: string = uuid();
-            const obj: WidgetEVO = new widgets[i].cons(previewId, coords, { css: { parent: `${name}-preview` } });
+            const obj: WidgetEVO = new widgets[i].cons(previewId, coords, { parent: `${name}-preview` });
 
             const css: CSS = obj.getCSS({
-                all: true,
-                replace: { 
-                    parent: "#Main .image-div"
-                }
+                all: true
             });
             const style: string = Handlebars.compile(styleTemplate)({
                 style: css

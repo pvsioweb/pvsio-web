@@ -85,14 +85,6 @@ export class LedEVO extends WidgetEVO {
         this.css["border-radius"] = opt.css["border-radius"] || `${this.radius}px`;
         this.css.overflow = "visible";
         
-        // create the DOM element
-        super.createHTMLElement();
-        this.base.css({ 
-            width: this.radius * 2,
-            height: this.radius * 2,
-            left: `${this.width / 2 - this.radius}px`
-        });
-
         // delete unnecessary style options
         delete this.css["font-size"];
         delete this.css["font-family"];
@@ -103,6 +95,7 @@ export class LedEVO extends WidgetEVO {
         this.attr = {
             ledName: opt.ledName || id        
         };
+
     }
 
     /**
@@ -127,8 +120,16 @@ export class LedEVO extends WidgetEVO {
      * @instance
      */
     render (state: Renderable, opt?: CSS): void {
+        super.render();
         // set style
         this.setCSS({ ...this.css, ...opt });
+
+        // make sure shape is round
+        this.$base.css({ 
+            width: `${this.radius * 2}px`,
+            height: `${this.radius * 2}px`,
+            left: `${this.width / 2 - this.radius}px`
+        });
 
         // update style, if necessary
         state = (state === undefined || state === null) ? "" : state;

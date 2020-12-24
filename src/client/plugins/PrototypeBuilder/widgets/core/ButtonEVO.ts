@@ -102,7 +102,7 @@ export class ButtonEVO extends WidgetEVO {
         this.connection = opt.connection;
 
         // create the basic widget
-        super.createHTMLElement();
+        // super.createHTMLElement();
 
         // add button-specific functionalities
         this.touchscreenMode = opt.touchscreenMode;
@@ -144,12 +144,12 @@ export class ButtonEVO extends WidgetEVO {
         this.attr.keyCodes = opt.keyCodes;
 
         // install action handlers
-        this.installHandlers();
+        // this.installHandlers();
     }
 
     protected installHandlers() {
         // bind mouse events
-        this.overlay.on("mouseover", (evt: JQuery.MouseOverEvent) => {
+        this.$overlay.on("mouseover", (evt: JQuery.MouseOverEvent) => {
             this.hoverFlag = true;
             this.onMouseOver(evt);
         }).on("mouseout", (evt: JQuery.MouseOutEvent) => {
@@ -164,7 +164,7 @@ export class ButtonEVO extends WidgetEVO {
                     top: evt.pageY || 0,
                     left: evt.pageX || 0
                 };
-                this.overlay.on("mousemove", (evt: JQuery.MouseMoveEvent) => {
+                this.$overlay.on("mousemove", (evt: JQuery.MouseMoveEvent) => {
                     this.onMouseMove(evt);
                 });
                 // we need to attach the listener to the document, otherwise the event is cancelled when the mouse exits the div of the button
@@ -341,23 +341,24 @@ export class ButtonEVO extends WidgetEVO {
      * @instance
      */
     render (state?: string | number | {}, opt?: CSS): void {
+        super.render();
         // set style
         opt = opt || {};
         this.setCSS({ ...this.css, ...opt });
 
         // set line height so text is vertically centered
-        this.base.css("line-height", `${this.lineHeight}px`);
+        this.$base.css("line-height", `${this.lineHeight}px`);
 
         // render content
         state = (state === undefined || state === null)? "" : state;
         // a fixed label is shown if any is specified, otherwise the provided value is displayed
         if (typeof state === "string" || typeof state === "number") {
             const label: string = this.attr["customLabel"] || `${state}`;
-            this.base.html(label);
+            this.$base.html(label);
             this.reveal();
         } else if (typeof state === "object" && this.attr?.displayName !== "" && this.evalViz(state)) {
             const label: string = this.attr["customLabel"] || this.evaluate(this.attr.displayName, state);
-            this.base.html(label);
+            this.$base.html(label);
             this.reveal();
         } else {
             this.hide();

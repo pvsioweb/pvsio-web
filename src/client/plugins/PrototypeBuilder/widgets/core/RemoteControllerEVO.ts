@@ -42,13 +42,13 @@ export class RemoteControllerEVO extends WidgetEVO {
         }, 500);
 
         if (window.DeviceOrientationEvent) {
-            this.base.text("gscope-pre");
+            this.$base.text("gscope-pre");
             this.deviceOrientation = window.addEventListener("deviceorientation", (evt) => {
                 // console.log(evt);
                 if (evt.gamma) {
                     // beta is the horizontal rotation. Range is between -180 and 180. Zero means axis is flush.
                     // gamma is the vertical axis. Ranges between -90 and 90.
-                    this.base.text(evt.gamma.toFixed(0));
+                    this.$base.text(evt.gamma.toFixed(0));
                     this.lastData = {
                         gscope: {
                             alpha: evt.alpha.toFixed(0),

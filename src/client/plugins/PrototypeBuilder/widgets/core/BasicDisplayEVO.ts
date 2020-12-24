@@ -104,24 +104,25 @@ export class BasicDisplayEVO extends WidgetEVO {
      * @instance
      */
     render (state?: string | number | {}, opt?: CSS): void {
-        if (!this.rendered) {
-            // invoke createHTMLElement to create the widget
-            super.createHTMLElement();
-        }
+        super.render();
+        // if (!this.rendered) {
+        //     // invoke createHTMLElement to create the widget
+        //     super.createHTMLElement();
+        // }
         // set style
         this.setCSS({ ...this.css, ...opt });
 
         // set line height so text is properly centered
         const lineHeight: number = parseFloat(this.css["line-height"]) || this.height;
-        this.base.css("line-height", `${lineHeight}px`);
+        this.$base.css("line-height", `${lineHeight}px`);
 
         // render content
         state = (state === undefined || state === null)? "" : state;
         if (typeof state === "string" || typeof state === "number") {
-            this.base.html(`${state}`);
+            this.$base.html(`${state}`);
             this.reveal();
         } else if (typeof state === "object" && this.attr?.displayName !== "" && this.evalViz(state)) {
-            this.base.html(this.evaluate(this.attr.displayName, state));
+            this.$base.html(this.evaluate(this.attr.displayName, state));
             this.reveal();
         } else {
             this.hide();
@@ -163,7 +164,7 @@ export class BasicDisplayEVO extends WidgetEVO {
     renderGlyphicon (icon, opt) {
         this.setCSS(opt);
         if (icon) {
-            this.base.addClass("blink glyphicon " + icon).css("font-family", "");
+            this.$base.addClass("blink glyphicon " + icon).css("font-family", "");
         }
         this.reveal();
         return this;

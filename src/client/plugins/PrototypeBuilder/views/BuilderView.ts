@@ -31,17 +31,25 @@ export const contentTemplate: string = `
 </div>
 <div class="image-overlay container-fluid" style="padding-left:0;"></div>`;
 
+export type WidgetsMap = { [id: string]: WidgetEVO };
 export class BuilderView extends View {
     
     protected $imageOverlay: JQuery<HTMLElement>;
     protected $imageDiv: JQuery<HTMLElement>;
 
-    protected hotspots: HotspotEditor;
+    protected hotspotEditor: HotspotEditor;
+    protected widgets: WidgetsMap = {};
 
     constructor (widgetManager: WidgetManager, data: BuilderViewOptions, connection: Connection, opt?: { localFiles?: boolean }) {
         super(widgetManager, data, connection);        
         this.render(data, opt);
         this.installHandlers();
+    }
+
+    events (): Backbone.EventsHash {
+        return {
+            "click button.btn-primary": "clickLoadImage"
+        };
     }
 
     render (data?: BuilderViewOptions, opt?: { localFiles?: boolean }): BuilderView {
@@ -53,54 +61,34 @@ export class BuilderView extends View {
         return this;
     }
 
-    async showDialog (data: HotspotData): Promise<boolean> {
+    async editWidget (hotspotData: HotspotData): Promise<WidgetEVO | null> {
         return new Promise((resolve, reject) => {
-            const editor: WidgetEditor = new WidgetEditor(this.widgetManager, data);
-            editor.on(WidgetEditorEvents.ok, (data: WidgetData) => {
-                if (data) {
-                    console.log(data);
-                    if (data.type) {
+            const editor: WidgetEditor = new WidgetEditor(this.widgetManager, hotspotData);
+            editor.on(WidgetEditorEvents.ok, (widgetData: WidgetData) => {
+                if (widgetData) {
+                    console.log(widgetData);
+                    if (widgetData.type) {
                         const desc: WidgetClassDescriptor = widgets.find((desc: WidgetClassDescriptor) => {
-                            return desc.name === data.type;
+                            return desc.name === widgetData.type;
                         });
                         console.log(desc);
                         if (desc) {
-                            const widget: WidgetEVO = new desc.cons(data.id, data.coords, data.opt);
+                            if (this.widgets[hotspotData.id]) {
+                                this.widgets[hotspotData.id].remove();
+                            }
+                            const widget: WidgetEVO = new desc.cons(widgetData?.id, widgetData?.coords, { parent: ".image-div", ...widgetData?.opt });
                             widget.renderSample();
                             console.log(widget);
-                            return resolve(true);
+                            this.widgets[hotspotData.id] = widget;
+                            return resolve(widget);
                         }
                     }
                 }
-                return resolve(false);
+                return resolve(null);
             });
             editor.on(WidgetEditorEvents.cancel, (data: WidgetData) => {
-                resolve(false);
+                resolve(null);
             });
-        });
-    }
-
-    protected installOpenLocalFileHandler (cb: (desc: Utils.FileDescriptor) => void, opt?: { isImage?: boolean }): void {
-        const customFileInput: JQuery<HTMLElement> = this.$imageDiv.find(".custom-file-input");
-        (opt?.isImage) ? customFileInput.attr("accept", "image/*") 
-            : customFileInput.attr("accept", "*");
-        customFileInput.on("change", (evt: JQuery.ChangeEvent) => {
-            const file: File = evt?.currentTarget?.files[0];
-            const reader: FileReader = new FileReader();
-            reader.addEventListener('loadend', (evt: ProgressEvent<FileReader>) => {
-                const fileContent: string = reader.result?.toString();
-                customFileInput.trigger("reset");
-                customFileInput.off("input");
-                if (cb) {
-                    cb ({
-                        fileName: Utils.getFileName(file.name),
-                        fileExtension: Utils.getFileExtension(file.name),
-                        contextFolder: null,
-                        fileContent
-                    });
-                }
-            });
-            reader.readAsDataURL(file);
         });
     }
 
@@ -125,80 +113,82 @@ export class BuilderView extends View {
             this.$imageDiv.html(imageElement);
             this.$imageDiv.css({ border: "1px solid black" });
 
-            this.hotspots = new HotspotEditor(this.widgetManager, {
+            this.hotspotEditor = new HotspotEditor(this.widgetManager, {
                 el: this.$imageDiv.find("img")[0],
                 overlay: this.$imageOverlay[0]
             });
+
             // install handlers for hotspot events
-            this.hotspots.on(HotspotEditorEvents.DidCreateHotspot, (data: HotspotData) => {
-                // this.showDialog(data);
+            this.hotspotEditor.on(HotspotEditorEvents.DidCreateHotspot, (data: HotspotData) => {
+                // do nothing, editing is triggered by double click on the hotspot
             });
-            this.hotspots.on(HotspotEditorEvents.EditHotspot, (data: HotspotData) => {
-                this.showDialog(data);
+            this.hotspotEditor.on(HotspotEditorEvents.DidMoveHotspot, (data: HotspotData) => {
+                console.log("move", data);
+                this.widgets[data.id]?.move(data.coords);
+            });
+            this.hotspotEditor.on(HotspotEditorEvents.DidResizeHotspot, (data: HotspotData) => {
+                console.log("resize", data);
+                this.widgets[data.id]?.resize(data.coords);
+            });
+            this.hotspotEditor.on(HotspotEditorEvents.EditHotspot, async (data: HotspotData) => {
+                await this.editWidget(data);
             });
         });
 
-        this.$el.find(".load-image-btn").on("click", (evt: JQuery.ClickEvent) => {
-            const req: OpenFileDialog = {
-                type: "openFileDialog",
-                image: true
-            };
-            this.connection?.sendRequest(req, (desc: Utils.FileDescriptor) => {
-                if (desc && desc.fileContent) {
-                    const imageElement: HTMLImageElement = new Image();
-                    imageElement.src = desc.fileContent;
-                    this.$imageDiv.html(imageElement);
-                    this.$imageDiv.css({ border: "none" });
+        // this.$el.find(".load-image-btn").on("click", (evt: JQuery.ClickEvent) => {
+        //     const req: OpenFileDialog = {
+        //         type: "openFileDialog",
+        //         image: true
+        //     };
+        //     this.connection?.sendRequest(req, (desc: Utils.FileDescriptor) => {
+        //         if (desc && desc.fileContent) {
+        //             const imageElement: HTMLImageElement = new Image();
+        //             imageElement.src = desc.fileContent;
+        //             this.$imageDiv.html(imageElement);
+        //             this.$imageDiv.css({ border: "none" });
 
-                    const $image: JQuery<HTMLImageElement> = this.$imageDiv.find("img");
-                    $image.attr("id", this.id).addClass(this.viewId);
+        //             const $image: JQuery<HTMLImageElement> = this.$imageDiv.find("img");
+        //             $image.attr("id", this.id).addClass(this.viewId);
 
-                    this.hotspots = new HotspotEditor(this.widgetManager, {
-                        el: $image[0],
-                        overlay: this.$imageOverlay[0]
-                    });
-                    // install handlers for hotspot events
-                    this.hotspots.on(HotspotEditorEvents.DidCreateHotspot, (data: HotspotData) => {
-                        // this.showDialog(data);
-                    });
-                    this.hotspots.on(HotspotEditorEvents.EditHotspot, (data: HotspotData) => {
-                        this.showDialog(data);
-                    });
-                }
-            });
-        });
+        //             this.hotspotEditor = new HotspotEditor(this.widgetManager, {
+        //                 el: $image[0],
+        //                 overlay: this.$imageOverlay[0]
+        //             });
+        //             // install handlers for hotspot events
+        //             this.hotspotEditor.on(HotspotEditorEvents.DidCreateHotspot, (data: HotspotData) => {
+        //                 // this.showDialog(data);
+        //             });
+        //             this.hotspotEditor.on(HotspotEditorEvents.EditHotspot, (data: HotspotData) => {
+        //                 this.showDialog(data);
+        //             });
+        //         }
+        //     });
+        // });
     }
 
+    // async loadImageContent (desc: Utils.FileDescriptor): Promise<boolean> {
+    //     if (desc && desc.fileContent) {
+    //         const imageElement: HTMLImageElement = new Image();
+    //         imageElement.src = desc.fileContent;
+    //         this.$imageDiv.html(imageElement);
+    //         const $image: JQuery<HTMLImageElement> = this.$imageDiv.find("img");
+    //         $image.attr("id", this.id).addClass(this.viewId);
 
-    events (): Backbone.EventsHash {
-        return {
-            "click button.btn-primary": "clickLoadImage"
-        };
-    }
-
-    async loadImageContent (desc: Utils.FileDescriptor): Promise<boolean> {
-        if (desc && desc.fileContent) {
-            const imageElement: HTMLImageElement = new Image();
-            imageElement.src = desc.fileContent;
-            this.$imageDiv.html(imageElement);
-            const $image: JQuery<HTMLImageElement> = this.$imageDiv.find("img");
-            $image.attr("id", this.id).addClass(this.viewId);
-
-            this.hotspots = new HotspotEditor(this.widgetManager, {
-                el: $image[0],
-                overlay: this.$imageOverlay[0]
-            });
-            // install handlers for hotspot events
-            this.hotspots.on(HotspotEditorEvents.DidCreateHotspot, (data: HotspotData) => {
-                // this.showDialog(data);
-            });
-            this.hotspots.on(HotspotEditorEvents.EditHotspot, (data: HotspotData) => {
-                this.showDialog(data);
-            });
-            return true;
-        }
-        return false;
-    }
+    //         this.hotspotEditor = new HotspotEditor(this.widgetManager, {
+    //             el: $image[0],
+    //             overlay: this.$imageOverlay[0]
+    //         });
+    //         // install handlers for hotspot events
+    //         this.hotspotEditor.on(HotspotEditorEvents.DidCreateHotspot, (data: HotspotData) => {
+    //             // this.showDialog(data);
+    //         });
+    //         this.hotspotEditor.on(HotspotEditorEvents.EditHotspot, (data: HotspotData) => {
+    //             this.editWidget(data);
+    //         });
+    //         return true;
+    //     }
+    //     return false;
+    // }
 
     async sendLoadImageRequest(desc: Utils.FileDescriptor): Promise<boolean> {
         const fname: string = Utils.desc2fname(desc);

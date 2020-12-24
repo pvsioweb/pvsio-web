@@ -88,7 +88,7 @@ export class Stylus extends WidgetEVO {
         const dom = Handlebars.compile(img_template, { noEscape: true })({
             svg: stylus_white
         });
-        this.base.append(dom);
+        this.$base.append(dom);
     }
 
      
@@ -160,14 +160,14 @@ export class Stylus extends WidgetEVO {
      */
     move (coords: Coords, opt?: CSS) {
         super.move(coords, opt);
-        if (this.div && this.div[0]) {
+        if (this.$div && this.$div[0]) {
             opt = opt || {};
             // the translation needs to be normalised by the top / left attributes of the div
             opt.duration = opt.duration || 1000;
             opt.transitionTimingFunction = opt.transitionTimingFunction || "ease-out";
             opt.rotation = (opt.rotation !== undefined) ? opt.rotation : "auto";
             const rotation_val: number = (opt.rotation === "auto") ? 35 : 0;
-            this.base.css("transform", "rotate(" + rotation_val + "deg)")
+            this.$base.css("transform", "rotate(" + rotation_val + "deg)")
                 .css("transform-origin", "bottom")
                 .css("transition-duration", opt.duration + "ms")
                 .css("transition-timing-function", opt.transitionTimingFunction);
@@ -197,8 +197,8 @@ export class Stylus extends WidgetEVO {
      * @instance
      */
     reveal () {
-        if (this.div && this.div[0] && this.div.css("display") !== "block") {
-            this.div.css("display", "block").css("opacity", 0).animate({ "opacity": this.opacity }, 250);
+        if (this.$div && this.$div[0] && this.$div.css("display") !== "block") {
+            this.$div.css("display", "block").css("opacity", 0).animate({ "opacity": this.opacity }, 250);
         }
         return this;
     };
@@ -211,11 +211,11 @@ export class Stylus extends WidgetEVO {
      * @instance
      */
     hide () {
-        if (this.div && this.div[0] && this.div.css("display") === "block") {
-            this.div.animate({ "opacity": 0 }, 250);
+        if (this.$div && this.$div[0] && this.$div.css("display") === "block") {
+            this.$div.animate({ "opacity": 0 }, 250);
             setTimeout(() => {
                 this.move(this.initial_position, { rotation: "0deg" });
-                this.div.css("display", "none");
+                this.$div.css("display", "none");
             }, 260);
         }
         return this;
