@@ -24,8 +24,8 @@ export const WidgetEditorEvents = {
 // all input forms must have attributes "name" and "value", as they will be used to identify key and value of coords, attr, css
 const containerTemplate: string = `
 <div class="card">
-    <div class="card-header">
-        <ul class="nav nav-tabs card-header-tabs d-flex flex-nowrap widget-list" style="overflow-x:auto; overflow-y:hidden;">
+    <div class="card-header" style="position:absolute; left:-180px; background:gainsboro; border-radius:4px; padding-bottom:22px;">
+        <ul class="nav flex-column flex-nowrap nav-pills card-header-tabs widget-list" style="overflow-y:auto; overflow-x:hidden; max-height:408px;">
             {{#each widgets}}
             <li class="nav-item">
                 <a draggable="false" name="{{name}}" class="widget-class nav-link{{#if @first}} active{{/if}}" id="{{name}}-tab" data-toggle="tab" href="#{{name}}" role="tab" aria-controls="{{name}}" aria-selected="true">{{name}}</a>
@@ -235,7 +235,7 @@ export class WidgetEditor extends Backbone.View {
     }
 
     protected updateDialogTitle (): void {
-        setDialogTitle("Editing widget " + this.widgetData.id)
+        setDialogTitle("Editing " + this.widgetData.id)
     }
 
     protected getDialogObject<T> (elem: string): T {
