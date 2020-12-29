@@ -24,17 +24,20 @@
  *
  */
 
-import { Connection } from "../../../../env/Connection";
-import { DisplayOptions } from "./BasicDisplayEVO";
-import { ButtonEVO, ButtonOptions } from "./ButtonEVO";
-import { Coords } from "./WidgetEVO";
+import { DisplayAttr, DisplayOptions } from "./BasicDisplayEVO";
+import { ButtonAttr, ButtonEVO, ButtonOptions } from "./ButtonEVO";
+import { Coords, CSS } from "./WidgetEVO";
 
 export interface TouchScreenOptions extends DisplayOptions, ButtonOptions { };
 
+export interface TouchScreenAttr extends DisplayAttr, ButtonAttr { };
+
 export class TouchScreenEVO extends ButtonEVO {
 
+    protected attr: TouchScreenAttr;
+    
     constructor (id: string, coords: Coords, opt?: TouchScreenOptions) {
-        super(id, coords, { ...opt, touchscreenMode: true });
+        super(id, coords, opt);
         opt = opt || {};
         opt.css = opt.css || {};
 
@@ -46,6 +49,31 @@ export class TouchScreenEVO extends ButtonEVO {
         // set widget keys
         this.attr.displayName = opt.displayName || id;
     }
+
+    // @override
+    protected onButtonPress (): void {
+        if (this.evts.press) {
+            this.pressAndHold();
+        }
+    };
+    // @override
+    protected onButtonRelease (): void {
+        if (this.evts.release) {
+            this.release();
+        } else if (this.evts.click) {
+            this.click();  // touchscreen buttons register a click when the button is released
+        }
+    };
+
+    render (state?: string | number | {}, opt?: CSS): void {
+        super.render(state, opt);
+        if (typeof state === "object" && this.attr?.displayName !== "" && this.evalViz(state)) {
+            const label: string = this.attr["customLabel"] || this.evaluate(this.attr.displayName, state);
+            this.$base.html(label);
+            this.reveal();
+        }
+    }
+
 
     /**
      * @function <a name="renderSample">renderSample</a>

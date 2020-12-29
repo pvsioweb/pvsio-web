@@ -27,13 +27,18 @@
  *
  */
 
-import { Coords, WidgetEVO, WidgetOptions, CSS } from "./WidgetEVO";
+import { Coords, WidgetEVO, WidgetOptions, CSS, WidgetAttr } from "./WidgetEVO";
 
 export interface DisplayOptions extends WidgetOptions {
     displayName?: string
-}
+};
+
+export interface DisplayAttr extends WidgetAttr {
+    displayName: string
+};
 
 export class BasicDisplayEVO extends WidgetEVO {
+    protected attr: DisplayAttr;
 
     /**
      * @function <a name="BasicDisplayEVO">BasicDisplayEVO</a>

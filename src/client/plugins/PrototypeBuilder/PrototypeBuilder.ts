@@ -7,7 +7,7 @@ import { Connection } from '../../env/Connection';
 // Prompt              = require("pvsioweb/forms/displayPrompt"),
 
 import * as Utils from '../../env/Utils';
-import { BuilderView } from './views/BuilderView';
+import { BuilderEvents, BuilderView, DidCreateWidgetEvent } from './views/BuilderView';
 import { WidgetsListView } from './views/WidgetsListView';
 import { WidgetManager } from "./WidgetManager";
 import { SettingsView } from './views/SettingsView';
@@ -90,8 +90,8 @@ export class PrototypeBuilder implements PVSioWebPlugin {
 
     protected widgetManager: WidgetManager;
 
-    protected widgetListView: WidgetsListView;
-    protected prototypeImageViews: { [screenId: string]: View };
+    protected sideView: WidgetsListView;
+    protected centralViews: { [screenId: string]: View };
 
     constructor () {
         this.widgetManager = new WidgetManager();
@@ -112,20 +112,20 @@ export class PrototypeBuilder implements PVSioWebPlugin {
         this.body = this.createPanelBody({
             parent: this.panel.$content
         });
-
-        this.widgetListView = new WidgetsListView(this.widgetManager, {
-            el: this.panel.$content.find(".widget-list")[0]
-        });
+        
         const bodyDiv: HTMLElement = this.panel.$content.find(`.prototype-screens`)[0];
         const headerDiv: HTMLElement = this.panel.$content.find(`.prototype-screen-list`)[0];
-        this.prototypeImageViews = {
-            "Settings": new SettingsView(this.widgetManager, {
+        this.sideView = new WidgetsListView(this.widgetManager, {
+            el: this.panel.$content.find(".widget-list")[0]
+        });
+        this.centralViews = {
+            Settings: new SettingsView(this.widgetManager, {
                 viewId: "Settings",
                 screenName: "Settings",
                 el: bodyDiv,
                 headerDiv,
             }, this.connection),
-            "Main": new BuilderView(this.widgetManager, {
+            Main: new BuilderView(this.widgetManager, {
                 viewId: "Main",
                 screenName: "Main",
                 el: bodyDiv,
@@ -135,6 +135,10 @@ export class PrototypeBuilder implements PVSioWebPlugin {
                 localFiles: true
             })
         };
+
+        this.centralViews.Main.on(BuilderEvents.DidCreateWidget, (evt: DidCreateWidgetEvent) => {
+            this.sideView.refresh(evt?.widgets);
+        });
 
         return true;
     }

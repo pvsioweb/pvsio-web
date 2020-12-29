@@ -70,7 +70,7 @@ export function setDialogTitle (title: string): JQuery<HTMLElement> {
 }
 export const DBLCLICK_TIMEOUT: number = 300; //ms -- if two consecutive clicks are registered in a time frame lower than this timeout, then it's a double click
 export const dialogTemplate: string = `
-<div class="modal fade show" id="{{dialogId}}" tabindex="-1" role="dialog" aria-labelledby="{{dialogId}}-title" aria-hidden="true" style="display:{{#if hidden}}none{{else}}block{{/if}}; opacity:0.98;">
+<div class="modal fade show" id="{{dialogId}}" tabindex="-1" role="dialog" aria-labelledby="{{dialogId}}-title" aria-hidden="true" style="display:{{#if hidden}}none{{else}}block{{/if}};">
     <div class="modal-dialog-shadow" style="width: 100%; height: 100%; position: absolute; background: black; opacity: 0.8;"></div>
     <div class="modal-dialog modal-dialog-centered{{#if largeModal}} modal-lg{{/if}}" role="document">
         <div class="modal-content">

@@ -22,7 +22,7 @@
  *
  */
 import { ActionCallback } from "../../../../env/ActionsQueue";
-import { WidgetOptions, Coords, WidgetEVO, CSS, Renderable } from "./WidgetEVO";
+import { WidgetOptions, Coords, WidgetEVO, CSS, Renderable, WidgetAttr } from "./WidgetEVO";
 
 export interface LedOptions extends WidgetOptions {
     ledName?: string,
@@ -33,7 +33,12 @@ const COLOR = {
     brightGreen: "#00FF66"
 };
 
+export interface LedAttr extends WidgetAttr {
+    ledName: string
+};
+
 export class LedEVO extends WidgetEVO {
+    protected attr: LedAttr;
     protected radius: number;
     /**
      * @function <a name="LedEVO">LedEVO</a>

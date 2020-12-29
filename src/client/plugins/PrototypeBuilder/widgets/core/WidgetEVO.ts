@@ -149,7 +149,7 @@ export const cssKeys = {
     "font-size": [ "string" ],
     "font-family": [ "string" ],
 
-    "color": [ "string" ],
+    color: [ "string" ],
     align: [ "string" ],
     border: [ "string" ],
     "border-radius": [ "string" ],
@@ -161,15 +161,10 @@ export const cssKeys = {
     "white-space": [ "normal", "nowrap" ],
     "line-height": [ "string" ],
 
-    "margin-left": [ "string" ],
-    "margin-top": [ "string" ],
-    "margin-right": [ "string" ],
-    "margin-bottom": [ "string" ],
+    margin: [ "string" ], // top right bottom left
+    padding: [ "string" ], // top right bottom left
 
-    "padding-top": [ "string" ],
-    "padding-left": [ "string" ],
-    "padding-right": [ "string" ],
-    "padding-bottom": [ "string" ]
+    halo: [ "string" ] // color
 };
 
 export interface CSS {
@@ -179,7 +174,7 @@ export interface CSS {
     "font-size"?: string,
     "font-family"?: string,
 
-    "color"?: string,
+    color?: string,
     align?: string,
     border?: string,
     "border-radius"?: string,
@@ -191,18 +186,12 @@ export interface CSS {
     "white-space"?: "normal" | "nowrap",
     "line-height"?: string,
 
-    "margin-left"?: string,
-    "margin-top"?: string,
-    "margin-right"?: string,
-    "margin-bottom"?: string,
+    margin?: string,
+    padding?: string,
 
-    "padding-top"?: string,
-    "padding-left"?: string,
-    "padding-right"?: string,
-    "padding-bottom"?: string,
+    halo?: string,
 
     // animation options
-    "overlay-color"?: string,
     duration?: number,
     rotation?: string,
     blinking?: string,
@@ -216,7 +205,7 @@ export interface WidgetOptions {
     parent?: "body" | string,
     css?: CSS,
     viz?: VizOptions,
-    type?: string, // widget type, e.g., button, display
+    type?: string, // widget type, e.g., "Button", "Display"
     widget_template?: string, // HTML template for rendering the widget
     callback?: ActionCallback,
     connection?: Connection
@@ -234,7 +223,7 @@ export type BasicEventData = {
 };
 export type WidgetEvents = { [evt in BasicEvent]?: boolean };
 export type WidgetAttr = {
-    [key: string]: string
+    // [key: string]: string
 };
 
 export abstract class WidgetEVO extends Backbone.Model {
@@ -320,7 +309,7 @@ export abstract class WidgetEVO extends Backbone.Model {
         this.css.overflow = opt.css.overflow || "visible";
         this.css["white-space"] = opt.css["white-space"] || "nowrap";
         this.css.blinking = opt.css.blinking === "true" ? "true" : undefined;
-        this.css["overlay-color"] = opt.css["overlay-color"] || "yellow"; // this is the color of the halo shown around the widget when e.g., the mouse is over the button
+        this.css.halo = opt.css.halo || "yellow"; // this is the color of the halo shown around the widget when e.g., the mouse is over the button
         this.css["z-index"] = opt.css["z-index"] || 0;
 
         this.widget_template = opt.widget_template || widget_template;
@@ -652,6 +641,25 @@ export abstract class WidgetEVO extends Backbone.Model {
     }
 
     /**
+     * Returns the first attribute the widget, which is considered the widget name.
+     */
+    getName (): string {
+        const keys: string[] = Object.keys(this.attr);
+        return keys && keys.length ? this.attr[keys[0]] : "...";
+    }
+
+    /**
+     * Sets the first attribute the widget, which is considered the widget name.
+     * The function has no effect if the widget does not have attributes.
+     */
+    setName (name: string): void {
+        const keys: string[] = Object.keys(this.attr);
+        if (keys && keys.length) {
+            this.attr[keys[0]] = name;
+        }
+    }
+
+    /**
      * @function <a name="invertColors">invertColors</a>
      * @description Inverts the colors of the display (as in a negative film).
      * @memberof module:WidgetEVO
@@ -675,13 +683,14 @@ export abstract class WidgetEVO extends Backbone.Model {
      */
     select (opt?: CSS): void {
         opt = opt || {};
-        const overlayColor: string = this.css['overlay-color'] || "yellow";
+        const halo: string = this.css.halo || "yellow";
         this.$base.css({
             ...this.css, 
             "background-color": dimColor(this.css["background-color"], 8),
-            ...opt });
+            ...opt
+        });
         if (opt.classed) { this.$base.addClass(<string> opt.classed); };
-        this.$overlay.css({ "box-shadow": `0px 0px 10px ${overlayColor}`, opacity: 1 });
+        this.$overlay.css({ "box-shadow": `0px 0px 10px ${halo}`, opacity: 1 });
     }
 
     /**
@@ -757,8 +766,12 @@ export abstract class WidgetEVO extends Backbone.Model {
         return this.setPositionAndSize(data);
     }
 
-    getType () {
+    getType (): string {
         return this.type;
+    }
+
+    getId (): string {
+        return this.id;
     }
 
     /**
@@ -790,6 +803,14 @@ export abstract class WidgetEVO extends Backbone.Model {
         return this.viz;
     }
 
+    getOptions (): WidgetOptions {
+        return {
+            css: this.getCSS(),
+            viz: this.getViz(),
+            ...this.getAttributes()
+        };
+    }
+
     getCoordinates (): Coords {
         return {
             top: +(this.top).toFixed(WidgetEVO.MAX_COORDINATES_ACCURACY),
@@ -806,7 +827,7 @@ export abstract class WidgetEVO extends Backbone.Model {
      *      keyCode {boolean}: whether to include keyCode in the returned list of attributes
      *      optionals {string[]}: list of optional attributes --- they will be placed at the end of the returned list 
      */
-    getAttr (opt?: { nameReplace?: string, keyCode?: boolean, optionals?: string[] }): WidgetAttr {
+    getAttributes (opt?: { nameReplace?: string, keyCode?: boolean, optionals?: string[] }): WidgetAttr {
         opt = opt || {};
         opt.optionals = opt.optionals || [];
         const keys: string[] = Object.keys(this.attr)?.sort((a: string, b: string): number => {
@@ -830,10 +851,6 @@ export abstract class WidgetEVO extends Backbone.Model {
             return {...core, ...optionals};
         };
         return null;
-    }
-    
-    getPrimaryKey (): string {
-        return this.id;
     }
 
     getEvents (): string[] {
@@ -885,7 +902,7 @@ export abstract class WidgetEVO extends Backbone.Model {
         return {
             id: this.id,
             type: this.alias || this.getType(),
-            attr: this.getAttr(),
+            attr: this.getAttributes(),
             coords: this.getCoordinates(),
             evts: this.getEvents(),
             style: this.getCSS()

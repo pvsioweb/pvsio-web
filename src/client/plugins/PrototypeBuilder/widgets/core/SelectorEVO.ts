@@ -1,22 +1,23 @@
+import { ActionsQueue, ActionCallback } from "../../../../../client/env/ActionsQueue";
 import { ButtonOptions } from "./ButtonEVO";
-import { DialEVO, DialOptions } from "./DialEVO";
+import { DialEventData, DialEVO, DialOptions } from "./DialEVO";
 import { Coords, CSS } from "./WidgetEVO";
 
 export interface SelectorOptions extends DialOptions {
-    turns: number[] // angles (deg) identifying selector rotations. First value is treated as initial rotation value.
+    turns?: number[] // angles (deg) identifying selector rotations. First value is treated as initial rotation value.
 }
 
 export class SelectorEVO extends DialEVO {
 
-    protected turns: number[] = null;
+    protected turns: number[];
     protected tIndex: number = 0; // current position, must be a valid index in turns
 
     constructor (id: string, coords: Coords, opt?: SelectorOptions) {
         super(id, { width: 64, height: 64, ...coords }, { svg: selectorImage, ...opt });
 
         opt.css = opt.css || {};
-        opt = opt || { turns: [0, 45] };
-        this.turns = opt.turns;
+        opt = opt || {};
+        this.turns = opt.turns || [0, 45];
         const size: number = Math.min(this.width, this.height) || 64;
         this.css["border-radius"] = `${size}px`;
         this.css.opacity = opt.css.opacity || 1;
@@ -52,7 +53,22 @@ export class SelectorEVO extends DialEVO {
 
     // @override
     protected onMouseWheel (): void {
-        this.click();
+        if (this.delta) {
+            const p: number = this.delta > 0 ? this.tIndex < this.turns.length ? this.tIndex + 1 : this.turns.length
+                : this.tIndex > 0 ? this.tIndex - 1 : 0;
+            this.turn(p);
+            // send rotate action over the connection
+            const fun: string = this.attr.customFunction || ("rotate_" + this.attr.buttonName);
+            const callback: ActionCallback = this.callback;
+            ActionsQueue.queueGUIAction(fun, this.connection, callback);
+            // trigger rotate event
+            const data: DialEventData = {
+                evt: "rotate",
+                fun,
+                val: this.rotation
+            };
+            this.trigger("rotate", data);            
+        }
     }
 
     // @override

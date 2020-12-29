@@ -260,7 +260,7 @@ class MoveHandler extends HotspotHandler {
     }
 }
 
-export type HotspotMap = { [id: string]: {
+export type HotspotsMap = { [id: string]: {
     $marker: JQuery<HTMLElement>
 }};
 
@@ -285,7 +285,7 @@ export class HotspotEditor extends Backbone.View {
     protected moveHandler: MoveHandler;
     protected resizeHandler: ResizeHandler;
 
-    protected hotspots: HotspotMap = {};
+    protected hotspots: HotspotsMap = {};
     
     constructor (widgetManager: WidgetManager, data: HotspotEditorData) {
         super(data);
@@ -307,7 +307,7 @@ export class HotspotEditor extends Backbone.View {
             this.onKeyDown(evt);
         });
     }
-    getHotspots (): HotspotMap {
+    getHotspots (): HotspotsMap {
         return this.hotspots;
     }
     getHotspot (id: string): JQuery<HTMLElement> {

@@ -30,7 +30,7 @@
  *
  */
 
-import { BasicDisplayEVO, DisplayOptions } from './BasicDisplayEVO';
+import { BasicDisplayEVO, DisplayAttr, DisplayOptions } from './BasicDisplayEVO';
 import { Coords, WidgetAttr, CSS, Renderable } from './WidgetEVO';
 
 const selectedFontSize = 1.076; // ratio selectedFont/normalFont for integer digits
@@ -62,7 +62,12 @@ export interface NumericCSS extends CSS {
     "decimal-letter-spacing"?: string
 };
 
+export interface NumericAttr extends DisplayAttr {
+    cursorName: string
+};
+
 export class NumericDisplayEVO extends BasicDisplayEVO {
+    protected attr: NumericAttr;
 
     protected maxDecimalDigits: number;
     protected maxIntegerDigits: number;
@@ -313,11 +318,11 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
     }
 
     // @override
-    getAttr (opt?: { nameReplace?: string, keyCode?: boolean, optionals?: string[] }): WidgetAttr {
+    getAttributes (opt?: { nameReplace?: string, keyCode?: boolean, optionals?: string[] }): WidgetAttr {
         opt = opt || {};
         opt.optionals = opt.optionals || [];
         opt.optionals = opt.optionals.concat([ "cursorName" ]);
-        return super.getAttr(opt);
+        return super.getAttributes(opt);
     }
 
 }

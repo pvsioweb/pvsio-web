@@ -6,15 +6,25 @@
 import * as Backbone from 'backbone';
 import * as Utils from '../../../env/Utils';
 
-import { WidgetEVO, Coords } from "../widgets/core/WidgetEVO";
+import { WidgetEVO, Coords, WidgetDescriptor, WidgetOptions } from "../widgets/core/WidgetEVO";
 import { Connection, OpenFileDialog, ReadFileRequest, ReadFileResponse } from '../../../env/Connection';
 import { WidgetManager } from "../WidgetManager";
-import { HotspotEditor, HotspotEditorEvents, HotspotData } from './utils/HotspotEditor';
+import { HotspotEditor, HotspotEditorEvents, HotspotData, HotspotsMap } from './editors/HotspotEditor';
 
 import { View, BuilderViewOptions } from './View';
-import { WidgetData, WidgetEditor, WidgetEditorEvents } from './utils/WidgetEditor';
+import { WidgetData, WidgetEditor, WidgetEditorEvents } from './editors/WidgetEditor';
 import { WidgetClassDescriptor, widgets } from '../widgets/widgets';
-import { Constructable } from '../../../env/PVSioWeb';
+
+export type WidgetsMap = { [id: string]: WidgetEVO };
+export const BuilderEvents = {
+    DidCreateWidget: "DidCreateWidget"
+};
+export type DidCreateWidgetEvent = {
+    id: string,
+    name: string,
+    widgets: WidgetsMap,
+    hotspots: HotspotsMap
+};
 
 export const contentTemplate: string = `
 <div class="image-div container-fluid" style="padding-left:0;">
@@ -31,14 +41,13 @@ export const contentTemplate: string = `
 </div>
 <div class="image-overlay container-fluid" style="padding-left:0;"></div>`;
 
-export type WidgetsMap = { [id: string]: WidgetEVO };
 export class BuilderView extends View {
     
     protected $imageOverlay: JQuery<HTMLElement>;
     protected $imageDiv: JQuery<HTMLElement>;
 
     protected hotspotEditor: HotspotEditor;
-    protected widgets: WidgetsMap = {};
+    protected widgetsMap: WidgetsMap = {};
 
     constructor (widgetManager: WidgetManager, data: BuilderViewOptions, connection: Connection, opt?: { localFiles?: boolean }) {
         super(widgetManager, data, connection);        
@@ -52,6 +61,14 @@ export class BuilderView extends View {
         };
     }
 
+    getWidgets (): WidgetsMap {
+        return this.widgetsMap;
+    }
+
+    getHotspots (): HotspotsMap {
+        return this.hotspotEditor.getHotspots();
+    }
+
     render (data?: BuilderViewOptions, opt?: { localFiles?: boolean }): BuilderView {
         opt = opt || {};
         const content: string = Handlebars.compile(contentTemplate, { noEscape: true })(opt);
@@ -63,23 +80,41 @@ export class BuilderView extends View {
 
     async editWidget (hotspotData: HotspotData): Promise<WidgetEVO | null> {
         return new Promise((resolve, reject) => {
-            const editor: WidgetEditor = new WidgetEditor(this.widgetManager, hotspotData);
+            const editor: WidgetEditor = new WidgetEditor({
+                widgetData: {
+                    name: this.widgetsMap[hotspotData.id]?.getName() || WidgetEVO.uuid(),
+                    opt: this.widgetsMap[hotspotData.id]?.getOptions(),
+                    cons: this.widgetsMap[hotspotData.id]?.getType(),
+                    ...hotspotData 
+                }
+            });
             editor.on(WidgetEditorEvents.ok, (widgetData: WidgetData) => {
                 if (widgetData) {
                     console.log(widgetData);
-                    if (widgetData.type) {
+                    if (widgetData.cons) {
                         const desc: WidgetClassDescriptor = widgets.find((desc: WidgetClassDescriptor) => {
-                            return desc.name === widgetData.type;
+                            return desc.name === widgetData.cons;
                         });
                         console.log(desc);
                         if (desc) {
-                            if (this.widgets[hotspotData.id]) {
-                                this.widgets[hotspotData.id].remove();
+                            if (this.widgetsMap[hotspotData.id]) {
+                                this.widgetsMap[hotspotData.id].remove();
                             }
-                            const widget: WidgetEVO = new desc.cons(widgetData?.id, widgetData?.coords, { parent: ".image-div", ...widgetData?.opt });
+                            const widget: WidgetEVO = new desc.cons(widgetData.id, hotspotData.coords, { 
+                                parent: ".image-div", 
+                                type: widgetData.cons,
+                                ...widgetData?.opt
+                            });
                             widget.renderSample();
                             console.log(widget);
-                            this.widgets[hotspotData.id] = widget;
+                            this.widgetsMap[hotspotData.id] = widget;
+                            const evt: DidCreateWidgetEvent = {
+                                id: widgetData.id,
+                                name: widgetData.name,
+                                widgets: this.getWidgets(),
+                                hotspots: this.getHotspots()
+                            }
+                            this.trigger(BuilderEvents.DidCreateWidget, evt);
                             return resolve(widget);
                         }
                     }
@@ -100,7 +135,6 @@ export class BuilderView extends View {
         });
 
         this.$el.find(".use-whiteboard-btn").on("click", (evt: JQuery.ClickEvent) => {
-
             const minWidth: number = 800;
             const minHeight: number = 400;
 
@@ -124,11 +158,11 @@ export class BuilderView extends View {
             });
             this.hotspotEditor.on(HotspotEditorEvents.DidMoveHotspot, (data: HotspotData) => {
                 console.log("move", data);
-                this.widgets[data.id]?.move(data.coords);
+                this.widgetsMap[data.id]?.move(data.coords);
             });
             this.hotspotEditor.on(HotspotEditorEvents.DidResizeHotspot, (data: HotspotData) => {
                 console.log("resize", data);
-                this.widgets[data.id]?.resize(data.coords);
+                this.widgetsMap[data.id]?.resize(data.coords);
             });
             this.hotspotEditor.on(HotspotEditorEvents.EditHotspot, async (data: HotspotData) => {
                 await this.editWidget(data);

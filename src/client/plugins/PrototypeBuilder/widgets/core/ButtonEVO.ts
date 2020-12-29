@@ -50,21 +50,26 @@ const CLICK_RATE = 250; // 250 milliseconds, default interval for repeating butt
 const DBLCLICK_TIMEOUT = 350; // 350 milliseconds, default (and minimum) timeout for detecting double clicks
 
 export interface ButtonOptions extends WidgetOptions {
-    toggleButton?: boolean,
-    pushButton?: boolean,
     customLabel?: string,
     readBack?: string,
-    touchscreenMode?: boolean,
     keyCodes?: string, // comma-separated list of keycodes. first keycode is key down, second is key up
     evts?: BasicEvent | BasicEvent[],
-    functionName?: string,
+    buttonName?: string,
     customFunction?: string,
     rate?: number,
     dblclick_timeout?: number
-}
+};
+
+export interface ButtonAttr extends WidgetAttr {
+    buttonName: string,
+    customFunction: string,
+    customLabel: string,
+    keyCodes: string
+};
 
 export class ButtonEVO extends WidgetEVO {
-    protected touchscreenMode: boolean = false;
+    protected attr: ButtonAttr;
+
     protected lineHeight: number;
 
     protected rate: number;
@@ -96,7 +101,7 @@ export class ButtonEVO extends WidgetEVO {
         this.css.color = opt.css.color || "white";
         this.css["cursor"] = opt.css.cursor || "pointer";
         this.css["z-index"] = opt.css["z-index"] || 1; // z-index for buttons should be at least 1, so they are placed over display widgets
-        // this.css["overlay-color"] = opt.css["overlay-color"] || "steelblue";
+        // this.css.halo = opt.css.halo || "steelblue";
         this.lineHeight = parseFloat(opt.css["line-height"]) || this.height;
 
         this.connection = opt.connection;
@@ -105,7 +110,6 @@ export class ButtonEVO extends WidgetEVO {
         // super.createHTMLElement();
 
         // add button-specific functionalities
-        this.touchscreenMode = opt.touchscreenMode;
         this.rate = (isNaN(opt.rate)) ? CLICK_RATE : Math.max(CLICK_RATE, opt.rate);
         this.dblclick_timeout = (isNaN(opt.dblclick_timeout)) ? DBLCLICK_TIMEOUT : Math.max(DBLCLICK_TIMEOUT, opt.rate);
 
@@ -137,7 +141,7 @@ export class ButtonEVO extends WidgetEVO {
         }
 
         // set widget keys
-        this.attr.functionName = opt.functionName || id;
+        this.attr.buttonName = opt.buttonName || id;
         this.attr.customFunction = opt.customFunction || "";
         this.attr.customLabel = opt.customLabel || "";
         // this.attr.readBack = opt.readBack;
@@ -244,15 +248,13 @@ export class ButtonEVO extends WidgetEVO {
     protected onButtonPress (): void {
         if (this.evts.press) {
             this.pressAndHold();
-        } else if (this.evts.click && !this.touchscreenMode) {
-            this.click();  // mechanical buttons register a click when the button is pressed
+        } else if (this.evts.click) {
+            this.click();  // mechanical buttons emit click events when the button is pressed
         }
     };
     protected onButtonRelease (): void {
         if (this.evts.release) {
             this.release();
-        } else if (this.evts.click && this.touchscreenMode) {
-            this.click();  // touchscreen buttons register a click when the button is released
         }
     };
     protected onButtonDoubleClick (): void {
@@ -300,10 +302,10 @@ export class ButtonEVO extends WidgetEVO {
         if (this._tick) { this.onButtonRelease(); }
     };
 
-    protected btn_action(evt: BasicEvent, opt?: { functionName?: string, customFunction?: string, callback?: ActionCallback }) {
+    protected btn_action(evt: BasicEvent, opt?: { buttonName?: string, customFunction?: string, callback?: ActionCallback }) {
         opt = opt || {};
 
-        const fun: string = opt.customFunction || this.attr.customFunction || (evt + "_" + this.attr.functionName);
+        const fun: string = opt.customFunction || this.attr.customFunction || (evt + "_" + this.attr.buttonName);
         const callback: ActionCallback = opt.callback || this.callback;
         ActionsQueue.queueGUIAction(fun, this.connection, callback);
         
@@ -313,11 +315,11 @@ export class ButtonEVO extends WidgetEVO {
     }
     
     // @override
-    getAttr (opt?: { nameReplace?: string, keyCode?: boolean, optionals?: string[] }): WidgetAttr {
+    getAttributes (opt?: { nameReplace?: string, keyCode?: boolean, optionals?: string[] }): WidgetAttr {
         opt = opt || {};
         opt.optionals = opt.optionals || [];
         opt.optionals = opt.optionals.concat([ "customFunction", "customLabel", "keyCode" ]);
-        return super.getAttr(opt);
+        return super.getAttributes(opt);
     }
 
     /**
@@ -350,14 +352,11 @@ export class ButtonEVO extends WidgetEVO {
         this.$base.css("line-height", `${this.lineHeight}px`);
 
         // render content
-        state = (state === undefined || state === null)? "" : state;
+        state = (state === undefined || state === null) ? "" : state;
+
         // a fixed label is shown if any is specified, otherwise the provided value is displayed
-        if (typeof state === "string" || typeof state === "number") {
-            const label: string = this.attr["customLabel"] || `${state}`;
-            this.$base.html(label);
-            this.reveal();
-        } else if (typeof state === "object" && this.attr?.displayName !== "" && this.evalViz(state)) {
-            const label: string = this.attr["customLabel"] || this.evaluate(this.attr.displayName, state);
+        if (this.attr.customLabel || typeof state === "string" || typeof state === "number") {
+            const label: string = this.attr.customLabel || `${state}`;
             this.$base.html(label);
             this.reveal();
         } else {

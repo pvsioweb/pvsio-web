@@ -1,19 +1,17 @@
 import * as Backbone from 'backbone';
-import { WidgetManager } from '../../WidgetManager';
 import { createDialog, setDialogTitle, uuid } from '../../../../env/Utils';
 import { Coords, CSS, WidgetEVO, WidgetAttr, BasicEventData, VizOptions, WidgetOptions } from '../../widgets/core/WidgetEVO';
 import { HotspotData } from './HotspotEditor';
-import { WidgetClassDescriptor } from '../../widgets/widgets';
+import { widgets } from '../../widgets/widgets';
 
-
-export interface WidgetEditorOptions extends Backbone.ViewOptions {
-    id: string, // widget ID
-    coords: Coords // widget coords
-};
 
 export interface WidgetData extends HotspotData {
-    type?: string, // constructor name
+    name: string,
+    cons?: string, // constructor name
     opt?: WidgetOptions
+};
+export interface WidgetEditorData extends Backbone.ViewOptions {
+    widgetData: WidgetData
 };
 
 export const WidgetEditorEvents = {
@@ -28,14 +26,14 @@ const containerTemplate: string = `
         <ul class="nav flex-column flex-nowrap nav-pills card-header-tabs widget-list" style="overflow-y:auto; overflow-x:hidden; max-height:408px;">
             {{#each widgets}}
             <li class="nav-item">
-                <a draggable="false" name="{{name}}" class="widget-class nav-link{{#if @first}} active{{/if}}" id="{{name}}-tab" data-toggle="tab" href="#{{name}}" role="tab" aria-controls="{{name}}" aria-selected="true">{{name}}</a>
+                <a draggable="false" cons="{{name}}" class="widget-class nav-link{{#if @first}} active{{/if}}" id="{{name}}-tab" data-toggle="tab" href="#{{name}}" role="tab" aria-controls="{{name}}" aria-selected="true">{{name}}</a>
             </li>
             {{/each}}
         </ul>
     </div>
     <div class="card-body tab-content" style="height:400px; padding-top:0px;">
         {{#each widgets}}
-        <div id="{{name}}" class="body modal-body container-fluid tab-pane fade show no-gutters{{#if @first}} active{{/if}}" aria-labelledby="{{key}}-tab" style="padding:0; position:relative;">
+        <div id="{{name}}" class="widget-info body modal-body container-fluid tab-pane fade show no-gutters{{#if @first}} active{{/if}}" aria-labelledby="{{key}}-tab" style="padding:0; position:relative;">
             <div class="row">
 
                 <div class="col-md-4">
@@ -43,31 +41,29 @@ const containerTemplate: string = `
                     <!-- {{name}}-preview -->
                     </div>
 
-                    <div id="{{name}}-evts" class="text-muted" style="min-width:200px; margin-top:8px; text-align:center; position:absolute;">
+                    <div id="{{name}}-evts" class="text-muted" style="min-width:200px; height:60px; overflow:auto; margin-top:8px;">
                     <!-- {{name}}-events -->
                     </div>
 
-                    <small id="{{name}}-desc" class="text-muted" style="position:absolute; margin-top:40px;">
+                    <small id="{{name}}-desc" class="text-muted">
                     <!-- {{name}}-description -->
                     </small>
                 </div>
                 <div class="col-md-6 ml-auto" style="height:400px; overflow:auto;">
-                    <div class="widget-id input-group input-group-sm">
+                    <div class="widget-id input-group input-group-sm" style="display:none;">
                         <div class="input-group-prepend" style="min-width:40%;">
                             <span class="input-group-text" style="width:100%;">ID</span>
                         </div>
                         <input type="text" class="form-control" value="{{../id}}" placeholder="{{../id}}" aria-label="{{../id}}" aria-describedby="{{name}}-id">
+                        <br>
                     </div>
-
-                    <br>
                     
                     <div id="{{name}}-attr" class="widget-attr">
                     <!-- {{name}}-attributes -->
                     </div>
-
-                    <br>
                     
-                    <div id="{{name}}-coords" class="widget-coords">
+                    <div id="{{name}}-coords" class="widget-coords" style="display:none;">
+                        <br>
                         {{#each ../coords}}
                         <div class="input-group input-group-sm">
                             <div class="input-group-prepend" style="min-width:40%;">
@@ -80,11 +76,11 @@ const containerTemplate: string = `
 
                     <br>
 
-                    <div id="{{name}}-css" class="widget-css"></div>
+                    <div id="{{name}}-viz" class="widget-viz"></div>
 
                     <br>
 
-                    <div id="{{name}}-viz" class="widget-viz"></div>
+                    <div id="{{name}}-css" class="widget-css"></div>
 
                 </div>
 
@@ -122,27 +118,36 @@ const attrTemplate: string = `
 {{/each}}`;
 
 export class WidgetEditor extends Backbone.View {
-    protected widgetManager: WidgetManager;
     protected mode: "create" | "edit"; // dialog modes
     protected widgetData: WidgetData;
+
     protected $dialog: JQuery<HTMLElement>;
 
     protected timer: NodeJS.Timer;
 
-    constructor (widgetManager: WidgetManager, data: WidgetEditorOptions) {
+    constructor (data: WidgetEditorData) {
         super(data);
-        this.widgetData = { ...data, id: WidgetEVO.uuid() };
-        this.widgetManager = widgetManager;
+        this.widgetData = data?.widgetData;
         this.mode = "create";
         this.render();
         this.installHandlers();
+    }
+
+    selectTab (cons: string): boolean {
+        if (cons) {
+            $(".widget-class").removeClass("active");
+            $(`#${cons}-tab`).addClass("active");
+            $(".widget-info").removeClass("active show");
+            $(`#${cons}`).addClass("active show");
+            return true;
+        }
+        return false;
     }
 
     /**
      * Renders the dialog
      */
     render (): WidgetEditor {
-        const widgets: WidgetClassDescriptor[] = this.widgetManager.getWidgetClassDescriptors();
         const data: {
             widgets: { [name: string]: any },
             coords: Coords
@@ -153,25 +158,33 @@ export class WidgetEditor extends Backbone.View {
             content: container,
             largeModal: true
         });
+        setDialogTitle("Widget Editor");
         const width: number = +parseFloat($(".widget-preview").css("width")).toFixed(0);
         const height: number = +parseFloat($(".widget-preview").css("height")).toFixed(0);
         for (let i = 0; i < widgets.length; i++) {
-            const name: string = widgets[i].name;
+            // create widget preview
+            const cons: string = widgets[i].name;
             const coords: Coords = { width, height };
             const previewId: string = uuid();
-            const obj: WidgetEVO = new widgets[i].cons(previewId, coords, { parent: `${name}-preview` });
+            const obj: WidgetEVO = new widgets[i].cons(previewId, coords, {
+                ...this.widgetData?.opt,
+                parent: `${cons}-preview`
+            });
+            obj.setName(this.widgetData.name);
 
+            // set css style
             const css: CSS = obj.getCSS({
                 all: true
             });
             const style: string = Handlebars.compile(styleTemplate)({
                 style: css
             });
-            $(`#${name}-css`).html(style);
-            $(`#${name}-css input`).on("input", (evt: JQuery.ChangeEvent) => {
+            $(`#${cons}-css`).html(style);
+            $(`#${cons}-css input`).on("input", (evt: JQuery.ChangeEvent) => {
                 const key: string = evt.currentTarget?.name;
                 if (key) {
                     const value: string = evt.currentTarget?.value;
+                    $(evt.currentTarget).attr("value", value);
                     const style: CSS = {};
                     style[key] = value;
                     obj.setCSS(style);
@@ -179,21 +192,24 @@ export class WidgetEditor extends Backbone.View {
                 }
             });
 
+            // set viz options
             let vizOp: VizOptions = obj.getViz();
             const viz: string = Handlebars.compile(vizTemplate)({
                 viz: vizOp
             });
-            $(`#${name}-viz`).html(viz);
+            $(`#${cons}-viz`).html(viz);
 
+            // set widget attributes
             const attr: string = Handlebars.compile(attrTemplate)({
-                attr: obj.getAttr({ nameReplace: this.widgetData.id, keyCode: false })
+                attr: obj.getAttributes({ nameReplace: this.widgetData.id, keyCode: false })
             });
-            $(`#${name}-attr`).html(attr);
-            $(`#${name}-attr input`).on("input", (evt: JQuery.ChangeEvent) => {
+            $(`#${cons}-attr`).html(attr);
+            $(`#${cons}-attr input`).on("input", (evt: JQuery.ChangeEvent) => {
                 const value: string = evt.currentTarget?.value;
                 const key: string = evt.currentTarget?.name;
                 let attr: WidgetAttr = {};
                 if (key) {
+                    $(evt.currentTarget).attr("value", value);
                     if (key === "keyCode") {
                         // TODO: render appropriate controls to simplify keyboard key binding
                     } else {
@@ -205,30 +221,33 @@ export class WidgetEditor extends Backbone.View {
                 console.log(key, value);
             });
 
-
+            // set widget events
             const evts: string[] = obj.getEvents();
             for (let i = 0; i < evts?.length; i++) {
                 const evt: string = evts[i];
                 this.listenTo(obj, evt, (data: BasicEventData) => {
                     const fun: string = data?.fun.replace(previewId, this.widgetData.id);
                     console.log(fun);
-                    $(`#${name}-evts`).html(`<i class="fa fa-bolt"></i> ${fun}`);
+                    $(`#${cons}-evts`).append(`<div><i class="fa fa-bolt"></i> ${fun}</div>`);
                     clearTimeout(this.timer);
                     this.timer = setTimeout(() => {
-                        $(`#${name}-evts`).html("");
+                        $(`#${cons}-evts`).html("");
                         this.timer = null;
                     }, 1200);
                 });
             }
 
-            $(`#${name}-desc`).html(obj.getDescription());
+            // attach widget description
+            $(`#${cons}-desc`).html(obj.getDescription());
+            // render widget sample
             obj.renderSample();
         }
-        this.setWidgetName(this.widgetData.id);
+        // select corresponding tab
+        this.selectTab(this.widgetData?.cons)
         return this;
     }
 
-    setWidgetName (name: string): void {
+    setWidgetId (name: string): void {
         this.widgetData.id = name;
         this.$dialog.find(".widget-id input").val(name);
         this.updateDialogTitle();
@@ -238,7 +257,7 @@ export class WidgetEditor extends Backbone.View {
         setDialogTitle("Editing " + this.widgetData.id)
     }
 
-    protected getDialogObject<T> (elem: string): T {
+    protected getDialogElement<T> (elem: string): T {
         const elems: JQuery<HTMLElement> = this.$dialog.find(`.active .widget-${elem} input`);
         let res = {};
         for (let i = 0; i < elems.length; i++) {
@@ -251,7 +270,7 @@ export class WidgetEditor extends Backbone.View {
         return <T> res;
     }
     protected getDialogCoords (): Coords<number> {
-        const coords: Coords = this.getDialogObject<Coords>("coords");
+        const coords: Coords = this.getDialogElement<Coords>("coords");
         const ans: Coords<number> = {};
         for (let i in coords) {
             ans[i] = parseFloat(coords[i]);
@@ -259,25 +278,31 @@ export class WidgetEditor extends Backbone.View {
         return ans;
     }
     protected getDialogCSS (): CSS {
-        return this.getDialogObject<CSS>("css");
+        return this.getDialogElement<CSS>("css");
     }
     protected getDialogAttr (): WidgetAttr {
-        return this.getDialogObject<WidgetAttr>("attr");
+        return this.getDialogElement<WidgetAttr>("attr");
     }
     protected getDialogViz (): VizOptions {
-        return this.getDialogObject<VizOptions>("viz");
+        return this.getDialogElement<VizOptions>("viz");
     }
     protected getDialogWidgetId (): string {
         return this.$dialog.find(".widget-id input").attr("value");
     }
-    protected getDialogWidgetName (): string {
-        return this.$dialog.find(".widget-class.active").attr("name");
+    protected getDialogWidgetConstructor (): string {
+        return this.$dialog.find(".widget-class.active").attr("cons");
+    }
+    protected getWidgetName (): string {
+        const attr: WidgetAttr = this.getDialogAttr();
+        const keys: string[] = Object.keys(attr);
+        return keys && keys.length ? attr[keys[0]] : "";
     }
 
     protected installHandlers (): void {
         this.$dialog.find(".ok-btn").on("click", (evt: JQuery.ClickEvent) => {
             this.widgetData = {
-                type: this.getDialogWidgetName(),
+                cons: this.getDialogWidgetConstructor(),
+                name: this.getWidgetName(),
                 id: this.getDialogWidgetId(),
                 coords: this.getDialogCoords(),
                 opt: {
@@ -300,7 +325,7 @@ export class WidgetEditor extends Backbone.View {
         });
         this.$dialog.find(".widget-id").on("input", (evt: JQuery.ChangeEvent) => {
             const newName: string = evt.currentTarget?.value;
-            this.setWidgetName(newName);
+            this.setWidgetId(newName);
         });
     }
 

@@ -48,10 +48,10 @@ export class DialEVO extends ButtonEVO {
     }
 
     protected recenter (): void {
-        this.$img.css({ height: `${this.size}px`, width: `${this.size}px`, "margin-left": `${(this.width - this.size) / 2}px` })
-        this.$base.css({ height: `${this.size}px`, width: `${this.size}px`, "margin-left": `${(this.width - this.size) / 2}px` })
-        this.$overlay.css({ "border-radius": `${this.size}px`});
-        this.$overlay.css({ height: `${this.size}px`, width: `${this.size}px`, "margin-left": `${(this.width - this.size) / 2}px` })
+        this.$div.css({ "padding-left": `${(this.width - this.size) / 2}px` });
+        this.$img.css({ height: `${this.size}px`, width: `${this.size}px` });
+        this.$base.css({ height: `${this.size}px`, width: `${this.size}px` });
+        this.$overlay.css({ height: `${this.size}px`, width: `${this.size}px`, "margin-left": `${(this.width - this.size) / 2}px`, "border-radius": `${this.size}px` });
     }
 
     getRotation (): number {
@@ -81,7 +81,7 @@ export class DialEVO extends ButtonEVO {
             // rotate the dial
             this.rotate(this.rotation);
             // send rotate action over the connection
-            const fun: string = this.attr.customFunction || ("rotate_" + this.attr.functionName);
+            const fun: string = this.attr.customFunction || ("rotate_" + this.attr.buttonName);
             const callback: ActionCallback = this.callback;
             ActionsQueue.queueGUIAction(fun, this.connection, callback);
             // trigger rotate event

@@ -3,23 +3,29 @@
  * @desc Widget within the PIM prototype editor
  * @author Nathaniel Watson
  */
-import * as Widget from '../../../plugins/PrototypeBuilder/widgets/Widget';
-import { TouchscreenElement } from '../../../plugins/PrototypeBuilder/widgets/TouchscreenElement';
+import { WidgetEVO, Coords, WidgetOptions, WidgetDescriptor } from '../../../plugins/PrototypeBuilder/widgets/core/WidgetEVO';
+import { TouchScreenEVO } from '../../../plugins/PrototypeBuilder/widgets/core/TouchScreenEVO';
 
-export interface WidgetOptions extends Widget.WidgetOptions {
+export interface PIMWidgetOptions extends WidgetOptions {
     targetScreen?: { id: string },
     name?: string,
     image?: string,
     evts?: string[]
-}
+};
 
-export class PIMWidget extends TouchscreenElement {
+export interface PIMWidgetDescriptor extends WidgetDescriptor {
+    name: string,
+    targetScreen: string,
+    image: string
+};
+
+export class PIMWidget extends TouchScreenEVO {
     protected name: string;
     protected targetScreen: { id: string };
     protected image: string;
 
-    constructor (id: string, coords: Widget.WidgetCoordinates, opt: WidgetOptions) {
-        super(id, coords, opt);
+    constructor (id: string, coords: Coords, opt: PIMWidgetOptions) {
+        super(id, coords);
         this.type = "pim-button";
         opt.evts = ["click"];
 
@@ -29,26 +35,14 @@ export class PIMWidget extends TouchscreenElement {
         this.image = opt.image; // this is a path relative to the project folder
     };
 
-    toJSON (): {
-        id: string, type: string, 
-        name: string, targetScreen: string, 
-        coords: Widget.WidgetCoordinates, 
-        image: string
-    } {
-        const targetId = this.targetScreen?.id;
-
+    toJSON (): PIMWidgetDescriptor {
+        const targetScreen: string = this.targetScreen?.id;
+        const image: string = this.image?.split("/").splice(1).join("/"); // the image path starts with the project name, we need to remove it
         return {
-            id: this.id,
-            type: this.type,
+            ...super.toJSON(),
             name: this.name,
-            targetScreen: targetId,
-            coords: {
-                top: this.top,
-                left: this.left,
-                width: this.width,
-                height: this.height
-            },
-            image: (this.image) ? this.image.split("/").splice(1).join("/") : null // the image path starts with the project name, we need to remove it
+            targetScreen,
+            image
         };
     };
 
@@ -92,7 +86,7 @@ export class PIMWidget extends TouchscreenElement {
             this.createWidgetImage();
         }
 
-        this.div.on("mousedown", (e: JQuery.Event) => {
+        this.$div.on("mousedown", (e: JQuery.Event) => {
             opt?.onClick(this, e);
         });
     };

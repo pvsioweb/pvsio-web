@@ -242,7 +242,6 @@ class Bennet980 {
                     top: 154, left: 145, width: 66, height: 54
                 }, { 
                     connection: this.connection,
-                    toggleButton: true,
                     parent: "ventSetupScreen",
                     css: {
                         opacity: 0.9,

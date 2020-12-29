@@ -4,12 +4,13 @@
  */
 
 import Backbone = require("backbone");
-import { WidgetEVO } from "../widgets/core/WidgetEVO";
+import { WidgetDescriptor, WidgetEVO } from "../widgets/core/WidgetEVO";
 import { WidgetManager } from "../WidgetManager";
+import { WidgetsMap } from "./BuilderView";
 
-const widgetsListTemplate: string = `
+const widgetsListViewTemplate: string = `
 {{#each widgets}}
-<button type="button" class="list-group-item list-group-item-action widget-list-item" id="{{id}}">{{type}}: {{name}}</button>
+<button type="button" class="list-group-item list-group-item-action widget-list-item" widget-id="{{widget-id}}">{{type}}: {{name}}</button>
 {{/each}}
 `;
 
@@ -17,56 +18,42 @@ export interface WidgetListViewOptions extends Backbone.ViewOptions {
 }
 
 export class WidgetsListView extends Backbone.View {
-    protected widgetManager: WidgetManager;
-    protected labelFunction: (id: WidgetEVO) => string;
-
-    protected $listItems: JQuery<HTMLUListElement>;
 
     constructor (widgetManager: WidgetManager, data: WidgetListViewOptions) {
         super(data);
-        this.widgetManager = widgetManager;
-
-        this.listenTo(this.widgetManager, "WidgetModified", () => {
-            this.render();
-        });
-        this.listenTo(this.widgetManager, "WidgetSelected", (event: { id: string, add?: boolean }) => {
-            this.selectWidget(event.id, event.add);
-        });
-
         this.render();
     }
 
-    /**
-     * @function render
-     * @description Updates and redraws the view.
-     * @return {PrototypeImageView} The view
-     */
-    render (): WidgetsListView {
-        const widgets: WidgetEVO[] = this.widgetManager.getAllWidgets();
-        
+    refresh (widgetsMap: WidgetsMap): void {
+        const widgets: { [id: string]: { "widget-id": string, type: string, name: string }} = {};
+        for (let i in widgetsMap) {
+            widgets[i] = { "widget-id": widgetsMap[i].getId(), type: widgetsMap[i].getType(), name: widgetsMap[i].getName() };
+        }
         // update DOM
-        const content: string = Handlebars.compile(widgetsListTemplate)({ widgets });
+        const content: string = Handlebars.compile(widgetsListViewTemplate)({
+            widgets
+        });
         this.$el.html(content);
 
         // add event handlers
-        for (let i in widgets) {
-            const widget: WidgetEVO = widgets[i];
-            const id: string = widget.id;
-            const $elem: JQuery<HTMLElement> = this.$el.filter(`#${id}`);
-            $elem.on("click", (evt: JQuery.Event) => {
-                const add: boolean = evt.shiftKey;
-                this.selectWidget(id, add);
-                evt.preventDefault();
-                evt.stopPropagation();
-            });
-            $elem.on("dblclick", (evt: JQuery.Event) => {
-                this.editWidget(id);
-                evt.preventDefault();
-                evt.stopPropagation();
-            });
-        }
-        return this;
+        // for (let i in components) {
+        //     const widget: WidgetEVO = components[i];
+        //     const id: string = widget.id;
+        //     const $elem: JQuery<HTMLElement> = this.$el.filter(`#${id}`);
+        //     $elem.on("click", (evt: JQuery.Event) => {
+        //         const add: boolean = evt.shiftKey;
+        //         this.selectWidget(id, add);
+        //         evt.preventDefault();
+        //         evt.stopPropagation();
+        //     });
+        //     $elem.on("dblclick", (evt: JQuery.Event) => {
+        //         this.editWidget(id);
+        //         evt.preventDefault();
+        //         evt.stopPropagation();
+        //     });
+        // }
     }
+
 
     /**
      * @function selectWidget

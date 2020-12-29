@@ -763,7 +763,7 @@ class MT32Demo {
             left: 226
         }, { connection: this.connection,
             customLabel: "",
-            functionName: "back",
+            buttonName: "back",
             css: {
                 "background-color": "steelblue",
                 opacity: 0.2,
@@ -1006,7 +1006,7 @@ class MT32Demo {
             left: 229
         }, { connection: this.connection,
             customLabel: "",
-            functionName: "confirm",
+            buttonName: "confirm",
             css: {
                 "background-color": "steelblue",
                 opacity: 0,
@@ -1022,7 +1022,7 @@ class MT32Demo {
             left: 461
         }, { connection: this.connection,
             customLabel: "",
-            functionName: "confirm",
+            buttonName: "confirm",
             css: {
                 "background-color": "steelblue",
                 opacity: 0,
@@ -1038,7 +1038,7 @@ class MT32Demo {
             left: 278
         }, { connection: this.connection,
             customLabel: "",
-            functionName: "confirm",
+            buttonName: "confirm",
             css: {
                 "background-color": "steelblue",
                 opacity: 0,
@@ -1054,7 +1054,7 @@ class MT32Demo {
             left: 370
         }, { connection: this.connection,
             customLabel: "",
-            functionName: "back",
+            buttonName: "back",
             css: {
                 "background-color": "steelblue",
                 opacity: 0.2,
@@ -1080,7 +1080,6 @@ class MT32Demo {
                 "border-radius": "20px",
                 parent: "MT32-right"
             },
-            toggleButton: true,
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.mt32.power_btn = new TouchscreenButton("power_btn", {
@@ -1245,7 +1244,6 @@ class MT32Demo {
                 "border-color": "#000066",
                 parent: "patientsScreen"
             },
-            toggleButton: true,
             viz: { visible: "this.ct64.known_patient = TRUE" },
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
@@ -1328,7 +1326,6 @@ class MT32Demo {
                 "border-color": "#000066",
                 parent: "newMonitoringSessionScreen"
             },
-            toggleButton: true,
             callback: (err?, res?) =>  { this.onMessageReceived(err, res); }
         });
         this.ct64.continue = new TouchscreenButton("continue", {
@@ -1614,7 +1611,7 @@ class MT32Demo {
             left: 49
         }, { connection: this.connection,
             customLabel: "",
-            functionName: "select_exam_data_hub",
+            buttonName: "select_exam_data_hub",
             css: {
                 "background-color": "steelblue",
                 opacity: 0,
