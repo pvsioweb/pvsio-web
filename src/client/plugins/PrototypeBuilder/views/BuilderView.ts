@@ -6,9 +6,8 @@
 import * as Backbone from 'backbone';
 import * as Utils from '../../../env/Utils';
 
-import { WidgetEVO, Coords, WidgetDescriptor, WidgetOptions } from "../widgets/core/WidgetEVO";
-import { Connection, OpenFileDialog, ReadFileRequest, ReadFileResponse } from '../../../env/Connection';
-import { WidgetManager } from "../WidgetManager";
+import { WidgetEVO, Coords } from "../widgets/core/WidgetEVO";
+import { Connection, ReadFileRequest, ReadFileResponse } from '../../../env/Connection';
 import { HotspotEditor, HotspotEditorEvents, HotspotData, HotspotsMap } from './editors/HotspotEditor';
 
 import { View, BuilderViewOptions } from './View';
@@ -49,8 +48,8 @@ export class BuilderView extends View {
     protected hotspotEditor: HotspotEditor;
     protected widgetsMap: WidgetsMap = {};
 
-    constructor (widgetManager: WidgetManager, data: BuilderViewOptions, connection: Connection, opt?: { localFiles?: boolean }) {
-        super(widgetManager, data, connection);        
+    constructor (data: BuilderViewOptions, connection: Connection, opt?: { localFiles?: boolean }) {
+        super(data, connection);        
         this.render(data, opt);
         this.installHandlers();
     }
@@ -128,11 +127,6 @@ export class BuilderView extends View {
     }
 
     protected installHandlers (): void {
-        this.listenTo(this.widgetManager, "WidgetRegionRestored", (id: string, coord: Coords) => {
-            const widget: WidgetEVO = this.widgetManager.getWidget(id);
-            // imageMapper.createRegion();
-            // widget.element(mark);
-        });
 
         this.$el.find(".use-whiteboard-btn").on("click", (evt: JQuery.ClickEvent) => {
             const minWidth: number = 800;
@@ -147,7 +141,7 @@ export class BuilderView extends View {
             this.$imageDiv.html(imageElement);
             this.$imageDiv.css({ border: "1px solid black" });
 
-            this.hotspotEditor = new HotspotEditor(this.widgetManager, {
+            this.hotspotEditor = new HotspotEditor({
                 el: this.$imageDiv.find("img")[0],
                 overlay: this.$imageOverlay[0]
             });

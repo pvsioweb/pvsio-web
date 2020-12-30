@@ -1,7 +1,5 @@
 import * as Backbone from 'backbone';
 import { Connection } from '../../../env/Connection';
-import { WidgetManager } from "../WidgetManager";
-
 import { View, BuilderViewOptions } from './View';
 
 export const content: string = `
@@ -12,8 +10,8 @@ export const content: string = `
 
 export class SettingsView extends View {
     
-    constructor (widgetManager: WidgetManager, data: BuilderViewOptions, connection: Connection) {
-        super(widgetManager, data, connection);        
+    constructor (data: BuilderViewOptions, connection: Connection) {
+        super(data, connection);        
         this.render(data);
     }
 

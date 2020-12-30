@@ -1,7 +1,6 @@
 import * as Backbone from 'backbone';
 import * as Utils from '../../../env/Utils';
 import { Connection } from '../../../env/Connection';
-import { WidgetManager } from "../WidgetManager";
 
 export interface BuilderViewOptions extends Backbone.ViewOptions {
     viewId: string,
@@ -23,7 +22,6 @@ const bodyTemplate: string = `
 </div>`;
 
 export abstract class View extends Backbone.View {
-    protected widgetManager: WidgetManager;
     protected connection: Connection;
     
     protected screenName: string;
@@ -31,9 +29,8 @@ export abstract class View extends Backbone.View {
 
     protected viewId: string;
 
-    constructor (widgetManager: WidgetManager, data: BuilderViewOptions, connection: Connection) {
+    constructor (data: BuilderViewOptions, connection: Connection) {
         super(data);
-        this.widgetManager = widgetManager;
         this.connection = connection;
         this.viewId = data.viewId || `view-${Utils.uuid()}`;
         this.screenName = data?.screenName || "";

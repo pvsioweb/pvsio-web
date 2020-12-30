@@ -4,8 +4,6 @@
  */
 
 import Backbone = require("backbone");
-import { WidgetDescriptor, WidgetEVO } from "../widgets/core/WidgetEVO";
-import { WidgetManager } from "../WidgetManager";
 import { WidgetsMap } from "./BuilderView";
 
 const widgetsListViewTemplate: string = `
@@ -19,7 +17,7 @@ export interface WidgetListViewOptions extends Backbone.ViewOptions {
 
 export class WidgetsListView extends Backbone.View {
 
-    constructor (widgetManager: WidgetManager, data: WidgetListViewOptions) {
+    constructor (data: WidgetListViewOptions) {
         super(data);
         this.render();
     }

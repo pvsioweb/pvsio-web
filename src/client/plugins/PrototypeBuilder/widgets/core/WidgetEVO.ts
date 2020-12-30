@@ -376,10 +376,11 @@ export abstract class WidgetEVO extends Backbone.Model {
      * @instance
      */
     reveal (): void {
-        if (this.$div && this.$div[0]) {
-            // console.log("revealing widget " + this.id);
-            this.$div.css("display", "block");
+        if (!this.rendered) {
+            this.createHTMLElement();
+            this.installHandlers();
         }
+        this.$div.css("display", "block");
     }
 
     /**
@@ -389,10 +390,11 @@ export abstract class WidgetEVO extends Backbone.Model {
      * @instance
      */
     hide (): void {
-        if (this.$div && this.$div[0]) {
-            // console.log("hiding widget " + this.id);
-            this.$div.css("display", "none");
+        if (!this.rendered) {
+            this.createHTMLElement();
+            this.installHandlers();
         }
+        this.$div.css("display", "none");
     }
 
     /**
@@ -407,21 +409,21 @@ export abstract class WidgetEVO extends Backbone.Model {
      */
     move (coords: Coords, opt?: CSS): void {
         opt = opt || {};
-        // console.log(coords);
-        if (this.$div && this.$div[0]) {
-            coords = coords || {};
-            // opt = normalise_options(opt);
-            opt.duration = opt.duration || 0;
-            opt.transitionTimingFunction = opt.transitionTimingFunction || "ease-out";
-            this.top = isNaN(parseFloat(`${coords.top}`)) ? this.top : +parseFloat(`${coords.top}`).toFixed(WidgetEVO.MAX_COORDINATES_ACCURACY);
-            this.left = isNaN(parseFloat(`${coords.left}`)) ? this.left : +parseFloat(`${coords.left}`).toFixed(WidgetEVO.MAX_COORDINATES_ACCURACY);
-            this.$div.animate({
-                "top": this.top + "px",
-                "left": this.left + "px",
-                "transition-timing-function": opt.transitionTimingFunction
-            }, +opt.duration);
+        if (!this.rendered) {
+            this.createHTMLElement();
+            this.installHandlers();
         }
-        this.reveal();
+        coords = coords || {};
+        // opt = normalise_options(opt);
+        opt.duration = opt.duration || 0;
+        opt.transitionTimingFunction = opt.transitionTimingFunction || "ease-out";
+        this.top = isNaN(parseFloat(`${coords.top}`)) ? this.top : +parseFloat(`${coords.top}`).toFixed(WidgetEVO.MAX_COORDINATES_ACCURACY);
+        this.left = isNaN(parseFloat(`${coords.left}`)) ? this.left : +parseFloat(`${coords.left}`).toFixed(WidgetEVO.MAX_COORDINATES_ACCURACY);
+        this.$div.animate({
+            "top": this.top + "px",
+            "left": this.left + "px",
+            "transition-timing-function": opt.transitionTimingFunction
+        }, +opt.duration);
     }
 
     /**
@@ -435,38 +437,38 @@ export abstract class WidgetEVO extends Backbone.Model {
      * @instance
      */
     resize (coords: Coords, opt?: CSS): void {
-        // console.log(coords);
-        if (this.$div && this.$div[0]) {
-            coords = coords || {};
-            opt = opt || {};
-            opt.duration = opt.duration || 0;
-            opt.transitionTimingFunction = opt.transitionTimingFunction || "ease-out";
-            this.height = isNaN(parseFloat(`${coords.height}`)) ? this.height : +parseFloat(`${coords.height}`).toFixed(WidgetEVO.MAX_COORDINATES_ACCURACY);
-            this.width = isNaN(parseFloat(`${coords.width}`)) ? this.width : +parseFloat(`${coords.width}`).toFixed(WidgetEVO.MAX_COORDINATES_ACCURACY);
-
-            // update font size
-            const matchBorder: RegExpMatchArray = /\d+px/.exec(opt?.border);
-            let borderWidth: number = opt["border-width"] ? parseFloat(`${opt["border-width"]}`)
-                : matchBorder ? parseFloat(matchBorder[0]) 
-                    : 0;
-            borderWidth = isNaN(borderWidth) ? 0 : borderWidth;
-            const fontSize: number = !isNaN(parseFloat(opt["font-size"])) && parseFloat(opt["font-size"]) < this.height - borderWidth - this.fontPadding ? 
-                parseFloat(opt["font-size"]) 
-                    : this.height - borderWidth - this.fontPadding;
-            this.css["font-size"] = fontSize + "px";
-
-            if (opt.duration) {
-                this.$div.animate({ "height": this.height + "px", "width": this.width + "px", "transition-timing-function": opt.transitionTimingFunction }, +opt.duration);
-                this.$base.css("font-size", this.css["font-size"]).animate({ "line-height": this.height + "px", "height": this.height + "px", "width": this.width + "px", "transition-timing-function": opt.transitionTimingFunction }, +opt.duration);
-                this.$overlay.animate({ "height": this.height + "px", "width": this.width + "px", "transition-timing-function": opt.transitionTimingFunction }, +opt.duration);
-            } else {
-                this.$div.css("height", this.height + "px").css("width", this.width + "px");
-                this.$base.css("line-height", this.height + "px").css("height", this.height + "px").css("width", this.width + "px").css("font-size", this.css["font-size"]);
-                this.$overlay.css("height", this.height + "px").css("width", this.width + "px");
-            }
-            this.move(coords, opt); // resize may change the top/left position of the widget
+        if (!this.rendered) {
+            this.createHTMLElement();
+            this.installHandlers();
         }
-        this.reveal();
+        coords = coords || {};
+        opt = opt || {};
+        opt.duration = opt.duration || 0;
+        opt.transitionTimingFunction = opt.transitionTimingFunction || "ease-out";
+        this.height = isNaN(parseFloat(`${coords.height}`)) ? this.height : +parseFloat(`${coords.height}`).toFixed(WidgetEVO.MAX_COORDINATES_ACCURACY);
+        this.width = isNaN(parseFloat(`${coords.width}`)) ? this.width : +parseFloat(`${coords.width}`).toFixed(WidgetEVO.MAX_COORDINATES_ACCURACY);
+
+        // update font size
+        const matchBorder: RegExpMatchArray = /\d+px/.exec(opt?.border);
+        let borderWidth: number = opt["border-width"] ? parseFloat(`${opt["border-width"]}`)
+            : matchBorder ? parseFloat(matchBorder[0]) 
+                : 0;
+        borderWidth = isNaN(borderWidth) ? 0 : borderWidth;
+        const fontSize: number = !isNaN(parseFloat(opt["font-size"])) && parseFloat(opt["font-size"]) < this.height - borderWidth - this.fontPadding ? 
+            parseFloat(opt["font-size"]) 
+                : this.height - borderWidth - this.fontPadding;
+        this.css["font-size"] = fontSize + "px";
+
+        if (opt.duration) {
+            this.$div.animate({ "height": this.height + "px", "width": this.width + "px", "transition-timing-function": opt.transitionTimingFunction }, +opt.duration);
+            this.$base.css("font-size", this.css["font-size"]).animate({ "line-height": this.height + "px", "height": this.height + "px", "width": this.width + "px", "transition-timing-function": opt.transitionTimingFunction }, +opt.duration);
+            this.$overlay.animate({ "height": this.height + "px", "width": this.width + "px", "transition-timing-function": opt.transitionTimingFunction }, +opt.duration);
+        } else {
+            this.$div.css("height", this.height + "px").css("width", this.width + "px");
+            this.$base.css("line-height", this.height + "px").css("height", this.height + "px").css("width", this.width + "px").css("font-size", this.css["font-size"]);
+            this.$overlay.css("height", this.height + "px").css("width", this.width + "px");
+        }
+        this.move(coords, opt); // resize may change the top/left position of the widget
     }
 
     /**
@@ -481,21 +483,22 @@ export abstract class WidgetEVO extends Backbone.Model {
      * @instance
      */
     rotate (deg: string | number, opt?: CSS): void {
-        if (this.$div && this.$div[0]) {
-            deg = (isNaN(parseFloat(`${deg}`))) ? 0 : parseFloat(`${deg}`);
-            opt = opt || {};
-            opt.duration = opt.duration || 0;
-            opt.transitionTimingFunction = opt.transitionTimingFunction || "ease-in";
-            opt.transformOrigin = opt.transformOrigin || "center";
-            this.$div.css({
-                "transform": `rotate(${deg}deg)`,
-                "transform-origin": opt.transformOrigin
-            });
-            if (opt.duration) {
-                this.$div.css({ "transition": `all ${opt.duration}ms ${opt.transitionTimingFunction} 0s` });
-            }
+        if (!this.rendered) {
+            this.createHTMLElement();
+            this.installHandlers();
         }
-        this.reveal();
+        deg = (isNaN(parseFloat(`${deg}`))) ? 0 : parseFloat(`${deg}`);
+        opt = opt || {};
+        opt.duration = opt.duration || 0;
+        opt.transitionTimingFunction = opt.transitionTimingFunction || "ease-in";
+        opt.transformOrigin = opt.transformOrigin || "center";
+        this.$div.css({
+            "transform": `rotate(${deg}deg)`,
+            "transform-origin": opt.transformOrigin
+        });
+        if (opt.duration) {
+            this.$div.css({ "transition": `all ${opt.duration}ms ${opt.transitionTimingFunction} 0s` });
+        }
     }
 
     /**
@@ -682,6 +685,10 @@ export abstract class WidgetEVO extends Backbone.Model {
      * @instance
      */
     select (opt?: CSS): void {
+        if (!this.rendered) {
+            this.createHTMLElement();
+            this.installHandlers();
+        }
         opt = opt || {};
         const halo: string = this.css.halo || "yellow";
         this.$base.css({
@@ -700,6 +707,10 @@ export abstract class WidgetEVO extends Backbone.Model {
      * @instance
      */
     deselect (): void {
+        if (!this.rendered) {
+            this.createHTMLElement();
+            this.installHandlers();
+        }
         this.setCSS(this.css);
         this.$overlay.css({ opacity: 0 });
     }

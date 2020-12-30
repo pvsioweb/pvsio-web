@@ -9,7 +9,6 @@ import { Connection } from '../../env/Connection';
 import * as Utils from '../../env/Utils';
 import { BuilderEvents, BuilderView, DidCreateWidgetEvent } from './views/BuilderView';
 import { WidgetsListView } from './views/WidgetsListView';
-import { WidgetManager } from "./WidgetManager";
 import { SettingsView } from './views/SettingsView';
 import { View } from './views/View';
 
@@ -88,19 +87,11 @@ export class PrototypeBuilder implements PVSioWebPlugin {
 
     protected collapsed: boolean = false;
 
-    protected widgetManager: WidgetManager;
-
     protected sideView: WidgetsListView;
     protected centralViews: { [screenId: string]: View };
 
-    constructor () {
-        this.widgetManager = new WidgetManager();
-    }
-
     async activate (connection?: Connection): Promise<boolean> {
         this.connection = connection;
-
-        this.widgetManager.activate(connection);
 
         this.panel = Utils.createCollapsiblePanel(this, {
             parent: "toolkit-body",
@@ -115,17 +106,17 @@ export class PrototypeBuilder implements PVSioWebPlugin {
         
         const bodyDiv: HTMLElement = this.panel.$content.find(`.prototype-screens`)[0];
         const headerDiv: HTMLElement = this.panel.$content.find(`.prototype-screen-list`)[0];
-        this.sideView = new WidgetsListView(this.widgetManager, {
+        this.sideView = new WidgetsListView({
             el: this.panel.$content.find(".widget-list")[0]
         });
         this.centralViews = {
-            Settings: new SettingsView(this.widgetManager, {
+            Settings: new SettingsView({
                 viewId: "Settings",
                 screenName: "Settings",
                 el: bodyDiv,
                 headerDiv,
             }, this.connection),
-            Main: new BuilderView(this.widgetManager, {
+            Main: new BuilderView({
                 viewId: "Main",
                 screenName: "Main",
                 el: bodyDiv,
@@ -154,7 +145,7 @@ export class PrototypeBuilder implements PVSioWebPlugin {
         $("#btnBuilderView").removeClass("btn-outline-secondary").addClass("btn-primary active");
         $("#btnSimulatorView").addClass("btn-outline-secondary").removeClass("btn-primary active");
         $("#btnRebootPrototype").addClass("disabled");
-        this.widgetManager.stopTimers();
+        // this.widgetManager.stopTimers();
         this.expandWidgetsList();
     }
 
@@ -166,8 +157,8 @@ export class PrototypeBuilder implements PVSioWebPlugin {
         $("#btnBuilderView").addClass("btn-outline-secondary").removeClass("btn-primary active");
         $("#btnSimulatorView").removeClass("btn-outline-secondary").addClass("btn-primary active");
         $("#btnRebootPrototype").addClass("disabled");
-        this.widgetManager.initWidgets();
-        this.widgetManager.startTimers();
+        // this.widgetManager.initWidgets();
+        // this.widgetManager.startTimers();
         this.collapseWidgetsList();
     }
 

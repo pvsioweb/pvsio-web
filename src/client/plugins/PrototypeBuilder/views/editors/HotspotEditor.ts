@@ -1,6 +1,5 @@
 import * as Backbone from 'backbone';
 import * as Utils from '../../../../env/Utils';
-import { WidgetManager } from "../../WidgetManager";
 import { Coords, WidgetEVO } from "../../widgets/core/WidgetEVO";
 
 export const HotspotEditorEvents = {
@@ -266,7 +265,6 @@ export type HotspotsMap = { [id: string]: {
 
 // main class
 export class HotspotEditor extends Backbone.View {
-    protected widgetManager: WidgetManager;
 
     static readonly MIN_WIDTH: number = 10;
     static readonly MIN_HEIGHT: number = 10;
@@ -287,9 +285,8 @@ export class HotspotEditor extends Backbone.View {
 
     protected hotspots: HotspotsMap = {};
     
-    constructor (widgetManager: WidgetManager, data: HotspotEditorData) {
+    constructor (data: HotspotEditorData) {
         super(data);
-        this.widgetManager = widgetManager;
         this.$overlay = $(data.overlay);
 
         this.render();
