@@ -1,6 +1,8 @@
 import * as Backbone from 'backbone';
 import * as Utils from '../../../env/Utils';
 import { Connection } from '../../../env/Connection';
+import { HotspotsMap } from './editors/HotspotEditor';
+import { WidgetEVO } from '../widgets/core/WidgetEVO';
 
 export interface BuilderViewOptions extends Backbone.ViewOptions {
     viewId: string,
@@ -20,6 +22,23 @@ const bodyTemplate: string = `
 <div id="{{screenName}}" class="container-fluid tab-pane fade show no-gutters{{#if active}} active{{/if}}" aria-labelledby="{{screenName}}-tab" style="padding:0; position:relative; min-height:480px;">
     {{content}}
 </div>`;
+
+export type WidgetsMap = { [id: string]: WidgetEVO };
+export const BuilderEvents = {
+    DidCreateWidget: "DidCreateWidget",
+    DidSelectWidget: "DidSelectWidget",
+    DidDeselectWidget: "DidDeselectWidget",
+    WillEditWidget: "WillEditWidget",
+};
+export interface SelectWidgetEvent {
+    id: string
+}
+export interface CreateWidgetEvent extends SelectWidgetEvent {
+    name: string,
+    widgets: WidgetsMap,
+    hotspots: HotspotsMap
+};
+
 
 export abstract class View extends Backbone.View {
     protected connection: Connection;

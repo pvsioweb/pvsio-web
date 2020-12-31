@@ -7,10 +7,10 @@ import { Connection } from '../../env/Connection';
 // Prompt              = require("pvsioweb/forms/displayPrompt"),
 
 import * as Utils from '../../env/Utils';
-import { BuilderEvents, BuilderView, DidCreateWidgetEvent } from './views/BuilderView';
+import { BuilderView } from './views/BuilderView';
 import { WidgetsListView } from './views/WidgetsListView';
 import { SettingsView } from './views/SettingsView';
-import { View } from './views/View';
+import { BuilderEvents, CreateWidgetEvent, SelectWidgetEvent, View } from './views/View';
 
 // import { WidgetEVO } from "../../widgets/core/WidgetEVO";
 // import { BasicDisplayEVO } from "../../widgets/core/BasicDisplayEVO";
@@ -87,7 +87,7 @@ export class PrototypeBuilder implements PVSioWebPlugin {
 
     protected collapsed: boolean = false;
 
-    protected sideView: WidgetsListView;
+    protected listView: WidgetsListView;
     protected centralViews: { [screenId: string]: View };
 
     async activate (connection?: Connection): Promise<boolean> {
@@ -106,7 +106,7 @@ export class PrototypeBuilder implements PVSioWebPlugin {
         
         const bodyDiv: HTMLElement = this.panel.$content.find(`.prototype-screens`)[0];
         const headerDiv: HTMLElement = this.panel.$content.find(`.prototype-screen-list`)[0];
-        this.sideView = new WidgetsListView({
+        this.listView = new WidgetsListView({
             el: this.panel.$content.find(".widget-list")[0]
         });
         this.centralViews = {
@@ -127,8 +127,21 @@ export class PrototypeBuilder implements PVSioWebPlugin {
             })
         };
 
-        this.centralViews.Main.on(BuilderEvents.DidCreateWidget, (evt: DidCreateWidgetEvent) => {
-            this.sideView.refresh(evt?.widgets);
+        this.centralViews.Main.on(BuilderEvents.DidCreateWidget, (evt: CreateWidgetEvent) => {
+            this.listView.refresh(evt?.widgets);
+            this.listView.selectWidget(evt?.id);
+        });
+        this.centralViews.Main.on(BuilderEvents.DidSelectWidget, (evt: SelectWidgetEvent) => {
+            this.listView.selectWidget(evt?.id);
+        });
+        this.listView.on(BuilderEvents.DidSelectWidget, (evt: SelectWidgetEvent) => {
+            (<BuilderView> this.centralViews.Main).selectWidget(evt?.id);
+        });
+        this.listView.on(BuilderEvents.DidDeselectWidget, (evt: SelectWidgetEvent) => {
+            (<BuilderView> this.centralViews.Main).deselectWidget(evt?.id);
+        });
+        this.listView.on(BuilderEvents.WillEditWidget, (evt: SelectWidgetEvent) => {
+            (<BuilderView> this.centralViews.Main).editWidget(evt?.id);
         });
 
         return true;

@@ -1,14 +1,9 @@
-/**
- * View that lists all widgets within a prototype
- * @author Nathaniel Watson
- */
-
-import Backbone = require("backbone");
-import { WidgetsMap } from "./BuilderView";
+import * as Backbone from 'backbone';
+import { BuilderEvents, SelectWidgetEvent, WidgetsMap } from './View';
 
 const widgetsListViewTemplate: string = `
 {{#each widgets}}
-<button type="button" class="list-group-item list-group-item-action widget-list-item" widget-id="{{widget-id}}">{{type}}: {{name}}</button>
+<button type="button" class="btn-sm list-group-item list-group-item-action widget-list-item" widget-id="{{widget-id}}" widget-name="{{name}}">{{type}}: {{name}}</button>
 {{/each}}
 `;
 
@@ -23,54 +18,57 @@ export class WidgetsListView extends Backbone.View {
     }
 
     refresh (widgetsMap: WidgetsMap): void {
-        const widgets: { [id: string]: { "widget-id": string, type: string, name: string }} = {};
+        const data: { [id: string]: { "widget-id": string, type: string, name: string }} = {};
         for (let i in widgetsMap) {
-            widgets[i] = { "widget-id": widgetsMap[i].getId(), type: widgetsMap[i].getType(), name: widgetsMap[i].getName() };
+            data[i] = { "widget-id": widgetsMap[i].getId(), type: widgetsMap[i].getType(), name: widgetsMap[i].getName() };
         }
         // update DOM
-        const content: string = Handlebars.compile(widgetsListViewTemplate)({
-            widgets
+        const content: string = Handlebars.compile(widgetsListViewTemplate, { noEscape: true })({
+            widgets: data
         });
         this.$el.html(content);
 
-        // add event handlers
-        // for (let i in components) {
-        //     const widget: WidgetEVO = components[i];
-        //     const id: string = widget.id;
-        //     const $elem: JQuery<HTMLElement> = this.$el.filter(`#${id}`);
-        //     $elem.on("click", (evt: JQuery.Event) => {
-        //         const add: boolean = evt.shiftKey;
-        //         this.selectWidget(id, add);
-        //         evt.preventDefault();
-        //         evt.stopPropagation();
-        //     });
-        //     $elem.on("dblclick", (evt: JQuery.Event) => {
-        //         this.editWidget(id);
-        //         evt.preventDefault();
-        //         evt.stopPropagation();
-        //     });
-        // }
+        // click toggles selection status
+        this.$el.find(".widget-list-item").on("click", (evt: JQuery.ClickEvent) => {
+            const id: string = $(evt?.currentTarget).attr("widget-id");
+            // const name: string = $(evt?.currentTarget).attr("widget-name");
+            const active: boolean = $(evt?.currentTarget).hasClass("active");
+            if (active) {
+                // deselect widget
+                this.deselectWidget(id);
+            } else {
+                // select widget
+                this.selectWidget(id);
+            }
+        });
+        // double click opens widget editor
+        this.$el.find(".widget-list-item").on("dblclick", (evt: JQuery.DoubleClickEvent) => {
+            const id: string = $(evt?.currentTarget).attr("widget-id");
+            // edit widget
+            this.editWidget(id);
+        });
     }
 
-
-    /**
-     * @function selectWidget
-     * @description Displays the given widget as selected within the view
-     * @param {Widget} widget Widget to select
-     * @param {boolean} add True if the widget should be added to the current selection, false if only it should
-     * be selected.
-     */
-    selectWidget (id: string, add?: boolean): void {
-        this.$el.filter(`#${id}`).addClass("active");
-        this.trigger("WidgetSelected", { id, add });
+    selectWidget (id: string): void {
+        this.clearSelection();
+        const elem: JQuery<HTMLElement> = this.$el.find(`[widget-id=${id}]`);
+        elem.addClass("active");
+        const event: SelectWidgetEvent = { id };
+        this.trigger(BuilderEvents.DidSelectWidget, event);
     }
-
-    editWidget (id: string, add?: boolean): void {
-        this.$el.filter(`#${id}`).addClass("active");
-        this.trigger("WidgetEditRequested", { id, add });
+    deselectWidget (id: string): void {
+        const elem: JQuery<HTMLElement> = this.$el.find(`[widget-id=${id}]`);
+        elem.removeClass("active");
+        const event: SelectWidgetEvent = { id };
+        this.trigger(BuilderEvents.DidDeselectWidget, event);
     }
-
     clearSelection (): void {
-        this.$el.filter(`.widget-list-item`).removeClass("active");
+        this.$el.find(`.widget-list-item`).removeClass("active");
+    }
+    editWidget (id: string): void {
+        const elem: JQuery<HTMLElement> = this.$el.find(`[widget-id=${id}]`);
+        this.selectWidget(id);
+        const event: SelectWidgetEvent = { id };
+        this.trigger(BuilderEvents.WillEditWidget, event);
     }
 }

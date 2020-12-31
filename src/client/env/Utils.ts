@@ -48,7 +48,7 @@ export interface DialogOptions {
     buttons?: HTMLElement,
     largeModal?: boolean,
     hidden?: boolean
-}
+};
 export function createDialog (data: DialogOptions): JQuery<HTMLElement> {
     if (data) {
         const dialogView: string = Handlebars.compile(dialogTemplate, { noEscape: true })({
@@ -103,6 +103,48 @@ const collapsiblePanelTemplate: string = `
     <div id="{{id}}-content" class="content collapsible-panel" style="display:block;"></div>
 </div>
 `;
+const menuTemplate: string = `
+<div id="{{menuId}}" class="fade show" style="position:absolute;width:0px;height:0px;top:{{top}}px;left:{{left}}px;">
+    <div class="dropdown-menu show">
+        {{#each items}}
+        {{#if name}}<a class="dropdown-item" href="#" action="{{name}}">{{icon}}{{name}}</a>{{else}}<div class="dropdown-divider"></div>{{/if}}
+        {{/each}}
+    </div>
+</div>
+`;
+export interface MenuOptions {
+    id?: string,
+    top?: number | string,
+    left?: number | string,
+    title?: string,
+    items: (string | { name: string, icon?: string })[]
+};
+export function createMenu (data: MenuOptions): JQuery<HTMLElement> {
+    if (data) {
+        const top: number = parseFloat(`${data.top}`);
+        const left: number = parseFloat(`${data.left}`);
+        const menuView: string = Handlebars.compile(menuTemplate, { noEscape: true })({
+            menuId: "pvsioweb-menu", 
+            top,
+            left,
+            items: data.items
+        });
+        // remove old dialog, if any
+        $("body").find("#pvsioweb-menu").remove();
+        // append new dialog
+        $("body").append(menuView);
+    }
+    return $("body").find("#pvsioweb-menu");
+}
+export function revealMenu (): JQuery<HTMLElement> {
+    return $("body").find("#pvsioweb-menu").css("display", "block");
+}
+export function hideMenu (): JQuery<HTMLElement> {
+    return $("body").find("#pvsioweb-menu").css("display", "none");
+}
+export function removeMenu (): JQuery<HTMLElement> {
+    return $("body").find("#pvsioweb-menu").remove();
+}
 export function createCollapsiblePanel (owner: PVSioWebPlugin, opt?: { 
     parent?: string, 
     showContent?: boolean, 
