@@ -32,6 +32,11 @@ export class BuilderView extends View {
     protected hotspotEditor: HotspotEditor;
     protected widgetsMap: WidgetsMap = {};
 
+    protected clipboard: {
+        hotspot: HotspotData,
+        widget?: WidgetEVO
+    };
+
     constructor (data: BuilderViewOptions, connection: Connection, opt?: { localFiles?: boolean }) {
         super(data, connection);        
         this.render(data, opt);
@@ -159,6 +164,17 @@ export class BuilderView extends View {
             });
             this.hotspotEditor.on(HotspotEditorEvents.WillEditHotspot, async (data: HotspotData) => {
                 await this.editWidget(data?.id);
+            });
+            this.hotspotEditor.on(HotspotEditorEvents.DidCopyHotspot, async (data: HotspotData) => {
+                this.clipboard = {
+                    hotspot: data,
+                    widget: this.widgetsMap[data.id]
+                };
+            });
+            this.hotspotEditor.on(HotspotEditorEvents.DidPasteHotspot, async (data: HotspotData) => {
+                if (this.clipboard?.hotspot) {
+                    this.hotspotEditor.createHotspot(this.clipboard.hotspot, { useFreshId: true });
+                }
             });
         });
 
