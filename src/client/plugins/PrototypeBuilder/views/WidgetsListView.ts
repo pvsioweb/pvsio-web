@@ -35,40 +35,46 @@ export class WidgetsListView extends Backbone.View {
             const active: boolean = $(evt?.currentTarget).hasClass("active");
             if (active) {
                 // deselect widget
-                this.deselectWidget(id);
+                this.deselectWidget({ id });
             } else {
                 // select widget
-                this.selectWidget(id);
+                this.selectWidget({ id });
             }
         });
         // double click opens widget editor
         this.$el.find(".widget-list-item").on("dblclick", (evt: JQuery.DoubleClickEvent) => {
             const id: string = $(evt?.currentTarget).attr("widget-id");
             // edit widget
-            this.editWidget(id);
+            this.editWidget({ id });
         });
     }
 
-    selectWidget (id: string): void {
-        this.clearSelection();
-        const elem: JQuery<HTMLElement> = this.$el.find(`[widget-id=${id}]`);
-        elem.addClass("active");
-        const event: SelectWidgetEvent = { id };
-        this.trigger(BuilderEvents.DidSelectWidget, event);
+    selectWidget (data: { id: string }): void {
+        if (data?.id) {
+            this.clearSelection();
+            const elem: JQuery<HTMLElement> = this.$el.find(`[widget-id=${data.id}]`);
+            elem.addClass("active");
+            const event: SelectWidgetEvent = { id: data.id };
+            this.trigger(BuilderEvents.DidSelectWidget, event);
+        }
     }
-    deselectWidget (id: string): void {
-        const elem: JQuery<HTMLElement> = this.$el.find(`[widget-id=${id}]`);
-        elem.removeClass("active");
-        const event: SelectWidgetEvent = { id };
-        this.trigger(BuilderEvents.DidDeselectWidget, event);
+    deselectWidget (data: { id: string }): void {
+        if (data?.id) {
+            const elem: JQuery<HTMLElement> = this.$el.find(`[widget-id=${data.id}]`);
+            elem.removeClass("active");
+            const event: SelectWidgetEvent = { id: data.id };
+            this.trigger(BuilderEvents.DidDeselectWidget, event);
+        }
     }
     clearSelection (): void {
         this.$el.find(`.widget-list-item`).removeClass("active");
     }
-    editWidget (id: string): void {
-        const elem: JQuery<HTMLElement> = this.$el.find(`[widget-id=${id}]`);
-        this.selectWidget(id);
-        const event: SelectWidgetEvent = { id };
-        this.trigger(BuilderEvents.WillEditWidget, event);
+    editWidget (data: { id: string }): void {
+        if (data.id) {
+            const elem: JQuery<HTMLElement> = this.$el.find(`[widget-id=${data.id}]`);
+            this.selectWidget(data);
+            const event: SelectWidgetEvent = { id: data.id };
+            this.trigger(BuilderEvents.WillEditWidget, event);
+        }
     }
 }

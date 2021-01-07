@@ -32,10 +32,7 @@ export class BuilderView extends View {
     protected hotspotEditor: HotspotEditor;
     protected widgetsMap: WidgetsMap = {};
 
-    protected clipboard: {
-        hotspot: HotspotData,
-        widget?: WidgetEVO
-    };
+    protected clipboard: WidgetEVO;
 
     constructor (data: BuilderViewOptions, connection: Connection, opt?: { localFiles?: boolean }) {
         super(data, connection);        
@@ -66,66 +63,78 @@ export class BuilderView extends View {
         return this;
     }
 
-    selectWidget (id: string): void {
-        this.hotspotEditor.selectHotspot(id);
+    selectWidget (data: { id: string }): void {
+        this.hotspotEditor.selectHotspot(data);
     }
-    deselectWidget (id: string): void {
-        this.hotspotEditor.deselectHotspot(id);
+    deselectWidget (data: { id: string }): void {
+        this.hotspotEditor.deselectHotspot(data);
     }
 
-    async editWidget (id: string): Promise<WidgetEVO | null> {
-        const coords: Coords = this.hotspotEditor.getCoords(id);
-        return new Promise((resolve, reject) => {
-            if (id && coords) {
-                const editor: WidgetEditor = new WidgetEditor({
-                    widgetData: {
+    createWidget (widgetData: WidgetData): WidgetEVO {
+        if (widgetData) {
+            // console.log(widgetData);
+            if (widgetData.cons) {
+                const desc: WidgetClassDescriptor = widgets.find((desc: WidgetClassDescriptor) => {
+                    return desc.name === widgetData.cons;
+                });
+                // console.log(desc);
+                if (desc) {
+                    if (this.widgetsMap[widgetData.id]) {
+                        this.widgetsMap[widgetData.id].remove();
+                    }
+                    const widget: WidgetEVO = new desc.cons(widgetData.id, widgetData.coords, { 
+                        parent: ".image-div", 
+                        type: widgetData.cons,
+                        ...widgetData?.opt
+                    });
+                    widget.renderSample();
+                    // console.log(widget);
+                    this.widgetsMap[widgetData.id] = widget;
+                    const evt: CreateWidgetEvent = {
+                        id: widgetData.id,
+                        name: widgetData.name,
+                        widgets: this.getWidgets(),
+                        hotspots: this.getHotspots()
+                    };
+                    this.trigger(BuilderEvents.DidCreateWidget, evt);
+                    return widget;
+                }
+            }
+        }
+        return null;
+    }
+
+    deleteWidget (widgetData: { id: string }): void {
+        this.widgetsMap[widgetData.id]?.remove();
+        delete this.widgetsMap[widgetData.id];
+    }
+
+    async editWidget (data: { id: string }): Promise<WidgetEVO | null> {
+        if (data?.id) {
+            const id: string = data.id;
+            const coords: Coords = this.hotspotEditor.getCoords(id);
+            return new Promise((resolve, reject) => {
+                if (id && coords) {
+                    const widgetData: WidgetData = {
                         id,
                         coords,
                         name: this.widgetsMap[id]?.getName() || WidgetEVO.uuid(),
                         opt: this.widgetsMap[id]?.getOptions(),
                         cons: this.widgetsMap[id]?.getType()
                     }
-                });
-                editor.on(WidgetEditorEvents.ok, (widgetData: WidgetData) => {
-                    if (widgetData) {
-                        console.log(widgetData);
-                        if (widgetData.cons) {
-                            const desc: WidgetClassDescriptor = widgets.find((desc: WidgetClassDescriptor) => {
-                                return desc.name === widgetData.cons;
-                            });
-                            // console.log(desc);
-                            if (desc) {
-                                if (this.widgetsMap[id]) {
-                                    this.widgetsMap[id].remove();
-                                }
-                                const widget: WidgetEVO = new desc.cons(widgetData.id, coords, { 
-                                    parent: ".image-div", 
-                                    type: widgetData.cons,
-                                    ...widgetData?.opt
-                                });
-                                widget.renderSample();
-                                console.log(widget);
-                                this.widgetsMap[id] = widget;
-                                const evt: CreateWidgetEvent = {
-                                    id: widgetData.id,
-                                    name: widgetData.name,
-                                    widgets: this.getWidgets(),
-                                    hotspots: this.getHotspots()
-                                }
-                                this.trigger(BuilderEvents.DidCreateWidget, evt);
-                                return resolve(widget);
-                            }
-                        }
-                    }
-                    return resolve(null);
-                });
-                editor.on(WidgetEditorEvents.cancel, (data: WidgetData) => {
+                    const editor: WidgetEditor = new WidgetEditor({ widgetData });
+                    editor.on(WidgetEditorEvents.ok, (widgetData: WidgetData) => {
+                        const widget: WidgetEVO = this.createWidget(widgetData);
+                        resolve(widget);
+                    });
+                    editor.on(WidgetEditorEvents.cancel, (data: WidgetData) => {
+                        resolve(null);
+                    });
+                } else {
                     resolve(null);
-                });
-            } else {
-                resolve(null);
-            }
-        });
+                }
+            });
+        }
     }
 
     protected installHandlers (): void {
@@ -159,21 +168,47 @@ export class BuilderView extends View {
                 this.widgetsMap[data.id]?.move(data.coords);
             });
             this.hotspotEditor.on(HotspotEditorEvents.DidResizeHotspot, (data: HotspotData) => {
-                console.log("resize", data);
                 this.widgetsMap[data.id]?.resize(data.coords);
             });
             this.hotspotEditor.on(HotspotEditorEvents.WillEditHotspot, async (data: HotspotData) => {
-                await this.editWidget(data?.id);
+                await this.editWidget(data);
             });
             this.hotspotEditor.on(HotspotEditorEvents.DidCopyHotspot, async (data: HotspotData) => {
-                this.clipboard = {
-                    hotspot: data,
-                    widget: this.widgetsMap[data.id]
-                };
+                this.clipboard = this.widgetsMap[data.id];
             });
-            this.hotspotEditor.on(HotspotEditorEvents.DidPasteHotspot, async (data: HotspotData) => {
-                if (this.clipboard?.hotspot) {
-                    this.hotspotEditor.createHotspot(this.clipboard.hotspot, { useFreshId: true });
+            this.hotspotEditor.on(HotspotEditorEvents.DidDeleteHotspot, async (data: HotspotData) => {
+                this.deleteWidget(data);
+                this.trigger(BuilderEvents.DidDeleteWidget, {
+                    ...data,
+                    widgets: this.getWidgets(),
+                    hotspots: this.getHotspots()
+                });
+            });
+            this.hotspotEditor.on(HotspotEditorEvents.DidCutHotspot, async (data: HotspotData) => {
+                this.clipboard = this.widgetsMap[data.id];
+                if (this.clipboard) {
+                    this.clipboard.hide();
+                    delete this.widgetsMap[data.id];
+                    this.trigger(BuilderEvents.DidCutWidget, {
+                        ...data,
+                        widgets: this.getWidgets(),
+                        hotspots: this.getHotspots()
+                    });
+                }
+            });
+            this.hotspotEditor.on(HotspotEditorEvents.DidPasteHotspot, async (data: { origin: HotspotData, clone: HotspotData }) => {
+                if (data) {
+                    const id: string = data.origin.id;
+                    const widget: WidgetEVO = this.widgetsMap[id] || this.clipboard;
+                    if (widget) {
+                        const widgetData: WidgetData = {
+                            ...data.clone,
+                            name: widget.getName(),
+                            opt: widget.getOptions(),
+                            cons: widget.getType()
+                        };
+                        this.createWidget(widgetData);
+                    }
                 }
             });
         });

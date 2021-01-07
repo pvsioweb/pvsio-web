@@ -14,10 +14,6 @@ import { ActionCallback } from "../../../../env/ActionsQueue";
 import { Connection } from "../../../../env/Connection";
 import * as Backbone from 'backbone';
 
-export const colors = {
-    blue: "#007bff"
-};
-
 // const normalised = {
 //     backgroundcolor: "backgroundColor",
 //     fontsize: "fontSize",

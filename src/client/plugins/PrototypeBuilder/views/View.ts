@@ -26,6 +26,8 @@ const bodyTemplate: string = `
 export type WidgetsMap = { [id: string]: WidgetEVO };
 export const BuilderEvents = {
     DidCreateWidget: "DidCreateWidget",
+    DidCutWidget: "DidCutWidget",
+    DidDeleteWidget: "DidDeleteWidget",
     DidSelectWidget: "DidSelectWidget",
     DidDeselectWidget: "DidDeselectWidget",
     WillEditWidget: "WillEditWidget",
@@ -38,6 +40,8 @@ export interface CreateWidgetEvent extends SelectWidgetEvent {
     widgets: WidgetsMap,
     hotspots: HotspotsMap
 };
+export type DeleteWidgetEvent = CreateWidgetEvent; 
+export type CutWidgetEvent = CreateWidgetEvent; 
 
 
 export abstract class View extends Backbone.View {

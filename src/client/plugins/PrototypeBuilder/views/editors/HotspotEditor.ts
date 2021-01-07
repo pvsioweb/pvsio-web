@@ -43,7 +43,7 @@ const markerOverlayTemplate: string = `
 `;
 // the marker has only one active corner for resize (tl), as this makes everything much easier to implement and bring little or no usability issue.
 const markerTemplate: string = `
-<div class="marker" coords="{ top: 0, left: 0, width: 0, height: 0 }" id="{{id}}" style="z-index:100; top:{{top}}px; left:{{left}}px; width:{{width}}px; height:{{height}}px; position:absolute;">
+<div class="marker" coords=${JSON.stringify({ top: 0, left: 0, width: 0, height: 0 })} id="{{id}}" style="z-index:100; top:{{top}}px; left:{{left}}px; width:{{width}}px; height:{{height}}px; position:absolute;">
     <div class="shader" style="z-index:100; width:100%; height:100%; opacity:${opacity.LOW}; background:steelblue; position:absolute; border: 1px solid blue; cursor:pointer;"></div>
     <div class="tl corner" style="z-index:100; width:10px; height:10px; top:0px; left:0px; position:absolute; cursor:nwse-resize; margin-left:-4px; margin-top:-4px; border: 1px solid blue; opacity:${opacity.NORMAL};"></div>
     <div class="bl corner" style="z-index:100; width:10px; height:10px; top:100%; left:0px; position:absolute; cursor:nesw-resize; margin-left:-4px; margin-top:-6px; border: 1px solid blue; opacity:${opacity.NORMAL};"></div>
@@ -65,7 +65,7 @@ export function getCoords (elem: JQuery<HTMLElement>): Coords<number> {
         height: +parseFloat(elem.css("height")).toFixed(0),
     };
 }
-export function getMouseCoords (evt: JQuery.MouseUpEvent | JQuery.MouseOverEvent | JQuery.MouseMoveEvent | JQuery.MouseDownEvent | JQuery.ContextMenuEvent, $el: JQuery<HTMLElement>): Coords<number> {
+export function getMouseCoords (evt: JQuery.MouseUpEvent | JQuery.MouseOverEvent | JQuery.MouseMoveEvent | JQuery.MouseDownEvent | JQuery.ContextMenuEvent | JQuery.ClickEvent, $el: JQuery<HTMLElement>): Coords<number> {
     const offset: JQuery.Coordinates = $el.offset()
     const top: number = +(evt?.pageY - offset?.top).toFixed(0);
     const left: number = +(evt?.pageX - offset?.left).toFixed(0);
@@ -166,14 +166,15 @@ abstract class HotspotHandler extends Backbone.View {
         this.resizeHotspot(coords);
         return coords;
     }
-    resizeHotspot (coords: Coords): void {
+    resizeHotspot (coords: Coords, opt?: { $activeMarker?: JQuery<HTMLElement> }): void {
         if (coords) {
             const data: Coords = {};
             if (coords.left) { data.left = `${parseFloat(`${coords.left}`)}px`; }
             if (coords.top) { data.top = `${parseFloat(`${coords.top}`)}px`; }
             if (coords.width) { data.width = `${parseFloat(`${coords.width}`)}px`; }
             if (coords.height) { data.height = `${parseFloat(`${coords.height}`)}px`; }
-            this.$marker.css(data);
+            const $activeMarker: JQuery<HTMLElement> = opt?.$activeMarker || this.$marker;
+            $activeMarker.css(data);
         }
     }
 };
@@ -290,6 +291,8 @@ export class HotspotEditor extends Backbone.View {
 
     protected mode: "create" | "move" | "resize" | null = null;
 
+    protected clipboard: HotspotData;
+
     protected anchorCoords: Coords<number>;
 
     protected dblClick: number = 0;
@@ -313,16 +316,16 @@ export class HotspotEditor extends Backbone.View {
         this.moveHandler = new MoveHandler(this.$el);
         this.resizeHandler = new ResizeHandler(this.$el);
         this.moveHandler.on(HotspotEditorEvents.DidMoveHotspot, (data: HotspotData) => {
-            this.selectHotspot(data?.id);
+            this.selectHotspot(data);
             this.trigger(HotspotEditorEvents.DidSelectHotspot, data);
             this.trigger(HotspotEditorEvents.DidMoveHotspot, data);
         });
         this.moveHandler.on(HotspotEditorEvents.DidSelectHotspot, (data: HotspotData) => {
-            this.selectHotspot(data?.id);
+            this.selectHotspot(data);
             this.trigger(HotspotEditorEvents.DidSelectHotspot, data);
         });
         this.resizeHandler.on(HotspotEditorEvents.DidResizeHotspot, (data: HotspotData) => {
-            this.selectHotspot(data?.id);
+            this.selectHotspot(data);
             this.trigger(HotspotEditorEvents.DidSelectHotspot, data);
             this.trigger(HotspotEditorEvents.DidResizeHotspot, data);
         });
@@ -337,6 +340,10 @@ export class HotspotEditor extends Backbone.View {
     getHotspot (id: string): JQuery<HTMLElement> {
         return this.hotspots[id]?.$marker;
     }
+    getSelectedHotspot (): JQuery<HTMLElement> {
+        const id: string = this.$overlay.find(".marker.selected").attr("id");
+        return this.getHotspot(id);
+    }
     getCoords (id: string): Coords {
         const coords: string = this.hotspots[id]?.$marker.attr("coords") || null;
         return JSON.parse(coords);
@@ -346,6 +353,22 @@ export class HotspotEditor extends Backbone.View {
         this.$overlay.append(content);
         this.$el.attr("draggable", "false");
         this.$el.css("cursor", "crosshair");
+        this.$el.on("contextmenu", (evt: JQuery.ContextMenuEvent) => {
+            // context menu position is relative to body
+            const coords: Coords<number> = getMouseCoords(evt, $("body"));
+            // hotspot position is relative to $el
+            const hotspotCoords: Coords<number> = getMouseCoords(evt, this.$el);
+            hotspotCoords.height = parseFloat(`${this.clipboard?.coords.height}`);
+            hotspotCoords.width = parseFloat(`${this.clipboard?.coords.width}`);
+            const hotspotData: HotspotData = {
+                id: this.clipboard?.id,
+                coords: hotspotCoords
+            };
+            this.openContextMenu(coords, hotspotData, {
+                edit: false, delete: false, cut: false, copy: false
+            });
+            evt.preventDefault();
+        });
         return this;
     }
     label (): JQuery<HTMLElement> {
@@ -449,6 +472,22 @@ export class HotspotEditor extends Backbone.View {
                 this.showCorners();
                 break;
             }
+            // case "c":
+            // case "C": {
+            //     const modifier: boolean = evt.ctrlKey || evt.metaKey;
+            //     if (modifier) {
+            //         // copy selected hotspot
+            //         const selected: JQuery<HTMLElement> = this.getSelectedHotspot();
+            //         const id: string = selected.attr("id");
+            //         if (id) {
+            //             this.copyHotspot({
+            //                 id,
+            //                 coords: this.getCoords(id)
+            //             });
+            //         }
+            //     }
+            //     break;
+            // }
             default: {
                 break;
             }
@@ -500,22 +539,32 @@ export class HotspotEditor extends Backbone.View {
         }, Utils.DBLCLICK_TIMEOUT);
         return this.dblClick > 1;
     }
-
     closeContextMenu (): void {
-        Utils.removeMenu();
+        Utils.deleteContextMenu();
     }
-
-    openContextMenu (coords: Coords, hotspotData: HotspotData): void {
+    openContextMenu (menuCoords: Coords, hotspotData: HotspotData, opt?: {
+        edit?: boolean, cut?: boolean, copy?: boolean, paste?: boolean, delete?: boolean,
+        atCursorPosition?: boolean
+    }): void {
+        opt = {
+            edit: !!hotspotData?.id, 
+            cut: !!hotspotData?.id, 
+            copy: !!hotspotData?.id, 
+            paste: !!this.clipboard, 
+            delete: !!hotspotData?.id,
+            ...opt
+        };
         const $menu: JQuery<HTMLElement> = Utils.createMenu({
-            top: +parseFloat(`${coords.top}`),
-            left: +parseFloat(`${coords.left}`),
+            top: +parseFloat(`${menuCoords.top}`),
+            left: +parseFloat(`${menuCoords.left}`),
             items: [
-                { name: "Edit", icon: `<i class="fa fa-edit" style="color:blue; padding-right:20px;"></i>` },
-                { name: "Cut", icon: `<i class="fa fa-cut" style="color:blue; padding-right:20px;"></i>` },
-                { name: "Copy", icon: `<i class="fa fa-copy" style="color:blue; padding-right:20px;"></i>`},
-                { name: "Paste", icon: `<i class="fa fa-paste" style="color:blue; padding-right:20px;"></i>` },
+                { name: "Edit", disabled: !opt.edit, icon: `<i class="fa fa-edit" style="${opt.edit ? `color:${Utils.colors.blue};` : ""}padding-right:20px;"></i>` },
                 "------",
-                { name: "Delete", icon: `<i class="fa fa-trash" style="color:blue; padding-right:20px;"></i>` },
+                { name: "Cut", disabled: !opt.cut, icon: `<i class="fa fa-cut" style="${opt.cut ? `color:${Utils.colors.blue};` : ""}padding-right:20px;"></i>` },
+                { name: "Copy", disabled: !opt.copy, icon: `<i class="fa fa-copy" style="${opt.copy ? `color:${Utils.colors.blue};` : ""}padding-right:20px;"></i>`},
+                { name: "Paste", disabled: !opt.paste, icon: `<i class="fa fa-paste" style="${opt.paste ? `color:${Utils.colors.blue};` : ""}padding-right:20px;"></i>` },
+                "------",
+                { name: "Delete", disabled: !opt.delete, icon: `<i class="fa fa-trash" style="${opt.delete ? `color:${Utils.colors.blue};` : ""}padding-right:20px;"></i>` },
             ]
         });
         const $items: JQuery<HTMLElement> = $menu.find(".dropdown-item");
@@ -523,25 +572,31 @@ export class HotspotEditor extends Backbone.View {
             $($items[i]).on("click", (evt: JQuery.ClickEvent) => {
                 jQuery(evt?.currentTarget).addClass("active");
                 const action: string = jQuery(evt?.currentTarget).attr("action");
+                const id: string = hotspotData?.id;
+                let coords: Coords = this.getCoords(id); // this is done to make sure the size of the hotspot is current -- the user may have resized the hotspot
                 switch (action) {
                     case "Edit": {
-                        this.trigger(HotspotEditorEvents.WillEditHotspot, hotspotData);
+                        this.trigger(HotspotEditorEvents.WillEditHotspot, { id, coords });
                         break;
                     }
                     case "Cut": {
-                        this.trigger(HotspotEditorEvents.DidCutHotspot, hotspotData);
+                        this.cutHotspot({ id, coords });
+                        this.trigger(HotspotEditorEvents.DidCutHotspot, { id, coords });
                         break;
                     }
                     case "Copy": {
-                        this.trigger(HotspotEditorEvents.DidCopyHotspot, hotspotData);
+                        this.copyHotspot({ id, coords });
+                        this.trigger(HotspotEditorEvents.DidCopyHotspot, { id, coords });
                         break;
                     }
                     case "Paste": {
-                        this.trigger(HotspotEditorEvents.DidPasteHotspot, hotspotData);
+                        const clone: HotspotData = this.pasteHotspot(hotspotData);
+                        this.trigger(HotspotEditorEvents.DidPasteHotspot, { origin: hotspotData, clone });
                         break;
                     }
                     case "Delete": {
-                        this.trigger(HotspotEditorEvents.DidDeleteHotspot, hotspotData);
+                        this.deleteHotspot({ id });
+                        this.trigger(HotspotEditorEvents.DidDeleteHotspot, { id, coords });
                         break;
                     }
                     default: {
@@ -553,33 +608,122 @@ export class HotspotEditor extends Backbone.View {
         }
     }
 
-    createHotspot (hotspotData: HotspotData, opt?: { useFreshId?: boolean }): void {
-        const id: string = opt?.useFreshId ? `marker-${Utils.uuid()}` : hotspotData?.id;
-        const $activeMarker: JQuery<HTMLElement> = this.areas().find(`#${id}`) || this.$marker;
-        if ($activeMarker) {
-            // create hotspot
-            const id: string = $activeMarker.attr("id");
-            const $shader: JQuery<HTMLElement> = $activeMarker.find(".shader");
-            const $corners: JQuery<HTMLElement>[] = [
-                $activeMarker.find(".tl"),
-                $activeMarker.find(".bl"),
-                $activeMarker.find(".br"),
-                $activeMarker.find(".tr"),
-                $activeMarker.find(".l"),
-                $activeMarker.find(".r"),
-                $activeMarker.find(".b"),
-                $activeMarker.find(".t")
-            ];
-            // show corners
-            $activeMarker.find(".corner").css({ display: "block" });
+    createHotspot (data: HotspotData, opt?: { useFreshId?: boolean }): HotspotData {
+        const id: string = opt?.useFreshId ? `marker-${Utils.uuid()}` : data?.id;
+        const hotspotData: HotspotData = {
+            ...data, id
+        };
+        let $activeMarker: JQuery<HTMLElement> = this.areas().find(`#${id}`) || this.$marker;
+        if (!$activeMarker[0]) {
+            const marker: string = Handlebars.compile(markerTemplate)({ id });
+            this.areas().append(marker);
+            $activeMarker = this.areas().find(`#${id}`);
+            this.resizeHandler.resizeHotspot(hotspotData.coords, { $activeMarker });
+        }
 
-            // move hotspot to the front
-            $activeMarker.css("z-index", zIndex.FRONT);            
+        $activeMarker.attr("coords", JSON.stringify(hotspotData.coords));
+        const $shader: JQuery<HTMLElement> = $activeMarker.find(".shader");
+        const $corners: JQuery<HTMLElement>[] = [
+            $activeMarker.find(".tl"),
+            $activeMarker.find(".bl"),
+            $activeMarker.find(".br"),
+            $activeMarker.find(".tr"),
+            $activeMarker.find(".l"),
+            $activeMarker.find(".r"),
+            $activeMarker.find(".b"),
+            $activeMarker.find(".t")
+        ];
+        // show corners
+        $activeMarker.find(".corner").css({ display: "block" });
 
-            // install mouse handlers on shader
-            $shader.on("mouseover", (evt: JQuery.MouseOverEvent) => {
+        // move hotspot to the front
+        $activeMarker.css("z-index", zIndex.FRONT);            
+
+        // install mouse handlers on shader
+        $shader.on("mouseover", (evt: JQuery.MouseOverEvent) => {
+            if (this.mode === null) {
+                this.highlightHotspot({ id });
+            }
+        }).on("mouseout", (evt: JQuery.MouseOutEvent) => {
+            if (this.mode === null) {
+                this.clearHighlight();
+            }
+        }).on("mousedown", (evt: JQuery.MouseDownEvent) => {
+            this.closeContextMenu();
+            if (this.mode === null) {
+                const key: number = evt.button;
+                switch (key) {
+                    case Utils.mouseButtons.middle:
+                    case Utils.mouseButtons.right: {
+                        break;
+                    }
+                    case Utils.mouseButtons.left:
+                    default: {
+                        this.mode = "move"; // start move mode
+                        this.moveHandler.activate({ $activeMarker });
+                        this.moveHandler.onMouseDown(evt);
+                        break;
+                    }
+                }
+            }
+        }).on("mousemove", (evt: JQuery.MouseMoveEvent) => {
+            switch (this.mode) {
+                case "move": {
+                    this.hideCoords();
+                    this.moveHandler.onMouseMove(evt);
+                    break; 
+                }
+                case "resize": {
+                    this.hideCoords(); 
+                    this.resizeHandler.onMouseMove(evt); 
+                    break; 
+                }
+                default: {
+                    break
+                }
+            }
+        }).on("mouseup", (evt: JQuery.MouseUpEvent) => {
+            // check if this is a double click
+            if (this.isDoubleClick()) {
+                // trigger edit event
+                const id: string = $activeMarker.attr("id");
+                const hotspotData: HotspotData = {
+                    id,
+                    coords: this.getCoords(id)
+                };    
+                this.trigger(HotspotEditorEvents.WillEditHotspot, hotspotData);
+            } else {
+                switch (this.mode) {
+                    case "move": {
+                        const coords: Coords<number> = getMouseCoords(evt, this.$el);
+                        this.showCoords(coords);
+                        this.moveHandler.onMouseUp(evt);
+                        break;
+                    }
+                    case "resize": {
+                        const coords: Coords<number> = getMouseCoords(evt, this.$el);
+                        this.showCoords(coords);
+                        this.resizeHandler.onMouseUp(evt);
+                        break;
+                    }
+                    default: {
+                        break;
+                    }
+                }
+            }
+            this.mode = null; // end mode
+        }).on("contextmenu", (evt: JQuery.ContextMenuEvent) => {
+            const coords: Coords<number> = getMouseCoords(evt, $("body"));
+            this.openContextMenu(coords, hotspotData);
+            evt.preventDefault();
+        });
+
+        // install mouse handlers on hot corners
+        for (let i in $corners) {
+            const $activeCorner: JQuery<HTMLElement> = $corners[i];
+            $activeCorner.on("mouseover", (evt: JQuery.MouseOverEvent) => {
                 if (this.mode === null) {
-                    this.highlightHotspot(id);
+                    this.highlightHotspot({ id });
                 }
             }).on("mouseout", (evt: JQuery.MouseOutEvent) => {
                 if (this.mode === null) {
@@ -588,140 +732,59 @@ export class HotspotEditor extends Backbone.View {
             }).on("mousedown", (evt: JQuery.MouseDownEvent) => {
                 this.closeContextMenu();
                 if (this.mode === null) {
-                    const key: number = evt.button;
-                    switch (key) {
-                        case Utils.mouseButtons.middle:
-                        case Utils.mouseButtons.right: {
-                            break;
-                        }
-                        case Utils.mouseButtons.left:
-                        default: {
-                            this.mode = "move"; // start move mode
-                            this.moveHandler.activate({ $activeMarker });
-                            this.moveHandler.onMouseDown(evt);
-                            break;
-                        }
-                    }
+                    this.mode = "resize"; // start resize mode
+                    this.resizeHandler.activate({ $activeMarker, $activeCorner });
+                    this.resizeHandler.onMouseDown(evt);
+                    this.selectHotspot({ id });
                 }
             }).on("mousemove", (evt: JQuery.MouseMoveEvent) => {
                 switch (this.mode) {
                     case "move": {
                         this.hideCoords();
                         this.moveHandler.onMouseMove(evt);
-                        break; 
+                        break;
                     }
                     case "resize": {
-                        this.hideCoords(); 
+                        this.hideCoords();
                         this.resizeHandler.onMouseMove(evt); 
-                        break; 
+                        break;
                     }
                     default: {
-                        break
+                        break;
                     }
                 }
             }).on("mouseup", (evt: JQuery.MouseUpEvent) => {
-                // check if this is a double click
-                if (this.isDoubleClick()) {
-                    // trigger edit event
-                    const id: string = $activeMarker.attr("id");
-                    const hotspotData: HotspotData = {
-                        id,
-                        coords: this.getCoords(id)
-                    };    
-                    this.trigger(HotspotEditorEvents.WillEditHotspot, hotspotData);
-                } else {
-                    switch (this.mode) {
-                        case "move": {
-                            const coords: Coords<number> = getMouseCoords(evt, this.$el);
-                            this.showCoords(coords);
-                            this.moveHandler.onMouseUp(evt);
-                            break;
-                        }
-                        case "resize": {
-                            const coords: Coords<number> = getMouseCoords(evt, this.$el);
-                            this.showCoords(coords);
-                            this.resizeHandler.onMouseUp(evt);
-                            break;
-                        }
-                        default: {
-                            break;
-                        }
+                switch (this.mode) {
+                    case "move": {
+                        const coords: Coords<number> = getMouseCoords(evt, this.$el);
+                        this.showCoords(coords);
+                        this.moveHandler.onMouseUp(evt); 
+                        break; 
+                    }
+                    case "resize": {
+                        const coords: Coords<number> = getMouseCoords(evt, this.$el);
+                        this.showCoords(coords);
+                        this.resizeHandler.onMouseUp(evt);
+                        break;
+                    }
+                    default: {
+                        break;
                     }
                 }
-                this.mode = null; // end mode
-            }).on("contextmenu", (evt: JQuery.ContextMenuEvent) => {
-                const coords: Coords<number> = getMouseCoords(evt, $("body"));
-                this.openContextMenu(coords, hotspotData);
-                evt.preventDefault();
+                this.resizeHandler.deactivate();
+                this.mode = null; // end move mode
+                
+                const coords: Coords<number> = getMouseCoords(evt, this.$el);
+                this.showCoords(coords);
             });
-
-            // install mouse handlers on hot corners
-            for (let i in $corners) {
-                const $activeCorner: JQuery<HTMLElement> = $corners[i];
-                $activeCorner.on("mouseover", (evt: JQuery.MouseOverEvent) => {
-                    if (this.mode === null) {
-                        this.highlightHotspot(id);
-                    }
-                }).on("mouseout", (evt: JQuery.MouseOutEvent) => {
-                    if (this.mode === null) {
-                        this.clearHighlight();
-                    }
-                }).on("mousedown", (evt: JQuery.MouseDownEvent) => {
-                    this.closeContextMenu();
-                    if (this.mode === null) {
-                        this.mode = "resize"; // start resize mode
-                        this.resizeHandler.activate({ $activeMarker, $activeCorner });
-                        this.resizeHandler.onMouseDown(evt);
-                        this.selectHotspot(id);
-                    }
-                }).on("mousemove", (evt: JQuery.MouseMoveEvent) => {
-                    switch (this.mode) {
-                        case "move": {
-                            this.hideCoords();
-                            this.moveHandler.onMouseMove(evt);
-                            break;
-                        }
-                        case "resize": {
-                            this.hideCoords();
-                            this.resizeHandler.onMouseMove(evt); 
-                            break;
-                        }
-                        default: {
-                            break;
-                        }
-                    }
-                }).on("mouseup", (evt: JQuery.MouseUpEvent) => {
-                    switch (this.mode) {
-                        case "move": {
-                            const coords: Coords<number> = getMouseCoords(evt, this.$el);
-                            this.showCoords(coords);
-                            this.moveHandler.onMouseUp(evt); 
-                            break; 
-                        }
-                        case "resize": {
-                            const coords: Coords<number> = getMouseCoords(evt, this.$el);
-                            this.showCoords(coords);
-                            this.resizeHandler.onMouseUp(evt);
-                            break;
-                        }
-                        default: {
-                            break;
-                        }
-                    }
-                    this.resizeHandler.deactivate();
-                    this.mode = null; // end move mode
-                    
-                    const coords: Coords<number> = getMouseCoords(evt, this.$el);
-                    this.showCoords(coords);
-                });
-            }
-
-            // end creation
-            this.trigger(HotspotEditorEvents.DidCreateHotspot, hotspotData);
-            this.hotspots[id] = {
-                $marker: $activeMarker
-            };
         }
+
+        // end creation
+        this.trigger(HotspotEditorEvents.DidCreateHotspot, hotspotData);
+        this.hotspots[id] = {
+            $marker: $activeMarker
+        };
+        return hotspotData;
     }
 
     protected onMouseUp (evt: JQuery.MouseUpEvent): void {
@@ -811,34 +874,67 @@ export class HotspotEditor extends Backbone.View {
             }
         }
     }
-    selectHotspot (id: string): void {
-        this.clearSelection();
-        const $el: JQuery<HTMLElement> = this.$overlay.find(`#${id}`);
-        $el.css({ border: "2px solid yellow", "box-shadow": "blue 0px 0px 8px" });
+    selectHotspot (data: { id: string }): void {
+        if (data?.id) {
+            this.clearSelection();
+            const $el: JQuery<HTMLElement> = this.$overlay.find(`#${data.id}`);
+            $el.addClass("selected");
+            this.highlightHotspot(data);
+        }
     }
-    deselectHotspot (id: string): void {
-        const $el: JQuery<HTMLElement> = this.$overlay.find(`#${id}`);
-        $el.css({ border: "0px solid yellow", "box-shadow": "blue 0px 0px 0px" });
+    deselectHotspot (data: { id: string }): void {
+        if (data?.id) {
+            const $el: JQuery<HTMLElement> = this.$overlay.find(`#${data.id}`);
+            $el.removeClass("selected");
+            this.highlightHotspot(data);
+        }
     }
     clearSelection (): void {
-        const $el: JQuery<HTMLElement> = this.$overlay.find(`.marker`);
-        $el.css({ border: "0px solid yellow", "box-shadow": "blue 0px 0px 0px" });
+        this.clearHighlight();
+        this.$overlay.find(`.marker`).removeClass("selected");
         this.trigger(HotspotEditorEvents.DidClearSelection);
     }
-    highlightHotspot (id: string): void {
-        const $el: JQuery<HTMLElement> = this.$overlay.find(`#${id}`);
-        // put marker under the cursor on top of the other markers
-        this.clearHighlight();
-        $el.css("z-index", zIndex.FRONT);
-        // increase visibility of the marker under the cursor
-        $el.css({ "box-shadow": "blue 0px 0px 8px" });
+    highlightHotspot (data: { id: string }): void {
+        if (data?.id) {
+            const $el: JQuery<HTMLElement> = this.$overlay.find(`#${data.id}`);
+            const color: string = $el.hasClass("selected") ? Utils.colors.blue : "gray";
+            // put marker under the cursor on top of the other markers
+            this.clearHighlight();
+            $el.css("z-index", zIndex.FRONT);
+            // increase visibility of the marker under the cursor
+            $el.find(".shader").css({ border: `1px solid ${color}`});
+            $el.find(".corner").css({ border: `1px solid ${color}`});
+            $el.css({ "box-shadow": `${color} 0px 0px 8px` });
+        }
     }
     clearHighlight (): void {
-        $(".marker").css({ "box-shadow": "blue 0px 0px 0px" });
         $(".marker").css({ "z-index": zIndex.NORMAL });
+        this.$overlay.find(".shader").css({ border: `1px solid gray`});
+        this.$overlay.find(".corner").css({ border: `1px solid gray`});
+        this.$overlay.find(`.marker`).css({ "box-shadow": `${Utils.colors.blue} 0px 0px 0px` });
+        this.$overlay.find(".marker.selected .shader").css({ border: `1px solid ${Utils.colors.blue}`});
+        this.$overlay.find(".marker.selected .corner").css({ border: `1px solid ${Utils.colors.blue}`});
+        this.$overlay.find(`.marker.selected`).css({ "box-shadow": `${Utils.colors.blue} 0px 0px 8px` });
     }
-    removeHotspot (id: string): void {
-        const $el: JQuery<HTMLElement> = this.$overlay.find(`#${id}`);
-        $el.remove();
+
+    copyHotspot (hotspotData: HotspotData): void {
+        if (hotspotData) {
+            this.clipboard = hotspotData;
+        }
+    }
+    cutHotspot (hotspotData: HotspotData): void {
+        if (hotspotData) {
+            this.clipboard = hotspotData;
+            this.deleteHotspot(hotspotData);
+        }
+    }
+    pasteHotspot (hotspotData: HotspotData): HotspotData {
+        return this.createHotspot(hotspotData, { useFreshId: true });
+    }
+    deleteHotspot (data: { id: string }): void {
+        if (data?.id) {
+            const $el: JQuery<HTMLElement> = this.$overlay.find(`#${data.id}`);
+            $el.remove();
+        }
     }
 }

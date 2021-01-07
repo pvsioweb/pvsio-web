@@ -107,19 +107,20 @@ const menuTemplate: string = `
 <div id="{{menuId}}" class="fade show" style="position:absolute;width:0px;height:0px;top:{{top}}px;left:{{left}}px;">
     <div class="dropdown-menu show">
         {{#each items}}
-        {{#if name}}<a class="dropdown-item" href="#" action="{{name}}">{{icon}}{{name}}</a>{{else}}<div class="dropdown-divider"></div>{{/if}}
+        {{#if name}}<a class="dropdown-item{{#if disabled}} disabled{{/if}}" href="#" action="{{name}}">{{icon}}{{name}}</a>{{else}}<div class="dropdown-divider"></div>{{/if}}
         {{/each}}
     </div>
 </div>
 `;
-export interface MenuOptions {
+export interface MenuData {
     id?: string,
     top?: number | string,
     left?: number | string,
     title?: string,
-    items: (string | { name: string, icon?: string })[]
+    items: MenuItem[]
 };
-export function createMenu (data: MenuOptions): JQuery<HTMLElement> {
+export type MenuItem = string | { name: string, icon?: string, disabled?: boolean };
+export function createMenu (data: MenuData): JQuery<HTMLElement> {
     if (data) {
         const top: number = parseFloat(`${data.top}`);
         const left: number = parseFloat(`${data.left}`);
@@ -127,7 +128,11 @@ export function createMenu (data: MenuOptions): JQuery<HTMLElement> {
             menuId: "pvsioweb-menu", 
             top,
             left,
-            items: data.items
+            items: data.items.map((item: MenuItem) => {
+                return typeof item === "string" ? item 
+                    : item.disabled ? { name: item.name, icon: item.icon, disabled: true }
+                        : { name: item.name, icon: item.icon };
+            })
         });
         // remove old dialog, if any
         $("body").find("#pvsioweb-menu").remove();
@@ -136,13 +141,13 @@ export function createMenu (data: MenuOptions): JQuery<HTMLElement> {
     }
     return $("body").find("#pvsioweb-menu");
 }
-export function revealMenu (): JQuery<HTMLElement> {
+export function openContextMenu (): JQuery<HTMLElement> {
     return $("body").find("#pvsioweb-menu").css("display", "block");
 }
-export function hideMenu (): JQuery<HTMLElement> {
+export function closeContextMenu (): JQuery<HTMLElement> {
     return $("body").find("#pvsioweb-menu").css("display", "none");
 }
-export function removeMenu (): JQuery<HTMLElement> {
+export function deleteContextMenu (): JQuery<HTMLElement> {
     return $("body").find("#pvsioweb-menu").remove();
 }
 export function createCollapsiblePanel (owner: PVSioWebPlugin, opt?: { 
@@ -593,5 +598,10 @@ export function dimColor(col: string, level?: number) {
 }
 export function fontOutlineStyle (col: string): string {
     col = col || "black";
-    return `-webkit-text-fill-color: transparent; -webkit-text-stroke: 1px ${col};`;
+    return `
+    -webkit-text-fill-color: transparent; -webkit-text-stroke: 1px ${col};`;
 }
+
+export const colors = {
+    blue: "#007bff"
+};

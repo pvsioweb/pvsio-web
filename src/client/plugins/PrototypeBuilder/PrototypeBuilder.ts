@@ -10,7 +10,7 @@ import * as Utils from '../../env/Utils';
 import { BuilderView } from './views/BuilderView';
 import { WidgetsListView } from './views/WidgetsListView';
 import { SettingsView } from './views/SettingsView';
-import { BuilderEvents, CreateWidgetEvent, SelectWidgetEvent, View } from './views/View';
+import { BuilderEvents, CreateWidgetEvent, DeleteWidgetEvent, CutWidgetEvent, SelectWidgetEvent, View } from './views/View';
 
 // import { WidgetEVO } from "../../widgets/core/WidgetEVO";
 // import { BasicDisplayEVO } from "../../widgets/core/BasicDisplayEVO";
@@ -129,19 +129,25 @@ export class PrototypeBuilder implements PVSioWebPlugin {
 
         this.centralViews.Main.on(BuilderEvents.DidCreateWidget, (evt: CreateWidgetEvent) => {
             this.listView.refresh(evt?.widgets);
-            this.listView.selectWidget(evt?.id);
+            this.listView.selectWidget({ id: evt?.id });
+        });
+        this.centralViews.Main.on(BuilderEvents.DidDeleteWidget, (evt: DeleteWidgetEvent) => {
+            this.listView.refresh(evt?.widgets);
+        });
+        this.centralViews.Main.on(BuilderEvents.DidCutWidget, (evt: CutWidgetEvent) => {
+            this.listView.refresh(evt?.widgets);
         });
         this.centralViews.Main.on(BuilderEvents.DidSelectWidget, (evt: SelectWidgetEvent) => {
-            this.listView.selectWidget(evt?.id);
+            this.listView.selectWidget({ id: evt?.id });
         });
         this.listView.on(BuilderEvents.DidSelectWidget, (evt: SelectWidgetEvent) => {
-            (<BuilderView> this.centralViews.Main).selectWidget(evt?.id);
+            (<BuilderView> this.centralViews.Main).selectWidget({ id: evt?.id });
         });
         this.listView.on(BuilderEvents.DidDeselectWidget, (evt: SelectWidgetEvent) => {
-            (<BuilderView> this.centralViews.Main).deselectWidget(evt?.id);
+            (<BuilderView> this.centralViews.Main).deselectWidget({ id: evt?.id });
         });
         this.listView.on(BuilderEvents.WillEditWidget, (evt: SelectWidgetEvent) => {
-            (<BuilderView> this.centralViews.Main).editWidget(evt?.id);
+            (<BuilderView> this.centralViews.Main).editWidget({ id: evt?.id });
         });
 
         return true;
