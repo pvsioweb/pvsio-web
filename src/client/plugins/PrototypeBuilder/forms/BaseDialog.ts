@@ -6,12 +6,11 @@
  * @author Patrick Oladimeji
  * @date 11/6/14 9:10:56 AM
  */
-
-import { EventDispatcher } from "../../../env/EventDispatcher";
 import * as FormUtils from "./FormUtils";
 import * as template from './Templates';
+import * as Backbone from 'backbone';
 
-export abstract class BaseDialog extends EventDispatcher {
+export abstract class BaseDialog extends Backbone.Model {
     protected div: JQuery<HTMLDivElement>;
     protected ok: JQuery<HTMLDivElement>;
     protected cancel: JQuery<HTMLDivElement>;
@@ -27,12 +26,12 @@ export abstract class BaseDialog extends EventDispatcher {
         this.ok = $("#PVSioWebModalCenter ok-button");
         this.ok.on("click", (evt: JQuery.Event) => {
             const formdata = FormUtils.serializeForm(this.div[0].innerHTML);
-            this.fire({ type: "ok", data: formdata, el: this.div, event: evt });
+            this.trigger("ok", { data: formdata, el: this.div, event: evt });
         });
         this.cancel = $("#PVSioWebModalCenter cancel-button");
         this.cancel.on("click", (evt: JQuery.Event) => {
             const formdata = FormUtils.serializeForm(this.div[0].innerHTML);
-            this.fire({ type: "cancel", data: formdata, el: this.div, event: evt });
+            this.trigger("cancel", { data: formdata, el: this.div, event: evt });
         });
         this.div.css("display", "block");
     }

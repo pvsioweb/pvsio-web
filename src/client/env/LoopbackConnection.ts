@@ -4,7 +4,6 @@
 
 import { Connection, PVSioWebRequest, PVSioWebCallBack } from './Connection';
 import * as Backbone from 'backbone';
-import { uuid } from './Utils';
 
 const dbg: boolean = true;
 

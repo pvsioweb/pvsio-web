@@ -1,10 +1,10 @@
 /**
  * Manages the available plugins
  */
-import { EventDispatcher } from './EventDispatcher';
 import { plugins } from '../plugins/plugins';
 import { PVSioWebPlugin } from './PVSioWeb';
 import { Connection } from './Connection';
+import * as Backbone from 'backbone';
 
 const pluginToggle: string = `
 <li class="list-group-item plugin-box" id="pluginBox_{{id}}" style="display:flex;">
@@ -12,7 +12,7 @@ const pluginToggle: string = `
 <label for="{{label}}" id="pluginLabel_{{id}}" style="margin: 6px 0 0 10px;">{{label}}</label>
 </li>`;
 
-export class PluginManager extends EventDispatcher {
+export class PluginManager extends Backbone.Model {
 
     protected connection: Connection;
     protected plugins: { [name: string]: PVSioWebPlugin } = {};

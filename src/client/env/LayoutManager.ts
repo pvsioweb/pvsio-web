@@ -1,12 +1,11 @@
 /**
  * @module LayoutManager
  */
-
-import { EventDispatcher } from './EventDispatcher';
 import * as plugins from '../plugins/plugins';
 import * as Utils from './Utils';
 import { PVSioWebPlugin } from './PVSioWeb';
 import { Connection } from './Connection';
+import * as Backbone from 'backbone';
 
 const toolkitInterface: string = `
 <div id="PVSio-web-logo" class="PVSio-web-logo">
@@ -22,7 +21,7 @@ const toolkitInterface: string = `
         <div id="toolkit-body" class="container-fluid col no-gutters">
         <!-- plugin panels go here -->
         </div>
-        <div id="toolkit-plugin-list" class="container-fluid col-2 no-gutters">
+        <div id="toolkit-plugin-list" class="container-fluid col-2 no-gutters" style="display:none;">
             <div id="plugins-group" class="plugins-group">
                 <div class="plugins" style="min-height:37px;">PVSio-web Tools</div>
                 {{!-- <ul>
@@ -86,7 +85,7 @@ const toolkitInterface: string = `
         <div id="projectTitle">
             <div class="btn txtProjectName"><span id="txtProjectName" style="color:white;"></span></div>
             <div style="width:100%">
-                <div id="toolkit-toolbar" class="btn-group pull-right" style="display:flex; margin-top:7px;">
+                <div class="toolkit-toolbar btn-group pull-right" style="display:flex; margin-top:7px;">
                     <button type="button" class="btn" id="newProject" style="color:white;">New Project</button>
                     <button type="button" class="btn" id="openProject" style="color:white;">Open Project</button>
                     <div class="btn-group pull-right" style="display:flex; width:158px;">
@@ -113,7 +112,7 @@ const toolkitInterface: string = `
 </div>
 <div id="audio"></div>`;
 
-export class LayoutManager extends EventDispatcher {
+export class LayoutManager extends Backbone.Model {
 
     protected connection: Connection;
     protected version: string;
