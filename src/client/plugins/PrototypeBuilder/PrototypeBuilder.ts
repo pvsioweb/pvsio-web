@@ -53,7 +53,7 @@ const prototypeBuilderBody: string = `
                 <ul class="nav nav-tabs card-header-tabs d-flex flex-nowrap prototype-screen-list">
                 </ul>
             </div>
-            <div class="card-body prototype-screens tab-content">
+            <div class="card-body prototype-screens tab-content" style="margin:0px;">
             </div>
         </div>
     </div>

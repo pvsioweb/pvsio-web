@@ -10,6 +10,7 @@ import { WidgetData, WidgetEditor, WidgetEditorEvents } from './editors/WidgetEd
 import { WidgetClassDescriptor, widgets } from '../widgets/widgets';
 
 export const contentTemplate: string = `
+<div class="builder-coords" style="position:absolute; color:darkslategray; top:-1.4em; left:45%; white-space:nowrap;"></div>
 <div class="image-div container-fluid" style="padding-left:0;">
     <div class="container-fluid" style="position:relative; overflow:hidden; background-color:white; border:4px dashed teal; text-align:center; min-height:480px;">
 
@@ -154,7 +155,8 @@ export class BuilderView extends View {
 
             this.hotspotEditor = new HotspotEditor({
                 el: this.$imageDiv.find("img")[0],
-                overlay: this.$imageOverlay[0]
+                overlay: this.$imageOverlay[0],
+                builderCoords: this.$el.find(".builder-coords")[0]
             });
 
             // install handlers for hotspot events
