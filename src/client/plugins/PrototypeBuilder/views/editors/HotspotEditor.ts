@@ -34,7 +34,7 @@ export enum opacity {
     NORMAL = 0.6,
     HIGH = 0.9
 };
-const tooltipMargin: number = 16; // px
+const tooltipDistance: number = 20; // px
 
 
 // templates
@@ -185,7 +185,7 @@ abstract class HotspotHandler extends Backbone.View {
         }
     }
     showTooltip (coords: Coords<number>, info: string): void {
-        this.$tooltip.css({ display: "block", top: `${coords.top + tooltipMargin}px`, left: `${coords.left + tooltipMargin}px`, background: "black", color: "white" });
+        this.$tooltip.css({ display: "block", top: `${coords.top + tooltipDistance}px`, left: `${coords.left + tooltipDistance}px`, background: "black", color: "white" });
         this.$tooltip.find(".marker-tooltip-label").html(info);
     }
     hideTooltip (): void {
@@ -454,7 +454,7 @@ export class HotspotEditor extends Backbone.View {
         this.showCoords(mousePosition);
     }
     showTooltip (coords: Coords<number>, info: string): void {
-        this.$tooltip.css({ display: "block", top: `${coords.top + tooltipMargin}px`, left: `${coords.left + tooltipMargin}px`, background: "black", color: "white" });
+        this.$tooltip.css({ display: "block", top: `${coords.top + tooltipDistance}px`, left: `${coords.left + tooltipDistance}px`, background: "black", color: "white" });
         this.$tooltip.find(".marker-tooltip-label").html(info);
     }
     hideTooltip (): void {

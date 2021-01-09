@@ -1,22 +1,21 @@
+import * as Backbone from 'backbone';
 import * as Utils from '../../../env/Utils';
 
 import { WidgetEVO, Coords } from "../widgets/core/WidgetEVO";
 import { Connection, ReadFileRequest, ReadFileResponse } from '../../../env/Connection';
 import { HotspotEditor, HotspotEditorEvents, HotspotData, HotspotsMap } from './editors/HotspotEditor';
 
-import { CentralViewEvents, CentralViewOptions, CreateWidgetEvent, WidgetsMap, BuilderEvents, MIN_WIDTH, MIN_HEIGHT } from './CentralView';
+import { CentralView, CentralViewOptions, CreateWidgetEvent, WidgetsMap, BuilderEvents, MIN_WIDTH, MIN_HEIGHT } from './CentralView';
 import { WidgetData, WidgetEditor, WidgetEditorEvents } from './editors/WidgetEditor';
 import { WidgetClassDescriptor, widgets } from '../widgets/widgets';
-import { BackgroundView } from './BackgroundView';
 
-const contentTemplate: string = `
-<div class="builder-coords" style="position:absolute; color:darkslategray; top:-1.4em; left:45%; white-space:nowrap;"></div>
-<div class="image-div view-div container-fluid" style="padding-left:0;">
-    <div class="container-fluid" style="position:relative; overflow:hidden; background-color:white; border:4px dashed teal; text-align:center; min-height:480px;">
+export const contentTemplate: string = `
+<div class="background-div view-div container-fluid" style="padding-left:0;">
+    <div class="container-fluid image-div" style="position:relative; overflow:hidden; background-color:white; border:4px dashed teal; text-align:center; min-height:480px;">
 
-        <div style="top:50%; left:35%; position:absolute;">
+        <div style="top:45%; left:40%; position:absolute;">
             <div class="btn-group center">
-                <button class="btn btn-primary btn-lg load-image-btn" style="white-space:nowrap;">Load Image</button>
+                <button class="btn btn-primary btn-lg load-image-btn" style="white-space:nowrap;">Load Picture</button>
                 <button class="btn btn-outline-secondary btn-lg use-whiteboard-btn" style="white-space:nowrap;">Use Whiteboard</button>
             </div>
         </div>
@@ -25,214 +24,63 @@ const contentTemplate: string = `
 </div>
 <div class="image-overlay container-fluid" style="padding-left:0;"></div>`;
 
-export class BuilderView extends BackgroundView {
+
+export class BackgroundView extends CentralView {
     
-    protected $imageOverlay: JQuery<HTMLElement>;
+    protected $imageDiv: JQuery<HTMLElement>;
 
     protected hotspotEditor: HotspotEditor;
     protected widgetsMap: WidgetsMap = {};
 
     protected clipboard: WidgetEVO;
+    protected keepAspectRatio: boolean = false;
+    readonly paddingRight: number = 64;
 
     constructor (data: CentralViewOptions, connection: Connection) {
         super(data, connection);
     }
 
-    getWidgets (): WidgetsMap {
-        return this.widgetsMap;
-    }
-
-    getHotspots (): HotspotsMap {
-        return this.hotspotEditor.getHotspots();
+    events (): Backbone.EventsHash {
+        return {
+            "click button.btn-primary": "clickLoadImage"
+        };
     }
 
     activate (): void {
         const content: string = Handlebars.compile(contentTemplate, { noEscape: true })({});
         super.render({ ...this.viewOptions, content });
-        this.$imageDiv = this.$el.find(".image-div");
-        this.$imageOverlay = this.$el.find(".image-overlay");
-        this.createWhiteboard();
-        this.createHotspotEditor();
+        this.$imageDiv = this.$el.find(`.background-div`);
         this.resizeView();
-    }
-
-    resizeView (coords?: Coords): void {
-        // keep image height of background image -- do it only when the background panel is active
-        const $background: JQuery<HTMLElement> = this.$el.find(`.tab-pane.active .background-div .image-div`);
-        if ($background[0]) {
-            const width: number = parseFloat(`${$background.css("width")}`);
-            if (isFinite(width) && width > 0) {
-                this.$imageDiv.css({ width: `${width}px`});
-                this.$imageDiv.find("img").attr({ width });
-            }
-            const height: number = parseFloat(`${$background.css("height")}`);
-            if (isFinite(height) && height > 0) {
-                this.$imageDiv.css({ height: `${height}px`});
-                this.$imageDiv.find("img").attr({ height });
-            }
-        } else if (coords && !this.keepAspectRatio) {
-            super.resizeView(coords);
-            const width: number = parseFloat(`${coords.width}`);
-            if (isFinite(width) && width > 0) {
-                this.$imageDiv.css({ width: `${width}px`});
-                this.$imageDiv.find("img").attr({ width });
-            }
-        }
-    }
-
-    selectWidget (data: { id: string }): void {
-        this.hotspotEditor.selectHotspot(data);
-    }
-    deselectWidget (data: { id: string }): void {
-        this.hotspotEditor.deselectHotspot(data);
-    }
-
-    createWidget (widgetData: WidgetData): WidgetEVO {
-        if (widgetData) {
-            // console.log(widgetData);
-            if (widgetData.cons) {
-                const desc: WidgetClassDescriptor = widgets.find((desc: WidgetClassDescriptor) => {
-                    return desc.name === widgetData.cons;
-                });
-                // console.log(desc);
-                if (desc) {
-                    if (this.widgetsMap[widgetData.id]) {
-                        this.widgetsMap[widgetData.id].remove();
-                    }
-                    const widget: WidgetEVO = new desc.cons(widgetData.id, widgetData.coords, { 
-                        parent: this.$imageDiv,
-                        type: widgetData.cons,
-                        ...widgetData?.opt
-                    });
-                    widget.renderSample();
-                    // console.log(widget);
-                    this.widgetsMap[widgetData.id] = widget;
-                    const evt: CreateWidgetEvent = {
-                        id: widgetData.id,
-                        name: widgetData.name,
-                        widgets: this.getWidgets(),
-                        hotspots: this.getHotspots()
-                    };
-                    this.trigger(BuilderEvents.DidCreateWidget, evt);
-                    return widget;
-                }
-            }
-        }
-        return null;
-    }
-    createHotspotEditor (): void {
-        this.hotspotEditor = new HotspotEditor({
-            el: this.$imageDiv.find("img")[0],
-            overlay: this.$imageOverlay[0],
-            builderCoords: this.$el.find(".builder-coords")[0]
-        });
-
-        // install handlers for hotspot events
-        this.hotspotEditor.on(HotspotEditorEvents.DidCreateHotspot, (data: HotspotData) => {
-            // do nothing, editing is triggered by double click on the hotspot
-        });
-        this.hotspotEditor.on(HotspotEditorEvents.DidSelectHotspot, (data: HotspotData) => {
-            this.trigger(BuilderEvents.DidSelectWidget, data);
-        });
-        this.hotspotEditor.on(HotspotEditorEvents.DidMoveHotspot, (data: HotspotData) => {
-            this.widgetsMap[data.id]?.move(data.coords);
-        });
-        this.hotspotEditor.on(HotspotEditorEvents.DidResizeHotspot, (data: HotspotData) => {
-            this.widgetsMap[data.id]?.resize(data.coords);
-        });
-        this.hotspotEditor.on(HotspotEditorEvents.WillEditHotspot, async (data: HotspotData) => {
-            await this.editWidget(data);
-        });
-        this.hotspotEditor.on(HotspotEditorEvents.DidCopyHotspot, async (data: HotspotData) => {
-            this.clipboard = this.widgetsMap[data.id];
-        });
-        this.hotspotEditor.on(HotspotEditorEvents.DidDeleteHotspot, async (data: HotspotData) => {
-            this.deleteWidget(data);
-            this.trigger(BuilderEvents.DidDeleteWidget, {
-                ...data,
-                widgets: this.getWidgets(),
-                hotspots: this.getHotspots()
-            });
-        });
-        this.hotspotEditor.on(HotspotEditorEvents.DidCutHotspot, async (data: HotspotData) => {
-            this.clipboard = this.widgetsMap[data.id];
-            if (this.clipboard) {
-                this.clipboard.hide();
-                delete this.widgetsMap[data.id];
-                this.trigger(BuilderEvents.DidCutWidget, {
-                    ...data,
-                    widgets: this.getWidgets(),
-                    hotspots: this.getHotspots()
-                });
-            }
-        });
-        this.hotspotEditor.on(HotspotEditorEvents.DidPasteHotspot, async (data: { origin: HotspotData, clone: HotspotData }) => {
-            if (data) {
-                const id: string = data.origin.id;
-                const widget: WidgetEVO = this.widgetsMap[id] || this.clipboard;
-                if (widget) {
-                    const widgetData: WidgetData = {
-                        ...data.clone,
-                        name: widget.getName(),
-                        opt: widget.getOptions(),
-                        cons: widget.getType()
-                    };
-                    this.createWidget(widgetData);
-                }
-            }
-        });
-    }
-
-    deleteWidget (widgetData: { id: string }): void {
-        this.widgetsMap[widgetData.id]?.remove();
-        delete this.widgetsMap[widgetData.id];
-    }
-
-    async editWidget (data: { id: string }): Promise<WidgetEVO | null> {
-        if (data?.id) {
-            const id: string = data.id;
-            const coords: Coords = this.hotspotEditor.getCoords(id);
-            return new Promise((resolve, reject) => {
-                if (id && coords) {
-                    const widgetData: WidgetData = {
-                        id,
-                        coords,
-                        name: this.widgetsMap[id]?.getName() || WidgetEVO.uuid(),
-                        opt: this.widgetsMap[id]?.getOptions(),
-                        cons: this.widgetsMap[id]?.getType()
-                    }
-                    const editor: WidgetEditor = new WidgetEditor({ widgetData });
-                    editor.on(WidgetEditorEvents.ok, (widgetData: WidgetData) => {
-                        const widget: WidgetEVO = this.createWidget(widgetData);
-                        resolve(widget);
-                    });
-                    editor.on(WidgetEditorEvents.cancel, (data: WidgetData) => {
-                        resolve(null);
-                    });
-                } else {
-                    resolve(null);
-                }
-            });
-        }
+        this.installHandlers();
     }
 
     protected createWhiteboard (): void {
         const imageElement: HTMLImageElement = new Image();
         imageElement.src = Utils.transparentGif;
-        const width: number = parseFloat($(".tab-pane.active .image-div").css("width")) || MIN_WIDTH;
-        const height: number = parseFloat($(".tab-pane.active .image-div").css("height")) || MIN_HEIGHT;
+        const width: number = parseFloat($(`.tab-pane.active .background-div`).css("width")) || MIN_WIDTH;
+        const height: number = parseFloat($(`.tab-pane.active .background-div`).css("height")) || MIN_HEIGHT;
         imageElement.width = width < MIN_WIDTH ? MIN_WIDTH : width;
         imageElement.height = height < MIN_HEIGHT ? MIN_HEIGHT : height;
         this.$imageDiv.html(imageElement);
         this.$imageDiv.css({ border: "1px solid black" });
     }
 
+    resizeView (coords?: Coords): void {
+        if (coords) {
+            const width: number = coords.width ? parseFloat(`${coords.width}`) : 0;
+            if (isFinite(width) && width > this.paddingRight) {
+                const w: number = width - this.paddingRight;
+                this.$el.find(".view-div").css({ width: `${w}px` });
+            }
+        }
+    }
+
+
     protected installHandlers (): void {
 
-        // this.$el.find(".use-whiteboard-btn").on("click", (evt: JQuery.ClickEvent) => {
-
-
-        // });
+        this.$el.find(".use-whiteboard-btn").on("click", (evt: JQuery.ClickEvent) => {
+            this.createWhiteboard();
+        });
 
         // this.$el.find(".load-image-btn").on("click", (evt: JQuery.ClickEvent) => {
         //     const req: OpenFileDialog = {

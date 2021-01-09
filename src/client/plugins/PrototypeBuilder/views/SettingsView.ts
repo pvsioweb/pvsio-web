@@ -1,6 +1,6 @@
 import * as Backbone from 'backbone';
 import { Connection } from '../../../env/Connection';
-import { View, BuilderViewOptions } from './View';
+import { CentralView, CentralViewOptions } from './CentralView';
 
 export const content: string = `
 <div class="builder-settings container-fluid" style="padding-left:0;">
@@ -8,14 +8,14 @@ export const content: string = `
 </div>`;
 
 
-export class SettingsView extends View {
+export class SettingsView extends CentralView {
     
-    constructor (data: BuilderViewOptions, connection: Connection) {
+    constructor (data: CentralViewOptions, connection: Connection) {
         super(data, connection);        
         this.render(data);
     }
 
-    render (data?: BuilderViewOptions): SettingsView {
+    render (data?: CentralViewOptions): SettingsView {
         super.render({ ...data, content, label: `<i class="fa fa-cogs"></i>` });
         return this;
     }

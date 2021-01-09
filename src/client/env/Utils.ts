@@ -6,7 +6,7 @@ import { PVSioWebPlugin, MouseEventHandlers } from "./PVSioWeb";
  * {
  * headerText: string to display in panel header
  * owner: <string> the name of the plugin that owns the panel
- * ownerObject: <object> Main class of the plugin that owns the panel. Used for forwarding key events.
+ * ownerObject: <object> main class of the plugin that owns the panel. Used for forwarding key events.
  * onClick: function - handler to invoke when the panel is toggled. Argument passed to the function identifies
  * whether the panel is now collapsed (true) or not (false).
  * showContent: Whether the default initial state of the panel is open (showContent == true) or closed (showContent == true or undefined)
@@ -24,6 +24,7 @@ export interface ResizableLeftPanel extends Panel {
     $left: JQuery<HTMLDivElement>,
     $central: JQuery<HTMLDivElement>,
     $resizeBar: JQuery<HTMLDivElement>,
+    onResize (size: { width: string, height: string }): void
 };
 export interface CollapsiblePanel extends Panel {
     $content: JQuery<HTMLDivElement>,
@@ -150,6 +151,7 @@ export function closeContextMenu (): JQuery<HTMLElement> {
 export function deleteContextMenu (): JQuery<HTMLElement> {
     return $("body").find("#pvsioweb-menu").remove();
 }
+
 export function createCollapsiblePanel (owner: PVSioWebPlugin, opt?: { 
     parent?: string, 
     showContent?: boolean, 
@@ -225,6 +227,9 @@ export function enableResizeLeft (desc: ResizableLeftPanel, opt?: { initialWidth
             const onMouseMove = (evt: JQuery.MouseMoveEvent) => {
                 evt.preventDefault();
                 adjustPanels({ leftWidth: evt.pageX });
+                if (desc?.onResize) {
+                    desc.onResize({ width: desc.$central.css("width"), height: desc.$central.css("height") });
+                }
             };
             const onMouseUp = (evt: JQuery.MouseUpEvent | JQuery.KeyDownEvent) => {
                 evt.preventDefault();
@@ -336,6 +341,7 @@ export function desc2fname (desc: FileDescriptor): string | null {
 }
 export const whiteGif: string = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 export const blackGif: string = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
+export const transparentGif: string = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
 export function isHiddenFile (fname: string): boolean {
     return fname ? getFileName(fname).indexOf(".") === 0 : false;

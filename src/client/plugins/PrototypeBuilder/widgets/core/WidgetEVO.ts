@@ -202,7 +202,7 @@ export interface CSS {
     [key: string]: string | number,
 }
 export interface WidgetOptions {
-    parent?: "body" | string,
+    parent?: "body" | string | JQuery<HTMLElement>,
     css?: CSS,
     viz?: VizOptions,
     type?: string, // widget type, e.g., "Button", "Display"
@@ -234,7 +234,9 @@ export abstract class WidgetEVO extends Backbone.Model {
 
     id: string;
     type: string;
-    parent: string;
+
+    $parent: JQuery<HTMLElement>;
+    parentSelector: string; // this is useful for debugging purposes
     
     top: number;
     left: number;
@@ -275,9 +277,10 @@ export abstract class WidgetEVO extends Backbone.Model {
         this.id = id;
         this.type = opt.type || "widget";
         opt.parent = opt.parent || "body";
-        opt.parent = opt.parent === "body" || opt.parent.startsWith("#") || opt.parent.startsWith(".") ? opt.parent
-            : `#${opt.parent}`;
-        this.parent = opt.parent;
+        this.parentSelector = (typeof opt.parent === "string") ? 
+            opt.parent === "body" || opt.parent.startsWith("#") || opt.parent.startsWith(".") ? opt.parent : `#${opt.parent}`
+                : null;
+        this.$parent = this.sel2jquery(opt.parent);
         this.top = parseFloat(`${coords.top}`) || 0;
         this.left = parseFloat(`${coords.left}`) || 0;
         this.width = isNaN(parseFloat(`${coords.width}`)) ? 32 : parseFloat(`${coords.width}`);
@@ -315,16 +318,23 @@ export abstract class WidgetEVO extends Backbone.Model {
         this.widget_template = opt.widget_template || widget_template;
     }
 
+    protected sel2jquery (sel: string | JQuery<HTMLElement>): JQuery<HTMLElement> {
+        return (typeof sel === "string") ? 
+            (sel === "body" || sel.startsWith("#") || sel.startsWith(".")) ? $(sel) 
+                : $(`#${sel}`)
+                    : sel;
+    }
+
     /**
      * Creates HTML elements
      */
     protected createHTMLElement (): void {
         const res: string = Handlebars.compile(this.widget_template, { noEscape: true })(this);
-        if (!$(this.parent)[0]) {
-            console.error("Error: " + this.parent + " does not exist. Widget '" + this.id + "' cannot be attached to DOM :((");
+        if (!this.$parent[0]) {
+            console.error("Error: " + this.parentSelector + " does not exist. Widget '" + this.id + "' cannot be attached to DOM :((");
         }
 
-        $(this.parent).append(res);
+        this.$parent.append(res);
         this.$div = $("#" + this.id);
         this.$img = this.$div.find(".img");
         this.$base = this.$div.find(".base");

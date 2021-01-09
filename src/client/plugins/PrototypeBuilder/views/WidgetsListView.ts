@@ -1,5 +1,5 @@
-import * as Backbone from 'backbone';
-import { BuilderEvents, SelectWidgetEvent, WidgetsMap } from './View';
+import { BuilderEvents, SelectWidgetEvent, WidgetsMap } from './CentralView';
+import { SideView, SideViewOptions } from './SideView';
 
 const widgetsListViewTemplate: string = `
 {{#each widgets}}
@@ -7,12 +7,10 @@ const widgetsListViewTemplate: string = `
 {{/each}}
 `;
 
-export interface WidgetListViewOptions extends Backbone.ViewOptions {
-}
 
-export class WidgetsListView extends Backbone.View {
+export class WidgetsListView extends SideView {
 
-    constructor (data: WidgetListViewOptions) {
+    constructor (data: SideViewOptions) {
         super(data);
         this.render();
     }
