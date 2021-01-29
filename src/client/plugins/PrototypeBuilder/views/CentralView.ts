@@ -25,7 +25,7 @@ const headerTemplate: string = `
 </li>`;
 
 const bodyTemplate: string = `
-<div id="{{screenName}}" class="container-fluid tab-pane show no-gutters{{#if active}} active{{/if}}" aria-labelledby="{{screenName}}-tab" style="padding:0; position:relative; min-height:480px;">
+<div id="{{screenName}}" class="container-fluid tab-pane show no-gutters{{#if active}} active{{/if}}" aria-labelledby="{{screenName}}-tab" style="padding:0; position:relative; min-height:480px; top:1em;">
     {{content}}
 </div>`;
 

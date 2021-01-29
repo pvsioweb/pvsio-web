@@ -7,11 +7,10 @@ import { Connection } from '../../env/Connection';
 // Prompt              = require("pvsioweb/forms/displayPrompt"),
 
 import * as Utils from '../../env/Utils';
-import { BuilderView } from './views/BuilderView';
+import { Picture, BuilderView } from './views/BuilderView';
 import { WidgetsListView } from './views/WidgetsListView';
 import { SettingsView } from './views/SettingsView';
 import { BuilderEvents, CreateWidgetEvent, DeleteWidgetEvent, CutWidgetEvent, SelectWidgetEvent, CentralView, CentralViewEvents } from './views/CentralView';
-import { BackgroundView } from './views/BackgroundView';
 import { SideView } from './views/SideView';
 
 // import { WidgetEVO } from "../../widgets/core/WidgetEVO";
@@ -41,10 +40,48 @@ import { SideView } from './views/SideView';
 //     }
 // }
 
+const sidebarStyle: string = `
+.builder-sidebar-heading {
+    color: white;
+    font-weight: bold;
+    display: block;
+    border-bottom: 40px solid #4c4c4c;
+    line-height: 40px;
+    width: 110%;
+}
+.left-panel {
+    overflow-x:hidden;
+    width:30%; 
+    min-width:10px; 
+    position:relative;
+}
+.widget-list {
+    margin-left: -4px;
+    width: 110%;
+    transform: scale(0.8);
+}
+.widget-list-item.active::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 0;
+
+    border-bottom: 20px solid transparent;    
+    border-left: 16px solid whitesmoke;
+
+    clear: both;
+}
+`;
+
 const prototypeBuilderBody: string = `
+<style>
+${sidebarStyle}
+</style>
 <div id="{{id}}" class="row d-flex">
-    <div id="{{id}}-left" class="container-fluid no-gutters" style="overflow-x:hidden; width:30%; min-width:10px;">
-        <div class="widgets"></div>
+    <div id="{{id}}-left" class="left-panel container-fluid no-gutters">
+        <div class="builder-sidebar-heading"></div>
         <div id="{{id}}-widget-list" class="widget-list list-group"></div>
         <div id="{{id}}-timers-list" class="list-group"></div>
     </div>
@@ -64,23 +101,22 @@ const prototypeBuilderBody: string = `
 const prototypeBuilderToolbar: string = `
 <div class="toolbar" id="{{id}}">
     <div class="btn-group" role="group" aria-label="Mode toggle">
-        <button id="{{id}}-builder-view-btn" type="button" class="btn btn-primary">
+        <button id="{{id}}-builder-view-btn" type="button" class="btn btn-primary btn-sm">
             Builder View
         </button>
-        <button id="{{id}}-simulator-view-btn" type="button" class="btn btn-outline-secondary">
+        <button id="{{id}}-simulator-view-btn" type="button" class="btn btn-outline-secondary btn-sm">
             Simulator View
         </button>
     </div>
-    <div class="toolbar-right">
-        <button id="{{id}}-reboot-btn" class="btn btn-danger pim-convert-button">Reboot Prototype</button>
+    <div style="float:right">
+        <button id="{{id}}-reboot-btn" class="btn btn-outline-danger btn-sm pim-convert-button" style="margin-left:36em;">Reboot Prototype</button>
     </div>
 </div>
 `;
 
 export interface PrototypeBuilderViews<T> {
     Settings?: T,
-    Hotspots?: T,
-    Picture?: T
+    [screen:string]: T
 };
 
 export class PrototypeBuilder implements PVSioWebPlugin {
@@ -93,22 +129,16 @@ export class PrototypeBuilder implements PVSioWebPlugin {
     protected toolbar: Utils.Panel;
     protected body: Utils.ResizableLeftPanel;
 
-    protected onResizeCentralView: (desc?: { width: string, height: string }) => void;
-
     protected collapsed: boolean = false;
 
     protected sideViews: PrototypeBuilderViews<SideView>;
     protected centralViews: PrototypeBuilderViews<CentralView>;
 
     async activate (connection?: Connection): Promise<boolean> {
+        // save connection
         this.connection = connection;
 
-        this.onResizeCentralView = (desc?: { width: string, height: string }) => {
-            for (let i in this.centralViews) {
-                this.centralViews[i].resizeView(desc);
-            }
-        };
-
+        // create panel, toolbar, and body
         this.panel = Utils.createCollapsiblePanel(this, {
             parent: "toolkit-body",
             showContent: true
@@ -120,10 +150,11 @@ export class PrototypeBuilder implements PVSioWebPlugin {
             parent: this.panel.$content
         });
         
+        // create central view and side view
         const bodyDiv: HTMLElement = this.panel.$content.find(`.prototype-screens`)[0];
         const headerDiv: HTMLElement = this.panel.$content.find(`.prototype-screen-list`)[0];
         this.sideViews = {
-            Hotspots: new WidgetsListView({
+            Builder: new WidgetsListView({
                 el: this.panel.$content.find(".widget-list")[0]
             })
         };
@@ -135,59 +166,90 @@ export class PrototypeBuilder implements PVSioWebPlugin {
                 headerDiv,
                 parentDiv: this.body.$central[0],
             }, this.connection),
-            Hotspots: new BuilderView({
-                viewId: "Hotspots",
-                screenName: "Hotspots",
+            Builder: new BuilderView({
+                viewId: "Prototype",
+                screenName: "Prototype",
                 el: bodyDiv,
                 headerDiv,
+                active: true,
                 parentDiv: this.body.$central[0],
-            }, this.connection),
-            Picture: new BackgroundView({
-                viewId: "Picture",
-                screenName: "Picture",
-                el: bodyDiv,
-                headerDiv,
-                parentDiv: this.body.$central[0],
-                active: true // only one tab should be active
             }, this.connection)
         };
+        // install handlers
+        this.activateViews();
+        // refresh the view
+        this.onResizeCentralView();
+        return true;
+    }
+
+    protected onResizeCentralView (desc?: { width: string, height: string }): void {
+        for (let i in this.centralViews) {
+            this.centralViews[i].resizeView(desc);
+        }
+    };
+
+    // protected async onLoadPicture (evt: JQuery.ChangeEvent): Promise<BackgroundPicture> {
+    //     return new Promise ((resolve, reject) => {
+    //         const file: File = evt?.currentTarget?.files[0];
+    //         if (file) {
+    //             const reader: FileReader = new FileReader();
+    //             reader.addEventListener('loadend', (evt: ProgressEvent<FileReader>) => {
+    //                 const fileContent: string = reader.result?.toString();
+    //                 $(".load-picture-form").trigger("reset");
+    //                 if (fileContent) {
+    //                     const picture: BackgroundPicture = {
+    //                         fileName: Utils.getFileName(file.name),
+    //                         fileExtension: Utils.getFileExtension(file.name),
+    //                         fileContent
+    //                     };
+    //                     (<BuilderView> this.centralViews.Builder).loadPicture(picture);
+    //                     resolve(picture);
+    //                 } else {
+    //                     resolve(null);
+    //                 }
+    //             });
+    //             reader.readAsDataURL(file);
+    //         } else {
+    //             resolve(null);
+    //         }
+    //     });
+    // }
+
+    protected activateViews (): void {
         for (let i in this.centralViews) {
             this.centralViews[i].activate();
             // add listeners for side views, so they can he shown/hidden together with the corresponding central view
             this.centralViews[i].on(CentralViewEvents.DidShowView, (data: { id: string }) => {
                 for (let j in this.sideViews) {
-                    this.sideViews[j].hide();
+                    this.sideViews[j]?.hide();
                 }
                 this.sideViews[i]?.reveal();
             });
+            this.centralViews[i].on(BuilderEvents.DidCreateWidget, (evt: CreateWidgetEvent) => {
+                (<WidgetsListView> this.sideViews[i])?.refresh(evt?.widgets);
+                (<WidgetsListView> this.sideViews[i])?.selectWidget({ id: evt?.id });
+            });
+            this.centralViews[i].on(BuilderEvents.DidDeleteWidget, (evt: DeleteWidgetEvent) => {
+                (<WidgetsListView> this.sideViews[i])?.refresh(evt?.widgets);
+            });
+            this.centralViews[i].on(BuilderEvents.DidCutWidget, (evt: CutWidgetEvent) => {
+                (<WidgetsListView> this.sideViews[i])?.refresh(evt?.widgets);
+            });
+            this.centralViews[i].on(BuilderEvents.DidSelectWidget, (evt: SelectWidgetEvent) => {
+                (<WidgetsListView> this.sideViews[i])?.selectWidget({ id: evt?.id });
+            });
+            this.sideViews[i]?.on(BuilderEvents.DidSelectWidget, (evt: SelectWidgetEvent) => {
+                (<BuilderView> this.centralViews[i]).selectWidget({ id: evt?.id });
+            });
+            this.sideViews[i]?.on(BuilderEvents.DidDeselectWidget, (evt: SelectWidgetEvent) => {
+                (<BuilderView> this.centralViews[i]).deselectWidget({ id: evt?.id });
+            });
+            this.sideViews[i]?.on(BuilderEvents.WillEditWidget, (evt: SelectWidgetEvent) => {
+                (<BuilderView> this.centralViews[i]).editWidget({ id: evt?.id });
+            });
         }
-        this.onResizeCentralView(); // this is done to refresh the initial view
-
-        this.centralViews.Hotspots.on(BuilderEvents.DidCreateWidget, (evt: CreateWidgetEvent) => {
-            (<WidgetsListView> this.sideViews.Hotspots).refresh(evt?.widgets);
-            (<WidgetsListView> this.sideViews.Hotspots).selectWidget({ id: evt?.id });
-        });
-        this.centralViews.Hotspots.on(BuilderEvents.DidDeleteWidget, (evt: DeleteWidgetEvent) => {
-            (<WidgetsListView> this.sideViews.Hotspots).refresh(evt?.widgets);
-        });
-        this.centralViews.Hotspots.on(BuilderEvents.DidCutWidget, (evt: CutWidgetEvent) => {
-            (<WidgetsListView> this.sideViews.Hotspots).refresh(evt?.widgets);
-        });
-        this.centralViews.Hotspots.on(BuilderEvents.DidSelectWidget, (evt: SelectWidgetEvent) => {
-            (<WidgetsListView> this.sideViews.Hotspots).selectWidget({ id: evt?.id });
-        });
-        this.sideViews.Hotspots.on(BuilderEvents.DidSelectWidget, (evt: SelectWidgetEvent) => {
-            (<BuilderView> this.centralViews.Hotspots).selectWidget({ id: evt?.id });
-        });
-        this.sideViews.Hotspots.on(BuilderEvents.DidDeselectWidget, (evt: SelectWidgetEvent) => {
-            (<BuilderView> this.centralViews.Hotspots).deselectWidget({ id: evt?.id });
-        });
-        this.sideViews.Hotspots.on(BuilderEvents.WillEditWidget, (evt: SelectWidgetEvent) => {
-            (<BuilderView> this.centralViews.Hotspots).editWidget({ id: evt?.id });
-        });
-
-        return true;
     }
+
     getName (): string { return this.name; };
     getId (): string { return this.id };
     getDependencies (): string[] { return []; }

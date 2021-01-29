@@ -396,13 +396,6 @@ ul {
 /**
  * Simple container for a collection of buttons
  */
-.toolbar {
-  padding: 10px 15px;
-  background-color: #f5f5f5;
-  border-bottom: 1px solid #e6e6e6; }
-  .toolbar-right {
-    float: right; }
-
 .expandable-panel {
   width: 100%;
   position: relative;

@@ -16,7 +16,7 @@ const toolkitInterface: string = `
     </div>
 </div>
 <div id="warnings" class="warnings" style="display:none"><button type="button" id="dismissWarnings">Dismiss</button></div>
-<div id="content" class="center pvsioweb-content" style="position:absolute; top:52px;">
+<div id="content" class="center pvsioweb-content" style="position:absolute; top:30px;">
     <div class="container-fluid row no-gutters" style="padding:0;">
         <div id="toolkit-body" class="container-fluid col no-gutters">
         <!-- plugin panels go here -->
@@ -81,29 +81,27 @@ const toolkitInterface: string = `
             </div>
         </div>
     </div>
-    <div id="toolkit-header" class="btn-group" style="width:100%;position:fixed;top:0px;">
+    <div id="toolkit-header" class="btn-group" style="width:100%;position:fixed;top:0px; z-index:99999;">
         <div id="projectTitle">
-            <div class="btn txtProjectName"><span id="txtProjectName" style="color:white;"></span></div>
+            <div class="btn prototype-name"></div>
             <div style="width:100%">
-                <div class="toolkit-toolbar btn-group pull-right" style="display:flex; margin-top:7px;">
-                    <button type="button" class="btn" id="newProject" style="color:white;">New Project</button>
-                    <button type="button" class="btn" id="openProject" style="color:white;">Open Project</button>
+                <div class="toolkit-toolbar btn-group pull-right" style="position:sticky; top:0;">
+                    <button type="button" class="btn btn-sm" id="newProject">New Project</button>
+                    <button type="button" class="btn btn-sm" id="openProject">Open Project</button>
                     <div class="btn-group pull-right" style="display:flex; width:158px;">
-                        <button type="button" class="btn btn" id="btnSaveProject" style="color:white;">Save Project</button>
-                        <button type="button" class="btn btn dropdown-toggle" data-toggle="dropdown" style="color:white; width:32px;">
-                            <span class="caret" style="color:white;"></span>
-                        </button>
+                        <button type="button" class="btn btn-sm" id="btnSaveProject">Save Project</button>
+                        <button type="button" class="btn btn-sm dropdown-toggle" data-toggle="dropdown"></button>
                         <div class="dropdown-menu dropdown-menu-right" role="menu" style="background-color:#08589a;">
-                            <button class="btn" id="btnSaveProjectAs" style="color:white; border-radius:0; margin:-8px 0 -8px; padding-left:16px; width:100%; text-align:left;">Save As...</button>
+                            <button class="btn btn-sm" id="btnSaveProjectAs" style="border-radius:0; margin:-8px 0 -8px; padding-left:16px; width:100%; text-align:left;">Save As...</button>
                         </div>
                     </div>
-                    <button type="button" class="btn" id="btnLoadPicture" style="color:white;">Change Picture</button>
+                    <button type="button" class="btn btn-sm" id="btnLoadPicture">Change Picture</button>
                     <div class="pull-right" style="min-width: 260px; display:inline-flex;">
-                        <button id="btnReconnect" class="btn" style="display:none;">Try to reconnect to WebServer <span class="fa fa-random"></span></button>
-                        <button id="lblWebSocketStatus" class="btn status" style="background:rgb(8, 88, 154); color:white; cursor:default;">WebServer <span class="fa fa-check"></span></button>
-                        <button id="logo" class="btn status" style="background:rgb(8, 88, 154); color:white; cursor:default;"><span>PVSio-web {{version}}</span></button>
+                        <button id="btnReconnect" class="btn btn-sm" style="display:none;">Try to reconnect to WebServer <span class="fa fa-random"></span></button>
+                        <button id="lblWebSocketStatus" class="btn btn-sm status" style="background:rgb(8, 88, 154); cursor:default;">WebServer <span class="fa fa-check"></span></button>
+                        <button id="logo" class="btn btn-sm status" style="background:rgb(8, 88, 154); cursor:default;"><span>PVSio-web {{version}}</span></button>
                         <div id="autoSaver" class="pull-right"></div>
-                        <button id="preferences" class="btn"><span class="fa fa-bars" style="color:white;"></span></button>
+                        <button id="preferences" class="btn btn-sm"><span class="fa fa-bars"></span></button>
                     </div>
                 </div>
             </div>

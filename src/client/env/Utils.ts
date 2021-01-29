@@ -204,21 +204,21 @@ export function enableResizeLeft (desc: ResizableLeftPanel, opt?: { initialWidth
     opt = opt || {};
     if (desc) {
         const min: number = 20;
+        const maxWidth: number = desc.$div.width();
+        let leftWidth: number = opt.initialWidth || maxWidth / 4;
         const adjustPanels = (opt?: { leftWidth?: number }) => {
             opt = opt || {};
             opt.leftWidth = opt.leftWidth ||  desc.$left.width();
             const windowWidth: number = $(window).width();
             const panelWidth: number = desc.$div.width();
             const maxWidth: number = panelWidth < windowWidth ? panelWidth : windowWidth;
-            const leftWidth: number = opt.leftWidth < min ? min 
+            leftWidth = opt.leftWidth < min ? min 
                 : opt.leftWidth > maxWidth ? maxWidth
                 : opt.leftWidth;
             const padding: number = parseFloat(desc.$resizeBar.css("width")) * 2;
             desc.$left.css("width", leftWidth + padding);
             desc.$central.css({ "width": maxWidth - leftWidth });
         }
-        const maxWidth: number = desc.$div.width();
-        const leftWidth: number = opt.initialWidth || maxWidth / 4;
         desc.$left.css("width", leftWidth);
         // make side panel resizeable
         desc.$resizeBar.on("mousedown", (evt: JQuery.MouseDownEvent) => {
@@ -251,9 +251,9 @@ export function enableResizeLeft (desc: ResizableLeftPanel, opt?: { initialWidth
             evt.preventDefault();
             desc.$resizeBar.css({ cursor: "col-resize" });
         });
-        // $(window).on("resize", (evt: JQuery.ResizeEvent) => {
-        //     adjustPanels();
-        // });
+        $(window).on("resize", (evt: JQuery.ResizeEvent) => {
+            adjustPanels({ leftWidth });
+        });
     }
     return desc;
 }
@@ -324,10 +324,10 @@ const fileExtensions: string[] = modelExtensions.concat(imageExtensions).concat(
 export type FileDescriptor = { contextFolder: string, fileName: string, fileExtension: string, fileContent?: string };
 
 export function getFileName (fname: string): string {
-    return fname ? fname.substr(fname.lastIndexOf("/") + 1) : "";
+    return fname ? fname.substr(fname.lastIndexOf("/") + 1, fname.lastIndexOf(".")) : "";
 }
 export function getFileExtension (fname: string, opt?: { toLowerCase?: boolean }): string {
-    const ans: string = fname ? fname.substr(fname.lastIndexOf(".") + 1) : "";
+    const ans: string = fname ? fname.substr(fname.lastIndexOf(".")) : "";
     return (opt?.toLowerCase) ? ans.toLocaleLowerCase() : ans;
 }
 export function getContextFolder (fname: string): string {

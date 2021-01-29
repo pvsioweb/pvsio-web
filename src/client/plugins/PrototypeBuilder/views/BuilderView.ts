@@ -4,29 +4,65 @@ import { WidgetEVO, Coords } from "../widgets/core/WidgetEVO";
 import { Connection, ReadFileRequest, ReadFileResponse } from '../../../env/Connection';
 import { HotspotEditor, HotspotEditorEvents, HotspotData, HotspotsMap } from './editors/HotspotEditor';
 
-import { CentralViewEvents, CentralViewOptions, CreateWidgetEvent, WidgetsMap, BuilderEvents, MIN_WIDTH, MIN_HEIGHT } from './CentralView';
+import { CentralViewOptions, CreateWidgetEvent, WidgetsMap, BuilderEvents, MIN_WIDTH, MIN_HEIGHT, CentralView } from './CentralView';
 import { WidgetData, WidgetEditor, WidgetEditorEvents } from './editors/WidgetEditor';
 import { WidgetClassDescriptor, widgets } from '../widgets/widgets';
-import { BackgroundView } from './BackgroundView';
 
 const contentTemplate: string = `
-<div class="builder-coords" style="position:absolute; color:darkslategray; top:-1.4em; left:45%; white-space:nowrap;"></div>
-<div class="image-div view-div container-fluid" style="padding-left:0;">
-    <div class="container-fluid" style="position:relative; overflow:hidden; background-color:white; border:4px dashed teal; text-align:center; min-height:480px;">
-
-        <div style="top:50%; left:35%; position:absolute;">
-            <div class="btn-group center">
-                <button class="btn btn-primary btn-lg load-image-btn" style="white-space:nowrap;">Load Image</button>
-                <button class="btn btn-outline-secondary btn-lg use-whiteboard-btn" style="white-space:nowrap;">Use Whiteboard</button>
-            </div>
+<style>
+.view-div {
+    position: absolute;
+    padding-left:0;
+    margin-right:30px;
+    overflow:hidden;
+}
+.builder-toolbar {
+    position:absolute; 
+    top:-2.2em; 
+    left:35%; 
+    transform:scale(0.8);
+}
+.builder-toolbar .btn {
+    height:2.5em;
+}
+.builder-coords {
+    position:absolute;
+    color:darkslategray; 
+    top:-1.8em; 
+    transform:scale(0.8); 
+    font-size:small;
+}
+</style>
+<div class="builder-coords"></div>
+<div class="builder-toolbar">
+    <form class="load-picture-form">
+        <div class="custom-file" style="position:absolute; width:13em;">
+            <input type="file" class="custom-file-input load-picture-btn" accept="image/*">
+            <label class="custom-file-label btn-sm" style="padding-right:20px; width:15em;"><i class="fa fa-upload"></i> Upload Picture</label>
         </div>
-
-    </div>
+        <button class="btn btn-outline-danger btn-lg load-whiteboard-btn btn-sm" style="margin-left:16em; width:15em;">Remove Picture</button>
+    </form>
 </div>
-<div class="image-overlay container-fluid" style="padding-left:0;"></div>`;
+<div class="prototype-image view-div container-fluid"></div>
+<div class="prototype-image-frame view-div container-fluid"></div>
+<div class="prototype-image-overlay container-fluid" style="padding-left:0;"></div>`;
 
-export class BuilderView extends BackgroundView {
+export interface Picture {
+    fileName: string,
+    fileExtension: string,
+    fileContent: string
+};
+export interface PictureOptions {
+    width?: number, 
+    height?: number, 
+    border?: string,
+    $el?: JQuery<HTMLElement>
+};
+
+export class BuilderView extends CentralView {
     
+    protected $imageDiv: JQuery<HTMLElement>;
+    protected $imageFrame: JQuery<HTMLElement>;
     protected $imageOverlay: JQuery<HTMLElement>;
 
     protected hotspotEditor: HotspotEditor;
@@ -49,35 +85,19 @@ export class BuilderView extends BackgroundView {
     activate (): void {
         const content: string = Handlebars.compile(contentTemplate, { noEscape: true })({});
         super.render({ ...this.viewOptions, content });
-        this.$imageDiv = this.$el.find(".image-div");
-        this.$imageOverlay = this.$el.find(".image-overlay");
+        // each prototype has three layers:
+        // - a bottom layer (prototype-image) contains the prototype image
+        // - a mid layer (prototype-image-frame) for rendering widgets -- this facilitates porting the set of widgets from one prototype to another when swapping the prototype image
+        // - an upper layer (prototype-image-overlay) shows the resizeable hotspot areas while building the prototype. This layer become hidden during simulation runs.  
+        this.$imageDiv = this.$el.find(".prototype-image");
+        this.$imageFrame = this.$el.find(".prototype-image-frame");
+        this.$imageOverlay = this.$el.find(".prototype-image-overlay");
         this.createWhiteboard();
-        this.createHotspotEditor();
+        this.createTransparentLayer();
         this.resizeView();
-    }
-
-    resizeView (coords?: Coords): void {
-        // keep image height of background image -- do it only when the background panel is active
-        const $background: JQuery<HTMLElement> = this.$el.find(`.tab-pane.active .background-div .image-div`);
-        if ($background[0]) {
-            const width: number = parseFloat(`${$background.css("width")}`);
-            if (isFinite(width) && width > 0) {
-                this.$imageDiv.css({ width: `${width}px`});
-                this.$imageDiv.find("img").attr({ width });
-            }
-            const height: number = parseFloat(`${$background.css("height")}`);
-            if (isFinite(height) && height > 0) {
-                this.$imageDiv.css({ height: `${height}px`});
-                this.$imageDiv.find("img").attr({ height });
-            }
-        } else if (coords && !this.keepAspectRatio) {
-            super.resizeView(coords);
-            const width: number = parseFloat(`${coords.width}`);
-            if (isFinite(width) && width > 0) {
-                this.$imageDiv.css({ width: `${width}px`});
-                this.$imageDiv.find("img").attr({ width });
-            }
-        }
+        this.installHandlers();
+        // create hotspot editor on top of the image
+        this.createHotspotEditor();
     }
 
     selectWidget (data: { id: string }): void {
@@ -100,7 +120,7 @@ export class BuilderView extends BackgroundView {
                         this.widgetsMap[widgetData.id].remove();
                     }
                     const widget: WidgetEVO = new desc.cons(widgetData.id, widgetData.coords, { 
-                        parent: this.$imageDiv,
+                        parent: this.$imageFrame,
                         type: widgetData.cons,
                         ...widgetData?.opt
                     });
@@ -122,7 +142,7 @@ export class BuilderView extends BackgroundView {
     }
     createHotspotEditor (): void {
         this.hotspotEditor = new HotspotEditor({
-            el: this.$imageDiv.find("img")[0],
+            el: this.$imageFrame.find("img")[0],
             overlay: this.$imageOverlay[0],
             builderCoords: this.$el.find(".builder-coords")[0]
         });
@@ -216,18 +236,105 @@ export class BuilderView extends BackgroundView {
         }
     }
 
-    protected createWhiteboard (): void {
-        const imageElement: HTMLImageElement = new Image();
-        imageElement.src = Utils.transparentGif;
-        const width: number = parseFloat($(".tab-pane.active .image-div").css("width")) || MIN_WIDTH;
-        const height: number = parseFloat($(".tab-pane.active .image-div").css("height")) || MIN_HEIGHT;
-        imageElement.width = width < MIN_WIDTH ? MIN_WIDTH : width;
-        imageElement.height = height < MIN_HEIGHT ? MIN_HEIGHT : height;
-        this.$imageDiv.html(imageElement);
-        this.$imageDiv.css({ border: "1px solid black" });
+    createWhiteboard (): void {
+        const size: { width: number, height: number } = this.getActiveScreenSize();
+        this.loadPicture({
+            fileName: "whiteboard",
+            fileExtension: ".gif",
+            fileContent: Utils.transparentGif
+        }, {
+            ...size,
+            border: "1px solid black"
+        });
+    }
+
+    createTransparentLayer (): void {
+        const size: { width: number, height: number } = this.getActiveScreenSize();
+        this.loadPicture({
+            fileName: "transparent",
+            fileExtension: ".gif",
+            fileContent: Utils.transparentGif
+        }, {
+            ...size,
+            border: "1px solid black",
+            $el: this.$imageFrame
+        });
+    }
+
+    /**
+     * Loads a new picture to the builder view, and automatically attaches a hotspot editor on top of the picture.
+     * @param desc 
+     * @param opt 
+     */
+    loadPicture (desc: Picture, opt?: PictureOptions): boolean {
+        if (desc && desc.fileName && desc.fileContent && desc.fileExtension) {
+            opt = opt || {};
+            const $el: JQuery<HTMLElement> = opt.$el || this.$imageDiv;
+            // load the image
+            const imageElement: HTMLImageElement = new Image();
+            imageElement.src = desc.fileContent;
+            const maxSize: { width: number, height: number } = this.getActiveScreenSize();
+            if (opt.width) { imageElement.width = opt.width; }
+            if (opt.height) { imageElement.height = opt.height; }
+            $el.html(imageElement);
+            $el.find("img").css({ "max-width": `${maxSize.width}px`, "max-height": `${maxSize.height}px` });
+            $el.attr("name", `${desc.fileName}${desc.fileExtension}`);
+            // update size of image frame
+            this.$imageFrame.find("img").css({ "max-width": `${maxSize.width}px`, "max-height": `${maxSize.height}px` });
+            if (opt.border) { this.$imageFrame.css({ border: "1px solid black" }); }
+            return true;
+        }
+        return false;
+    }
+
+    getActiveImageSize (): { width: number, height: number } {
+        const width: number = parseFloat($(`.prototype-screens .tab-pane.active .prototype-image`).css("width")) || window.innerWidth || MIN_WIDTH;
+        const height: number = parseFloat($(`.prototype-screens .tab-pane.active .prototype-image`).css("height")) || window.innerHeight || MIN_HEIGHT;
+        return { width, height };
+    }
+    getActiveScreenSize (): { width: number, height: number } {
+        const width: number = parseFloat($(`.prototype-screens .tab-pane.active`).css("width")) || window.innerWidth || MIN_WIDTH;
+        const height: number = parseFloat($(`.prototype-screens .tab-pane.active`).css("height")) || window.innerHeight || MIN_HEIGHT;
+        return { width, height };
+    }
+
+    protected async onLoadPicture (evt: JQuery.ChangeEvent): Promise<Picture> {
+        return new Promise ((resolve, reject) => {
+            const file: File = evt?.currentTarget?.files[0];
+            if (file) {
+                const reader: FileReader = new FileReader();
+                reader.addEventListener('loadend', (evt: ProgressEvent<FileReader>) => {
+                    const fileContent: string = reader.result?.toString();
+                    $(".load-picture-form").trigger("reset");
+                    if (fileContent) {
+                        const picture: Picture = {
+                            fileName: Utils.getFileName(file.name),
+                            fileExtension: Utils.getFileExtension(file.name),
+                            fileContent
+                        };
+                        this.loadPicture(picture);
+                        resolve(picture);
+                    } else {
+                        resolve(null);
+                    }
+                });
+                reader.readAsDataURL(file);
+            } else {
+                resolve(null);
+            }
+        });
     }
 
     protected installHandlers (): void {
+
+        $(document).find(".load-whiteboard-btn").on("click", (evt: JQuery.ClickEvent) => {
+            this.createWhiteboard();
+        });
+
+        $(document).find(".load-picture-btn").on("input", async (evt: JQuery.ChangeEvent) => {
+            await this.onLoadPicture(evt);
+        });
+
 
         // this.$el.find(".use-whiteboard-btn").on("click", (evt: JQuery.ClickEvent) => {
 
