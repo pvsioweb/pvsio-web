@@ -24,12 +24,14 @@ export interface ResizableLeftPanel extends Panel {
     $left: JQuery<HTMLDivElement>,
     $central: JQuery<HTMLDivElement>,
     $resizeBar: JQuery<HTMLDivElement>,
-    onResize (size: { width: string, height: string }): void
+    onResize (size: { width: string, height: string }): void,
+    disableResize?: boolean
 };
 export interface CollapsiblePanel extends Panel {
     $content: JQuery<HTMLDivElement>,
     $label: JQuery<HTMLElement>,
-    $collapseBtn?: JQuery<HTMLElement>
+    $collapseBtn?: JQuery<HTMLElement>,
+    $toolbar?: JQuery<HTMLElement>
 }
 /**
  * The dialog template creates a modal dialog with bootstrap. 
@@ -96,13 +98,29 @@ export const dialogTemplate: string = `
     </div>
 </div>`;
 const collapsiblePanelTemplate: string = `
-<div id="{{id}}-panel" class="collapsible-panel-parent" style="width:{{width}};">
-    <div id="{{id}}-title" class="header">
+<style>
+.pvsioweb-collapsible-panel {
+    display: block;
+    position: sticky;
+    top: 30px;
+    height: 30px;
+}
+.pvsioweb-collapsible-panel span {
+    font-size: small;
+}
+</style>
+<div id="{{id}}-panel" class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow pvsioweb-collapsible-panel">
+    <span class="navbar-brand col-sm-3 col-md-2 mr-0">
         <i id="{{id}}-collapse-icon" class="icon toggle-collapse fa {{#if showContent}}fa-minus-square{{else}}fa-plus-square{{/if}}"></i>
         <span id="{{id}}-label" class="label">{{name}} {{#if showContent}}{{else}}(click to expand){{/if}}</span>
-    </div>
-    <div id="{{id}}-content" class="content collapsible-panel" style="display:block;"></div>
+    </span>
+    {{#if toolbar}}
+    <span class="toolbar">
+        {{toolbar}}
+    </span>
+    {{/if}}
 </div>
+<div id="{{id}}-content" class="content collapsible-panel" style="display:block;"></div>
 `;
 const menuTemplate: string = `
 <div id="{{menuId}}" class="fade show" style="position:absolute;width:0px;height:0px;top:{{top}}px;left:{{left}}px;">
@@ -158,6 +176,7 @@ export function createCollapsiblePanel (owner: PVSioWebPlugin, opt?: {
     isDemo?: boolean,
     handlers?: MouseEventHandlers,
     headerText?: string,
+    toolbar?: string,
     width?: string
 }): CollapsiblePanel {
     opt = opt || {};
@@ -166,17 +185,19 @@ export function createCollapsiblePanel (owner: PVSioWebPlugin, opt?: {
     const pluginName: string = owner.getName() || "";
     const width: string = opt.width || "100%";
     
-    const panel: string = Handlebars.compile(collapsiblePanelTemplate)({
+    const panel: string = Handlebars.compile(collapsiblePanelTemplate, { noEscape: true })({
         showContent: !!opt?.showContent,
         width: width,
         id: pluginId,
-        name: pluginName
+        name: pluginName,
+        toolbar: opt?.toolbar
     });
     $(parent).append(panel);
     const $div: JQuery<HTMLDivElement> = $(`#${pluginId}-panel`);
     const $content: JQuery<HTMLDivElement> = $(`#${pluginId}-content`);
     const $collapseBtn: JQuery<HTMLElement> = $(`#${pluginId}-collapse-icon`);
     const $label: JQuery<HTMLElement> = $(`#${pluginId}-label`);
+    const $toolbar: JQuery<HTMLElement> = $div.find(".toolbar");
 
     if (!opt?.isDemo) {
         $collapseBtn.on("click", () => {
@@ -197,13 +218,13 @@ export function createCollapsiblePanel (owner: PVSioWebPlugin, opt?: {
         $div.attr("active-panel", pluginId);
     });
 
-    return { $div, $collapseBtn, $content, $label };
+    return { $div, $collapseBtn, $content, $label, $toolbar };
 };
 
 export function enableResizeLeft (desc: ResizableLeftPanel, opt?: { initialWidth?: number }): ResizableLeftPanel {
     opt = opt || {};
     if (desc) {
-        const min: number = 20;
+        const min: number = 10;
         const maxWidth: number = desc.$div.width();
         let leftWidth: number = opt.initialWidth || maxWidth / 4;
         const adjustPanels = (opt?: { leftWidth?: number }) => {
@@ -248,11 +269,15 @@ export function enableResizeLeft (desc: ResizableLeftPanel, opt?: { initialWidth
             });
         });
         desc.$resizeBar.on("mouseover", (evt: JQuery.MouseOverEvent) => {
-            evt.preventDefault();
-            desc.$resizeBar.css({ cursor: "col-resize" });
+            if (!desc.disableResize) {
+                evt.preventDefault();
+                desc.$resizeBar.css({ cursor: "col-resize" });
+            }
         });
         $(window).on("resize", (evt: JQuery.ResizeEvent) => {
-            adjustPanels({ leftWidth });
+            if (!desc.disableResize) {
+                adjustPanels({ leftWidth });
+            }
         });
     }
     return desc;

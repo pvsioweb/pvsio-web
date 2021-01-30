@@ -1,59 +1,28 @@
 import { PVSioWebPlugin } from '../../env/PVSioWeb';
 import { Connection } from '../../env/Connection';
-// import { createCollapsiblePanel } from '../../../env/Utils';
-
-// import { WidgetManager } from './WidgetManager';
-// Recorder            = require("util/ActionRecorder"),
-// Prompt              = require("pvsioweb/forms/displayPrompt"),
 
 import * as Utils from '../../env/Utils';
-import { Picture, BuilderView } from './views/BuilderView';
+import { BuilderView } from './views/BuilderView';
 import { WidgetsListView } from './views/WidgetsListView';
 import { SettingsView } from './views/SettingsView';
 import { BuilderEvents, CreateWidgetEvent, DeleteWidgetEvent, CutWidgetEvent, SelectWidgetEvent, CentralView, CentralViewEvents } from './views/CentralView';
 import { SideView } from './views/SideView';
-
-// import { WidgetEVO } from "../../widgets/core/WidgetEVO";
-// import { BasicDisplayEVO } from "../../widgets/core/BasicDisplayEVO";
-// import { NumericDisplayEVO } from "../../widgets/core/NumericDisplayEVO";
-// import { LedEVO } from "../../widgets/core/LedEVO";
-// import { ButtonEVO } from "../../widgets/core/ButtonEVO";
-// import { TouchScreenEVO } from "../../widgets/core/TouchScreenEVO";
-
-// TimersListView      = require("pvsioweb/forms/TimersListView"),
-// NewWidgetView       = require("pvsioweb/forms/newWidget"),
-// EditWidgetView      = require("pvsioweb/forms/editWidget"),
-// ScriptPlayer        = require("util/ScriptPlayer"),
-// PluginManager       = require("plugins/PluginManager"),
-// fs                  = require("filesystem/FileSystem").getInstance(),
-// Descriptor          = require("project/Descriptor"),
-
-// const labelFunction = (widget: WidgetEVO) => {
-//     switch (widget.type) {
-//         case "display"       : { return "Display: " + (<BasicDisplayEVO>widget).displayKey; }
-//         case "numericdisplay": { return "Numeric Display: " + (<NumericDisplayEVO>widget).displayKey; }
-//         case "led"           : { return "LED: " + (<LedEVO>widget).ledKey; }
-//         case "button"        : { return "Button: " + (<ButtonEVO>widget).functionText; }
-//         case "touchscreenbutton": { return "Touch-Button: " + (<TouchScreenEVO>widget).functionText; }
-//         case "touchscreendisplay": { return "Touch-Display: " + (<TouchScreenEVO>widget).functionText; }
-//         default: { return widget.type + ": " + widget.id; }
-//     }
-// }
+import { SimulatorView } from './views/SimulatorView';
 
 const sidebarStyle: string = `
 .builder-sidebar-heading {
     color: white;
-    font-weight: bold;
     display: block;
-    border-bottom: 40px solid #4c4c4c;
-    line-height: 40px;
-    width: 110%;
+    background-color: #4c4c4c;
+    height: 40px;
+    width: 200%;
 }
 .left-panel {
     overflow-x:hidden;
     width:30%; 
     min-width:10px; 
     position:relative;
+    padding:0;
 }
 .widget-list {
     margin-left: -4px;
@@ -73,7 +42,17 @@ const sidebarStyle: string = `
 
     clear: both;
 }
+.builder-controls {
+    position: absolute;
+    background-color: white;
+    border-radius: 4px;
+    top: 2px;
+    left: 32px;
+    transform: scale(0.8);
+}
 `;
+
+//        <button id="{{id}}-reboot-btn" class="btn btn-outline-danger btn-sm pim-convert-button" style="margin-left:36em;">Reboot Prototype</button>
 
 const prototypeBuilderBody: string = `
 <style>
@@ -88,7 +67,7 @@ ${sidebarStyle}
     <div id="{{id}}-resize-bar" style="width:6px;background-color:#4c4c4c;"></div>
     <div id="{{id}}-central" class="flex-grow-1 no-gutters" style="position:relative; width:66%; overflow:hidden;">
         <div class="card">
-            <div class="card-header" style="margin-top:-14px;">
+            <div class="card-header" style="margin-top:-8px;">
                 <ul class="nav nav-tabs card-header-tabs d-flex flex-nowrap prototype-screen-list">
                 </ul>
             </div>
@@ -98,25 +77,21 @@ ${sidebarStyle}
     </div>
 </div>`;
 
-const prototypeBuilderToolbar: string = `
-<div class="toolbar" id="{{id}}">
-    <div class="btn-group" role="group" aria-label="Mode toggle">
-        <button id="{{id}}-builder-view-btn" type="button" class="btn btn-primary btn-sm">
-            Builder View
-        </button>
-        <button id="{{id}}-simulator-view-btn" type="button" class="btn btn-outline-secondary btn-sm">
-            Simulator View
-        </button>
-    </div>
-    <div style="float:right">
-        <button id="{{id}}-reboot-btn" class="btn btn-outline-danger btn-sm pim-convert-button" style="margin-left:36em;">Reboot Prototype</button>
-    </div>
+const toolbar: string = `
+<div class="btn-group builder-controls" role="group" aria-label="Toggle View">
+<button type="button" class="btn btn-primary btn-sm toggle-builder-view">
+    Builder View
+</button>
+<button type="button" class="btn btn-outline-secondary btn-sm toggle-simulator-view">
+    Simulator View
+</button>
 </div>
 `;
 
 export interface PrototypeBuilderViews<T> {
     Settings?: T,
-    [screen:string]: T
+    Builder?: T,
+    Simulator?: T
 };
 
 export class PrototypeBuilder implements PVSioWebPlugin {
@@ -126,8 +101,9 @@ export class PrototypeBuilder implements PVSioWebPlugin {
     protected connection: Connection;
 
     protected panel: Utils.CollapsiblePanel;
-    protected toolbar: Utils.Panel;
     protected body: Utils.ResizableLeftPanel;
+
+    protected width: string = "0px"; // side panel width
 
     protected collapsed: boolean = false;
 
@@ -143,12 +119,12 @@ export class PrototypeBuilder implements PVSioWebPlugin {
             parent: "toolkit-body",
             showContent: true
         });
-        this.toolbar = this.createPanelToolbar({
-            parent: this.panel.$content
-        });
         this.body = this.createPanelBody({
             parent: this.panel.$content
         });
+        // this.$simulatorView = this.panel?.$div.find(".toggle-simulator-view");
+        // this.$builderView = this.panel?.$div.find(".toggle-builder-view");
+        // this.$toolbar = this.panel?.$toolbar;
         
         // create central view and side view
         const bodyDiv: HTMLElement = this.panel.$content.find(`.prototype-screens`)[0];
@@ -160,23 +136,36 @@ export class PrototypeBuilder implements PVSioWebPlugin {
         };
         this.centralViews = {
             Settings: new SettingsView({
-                viewId: "Settings",
-                screenName: "Settings",
+                label: "Settings",
+                viewId: "settings",
+                panelId: "settings",
                 el: bodyDiv,
                 headerDiv,
-                parentDiv: this.body.$central[0],
+                parentDiv: this.body.$central[0]
             }, this.connection),
             Builder: new BuilderView({
-                viewId: "Prototype",
-                screenName: "Prototype",
+                label: "Builder View",
+                viewId: "builder-view",
+                panelId: "builder-view",
                 el: bodyDiv,
                 headerDiv,
                 active: true,
+                parentDiv: this.body.$central[0]
+            }, this.connection),
+            Simulator: new SimulatorView({
+                label: "Simulator View",
+                viewId: "simulator-view",
+                panelId: "builder-view",
+                externalPanel: true,
+                el: bodyDiv,
+                headerDiv,
                 parentDiv: this.body.$central[0],
             }, this.connection)
         };
+        // render views
+        this.renderViews();
         // install handlers
-        this.activateViews();
+        this.installHandlers();
         // refresh the view
         this.onResizeCentralView();
         return true;
@@ -186,38 +175,21 @@ export class PrototypeBuilder implements PVSioWebPlugin {
         for (let i in this.centralViews) {
             this.centralViews[i].resizeView(desc);
         }
+        this.width = this.body?.$left.css("width");
     };
 
-    // protected async onLoadPicture (evt: JQuery.ChangeEvent): Promise<BackgroundPicture> {
-    //     return new Promise ((resolve, reject) => {
-    //         const file: File = evt?.currentTarget?.files[0];
-    //         if (file) {
-    //             const reader: FileReader = new FileReader();
-    //             reader.addEventListener('loadend', (evt: ProgressEvent<FileReader>) => {
-    //                 const fileContent: string = reader.result?.toString();
-    //                 $(".load-picture-form").trigger("reset");
-    //                 if (fileContent) {
-    //                     const picture: BackgroundPicture = {
-    //                         fileName: Utils.getFileName(file.name),
-    //                         fileExtension: Utils.getFileExtension(file.name),
-    //                         fileContent
-    //                     };
-    //                     (<BuilderView> this.centralViews.Builder).loadPicture(picture);
-    //                     resolve(picture);
-    //                 } else {
-    //                     resolve(null);
-    //                 }
-    //             });
-    //             reader.readAsDataURL(file);
-    //         } else {
-    //             resolve(null);
-    //         }
-    //     });
-    // }
+    protected installHandlers (): void {
+        this.centralViews?.Simulator?.on(CentralViewEvents.DidShowView, () => {
+            this.switchToSimulatorView();
+        });
+        this.centralViews?.Builder?.on(CentralViewEvents.DidShowView, () => {
+            this.switchToBuilderView();
+        });
+    }
 
-    protected activateViews (): void {
+    protected renderViews (): void {
         for (let i in this.centralViews) {
-            this.centralViews[i].activate();
+            this.centralViews[i].render();
             // add listeners for side views, so they can he shown/hidden together with the corresponding central view
             this.centralViews[i].on(CentralViewEvents.DidShowView, (data: { id: string }) => {
                 for (let j in this.sideViews) {
@@ -258,10 +230,7 @@ export class PrototypeBuilder implements PVSioWebPlugin {
      * Switches the prototoyping layer to the builder layer
      */
     switchToBuilderView(): void {
-        $("#prototype-builder-container .image-map-layer").css("opacity", 1).css("z-index", 190);
-        $("#btnBuilderView").removeClass("btn-outline-secondary").addClass("btn-primary active");
-        $("#btnSimulatorView").addClass("btn-outline-secondary").removeClass("btn-primary active");
-        $("#btnRebootPrototype").addClass("disabled");
+        (<BuilderView> this.centralViews?.Builder)?.builderView();
         // this.widgetManager.stopTimers();
         this.expandWidgetsList();
     }
@@ -270,10 +239,7 @@ export class PrototypeBuilder implements PVSioWebPlugin {
      * Switches the prototyping layer to the simulator/testing layer
      */
     switchToSimulatorView(): void {
-        $("#prototype-builder-container .image-map-layer").css("opacity", 0.1).css("z-index", -2);
-        $("#btnBuilderView").addClass("btn-outline-secondary").removeClass("btn-primary active");
-        $("#btnSimulatorView").removeClass("btn-outline-secondary").addClass("btn-primary active");
-        $("#btnRebootPrototype").addClass("disabled");
+        (<BuilderView> this.centralViews?.Builder)?.simulatorView();
         // this.widgetManager.initWidgets();
         // this.widgetManager.startTimers();
         this.collapseWidgetsList();
@@ -285,29 +251,18 @@ export class PrototypeBuilder implements PVSioWebPlugin {
 
     protected createPanelBody (desc: { parent: JQuery<HTMLElement> }): Utils.ResizableLeftPanel {
         const id: string = `${this.id}-panel`;
-        const body: string = Handlebars.compile(prototypeBuilderBody)({
+        const content: string = Handlebars.compile(prototypeBuilderBody)({
             id
         });
-        desc.parent.append(body);
+        desc.parent.append(content);
         const $div: JQuery<HTMLDivElement> = $(`#${id}`);
         const $left: JQuery<HTMLDivElement> = $(`#${id}-left`);
         const $central: JQuery<HTMLDivElement> = $(`#${id}-central`);
         const $resizeBar: JQuery<HTMLDivElement> = $(`#${id}-resize-bar`);
 
-        const panel: Utils.ResizableLeftPanel = Utils.enableResizeLeft({ $div, $left, $central, $resizeBar, onResize: this.onResizeCentralView });
-        return panel;
+        const body: Utils.ResizableLeftPanel = Utils.enableResizeLeft({ $div, $left, $central, $resizeBar, onResize: this.onResizeCentralView });
+        return body;
     }
-
-    protected createPanelToolbar (desc: { parent: JQuery<HTMLElement> }): Utils.Panel {
-        const id: string = `${this.id}-toolbar`;
-        const toolbar: string = Handlebars.compile(prototypeBuilderToolbar)({
-            id
-        });
-        desc.parent.append(toolbar);
-        const $div: JQuery<HTMLDivElement> = $(`#${id}`);
-        return { $div };
-    }
-
 
 //     PrototypeBuilder.prototype.unload = function () {
 //         widgetListView.remove();
@@ -388,23 +343,13 @@ export class PrototypeBuilder implements PVSioWebPlugin {
 //     }
 
     collapseWidgetsList (): void {
-        const elem = $("#builder-controls");
-        if (elem[0]) {
-            const width = elem[0].getBoundingClientRect().width;
-            if (width > 0) {
-                // this.widgetListView.width = width;
-                $("#builder-controls").animate({ width: "0px" }, 300);
-            }
-        }
+        this.body.disableResize = true;
+        this.width = this.body.$left.css("width");
+        this.body.$left?.animate({ width: "0px" }, 500);
     }
     expandWidgetsList (): void {
-        const elem = $("#builder-controls");
-        if (elem[0]) {
-            const width = elem[0].getBoundingClientRect().width;
-            if (width === 0) {
-                $("#builder-controls").animate({ width: "300px" }, 300);
-            }
-        }
+        this.body.disableResize = false;
+        this.body.$left?.animate({ width: this.width }, 500);
     }
 
 //     function restartPVSio() {

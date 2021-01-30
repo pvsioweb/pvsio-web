@@ -11,8 +11,7 @@ export const content: string = `
 export class SettingsView extends CentralView {
     
     constructor (data: CentralViewOptions, connection: Connection) {
-        super(data, connection);        
-        this.render(data);
+        super(data, connection);
     }
 
     render (data?: CentralViewOptions): SettingsView {
@@ -21,8 +20,7 @@ export class SettingsView extends CentralView {
     }
 
     events (): Backbone.EventsHash {
-        return {
-        };
+        return { };
     }
 
 }

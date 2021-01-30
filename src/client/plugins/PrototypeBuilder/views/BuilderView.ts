@@ -32,6 +32,12 @@ const contentTemplate: string = `
     transform:scale(0.8); 
     font-size:small;
 }
+.prototype-image-frame {
+    cursor: crosshair;
+}
+.prototype {
+    transform-origin: top left;
+}
 </style>
 <div class="builder-coords"></div>
 <div class="builder-toolbar">
@@ -43,9 +49,11 @@ const contentTemplate: string = `
         <button class="btn btn-outline-danger btn-lg load-whiteboard-btn btn-sm" style="margin-left:16em; width:15em;">Remove Picture</button>
     </form>
 </div>
-<div class="prototype-image view-div container-fluid"></div>
-<div class="prototype-image-frame view-div container-fluid"></div>
-<div class="prototype-image-overlay container-fluid" style="padding-left:0;"></div>`;
+<div class="prototype">
+    <div class="prototype-image view-div container-fluid"></div>
+    <div class="prototype-image-frame view-div container-fluid"></div>
+    <div class="prototype-image-overlay container-fluid" style="padding-left:0;"></div>
+</div>`;
 
 export interface Picture {
     fileName: string,
@@ -64,6 +72,8 @@ export class BuilderView extends CentralView {
     protected $imageDiv: JQuery<HTMLElement>;
     protected $imageFrame: JQuery<HTMLElement>;
     protected $imageOverlay: JQuery<HTMLElement>;
+    protected $coords: JQuery<HTMLElement>;
+    protected $toolbar: JQuery<HTMLElement>;
 
     protected hotspotEditor: HotspotEditor;
     protected widgetsMap: WidgetsMap = {};
@@ -82,7 +92,7 @@ export class BuilderView extends CentralView {
         return this.hotspotEditor.getHotspots();
     }
 
-    activate (): void {
+    render (opt?: CentralViewOptions): BuilderView {
         const content: string = Handlebars.compile(contentTemplate, { noEscape: true })({});
         super.render({ ...this.viewOptions, content });
         // each prototype has three layers:
@@ -92,12 +102,15 @@ export class BuilderView extends CentralView {
         this.$imageDiv = this.$el.find(".prototype-image");
         this.$imageFrame = this.$el.find(".prototype-image-frame");
         this.$imageOverlay = this.$el.find(".prototype-image-overlay");
+        this.$coords = this.$el.find(".builder-coords");
+        this.$toolbar = this.$el.find(".builder-toolbar");
         this.createWhiteboard();
-        this.createTransparentLayer();
+        this.createImageFrametLayer();
         this.resizeView();
         this.installHandlers();
         // create hotspot editor on top of the image
         this.createHotspotEditor();
+        return this;
     }
 
     selectWidget (data: { id: string }): void {
@@ -105,6 +118,40 @@ export class BuilderView extends CentralView {
     }
     deselectWidget (data: { id: string }): void {
         this.hotspotEditor.deselectHotspot(data);
+    }
+
+    /**
+     * User interface controls
+     */
+    hideCoords (): void {
+        this.$coords?.css("display", "none");
+    }
+    revealCoords (): void {
+        this.$coords?.css("display", "block");
+    }
+    hideToolbar (): void {
+        this.$toolbar?.css("display", "none");
+    }
+    revealToolbar (): void {
+        this.$toolbar?.css("display", "block");
+    }
+    revealHotspots (): void {
+        this.$imageOverlay?.css("display", "block");
+        this.$imageFrame?.css("cursor", "crosshair");
+    }
+    hideHotspots (): void {
+        this.$imageOverlay?.css("display", "none");
+        this.$imageFrame?.css("cursor", "default");
+    }
+    builderView (): void {
+        this.revealHotspots();
+        this.revealCoords();
+        this.revealToolbar();
+    }
+    simulatorView (): void {
+        this.hideHotspots();
+        this.hideCoords();
+        this.hideToolbar();
     }
 
     createWidget (widgetData: WidgetData): WidgetEVO {
@@ -144,7 +191,7 @@ export class BuilderView extends CentralView {
         this.hotspotEditor = new HotspotEditor({
             el: this.$imageFrame.find("img")[0],
             overlay: this.$imageOverlay[0],
-            builderCoords: this.$el.find(".builder-coords")[0]
+            builderCoords: this.$coords[0]
         });
 
         // install handlers for hotspot events
@@ -248,10 +295,10 @@ export class BuilderView extends CentralView {
         });
     }
 
-    createTransparentLayer (): void {
+    protected createImageFrametLayer (): void {
         const size: { width: number, height: number } = this.getActiveScreenSize();
         this.loadPicture({
-            fileName: "transparent",
+            fileName: "image-frame",
             fileExtension: ".gif",
             fileContent: Utils.transparentGif
         }, {
@@ -326,75 +373,13 @@ export class BuilderView extends CentralView {
     }
 
     protected installHandlers (): void {
-
         $(document).find(".load-whiteboard-btn").on("click", (evt: JQuery.ClickEvent) => {
             this.createWhiteboard();
         });
-
         $(document).find(".load-picture-btn").on("input", async (evt: JQuery.ChangeEvent) => {
             await this.onLoadPicture(evt);
         });
-
-
-        // this.$el.find(".use-whiteboard-btn").on("click", (evt: JQuery.ClickEvent) => {
-
-
-        // });
-
-        // this.$el.find(".load-image-btn").on("click", (evt: JQuery.ClickEvent) => {
-        //     const req: OpenFileDialog = {
-        //         type: "openFileDialog",
-        //         image: true
-        //     };
-        //     this.connection?.sendRequest(req, (desc: Utils.FileDescriptor) => {
-        //         if (desc && desc.fileContent) {
-        //             const imageElement: HTMLImageElement = new Image();
-        //             imageElement.src = desc.fileContent;
-        //             this.$imageDiv.html(imageElement);
-        //             this.$imageDiv.css({ border: "none" });
-
-        //             const $image: JQuery<HTMLImageElement> = this.$imageDiv.find("img");
-        //             $image.attr("id", this.id).addClass(this.viewId);
-
-        //             this.hotspotEditor = new HotspotEditor(this.widgetManager, {
-        //                 el: $image[0],
-        //                 overlay: this.$imageOverlay[0]
-        //             });
-        //             // install handlers for hotspot events
-        //             this.hotspotEditor.on(HotspotEditorEvents.DidCreateHotspot, (data: HotspotData) => {
-        //                 // this.showDialog(data);
-        //             });
-        //             this.hotspotEditor.on(HotspotEditorEvents.EditHotspot, (data: HotspotData) => {
-        //                 this.showDialog(data);
-        //             });
-        //         }
-        //     });
-        // });
     }
-
-    // async loadImageContent (desc: Utils.FileDescriptor): Promise<boolean> {
-    //     if (desc && desc.fileContent) {
-    //         const imageElement: HTMLImageElement = new Image();
-    //         imageElement.src = desc.fileContent;
-    //         this.$imageDiv.html(imageElement);
-    //         const $image: JQuery<HTMLImageElement> = this.$imageDiv.find("img");
-    //         $image.attr("id", this.id).addClass(this.viewId);
-
-    //         this.hotspotEditor = new HotspotEditor(this.widgetManager, {
-    //             el: $image[0],
-    //             overlay: this.$imageOverlay[0]
-    //         });
-    //         // install handlers for hotspot events
-    //         this.hotspotEditor.on(HotspotEditorEvents.DidCreateHotspot, (data: HotspotData) => {
-    //             // this.showDialog(data);
-    //         });
-    //         this.hotspotEditor.on(HotspotEditorEvents.EditHotspot, (data: HotspotData) => {
-    //             this.editWidget(data);
-    //         });
-    //         return true;
-    //     }
-    //     return false;
-    // }
 
     async sendLoadImageRequest(desc: Utils.FileDescriptor): Promise<boolean> {
         const fname: string = Utils.desc2fname(desc);
@@ -422,139 +407,4 @@ export class BuilderView extends CentralView {
             });
         });
     }
-
-
-    /**
-     * Resizes the image and widgets to fit the view's element size
-     * @return {number} Scale of the image
-     */
-    resize (): void {
-        // if (this.img) {
-        //     var // pbox = this.d3El.node().getBoundingClientRect(),
-        //         adjustedWidth = this.img.width,
-        //         adjustedHeight = this.img.height;
-
-        //     this.$el.css("width", adjustedWidth + "px").css("height", adjustedHeight + "px");
-        //     this.$el.filter("img").attr("src", this.img.src).attr("height", adjustedHeight).attr("width", adjustedWidth).css("display", "block");
-        //     this.$el.filter("svg").attr("height", adjustedHeight).attr("width", adjustedWidth);
-        //     // //hide the draganddrop stuff
-        //     // this.$el.filter(".dndcontainer").css("display", "none");
-        // }
-    }
-
-    /**
-     * Removes a widget regions from the display
-     */
-    clearWidgetAreas () {
-        // this.mapCreator.clear();
-    }
-
-    /**
-     * Removes widget areas from the view, without completely removing the widget container itself
-     */
-    // softClearWidgetAreas () {
-    //     this.mapCreator.clearRegions();
-    // }
-
-    /**
-     * Removes the image displayed within the prototype builder image view
-     */
-    clearImage () {
-        // this.$el.attr("style", null);
-        // this.$el.filter("img").attr("src", "").attr("height", "0").attr("width", "0").attr("display", "none");
-        // this.img = null;
-        // this.$el.filter("svg").attr("height", "0").attr("width", "0");
-        // this.$el.attr("style", "");
-        // this.$el.filter("#body").attr("style", "height: 480px"); // 430 + 44 + 6
-        // //show the image drag and drop div
-        // this.$el.filter(".dndcontainer").css("display", null);
-    }
-
-    /**
-     * @function hasImage
-     * @description Returns whether or not the view is currently displaying an image
-     * @returns {Boolean} true if an image is currently displayed, false otherwise.
-     */
-    // hasImage (): boolean {
-    //     // return this.img && this.img.src && this.img.src !== "";
-    // }
-
-    /**
-     * @return {d3.selection} The image map element used by this view
-     */
-    // getImageMap: function () {
-    //     return this._map;
-    // },
-
-    // updateMapCreator (cb?: () => void) {
-    //     const round = (val: number): number => {
-    //         return Math.round(val * 10) / 10;
-    //     };
-
-    //     imageMapper({
-    //         scale: 1, 
-    //         element: this.$el.filter("img")[0], 
-    //         parent: this.$el[0], 
-    //         onReady: (mc) => {
-    //             this.mapCreator = mc.on("create", (e) => {
-    //                 const region = e.region;
-    //                 // region.on("dblclick", function () {
-    //                 //     _this.trigger("WidgetEditRequested", region.attr("id"));
-    //                 // });
-
-    //                 //pop up the widget edit dialog
-    //                 const coord = {
-    //                     top: round(e.pos.y),
-    //                     left: round(e.pos.x),
-    //                     width: round(e.pos.width),
-    //                     height: round(e.pos.height)
-    //                 };
-
-    //                 this.trigger("WidgetRegionDrawn", coord, region);
-    //             }).on("edit", (e) => {
-    //                 this.trigger("WidgetEditRequested", e.region.attr("id"));
-    //             }).on("resize", (e) => {
-    //                 this.widgetManager.updateLocationAndSize(e.region.attr("id"), e.pos, e.scale);
-    //                 const event = {
-    //                     action: "resize",
-    //                     widget: this.widgetManager.getWidget(e.region.attr("id"))
-    //                 };
-    //                 this.widgetManager.fire({ type: "WidgetModified", event });
-    //             }).on("move", (e) => {
-    //                 this.widgetManager.updateLocationAndSize(e.region.attr("id"), e.pos, e.scale);
-    //                 const event = {
-    //                     action: "move",
-    //                     widget: this.widgetManager.getWidget(e.region.attr("id"))
-    //                 };
-    //                 this.widgetManager.fire({ type: "WidgetModified", event });
-    //             }).on("remove", (e) => {
-    //                 const event = {
-    //                     action: "remove",
-    //                     widget: this.widgetManager.getWidget(e.regions.node().id)
-    //                 };
-    //                 // e.regions.each(() => {
-    //                 //     const w = this.widgetManager.getWidget($(this).attr("id"));
-    //                 //     if (w) {
-    //                 //         wm.removeWidget(w);
-    //                 //         w.remove();
-    //                 //     } else {
-    //                 //         $(this.parentNode).empty();
-    //                 //     }
-    //                 // });
-    //                 this.widgetManager.fire({ type: "WidgetModified", event });
-    //             }).on("select", (e) => {
-    //                 this.trigger("WidgetSelected", this.widgetManager.getWidget(e.region.attr("id")), e.event.shiftKey);
-    //             }).on("clearselection", (e) => {
-    //                 const widgets = [];
-    //                 // e.regions.each(function () {
-    //                 //     widgets.push(wm.getWidget($(this).attr("id")));
-    //                 // });
-    //                 this.widgetManager.fire({ type: "WidgetSelectionCleared", widgets, event: e.event });
-    //             });
-    //             if (cb) { 
-    //                 cb();
-    //             }
-    //         }
-    //     });
-    // }
 }

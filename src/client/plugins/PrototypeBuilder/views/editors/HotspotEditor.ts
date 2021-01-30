@@ -378,7 +378,7 @@ export class HotspotEditor extends Backbone.View {
         const parent: HTMLElement = data?.overlay || $("body")[0];
         $(parent).append(content);
         this.$el.attr("draggable", "false");
-        this.$el.css("cursor", "crosshair");
+        // this.$el.css("cursor", "crosshair");
         this.$el.on("contextmenu", (evt: JQuery.ContextMenuEvent) => {
             // context menu position is relative to body
             const coords: Coords<number> = getMouseCoords(evt, $("body"));
