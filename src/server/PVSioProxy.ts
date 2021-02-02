@@ -219,12 +219,13 @@ export class PvsProxy {
 		this.lastState = opt.lastState || "";
 		this.pvsFile = desc;
 		const pvsioProcess: PvsProcess = new PvsProcess({ pvsPath: this.pvsPath });
-		const success: boolean = await pvsioProcess.activate({
-			fileName: desc.fileName, 
-			fileExtension: desc.fileExtension,
-			contextFolder: desc.contextFolder,
-			theoryName: desc.fileName // filename and theoryname should be the same
-		});
+		const success: boolean = desc && desc.fileName && desc.fileExtension && desc.contextFolder ? 
+			await pvsioProcess.activate({
+				fileName: desc.fileName, 
+				fileExtension: desc.fileExtension,
+				contextFolder: desc.contextFolder,
+				theoryName: desc.fileName // filename and theoryname should be the same
+			}) : false;
 		if (success) {
 			this.proc = pvsioProcess;
 			this.contextFolder = desc.contextFolder;

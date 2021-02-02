@@ -14,16 +14,19 @@ export class ActionsQueue {
             };
             if (connection) {
                 connection?.sendRequest(req, (err: string | null, res: {}) => {
-                    if (cb) { cb(err, res); }
-                    if (err) {
-                        reject(err);
-                    } else {
-                        // console.log(res);
-                        resolve(res);
+                    if (cb) {
+                        if (err) {
+                            console.warn("[actions-queue] Warning: ", err);
+                            resolve(null);
+                        } else {
+                            cb(err, res);
+                            // console.log(res);
+                            resolve(res);
+                        }
                     }
                 });
             } else {
-                console.warn(`[button-actions-queue] Warning: connection is null`);
+                console.warn(`[actions-queue] Warning: connection is null`);
                 resolve(req);
             }
         });

@@ -4,7 +4,6 @@ import { Coords, CSS, WidgetEVO, WidgetAttr, BasicEventData, VizOptions, WidgetO
 import { HotspotData } from './HotspotEditor';
 import { widgets } from '../../widgets/widgets';
 
-
 export interface WidgetData extends HotspotData {
     name: string,
     cons?: string, // constructor name
@@ -166,10 +165,11 @@ export class WidgetEditor extends Backbone.View {
             const cons: string = widgets[i].name;
             const coords: Coords = { width, height };
             const previewId: string = uuid();
-            const obj: WidgetEVO = new widgets[i].cons(previewId, coords, {
+            const options: WidgetOptions = {
                 ...this.widgetData?.opt,
                 parent: `${cons}-preview`
-            });
+            };
+            const obj: WidgetEVO = new widgets[i].cons(previewId, coords, options);
             obj.setName(this.widgetData.name);
 
             // set css style

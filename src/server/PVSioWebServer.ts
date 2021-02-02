@@ -281,19 +281,19 @@ class PvsiowebServer {
             console.info("opening websocket client " + socketid);
             socket.on("message", async (m: string) => {
                 try {
-                    let token = JSON.parse(m);
-                    // console.dir(`[pvsiowebServer] ${m}`);
+                    const token: Token = JSON.parse(m);
+                    // console.dir(`[pvsioweb-server] ${m}`);
                     token.time = token.time || {};
                     token.time.server = { received: new Date().getTime() };
                     const f: (token: Token, socket: WebSocket, socketid: number) => Promise<void> = this.functionMaps[token.type];
                     if (f && typeof f === 'function') {
                         console.log("received request from client...");
                         console.dir(token);        
-                        //call the function with token and socket as parameter
+                        // call the function with token and socket as parameter
                         try {
                             await f(token, socket, socketid);
                         } catch (eval_error) {
-                            const cmd: string = (token && token.data && token.data.command)? token.data.command : JSON.stringify(token);
+                            const cmd: string = token?.data?.command || JSON.stringify(token);
                             console.error("unable to evaluate command " + cmd + " in PVSio (" + eval_error + ")");
                             token.err = eval_error;
                             this.processCallback(token, socket);
@@ -851,19 +851,23 @@ class PvsiowebServer {
             "startProcess": async (token: StartProcessToken, socket: WebSocket, socketid: number) => {
                 initProcessMap(socketid);
                 token.socketId = socketid;
-                console.info("Calling start process for client... " + socketid);
-                const root: string = path.join(examplesDir, token?.data?.contextFolder);
-                // close the process if it exists and recreate it
-                if (this.pvsioProcessMap[socketid]) {
-                    this.pvsioProcessMap[socketid].close();
-                    delete this.pvsioProcessMap[socketid];
+                if (token?.data?.fileName && token?.data?.contextFolder && token?.data?.fileExtension) {
+                    console.info("Starting PVSio process for client... " + socketid);
+                    const root: string = path.join(examplesDir, token?.data?.contextFolder);
+                    // close the process if it exists and recreate it
+                    if (this.pvsioProcessMap[socketid]) {
+                        this.pvsioProcessMap[socketid].close();
+                        delete this.pvsioProcessMap[socketid];
+                    }
+                    // recreate the pvsio process
+                    this.pvsioProcessMap[socketid] = new PvsProxy();
+                    // set the workspace dir and start the pvs process with a callback for processing process ready and exit
+                    // messages from the process
+                    const res: boolean = await this.pvsioProcessMap[socketid].start({ contextFolder: root, fileName: token.data.fileName, fileExtension: ".pvs" });
+                    console.log(`[pvsioweb-server] PVSio process started`);
+                } else {
+                    console.warn(`[pvsioweb-server] Warning: token does not indicate a pvs file`);
                 }
-                // recreate the pvsio process
-                this.pvsioProcessMap[socketid] = new PvsProxy();
-                // set the workspace dir and start the pvs process with a callback for processing process ready and exit
-                // messages from the process
-                const res: boolean = await this.pvsioProcessMap[socketid].start({ contextFolder: root, fileName: token.data.fileName, fileExtension: ".pvs" });
-                console.log(`[pvsioweb-server] PVSio process started`);
                 this.processCallback(token, socket);
             },
             "closeProcess": async (token: CloseProcessToken, socket: WebSocket, socketid: number) => {
@@ -876,7 +880,7 @@ class PvsiowebServer {
                     token.message = "process closed";
                 } else {
                     token.err = {
-                        message: "attempting to close undefined process"
+                        message: "process already closed"
                     };
                 }
                 this.unregisterFolderWatchers();

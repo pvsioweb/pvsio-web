@@ -1,6 +1,6 @@
 import * as Utils from '../../../env/Utils';
 
-import { WidgetEVO, Coords } from "../widgets/core/WidgetEVO";
+import { WidgetEVO, Coords, WidgetOptions } from "../widgets/core/WidgetEVO";
 import { Connection, ReadFileRequest, ReadFileResponse } from '../../../env/Connection';
 import { HotspotEditor, HotspotEditorEvents, HotspotData, HotspotsMap } from './editors/HotspotEditor';
 
@@ -166,11 +166,13 @@ export class BuilderView extends CentralView {
                     if (this.widgetsMap[widgetData.id]) {
                         this.widgetsMap[widgetData.id].remove();
                     }
-                    const widget: WidgetEVO = new desc.cons(widgetData.id, widgetData.coords, { 
+                    const options: WidgetOptions = { 
                         parent: this.$imageFrame,
                         type: widgetData.cons,
-                        ...widgetData?.opt
-                    });
+                        ...widgetData?.opt,
+                        connection: this.connection
+                    };
+                    const widget: WidgetEVO = new desc.cons(widgetData.id, widgetData.coords, options);
                     widget.renderSample();
                     // console.log(widget);
                     this.widgetsMap[widgetData.id] = widget;
@@ -195,8 +197,9 @@ export class BuilderView extends CentralView {
         });
 
         // install handlers for hotspot events
-        this.hotspotEditor.on(HotspotEditorEvents.DidCreateHotspot, (data: HotspotData) => {
-            // do nothing, editing is triggered by double click on the hotspot
+        this.hotspotEditor.on(HotspotEditorEvents.DidCreateHotspot, async (data: HotspotData) => {
+            // automatically open widget editor
+            await this.editWidget(data);
         });
         this.hotspotEditor.on(HotspotEditorEvents.DidSelectHotspot, (data: HotspotData) => {
             this.trigger(BuilderEvents.DidSelectWidget, data);
@@ -255,10 +258,10 @@ export class BuilderView extends CentralView {
         delete this.widgetsMap[widgetData.id];
     }
 
-    async editWidget (data: { id: string }): Promise<WidgetEVO | null> {
+    async editWidget (data: { id: string, coords?: Coords }): Promise<WidgetEVO | null> {
         if (data?.id) {
             const id: string = data.id;
-            const coords: Coords = this.hotspotEditor.getCoords(id);
+            const coords: Coords = data?.coords || this.hotspotEditor.getCoords(id);
             return new Promise((resolve, reject) => {
                 if (id && coords) {
                     const widgetData: WidgetData = {
