@@ -349,14 +349,21 @@ const fileExtensions: string[] = modelExtensions.concat(imageExtensions).concat(
 export type FileDescriptor = { contextFolder: string, fileName: string, fileExtension: string, fileContent?: string };
 
 export function getFileName (fname: string): string {
-    return fname ? fname.substr(fname.lastIndexOf("/") + 1, fname.lastIndexOf(".")) : "";
+    let ans: string = fname || "";
+    ans = ans.includes("/") ? ans.substr(ans.lastIndexOf("/") + 1) : ans;
+    ans = ans.includes(".") ? ans.substr(0, ans.lastIndexOf(".")) : ans;
+    return ans.trim();
 }
 export function getFileExtension (fname: string, opt?: { toLowerCase?: boolean }): string {
-    const ans: string = fname ? fname.substr(fname.lastIndexOf(".")) : "";
-    return (opt?.toLowerCase) ? ans.toLocaleLowerCase() : ans;
+    let ans: string = fname || "";
+    ans = ans.includes("/") ? ans.substr(ans.lastIndexOf("/") + 1) : ans;
+    ans = ans.includes(".") ? ans.substr(ans.lastIndexOf(".")) : "";
+    return (opt?.toLowerCase) ? ans.toLocaleLowerCase().trim() : ans.trim();
 }
 export function getContextFolder (fname: string): string {
-    return fname ? fname.substr(0, fname.lastIndexOf("/") + 1) : "";
+    let ans: string = fname || "";
+    ans = ans.includes("/") ? ans.substr(0, ans.lastIndexOf("/") + 1) : ans;
+    return ans.trim();
 }
 export function desc2fname (desc: FileDescriptor): string | null {
     if (desc) {

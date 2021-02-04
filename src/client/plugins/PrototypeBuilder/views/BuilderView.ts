@@ -1,7 +1,7 @@
 import * as Utils from '../../../env/Utils';
 
 import { WidgetEVO, Coords, WidgetOptions } from "../widgets/core/WidgetEVO";
-import { Connection, ReadFileRequest, ReadFileResponse } from '../../../env/Connection';
+import { Connection } from '../../../env/Connection';
 import { HotspotEditor, HotspotEditorEvents, HotspotData, HotspotsMap } from './editors/HotspotEditor';
 
 import { CentralViewOptions, CreateWidgetEvent, WidgetsMap, BuilderEvents, MIN_WIDTH, MIN_HEIGHT, CentralView } from './CentralView';
@@ -384,30 +384,30 @@ export class BuilderView extends CentralView {
         });
     }
 
-    async sendLoadImageRequest(desc: Utils.FileDescriptor): Promise<boolean> {
-        const fname: string = Utils.desc2fname(desc);
-        const req: ReadFileRequest = {
-            type: "readFile",
-            encoding: "base64",
-            path: fname
-        }
-        return new Promise ((resolve, reject) => {
-            this.connection.sendRequest(req, (res: ReadFileResponse) => {
-                if (res?.content) {
-                    const img: HTMLImageElement = new Image();
-                    img.onload = (res) => {
-                        resolve(true);
-                    }
-                    img.onerror = (res) => {
-                        //show the image drag and drop div
-                        this.$el.filter(".dndcontainer").css("display", "block");
-                        alert("Failed to load picture " + fname);
-                        resolve(false);
-                    };
-                    // this.img.name = image.path;
-                    img.src = res.content;        
-                }
-            });
-        });
-    }
+    // async sendLoadImageRequest(desc: Utils.FileDescriptor): Promise<boolean> {
+    //     const fname: string = Utils.desc2fname(desc);
+    //     const req: ReadFileRequest = {
+    //         type: "readFile",
+    //         encoding: "base64",
+    //         path: fname
+    //     }
+    //     return new Promise ((resolve, reject) => {
+    //         this.connection.sendRequest(req, (res: ReadFileResponse) => {
+    //             if (res?.content) {
+    //                 const img: HTMLImageElement = new Image();
+    //                 img.onload = (res) => {
+    //                     resolve(true);
+    //                 }
+    //                 img.onerror = (res) => {
+    //                     //show the image drag and drop div
+    //                     this.$el.filter(".dndcontainer").css("display", "block");
+    //                     alert("Failed to load picture " + fname);
+    //                     resolve(false);
+    //                 };
+    //                 // this.img.name = image.path;
+    //                 img.src = res.content;        
+    //             }
+    //         });
+    //     });
+    // }
 }

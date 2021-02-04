@@ -29,11 +29,9 @@ import * as ws from 'ws';
 import * as fs from 'fs';
 import express = require('express');
 import * as http from 'http';
-import open = require('open');
-import * as util from 'util';
 import * as FileFilters from './FileFilters';
 import * as serverUtils from './ServerUtils';
-import { exec, ExecException, execSync } from 'child_process';
+import { exec, ExecException } from 'child_process';
 import { PvsioResponse, PvsProxy } from './PVSioProxy';
 import WebSocket = require ('ws');
 import { AddressInfo } from 'net';
@@ -45,193 +43,23 @@ const projectsDir: string = path.join(examplesDir, "projects");
 const demosDir: string = path.join(examplesDir, "demos");
 const tutorialsDir: string = path.join(examplesDir, "tutorials");
 
-export interface BasicToken {
-    socketId: number,
-    name?: string,
-    path?: string,
-    files?: serverUtils.FileDescriptor[],
-    type: string,
-    time: { client?: { sent?: number }, server?: { sent?: number } },
-    data?: any,
-    err?: {
-        path?: string,
-        message?: string,
-        code?: string,
-        failedCommand?: string
-    }
-}
-export interface ErrorToken extends BasicToken {
-    type: "error",
-    err: {
-        message: string,
-        code: string,
-        path?: string,
-        failedCommand?: string
-    }
-}
-export interface TokenId extends BasicToken {
-    id: string;
-}
-export interface StartServerToken extends TokenId {
-    data: string;
-}
-export interface SetMainFileToken extends TokenId {
-    type: "setMainFile",
-    name: string,
-    project: serverUtils.ProjectDescriptor,
-    key?: string,
-    value?: string
-}
-export interface ChangeProjectSettingsToken extends TokenId {
-    type: "changeProjectSettings",
-    name: string,
-    project: serverUtils.ProjectDescriptor,
-    key?: string,
-    value?: string
-}
-export interface OpenProjectToken extends TokenId {
-    name: string,
-    project: serverUtils.ProjectDescriptor,
-    key?: string,
-    value?: string
-}
-export interface TypecheckToken extends TokenId {
-    path: string
-    stdout?: string,
-    stderr?: string
-}
-export interface SendCommandToken extends TokenId {
-    type: "sendCommand",
-    command: string,
-    data?: {},
-    raw?: string,
-    json?: string
-}
-export interface ListProjectsToken extends TokenId {
-    socketId: number,
-    projects: serverUtils.ProjectDescriptor[]
-}
-export interface FileDescriptor {
-    fileName: string,
-    fileExtension: string,
-    contextFolder: string
-}
-export interface StartProcessToken extends TokenId {
-    type: "startProcess",
-    data: FileDescriptor
-}
-export interface CloseProcessToken extends TokenId {
-    type: "closeProcess",
-    data: FileDescriptor,
-    message?: string
-}
-export interface ReadFileToken extends Connection.ReadFileResponse {
-    id: string
-}
-export interface WriteFileToken extends TokenId {
-    type: "writeFile",
-    encoding: "utf8" | "base64",
-    content?: string,
-    opt?: {
-        overWrite?: boolean
-    }
-}
-export interface DeleteFileToken extends TokenId {
-    type: "deleteFile",
-    encoding: "utf8" | "base64",
-    content?: string
-}
-export interface RenameFileToken extends TokenId {
-    type: "renameFile",
-    encoding: "utf8" | "base64",
-    oldPath: string,
-    newPath: string
-}
-export interface FileExistsToken extends TokenId {
-    type: "fileExists",
-    encoding: "utf8" | "base64",
-    path: string,
-    exists?: boolean
-}
-export interface ReadDirectoryToken extends TokenId {
-    type: "readDirectory",
-    files?: serverUtils.FileDescriptor[]
-}
-export interface WriteDirectoryToken extends TokenId {
-    type: "writeDirectory"
-}
-export interface DeleteDirectoryToken extends TokenId {
-    type: "deleteDirectory"
-}
-export interface ReadExamplesFolderToken extends TokenId {
-    type: "readExamplesFolder",
-    files?: serverUtils.FileDescriptor[]
-}
-export interface RenameProjectToken extends TokenId {
-    type: "renameProject",
-    oldPath: string,
-    newPath: string
-}
-export interface CtrlToken extends TokenId {
-    type: "ctrl"
-}
-export interface JavaToken extends TokenId {
-    type: "java",
-    data: {
-        javaFile: string, 
-        basePath?: string, 
-        argv?: string[], 
-        javaOptions?: string[] 
-    },
-    stdout?: string,
-    stderr?: string
-}
-export interface StartSapereEEToken extends TokenId {
-    type: "startSapereEE",
-    stdout?: string,
-    stderr?: string
-}
-export interface StopSapereEEToken extends TokenId {
-    type: "stopSapereEE"
-}
-export interface StartIVYToken extends TokenId {
-    type: "startIVY",
-    stdout?: string,
-    stderr?: string
-}
-export interface FileSystemUpdateToken extends BasicToken {
-    socketId: -1,
-    type: "FileSystemUpdate",
-    event: "rename" | "change" | "delete" | "refresh",
-    subFiles?: serverUtils.FileDescriptor[],
-    isDirectory?: boolean,
-    subFolders?: serverUtils.FileDescriptor[]
-}
-export interface PingToken extends TokenId {
-    type: "ping",
-    data?: string[]
-} 
-export interface PongToken extends TokenId {
-    type: "pong",
-    data?: string[]
-} 
-
-export type Token = PongToken | PingToken | FileSystemUpdateToken | StartIVYToken | StopSapereEEToken | StartSapereEEToken
-    | JavaToken | CtrlToken | RenameProjectToken | DeleteDirectoryToken | WriteDirectoryToken | ReadDirectoryToken
-    | FileExistsToken | RenameFileToken | DeleteFileToken | WriteFileToken | ReadFileToken | CloseProcessToken
-    | StartProcessToken | ListProjectsToken | SendCommandToken | TypecheckToken | OpenProjectToken | ReadExamplesFolderToken
-    | ChangeProjectSettingsToken | SetMainFileToken | ErrorToken | StartServerToken;
-
-
+const helpMsg: string = `
+    Usage: node PVSioWebServer.js [options]
+    Options:
+      -pvs <path>          (Specifies location of pvs executables)
+      -port <port number>  (Specifies the server port where clients connect)
+`;
+  
 class PvsiowebServer {
     protected port: number = +process.env.PORT || 8082;
-    protected pvsioProcessMap: { [key: string]: PvsProxy } = {};//each client should get his own process
+    protected pvsPath: string = process.env.pvsdir || "";
+    protected pvsioProcessMap: { [key: string]: PvsProxy } = {}; //each client should get its own process
     protected httpServer: http.Server;
     protected wsServer: ws.Server;
     protected clientid: number = 0;
     protected fsWatchers: { [folder: string]: fs.FSWatcher } = {};
     protected socketRegistry = {};
-    protected functionMaps: { [key: string]: (token: Token, socket: WebSocket, socketid: number) => Promise<void> } = {};
+    protected functionMaps: Map<Connection.RequestType, (token: Connection.Token, socket: WebSocket, socketid: number) => Promise<void>> = new Map();
 
     constructor () {
         // create pvs process wrapper
@@ -246,7 +74,74 @@ class PvsiowebServer {
         return address;
     }
 
+    testConfiguration (): boolean {
+        // test if the pvs executable are actually there
+        const pvsio: string = path.join(this.pvsPath, "pvsio");
+        const success: boolean = serverUtils.fileExists(pvsio);
+        if (success) {
+            console.log(`[pvsioweb-server] PVSio executable found at ${pvsio}`);
+            return true;
+        }
+        const msg: string = `
+================================================================
+================================================================
+====   Warning: Failed to locate PVS executables            ====
+================================================================
+====   Please indicate the correct path to the PVS folder   ====
+====   when launching the server, using the -pvs option     ====
+====   Alternatively place the PVS executable files on      ====
+====   your PATH (see README.md for installation details).  ====
+================================================================
+================================================================
+
+`;
+        console.warn(msg);
+        return false;
+    }
+
+    protected parseCliArgs (args: string[]): void {
+        if (args) {
+            for (let i = 0; i < args.length; i++) {
+                const elem: string = args[i].toLocaleLowerCase();
+                switch (elem) {
+                    case "-pvs": {
+                        if ((i + 1) < args.length && !args[i + 1].startsWith("-")) {
+                            i++;
+                            this.pvsPath = args[i];
+                            console.log("[pvsioweb-server] PVS path: ", this.pvsPath);
+                        }
+                        break;
+                    }
+                    case "-port": {
+                        if ((i + 1) < args.length && !isNaN(+args[i + 1])) {
+                            i++;
+                            this.port = +args[i];
+                            console.info(`[pvsioweb-server] Server port: ${this.port}`)
+                        } else {
+                            console.warn("Warning: port number not provided, using default port " + this.port);
+                        }
+                    }
+                    case "-help": {
+                        console.log(helpMsg);
+                        process.exit(1);
+                    }
+                    default: {
+                        console.warn("[daa-server] Warning: unrecognized option ", args[i]);
+                    }
+                }
+            }
+        }
+    }
+
     activate () {
+        // parse command line arguments, if any
+        const args: string[] = process.argv.slice(2);
+        console.log("args: ", args);
+        this.parseCliArgs(args);
+
+        // test the configuration -- this will print warnings if, e.g., pvs is not installed
+        this.testConfiguration();
+
         // create websocket server
         const webserver = express();
         this.httpServer = http.createServer(webserver);
@@ -257,15 +152,15 @@ class PvsiowebServer {
             }
             next();
         });        
-        //create the express static server serve contents in the client directory and the demos directory
+        // create the express static server serve contents in the client directory and the demos directory
         webserver.use(express.static(clientDir));
         webserver.use("/demos", express.static(demosDir));
-        console.log(`Serving ${demosDir}`);
+        // console.log(`[pvsioweb-server] Serving ${demosDir}`);
         webserver.use("/tutorials", express.static(tutorialsDir));
-        console.log(`Serving ${tutorialsDir}`);
+        // console.log(`[pvsioweb-server] Serving ${tutorialsDir}`);
         webserver.use("/projects", express.static(projectsDir));
-        console.log(`Serving ${projectsDir}`);
-        //creating a pathname prefix for client so that demo css and scripts can be loaded from the client dir
+        // console.log(`[pvsioweb-server] Serving ${projectsDir}`);
+        // create a pathname prefix for client so that demo css and scripts can be loaded from the client dir
         webserver.use("/client", express.static(clientDir));
 
         // routing necessary for backbone
@@ -281,31 +176,32 @@ class PvsiowebServer {
             console.info("opening websocket client " + socketid);
             socket.on("message", async (m: string) => {
                 try {
-                    const token: Token = JSON.parse(m);
-                    // console.dir(`[pvsioweb-server] ${m}`);
+                    const token: Connection.Token = JSON.parse(m);
+                    console.log(`[pvsioweb-server] Request`, m);
                     token.time = token.time || {};
                     token.time.server = { received: new Date().getTime() };
-                    const f: (token: Token, socket: WebSocket, socketid: number) => Promise<void> = this.functionMaps[token.type];
+                    // const type: string = token?.type.split(" ")[0];
+                    const f: (token: Connection.Token, socket: WebSocket, socketid: number) => Promise<void> = this.functionMaps.get(token.type);
                     if (f && typeof f === 'function') {
-                        console.log("received request from client...");
+                        console.log(`[pvsioweb-server] received request '${token.type}' from client...`);
                         console.dir(token);        
                         // call the function with token and socket as parameter
                         try {
                             await f(token, socket, socketid);
                         } catch (eval_error) {
                             const cmd: string = token?.data?.command || JSON.stringify(token);
-                            console.error("unable to evaluate command " + cmd + " in PVSio (" + eval_error + ")");
+                            console.error("[pvsioweb-server] unable to evaluate command " + cmd + " in PVSio (" + eval_error + ")");
                             token.err = eval_error;
                             this.processCallback(token, socket);
                         }
                     } else {
-                        console.warn("f is something unexpected -- I expected a function but got type " + typeof f);
+                        console.warn(`[pvsioweb-server] Warning: message type ${token.type} has no handler`);
                     }
                 } catch (error) {
                     console.error(error.message);
                     console.error(m);
-                    console.warn("Error while parsing token " + JSON.stringify(m).replace(/\\/g,""));
-                    const res: ErrorToken = {
+                    console.error("[pvsioweb-server] Error while parsing token " + JSON.stringify(m).replace(/\\/g,""));
+                    const res: Connection.ErrorToken = {
                         type: "error",
                         err: error,
                         time: { server: { sent: new Date().getTime() } },
@@ -316,14 +212,14 @@ class PvsiowebServer {
             });
     
             socket.on("close", () => {
-                console.info("closing websocket client " + socketid);
+                console.info("[pvsioweb-server] Closing websocket client " + socketid);
                 const p: PvsProxy = this.pvsioProcessMap[socketid];
                 p?.close();
                 delete this.pvsioProcessMap[socketid];
             });
     
             socket.on("error", (err: NodeJS.ErrnoException) => {
-                console.error("abrupt websocket close operation from client " + socketid);
+                console.error("[pvsioweb-server] Abrupt websocket close operation from client " + socketid);
                 console.error(err);
                 const p: PvsProxy = this.pvsioProcessMap[socketid];
                 p?.close();
@@ -339,26 +235,11 @@ class PvsiowebServer {
             console.log("----------------------------------------------");
         });
 
-
-        console.info(""); // this is used to print date and time in the console
-        console.log("----------------------------------------------\nStarting up PVSio-web server on " + this.getAddress() + "...");
+        console.log("----------------------------------------------");
+        console.log(`Starting up PVSio-web server on ${this.getAddress()}...`);
         this.httpServer.listen(this.port, () => {
             console.log("PVSio-web server ready!");
             console.log("----------------------------------------------");
-            let restart = false;
-            if (process.argv) {
-                process.argv.forEach((val: string) => {
-                    if (val?.toLowerCase() === "restart") {
-                        restart = true;
-                    }
-                    if (val?.toLowerCase().indexOf("pvsdir:") === 0) {
-                        process.env.pvsdir = val?.split(":")[1];
-                    }
-                });
-            }
-            if (!restart) {
-                open(util.format("http://localhost:%s", this.port.toString()));
-            }
         });
     }
 
@@ -367,7 +248,7 @@ class PvsiowebServer {
      * @param {{type:string, data}} token The token to send to the client
      * @param {Socket} socket The websocket to use to send the token
      */
-    protected processCallback(token: Token, socket: WebSocket): void {
+    protected processCallback(token: Connection.Token, socket: WebSocket): void {
         try {
             //called when any data is recieved from pvs process
             //if the type of the token is 'processExited' then send message to client if the socket is still open
@@ -382,7 +263,7 @@ class PvsiowebServer {
                 token.path = token.path.replace(projectsDir, "");
             }
             if (token.files) {
-                token.files.forEach((file: serverUtils.FileDescriptor) => {
+                token.files.forEach((file: serverUtils.NodeJSFileDescriptor) => {
                     if (file && file.path && file.path.indexOf(projectsDir) === 0) {
                         file.path = file.path.replace(projectsDir, "");
                     }
@@ -397,16 +278,16 @@ class PvsiowebServer {
                 }
             }
             if (socket && socket.readyState === 1) {
-                console.log("sending data back to client...");
+                console.log("[pvsioweb-server] sending data back to client...");
                 console.dir({ type: token.type, data: token.data }, { depth: null });
                 socket.send(JSON.stringify(token));
-                console.log("data sent!\n");
+                console.log("[pvsioweb-server] data sent!\n");
             }
         } catch (processCallbackError) {
-            console.log("WARNING: processCallbackError " + JSON.stringify(processCallbackError));
+            console.error("[pvsioweb-server] Error: process callback triggered an exception " + JSON.stringify(processCallbackError));
         }
     }
-    protected broadcast(token: Token): void {
+    protected broadcast(token: Connection.Token): void {
         const keys: string[] = Object.keys(this.socketRegistry);
         for(let k in keys) {
             this.processCallback(token, this.socketRegistry[k]);
@@ -445,17 +326,19 @@ class PvsiowebServer {
 
 
     async typeCheck(file: string, cb: (error: ExecException, stdout: string, stderr: string) => void): Promise<void> {
-        console.log("typechecking file " + file + " ...");
+        console.log("[pvsioweb-server] typechecking file " + file + " ...");
         if (process.env.PORT) { // this is for the PVSio-web version installed on the heroku cloud
             const cmd: string = `/app/PVS/proveit -T -l -v ${file}`;
             console.log(cmd);
             exec(cmd, cb);
-        } else if (process.env.pvsdir) {
-            const cmd: string = `${path.join(process.env.pvsdir, "proveit")} -T -l -v ${file}`;
-            console.log(cmd);
-            exec(cmd, cb);
-        } else {
-            const cmd: string = `proveit -T -l -v ${file}`;
+        } 
+        // else if (process.env.pvsdir) {
+        //     const cmd: string = `${path.join(process.env.pvsdir, "proveit")} -T -l -v ${file}`;
+        //     console.log(cmd);
+        //     exec(cmd, cb);
+        // } 
+        else {
+            const cmd: string = `${path.join(this.pvsPath, "proveit")} -T -l -v ${file}`;
             console.log(cmd);
             exec(cmd, cb);
         }
@@ -509,9 +392,9 @@ class PvsiowebServer {
     /**
      * Creates a function that updates the path of the parameter object such that it is relative to the specified basePath
      */
-    toRelativePath(basePath: string): (d: serverUtils.FileDescriptor) => serverUtils.FileDescriptor {
+    toRelativePath(basePath: string): (d: serverUtils.NodeJSFileDescriptor) => serverUtils.NodeJSFileDescriptor {
         basePath = basePath || projectsDir;
-        return (desc: serverUtils.FileDescriptor) => {
+        return (desc: serverUtils.NodeJSFileDescriptor) => {
             if (desc?.path?.indexOf(basePath) === 0) {
                 desc.path = desc.path.replace(basePath, "");
             }
@@ -531,12 +414,12 @@ class PvsiowebServer {
      * @returns {Promise} a promise that resolves with a list of objects representing the files in the directory
      * each object contains {name: <String>, path: <String>, isDirectory: <boolean>}
      */
-    async readDirectory(folderPath: string): Promise<serverUtils.FileDescriptor[]> {
+    async readDirectory(folderPath: string): Promise<serverUtils.NodeJSFileDescriptor[]> {
         return new Promise((resolve, reject) => {
             fs.readdir(folderPath, async (err: NodeJS.ErrnoException, files: string[]) => {
                 if (!err) {
                     //get stat attributes for all the files using an async call
-                    const promises: Promise<serverUtils.FileDescriptor>[] = files.map((name: string) => {
+                    const promises: Promise<serverUtils.NodeJSFileDescriptor>[] = files.map((name: string) => {
                         return new Promise((resolve, reject) => {
                             const fullPath: string = path.join(folderPath, name);
                             fs.stat(fullPath, (err: NodeJS.ErrnoException, res) => {
@@ -556,8 +439,8 @@ class PvsiowebServer {
                         });
                     });
 
-                    const res: serverUtils.FileDescriptor[] = await Promise.all(promises);
-                    const result: serverUtils.FileDescriptor[] = res.map((d, i) => {
+                    const res: serverUtils.NodeJSFileDescriptor[] = await Promise.all(promises);
+                    const result: serverUtils.NodeJSFileDescriptor[] = res.map((d, i) => {
                         return {
                             name: d.name,
                             path: d.path,
@@ -597,7 +480,7 @@ class PvsiowebServer {
             const extension: string = path.extname(name).toLowerCase();
             if (name && name !== ".DS_Store" && (event === "rename" || event === "change")) {
                 const fullPath: string = path.join(folder, name);
-                const token: FileSystemUpdateToken = {
+                const token: Connection.FileSystemUpdateToken = {
                     socketId: -1,
                     type: "FileSystemUpdate",
                     name: name,
@@ -662,13 +545,13 @@ class PvsiowebServer {
         try {
             this.fsWatchers[folderPath] = this.watch(folderPath, socket);
             // watch the sub-directories too
-            const data: serverUtils.FileDescriptor[] = await serverUtils.getFolderTree(folderPath);
+            const data: serverUtils.NodeJSFileDescriptor[] = await serverUtils.getFolderTree(folderPath);
             const subFolders = data?.filter(function (f) {
                 return f.isDirectory;
             }) || [];
             // watch all subfolders
             for (let i = 0; i < subFolders.length; i++) {
-                const subFolder: serverUtils.FileDescriptor = subFolders[i];
+                const subFolder: serverUtils.NodeJSFileDescriptor = subFolders[i];
                 if (subFolder) {
                     if (!this.fsWatchers[subFolder.path]) {
                         this.fsWatchers[subFolder.path] = this.watch(subFolder.path, socket);
@@ -680,8 +563,8 @@ class PvsiowebServer {
         }
     }
 
-    async readFolderContent(folderPath: string, socket: WebSocket): Promise<FileSystemUpdateToken> {
-        const res: FileSystemUpdateToken = {
+    async readFolderContent(folderPath: string, socket: WebSocket): Promise<Connection.FileSystemUpdateToken> {
+        const res: Connection.FileSystemUpdateToken = {
             socketId: -1,
             type: "FileSystemUpdate",
             event: "refresh",
@@ -690,460 +573,545 @@ class PvsiowebServer {
             isDirectory: true,
             time: { server: {} }
         };
-        const data: serverUtils.FileDescriptor[] = await serverUtils.getFolderTree(folderPath);
-        res.subFiles = data?.filter((f: serverUtils.FileDescriptor) => {
+        const data: serverUtils.NodeJSFileDescriptor[] = await serverUtils.getFolderTree(folderPath);
+        res.subFiles = data?.filter((f: serverUtils.NodeJSFileDescriptor) => {
             return (!f.isDirectory) && FileFilters.filesFilter?.indexOf(path.extname(f.path).toLowerCase()) > -1;
         }).map(this.toRelativePath(folderPath));
-        res.subFolders = data?.filter((f: serverUtils.FileDescriptor) => {
+        res.subFolders = data?.filter((f: serverUtils.NodeJSFileDescriptor) => {
             return f.isDirectory;
         }).map(this.toRelativePath(folderPath));
         this.processCallback(res, socket);
         return res;
     }
 
+    protected initProcessMap (socketid: number): void {
+        if (!this.pvsioProcessMap[socketid]) {
+            this.pvsioProcessMap[socketid] = new PvsProxy({ pvsPath: this.pvsPath });
+        }
+        // console.debug(socketid);
+    };
 
     /**
-     * get function maps for client sockets
+     * Handlers for client requests
+     */
+    protected async activateServerHandler (token: Connection.StartServerToken, socket: WebSocket, socketid: number): Promise<void> {
+        console.log(`[pvsioweb-server] Activating server...`);
+        this.initProcessMap(socketid);
+        token.socketId = socketid;
+        token.data = path.normalize(path.join(__dirname, "../client"));
+        console.log(`[pvsioweb-server] Client folder is ${token.data}`);
+        this.processCallback(token, socket);
+    }
+    protected async setMainFileHandler (token: Connection.SetMainFileToken, socket: WebSocket, socketid: number): Promise<void> {
+        this.initProcessMap(socketid);
+        token.socketId = socketid;
+        const mainFile = token.path.split("/").slice(1).join("/");
+        if (mainFile !== "") {
+            await this.changeProjectSetting(token.name, "mainPVSFile", mainFile);
+            this.processCallback(token, socket);
+        } else {
+            token.err = {
+                message: `Invalid token ${JSON.stringify(token)}`,
+                code: "ENOENT",
+                path: token.path
+            };
+            this.processCallback(token, socket);
+        }
+    }
+    protected async changeProjectSettingsHandler (token: Connection.ChangeProjectSettingsToken, socket: WebSocket, socketid: number): Promise<void> {
+        this.initProcessMap(socketid);
+        token.socketId = socketid;
+        if (token && token.key && token.value) {
+            await this.changeProjectSetting(token.name, token.key, token.value);
+            this.processCallback(token, socket);
+        } else {
+            token.err = {
+                message: `Invalid token ${JSON.stringify(token)}`,
+                code: "ENOENT",
+                path: token.path
+            };
+            this.processCallback(token, socket);
+        }
+    }
+    protected async listProjectsHandler (token: Connection.ListProjectsToken, socket: WebSocket, socketid: number): Promise<void> {
+        this.initProcessMap(socketid);
+        token.socketId = socketid;
+        const projects: serverUtils.ProjectDescriptor[] = await serverUtils.listProjects();
+        const res: Connection.ListProjectsToken = {
+            type: token.type,
+            id: token.id,
+            socketId: socketid,
+            time: token.time,
+            projects
+        };
+        // console.log("[pvsiowebServer] listProjects", projects);
+        this.processCallback(res, socket);
+    }
+    protected async openProjectHandler (token: Connection.OpenProjectToken, socket: WebSocket, socketid: number): Promise<void> {
+        this.initProcessMap(socketid);
+        token.socketId = socketid;
+        const res: Connection.OpenProjectToken = {
+            id: token.id,
+            type: token.type,
+            socketId: socketid,
+            time: token.time,
+            name: token.name,
+            project: await serverUtils.openProject(token.name)
+        };
+        this.unregisterFolderWatchers();
+        await this.registerFolderWatcher(path.join(projectsDir, token.name), socket);
+        this.processCallback(res, socket);
+    }
+    protected async typecheckFileHandler (token: Connection.TypecheckToken, socket: WebSocket, socketid: number): Promise<void> {
+        this.initProcessMap(socketid);
+        token.socketId = socketid;
+        const fname: string = path.join(projectsDir, token?.path);
+        this.typeCheck(fname, (err: ExecException, stdout: string, stderr: string) => {
+            token.err = {
+                code: `${err?.code}`,
+                message: err?.message
+            };
+            token.stdout = stdout;
+            token.stderr = stderr;
+            this.processCallback(token, socket);
+        });
+    }
+    /**
+     * Sends the PVS command specified in the token to the PVSio process
+     * @param token 
+     * @param socket 
+     * @param socketid 
+     */
+    protected async sendCommandHandler (token: Connection.SendCommandToken, socket: WebSocket, socketid: number): Promise<void> {
+        // console.log("received command: ", token);
+        this.initProcessMap(socketid);
+        token.socketId = socketid;
+        
+        const res: PvsioResponse = await this.pvsioProcessMap[socketid]?.sendCommand(token.command, { useLastState: true });
+        if (res) {
+            let extras: {} = {};
+            if (res?.jsonOut) {
+                try {
+                    extras = JSON.parse(res?.jsonOut);
+                } catch (err) {
+                    console.warn(`[pvsioweb-server] Warning: unable to parse jsonOut`, res.jsonOut);
+                }
+            }
+            token.data = { ...res?.state, ...extras };
+            token.raw = res?.pvsioOut;
+            token.err = res?.error ? { message: res.error, failedCommand: token?.command } : null;
+            this.processCallback(token, socket);
+        }
+    }
+    protected async pingHandler (token: Connection.PingToken, socket: WebSocket, socketid: number): Promise<void> {
+        setTimeout(() => {
+            this.initProcessMap(socketid);
+            console.log("..sending pong response..");
+            const res: Connection.PongToken = {
+                id: token.id,
+                data: ["<pong>"],
+                socketId: socketid,
+                type: "<pong>",
+                time: token.time
+            };
+            this.processCallback(res, socket);
+        }, 500);
+    }
+    protected async pongHandler (token: Connection.PongToken, socket: WebSocket, socketid: number): Promise<void> {
+        setTimeout(() => {
+            this.initProcessMap(socketid);
+            console.log("..sending ping response..");
+            const res: Connection.PingToken = {
+                id: token.id,
+                data: ["<ping>"],
+                socketId: socketid,
+                type: "<ping>",
+                time: token.time
+            };
+            this.processCallback(res, socket);
+        }, 500);
+    }
+    protected async startPvsProcessHandler (token: Connection.StartPvsProcessToken, socket: WebSocket, socketid: number): Promise<void> {
+        this.initProcessMap(socketid);
+        token.socketId = socketid;
+        if (token?.data?.fileName && token?.data?.contextFolder && token?.data?.fileExtension) {
+            console.info("Starting PVSio process for client... " + socketid);
+            const root: string = path.join(examplesDir, token?.data?.contextFolder);
+            // close the process if it exists and recreate it
+            if (this.pvsioProcessMap[socketid]) {
+                this.pvsioProcessMap[socketid].close();
+                delete this.pvsioProcessMap[socketid];
+            }
+            // recreate the pvsio process
+            this.pvsioProcessMap[socketid] = new PvsProxy();
+            // set the workspace dir and start the pvs process with a callback for processing process ready and exit
+            // messages from the process
+            const res: boolean = await this.pvsioProcessMap[socketid].start({ contextFolder: root, fileName: token.data.fileName, fileExtension: ".pvs" });
+            console.log(`[pvsioweb-server] PVSio process started`);
+        } else {
+            console.warn(`[pvsioweb-server] Warning: token does not indicate a pvs file`);
+        }
+        this.processCallback(token, socket);
+    }
+    protected async stopPvsProcessHandler (token: Connection.StopPvsProcessToken, socket: WebSocket, socketid: number): Promise<void> {
+        //closes pvs process
+        this.initProcessMap(socketid);
+        token.socketId = socketid;
+        if (this.pvsioProcessMap[socketid]) {
+            this.pvsioProcessMap[socketid].close();
+            delete this.pvsioProcessMap[socketid];
+            token.message = "process closed";
+        } else {
+            token.err = {
+                message: "process already closed"
+            };
+        }
+        this.unregisterFolderWatchers();
+        this.processCallback(token, socket);
+    }
+    protected async readFileHandler (token: Connection.ReadFileToken, socket: WebSocket, socketid: number): Promise<void> {
+        this.initProcessMap(socketid);
+        token.socketId = socketid;
+        let encoding = token.encoding || "utf8";
+        if (path.isAbsolute(token.path)) {
+            // remove all ../ to avoid writing in arbitrary parts of the file system
+            token.path = token.path.replace(/\.\./g, "");
+        } else {
+            token.path = path.join(projectsDir, token.path);
+        }
+        console.log("reading file " + token.path);
+        token.content = await serverUtils.readFile(token.path, encoding);
+        this.processCallback(token, socket);
+    }
+    protected async writeFileHandler (token: Connection.WriteFileToken, socket: WebSocket, socketid: number): Promise<void> {
+        this.initProcessMap(socketid);
+        token.socketId = socketid;
+        if (path.isAbsolute(token.path)) {
+            // remove all ../ to avoid writing in arbitrary parts of the file system
+            token.path = token.path.replace(/\.\./g, "");
+            token.path = path.join(examplesDir, token.path);
+        } else {
+            token.path = path.join(projectsDir, token.path);
+        }
+        console.log("writing file " + token.path);
+        const desc: serverUtils.NodeJSFileDescriptor = await serverUtils.writeFile(token.path, token.content, token.encoding, token.opt);
+        if (!desc || desc.err) {
+            token.err = (desc) ? desc.err : { message: `Unhandled error code` };
+        }
+        this.processCallback(token, socket);
+    }
+    protected async deleteFileHandler (token: Connection.DeleteFileToken, socket: WebSocket, socketid: number): Promise<void> {
+        this.initProcessMap(socketid);
+        token.socketId = socketid;
+        token.path = path.join(projectsDir, token.path);
+        try {
+            const contextFolder: string = this.pvsioProcessMap[socketid].getContextFolder();
+            serverUtils.removeFile(token.path, { contextFolder });
+            this.processCallback(token, socket);
+        } catch (err) {
+            token.err = err;
+            this.processCallback(token, socket);
+        }
+    }
+    protected async renameFileHandler (token: Connection.RenameFileToken, socket: WebSocket, socketid: number): Promise<void> {
+        this.initProcessMap(socketid);
+        token.socketId = socketid;
+        const fileExists: boolean = serverUtils.fileExists(token.newPath);
+        const success: boolean = (fileExists) ? false : await serverUtils.renameFile(token.oldPath, token.newPath);
+        if (!success) {
+            let message: string = "Error while renaming " + token.oldPath + " into " + token.newPath;
+            if (fileExists) { message += " (file already exists)"; }
+            console.warn(message);
+            token.err = {
+                path: token.oldPath,
+                message
+            }
+        }
+        this.processCallback(token, socket);
+    }
+    protected async fileExistsHandler (token: Connection.FileExistsToken, socket: WebSocket, socketid: number): Promise<void> {
+        this.initProcessMap(socketid);
+        token.socketId = socketid;
+        const fname: string = path.join(projectsDir, token.path);
+        token.exists = serverUtils.fileExists(fname);
+        this.processCallback(token, socket);
+    }
+    protected async readFolderHandler (token: Connection.ReadFolderToken, socket: WebSocket, socketid: number): Promise<void> {
+        this.initProcessMap(socketid);
+        token.socketId = socketid;
+        const fname: string = token.path.indexOf("~") === 0 ? path.join(process.env.HOME, token.path.substr(1))
+            : path.isAbsolute(token.path) ? token.path : path.join(projectsDir, token.path);
+        console.log("\n>> Reading folder " + fname);
+        token.files = await this.readDirectory(fname);
+        this.processCallback(token, socket);
+    }
+    protected async readExampleFolderHandler (token: Connection.ReadExamplesFolderToken, socket: WebSocket, socketid: number): Promise<void> {
+        this.initProcessMap(socketid);
+        token.socketId = socketid;
+        console.log("\n>> Reading examples folder " + examplesDir);
+        token.socketId = socketid;
+        token.path = examplesDir;
+        token.files = await this.readDirectory(examplesDir);
+        this.processCallback(token, socket);
+    }
+    protected async writeFolderHandler (token: Connection.WriteFolderToken, socket: WebSocket, socketid: number): Promise<void> {
+        this.initProcessMap(socketid);
+        token.socketId = socketid;
+        if (token.path) {
+            const folder: string = path.join(projectsDir, token.path);
+            // console.log(`[pvsiowebServer] Creating folder ${folder}`);
+            let exists: boolean = serverUtils.fileOrFolderExists(folder);
+            if (!exists) {
+                exists = await serverUtils.mkdirRecursive(folder);
+            }
+            if (exists) {
+                // directory exists: refresh content and send message EEXIST to client
+                // Note: we refresh the content because this is an existing folder
+                // that is visible to the client (the client might not have info about it)
+                await serverUtils.stat(folder);
+                this.unregisterFolderWatcher(folder);
+                await this.readFolderContent(folder, socket);
+                await this.registerFolderWatcher(folder, socket);
+            } else {
+                token.err = {
+                    path: token.path,
+                    message: "Directory Exists",
+                    code: "EEXIST"
+                };
+            }
+        } else {
+            token.err = {
+                path: token.path,
+                message: "Write directory error: property 'path' is undefined.",
+                code: "ENOENT"
+            };
+        }
+        this.processCallback(token, socket);
+    }
+    protected async deleteFolderHandler (token: Connection.DeleteFolderToken, socket: WebSocket, socketid: number): Promise<void> {
+        this.initProcessMap(socketid);
+        token.socketId = socketid;
+        try {
+            const folder: string = path.join(projectsDir, token.path);
+            serverUtils.removeFile(folder);
+        } catch (err) {
+            token.err = err;
+        } finally {
+            this.processCallback(token, socket);
+        }
+    }
+    protected async renameProjectHandler (token: Connection.RenameProjectToken, socket: WebSocket, socketid: number): Promise<void> {
+        this.initProcessMap(socketid);
+        token.socketId = socketid;
+        const oldProjectPath: string = path.join(projectsDir, token.oldPath);
+        const newProjectPath: string = path.join(projectsDir, token.newPath);
+        this.unregisterFolderWatcher(oldProjectPath);
+        let success: boolean = !serverUtils.fileOrFolderExists(newProjectPath);
+        if (success) {
+            success = await serverUtils.renameFile(token.oldPath, token.newPath);
+        }
+        if (success) {
+            this.unregisterFolderWatcher(oldProjectPath);
+            await this.registerFolderWatcher(newProjectPath, socket);
+        } else {
+            const message: string = "Error while renaming " + token.oldPath + " into " + token.newPath;
+            console.warn(message);
+            token.err = {
+                path: token.oldPath,
+                message
+            };
+        }
+        this.processCallback(token, socket);
+    }
+    protected async controlHandler (token: Connection.CtrlToken, socket: WebSocket, socketid: number): Promise<void> {
+        this.initProcessMap(socketid);
+        token.socketId = socketid;
+        console.log(token);
+        this.broadcast(token);
+        // try {
+        //     let opts = {
+        //         argv: token.data.argv,
+        //         basePath: token.data.basePath
+        //     };
+        //     java(token.data.javaFile, opts, function (err, stdout, stderr) {
+        //         res.stdout = stdout;
+        //         res.stderr = stderr;
+        //         console.log("java err:" + err);
+        //         console.log("java stderr:" + stderr);
+        //         console.log("java stdout:" + stdout);
+        //         processCallback(res, socket);
+        //     });
+        // } catch (err) {
+        //     res.type = token.type + "_error";
+        //     res.err = err.message;
+        //     processCallback(res, socket);
+        // }
+    }
+    protected async execJavaHandler (token: Connection.JavaToken, socket: WebSocket, socketid: number): Promise<void> {
+        // console.log(token);
+        this.initProcessMap(socketid);
+        token.socketId = socketid;
+        try {
+            const opts: { argv: string[], basePath: string } = {
+                argv: token.data.argv,
+                basePath: token.data.basePath
+            };
+            this.java(token.data.javaFile, opts, (error: ExecException, stdout: string, stderr: string) => {
+                token.stdout = stdout;
+                token.stderr = stderr;
+                console.log("java err:" + error);
+                console.log("java stderr:" + stderr);
+                console.log("java stdout:" + stdout);
+                this.processCallback(token, socket);
+            });
+        } catch (err) {
+            token.err = err;
+            this.processCallback(token, socket);
+        }
+    }
+    protected async startSapereHandler (token: Connection.StartSapereEEToken, socket: WebSocket, socketid: number): Promise<void> {
+        this.initProcessMap(socketid);
+        token.socketId = socketid;
+        try {
+            this.startSapereEE((error: ExecException, stdout: string, stderr: string) => {
+                token.stdout = stdout;
+                token.stderr = stderr;
+                console.log("glassfish err:" + error);
+                console.log("glassfish stderr:" + stderr);
+                console.log("glassfish stdout:" + stdout);
+                this.processCallback(token, socket);
+            });
+        } catch (err) {
+            if (err.code === 1 && err.killed === false) {
+                // glassfish is already running, it's not an error
+                token.stdout = "PVSio-web Network Controller already started.";
+            } else {
+                token.err = err;
+            }
+            this.processCallback(token, socket);
+        }
+    }
+    protected async startIvyHandler (token: Connection.StartIVYToken, socket: WebSocket, socketid: number): Promise<void> {
+        this.initProcessMap(socketid);
+        token.socketId = socketid;
+        try {
+            this.startIVY((error: ExecException, stdout: string, stderr: string) => {
+                token.stdout = stdout;
+                token.stderr = stderr;
+                console.log("IVY err:" + error);
+                console.log("IVY stderr:" + stderr);
+                console.log("IVY stdout:" + stdout);
+                this.processCallback(token, socket);
+            });
+        } catch (err) {
+            token.err = err.message;
+            this.processCallback(token, socket);
+        }
+    }
+    protected async stopSapereHandler (token: Connection.StopSapereEEToken, socket: WebSocket, socketid: number): Promise<void> {
+        this.initProcessMap(socketid);
+        token.socketId = socketid;
+        try {
+            this.stopSapereEE((error: ExecException, stdout: string, stderr: string) => {
+                if (error) {
+                    token.err = {
+                        message: error.message,
+                        code: `${error.code}`
+                    };
+                }
+                this.processCallback(token, socket);
+            });
+        } catch (err) {
+            token.err = err;
+            this.processCallback(token, socket);
+        }
+    }
+    /**
+     * Utility function, creates the hashmap with the functions for handling client requests
      */
     protected createClientFunctionMaps(): void {
-        const initProcessMap = (socketid: number) => {
-            if (!this.pvsioProcessMap[socketid]) {
-                this.pvsioProcessMap[socketid] = new PvsProxy();
-            }
-            // console.debug(socketid);
-        };
-        this.functionMaps = {
-            "activate-server": async (token: StartServerToken, socket: WebSocket, socketid: number) => {
-                console.log(`[pvsioweb-server] Activating server...`);
-                initProcessMap(socketid);
-                token.socketId = socketid;
-                token.data = path.normalize(path.join(__dirname, "../client"));
-                console.log(`[pvsioweb-server] Client folder is ${token.data}`);
-                this.processCallback(token, socket);
-            },
-            "keepAlive": async (token: Token, socket: WebSocket, socketid: number) => {
+        this.functionMaps.set("activate-server", async (token: Connection.StartServerToken, socket: WebSocket, socketid: number) => {
+            await this.activateServerHandler(token, socket, socketid);
+        });
+        this.functionMaps.set("keepAlive", async (token: Connection.Token, socket: WebSocket, socketid: number) => {
                 // do nothing
                 // console.log("Receiving keepAlive message...");
-            },
-            "setMainFile": async (token: SetMainFileToken, socket: WebSocket, socketid: number) => {
-                initProcessMap(socketid);
-                token.socketId = socketid;
-                const mainFile = token.path.split("/").slice(1).join("/");
-                if (mainFile !== "") {
-                    await this.changeProjectSetting(token.name, "mainPVSFile", mainFile);
-                    this.processCallback(token, socket);
-                } else {
-                    token.err = {
-                        message: `Invalid token ${JSON.stringify(token)}`,
-                        code: "ENOENT",
-                        path: token.path
-                    };
-                    this.processCallback(token, socket);
-                }
-            },
-            "changeProjectSetting": async (token: ChangeProjectSettingsToken, socket: WebSocket, socketid: number) => {
-                initProcessMap(socketid);
-                token.socketId = socketid;
-                if (token && token.key && token.value) {
-                    await this.changeProjectSetting(token.name, token.key, token.value);
-                    this.processCallback(token, socket);
-                } else {
-                    token.err = {
-                        message: `Invalid token ${JSON.stringify(token)}`,
-                        code: "ENOENT",
-                        path: token.path
-                    };
-                    this.processCallback(token, socket);
-                }
-            },
-            "listProjects": async (token: ListProjectsToken, socket: WebSocket, socketid: number) => {
-                initProcessMap(socketid);
-                token.socketId = socketid;
-                const projects: serverUtils.ProjectDescriptor[] = await serverUtils.listProjects();
-                const res: ListProjectsToken = {
-                    type: token.type,
-                    id: token.id,
-                    socketId: socketid,
-                    time: token.time,
-                    projects
-                };
-                // console.log("[pvsiowebServer] listProjects", projects);
-                this.processCallback(res, socket);
-            },
-            "openProject": async (token: OpenProjectToken, socket: WebSocket, socketid: number) => {
-                initProcessMap(socketid);
-                token.socketId = socketid;
-                const res: OpenProjectToken = {
-                    id: token.id,
-                    type: token.type,
-                    socketId: socketid,
-                    time: token.time,
-                    name: token.name,
-                    project: await serverUtils.openProject(token.name)
-                };
-                this.unregisterFolderWatchers();
-                await this.registerFolderWatcher(path.join(projectsDir, token.name), socket);
-                this.processCallback(res, socket);
-            },
-            "typeCheck": async (token: TypecheckToken, socket: WebSocket, socketid: number) => {
-                initProcessMap(socketid);
-                token.socketId = socketid;
-                const fname: string = path.join(projectsDir, token?.path);
-                this.typeCheck(fname, (err: ExecException, stdout: string, stderr: string) => {
-                    token.err = {
-                        code: `${err?.code}`,
-                        message: err?.message
-                    };
-                    token.stdout = stdout;
-                    token.stderr = stderr;
-                    this.processCallback(token, socket);
-                });
-            },
-            "sendCommand": async (token: SendCommandToken, socket: WebSocket, socketid: number) => {
-                // console.log("received command: ", token);
-                initProcessMap(socketid);
-                token.socketId = socketid;
-                
-                const res: PvsioResponse = await this.pvsioProcessMap[socketid]?.sendCommand(token.command, { useLastState: true });
-                if (res) {
-                    let extras: {} = {};
-                    if (res?.jsonOut) {
-                        try {
-                            extras = JSON.parse(res?.jsonOut);
-                        } catch (err) {
-                            console.warn(`[pvsioweb-server] Warning: unable to parse jsonOut`, res.jsonOut);
-                        }
-                    }
-                    token.data = { ...res?.state, ...extras };
-                    token.raw = res?.pvsioOut;
-                    token.err = res?.error ? { message: res.error, failedCommand: token?.command } : null;
-                    this.processCallback(token, socket);
-                }
-            },
-            "<ping>": async (token: PingToken, socket: WebSocket, socketid: number) => {
-                setTimeout(() => {
-                    initProcessMap(socketid);
-                    console.log("..sending pong response..");
-                    const res: PongToken = {
-                        id: token.id,
-                        data: ["<pong>"],
-                        socketId: socketid,
-                        type: "pong",
-                        time: token.time
-                    };
-                    this.processCallback(res, socket);
-                }, 500);
-            },
-            "<pong>": async (token: PongToken, socket: WebSocket, socketid: number) => {
-                setTimeout(() => {
-                    initProcessMap(socketid);
-                    console.log("..sending ping response..");
-                    const res: PingToken = {
-                        id: token.id,
-                        data: ["<ping>"],
-                        socketId: socketid,
-                        type: "ping",
-                        time: token.time
-                    };
-                    this.processCallback(res, socket);
-                }, 500);
-            },
-            "startProcess": async (token: StartProcessToken, socket: WebSocket, socketid: number) => {
-                initProcessMap(socketid);
-                token.socketId = socketid;
-                if (token?.data?.fileName && token?.data?.contextFolder && token?.data?.fileExtension) {
-                    console.info("Starting PVSio process for client... " + socketid);
-                    const root: string = path.join(examplesDir, token?.data?.contextFolder);
-                    // close the process if it exists and recreate it
-                    if (this.pvsioProcessMap[socketid]) {
-                        this.pvsioProcessMap[socketid].close();
-                        delete this.pvsioProcessMap[socketid];
-                    }
-                    // recreate the pvsio process
-                    this.pvsioProcessMap[socketid] = new PvsProxy();
-                    // set the workspace dir and start the pvs process with a callback for processing process ready and exit
-                    // messages from the process
-                    const res: boolean = await this.pvsioProcessMap[socketid].start({ contextFolder: root, fileName: token.data.fileName, fileExtension: ".pvs" });
-                    console.log(`[pvsioweb-server] PVSio process started`);
-                } else {
-                    console.warn(`[pvsioweb-server] Warning: token does not indicate a pvs file`);
-                }
-                this.processCallback(token, socket);
-            },
-            "closeProcess": async (token: CloseProcessToken, socket: WebSocket, socketid: number) => {
-                //closes pvs process
-                initProcessMap(socketid);
-                token.socketId = socketid;
-                if (this.pvsioProcessMap[socketid]) {
-                    this.pvsioProcessMap[socketid].close();
-                    delete this.pvsioProcessMap[socketid];
-                    token.message = "process closed";
-                } else {
-                    token.err = {
-                        message: "process already closed"
-                    };
-                }
-                this.unregisterFolderWatchers();
-                this.processCallback(token, socket);
-            },
-            "readFile": async (token: ReadFileToken, socket: WebSocket, socketid: number) => {
-                initProcessMap(socketid);
-                token.socketId = socketid;
-                let encoding = token.encoding || "utf8";
-                if (path.isAbsolute(token.path)) {
-                    // remove all ../ to avoid writing in arbitrary parts of the file system
-                    token.path = token.path.replace(/\.\./g, "");
-                } else {
-                    token.path = path.join(projectsDir, token.path);
-                }
-                console.log("reading file " + token.path);
-                token.content = await serverUtils.readFile(token.path, encoding);
-                this.processCallback(token, socket);
-            },
-            "writeFile": async (token: WriteFileToken, socket: WebSocket, socketid: number) => {
-                initProcessMap(socketid);
-                token.socketId = socketid;
-                if (path.isAbsolute(token.path)) {
-                    // remove all ../ to avoid writing in arbitrary parts of the file system
-                    token.path = token.path.replace(/\.\./g, "");
-                    token.path = path.join(examplesDir, token.path);
-                } else {
-                    token.path = path.join(projectsDir, token.path);
-                }
-                console.log("writing file " + token.path);
-                const desc: serverUtils.FileDescriptor = await serverUtils.writeFile(token.path, token.content, token.encoding, token.opt);
-                if (!desc || desc.err) {
-                    token.err = (desc) ? desc.err : { message: `Unhandled error code` };
-                }
-                this.processCallback(token, socket);
-            },
-            "deleteFile": async (token: DeleteFileToken, socket: WebSocket, socketid: number) => {
-                initProcessMap(socketid);
-                token.socketId = socketid;
-                token.path = path.join(projectsDir, token.path);
-                try {
-                    const contextFolder: string = this.pvsioProcessMap[socketid].getContextFolder();
-                    serverUtils.removeFile(token.path, { contextFolder });
-                    this.processCallback(token, socket);
-                } catch (err) {
-                    token.err = err;
-                    this.processCallback(token, socket);
-                }
-            },
-            "renameFile": async (token: RenameFileToken, socket: WebSocket, socketid: number) => {
-                initProcessMap(socketid);
-                token.socketId = socketid;
-                const fileExists: boolean = serverUtils.fileExists(token.newPath);
-                const success: boolean = (fileExists) ? false : await serverUtils.renameFile(token.oldPath, token.newPath);
-                if (!success) {
-                    let message: string = "Error while renaming " + token.oldPath + " into " + token.newPath;
-                    if (fileExists) { message += " (file already exists)"; }
-                    console.warn(message);
-                    token.err = {
-                        path: token.oldPath,
-                        message
-                    }
-                }
-                this.processCallback(token, socket);
-            },
-            "fileExists": async (token: FileExistsToken, socket: WebSocket, socketid: number) => {
-                initProcessMap(socketid);
-                token.socketId = socketid;
-                const fname: string = path.join(projectsDir, token.path);
-                token.exists = serverUtils.fileExists(fname);
-                this.processCallback(token, socket);
-            },
-            "readDirectory": async (token: ReadDirectoryToken, socket: WebSocket, socketid: number) => {
-                initProcessMap(socketid);
-                token.socketId = socketid;
-                const fname: string = token.path.indexOf("~") === 0 ? path.join(process.env.HOME, token.path.substr(1))
-                    : path.isAbsolute(token.path) ? token.path : path.join(projectsDir, token.path);
-                console.log("\n>> Reading folder " + fname);
-                token.files = await this.readDirectory(fname);
-                this.processCallback(token, socket);
-            },
-            "readExamplesFolder": async (token: ReadExamplesFolderToken, socket: WebSocket, socketid: number) => {
-                initProcessMap(socketid);
-                token.socketId = socketid;
-                console.log("\n>> Reading examples folder " + examplesDir);
-                token.socketId = socketid;
-                token.path = examplesDir;
-                token.files = await this.readDirectory(examplesDir);
-                this.processCallback(token, socket);
-            },
-            "writeDirectory": async (token: WriteDirectoryToken, socket: WebSocket, socketid: number) => {
-                initProcessMap(socketid);
-                token.socketId = socketid;
-                if (token.path) {
-                    const folder: string = path.join(projectsDir, token.path);
-                    // console.log(`[pvsiowebServer] Creating folder ${folder}`);
-                    let exists: boolean = serverUtils.fileOrFolderExists(folder);
-                    if (!exists) {
-                        exists = await serverUtils.mkdirRecursive(folder);
-                    }
-                    if (exists) {
-                        // directory exists: refresh content and send message EEXIST to client
-                        // Note: we refresh the content because this is an existing folder
-                        // that is visible to the client (the client might not have info about it)
-                        await serverUtils.stat(folder);
-                        this.unregisterFolderWatcher(folder);
-                        await this.readFolderContent(folder, socket);
-                        await this.registerFolderWatcher(folder, socket);
-                    } else {
-                        token.err = {
-                            path: token.path,
-                            message: "Directory Exists",
-                            code: "EEXIST"
-                        };
-                    }
-                } else {
-                    token.err = {
-                        path: token.path,
-                        message: "Write directory error: property 'path' is undefined.",
-                        code: "ENOENT"
-                    };
-                }
-                this.processCallback(token, socket);
-            },
-            "deleteDirectory": async (token: DeleteDirectoryToken, socket: WebSocket, socketid: number) => {
-                initProcessMap(socketid);
-                token.socketId = socketid;
-                try {
-                    const folder: string = path.join(projectsDir, token.path);
-                    serverUtils.removeFile(folder);
-                } catch (err) {
-                    token.err = err;
-                } finally {
-                    this.processCallback(token, socket);
-                }
-            },
-            "renameProject": async (token: RenameProjectToken, socket: WebSocket, socketid: number) => {
-                initProcessMap(socketid);
-                token.socketId = socketid;
-                const oldProjectPath: string = path.join(projectsDir, token.oldPath);
-                const newProjectPath: string = path.join(projectsDir, token.newPath);
-                this.unregisterFolderWatcher(oldProjectPath);
-                let success: boolean = !serverUtils.fileOrFolderExists(newProjectPath);
-                if (success) {
-                    success = await serverUtils.renameFile(token.oldPath, token.newPath);
-                }
-                if (success) {
-                    this.unregisterFolderWatcher(oldProjectPath);
-                    await this.registerFolderWatcher(newProjectPath, socket);
-                } else {
-                    const message: string = "Error while renaming " + token.oldPath + " into " + token.newPath;
-                    console.warn(message);
-                    token.err = {
-                        path: token.oldPath,
-                        message
-                    };
-                }
-                this.processCallback(token, socket);
-            },
-            "ctrl": async (token: CtrlToken, socket: WebSocket, socketid: number) => {
-                initProcessMap(socketid);
-                token.socketId = socketid;
-                console.log(token);
-                this.broadcast(token);
-                // try {
-                //     let opts = {
-                //         argv: token.data.argv,
-                //         basePath: token.data.basePath
-                //     };
-                //     java(token.data.javaFile, opts, function (err, stdout, stderr) {
-                //         res.stdout = stdout;
-                //         res.stderr = stderr;
-                //         console.log("java err:" + err);
-                //         console.log("java stderr:" + stderr);
-                //         console.log("java stdout:" + stdout);
-                //         processCallback(res, socket);
-                //     });
-                // } catch (err) {
-                //     res.type = token.type + "_error";
-                //     res.err = err.message;
-                //     processCallback(res, socket);
-                // }
-            },
-            "java": async (token: JavaToken, socket: WebSocket, socketid: number) => {
-                // console.log(token);
-                initProcessMap(socketid);
-                token.socketId = socketid;
-                try {
-                    const opts: { argv: string[], basePath: string } = {
-                        argv: token.data.argv,
-                        basePath: token.data.basePath
-                    };
-                    this.java(token.data.javaFile, opts, (error: ExecException, stdout: string, stderr: string) => {
-                        token.stdout = stdout;
-                        token.stderr = stderr;
-                        console.log("java err:" + error);
-                        console.log("java stderr:" + stderr);
-                        console.log("java stdout:" + stdout);
-                        this.processCallback(token, socket);
-                    });
-                } catch (err) {
-                    token.err = err;
-                    this.processCallback(token, socket);
-                }
-            },
-            "startSapereEE": async (token: StartSapereEEToken, socket: WebSocket, socketid: number) => {
-                initProcessMap(socketid);
-                token.socketId = socketid;
-                try {
-                    this.startSapereEE((error: ExecException, stdout: string, stderr: string) => {
-                        token.stdout = stdout;
-                        token.stderr = stderr;
-                        console.log("glassfish err:" + error);
-                        console.log("glassfish stderr:" + stderr);
-                        console.log("glassfish stdout:" + stdout);
-                        this.processCallback(token, socket);
-                    });
-                } catch (err) {
-                    if (err.code === 1 && err.killed === false) {
-                        // glassfish is already running, it's not an error
-                        token.stdout = "PVSio-web Network Controller already started.";
-                    } else {
-                        token.err = err;
-                    }
-                    this.processCallback(token, socket);
-                }
-            },
-            "startIVY": async (token: StartIVYToken, socket: WebSocket, socketid: number) => {
-                initProcessMap(socketid);
-                token.socketId = socketid;
-                try {
-                    this.startIVY((error: ExecException, stdout: string, stderr: string) => {
-                        token.stdout = stdout;
-                        token.stderr = stderr;
-                        console.log("IVY err:" + error);
-                        console.log("IVY stderr:" + stderr);
-                        console.log("IVY stdout:" + stdout);
-                        this.processCallback(token, socket);
-                    });
-                } catch (err) {
-                    token.err = err.message;
-                    this.processCallback(token, socket);
-                }
-            },
-            "stopSapereEE": async (token: StopSapereEEToken, socket: WebSocket, socketid: number) => {
-                initProcessMap(socketid);
-                token.socketId = socketid;
-                try {
-                    this.stopSapereEE((error: ExecException, stdout: string, stderr: string) => {
-                        if (error) {
-                            token.err = {
-                                message: error.message,
-                                code: `${error.code}`
-                            };
-                        }
-                        this.processCallback(token, socket);
-                    });
-                } catch (err) {
-                    token.err = err;
-                    this.processCallback(token, socket);
-                }
-            }
-        };
+        });
+        this.functionMaps.set("setMainFile", async (token: Connection.SetMainFileToken, socket: WebSocket, socketid: number) => {
+            await this.setMainFileHandler(token, socket, socketid);
+        });
+        this.functionMaps.set("changeProjectSettings", async (token: Connection.ChangeProjectSettingsToken, socket: WebSocket, socketid: number) => {
+            await this.changeProjectSettingsHandler(token, socket, socketid);
+        });
+        this.functionMaps.set("listProjects", async (token: Connection.ListProjectsToken, socket: WebSocket, socketid: number) => {
+            await this.listProjectsHandler(token, socket, socketid);
+        });
+        this.functionMaps.set("openProject", async (token: Connection.OpenProjectToken, socket: WebSocket, socketid: number) => {
+            await this.openProjectHandler(token, socket, socketid);
+        });
+        this.functionMaps.set("typeCheck", async (token: Connection.TypecheckToken, socket: WebSocket, socketid: number) => {
+            this.typecheckFileHandler(token, socket, socketid);
+        });
+        this.functionMaps.set("sendCommand", async (token: Connection.SendCommandToken, socket: WebSocket, socketid: number) => {
+            await this.sendCommandHandler(token, socket, socketid);
+        });
+        this.functionMaps.set("<ping>", async (token: Connection.PingToken, socket: WebSocket, socketid: number) => {
+            await this.pingHandler(token, socket, socketid);
+        });
+        this.functionMaps.set("<pong>", async (token: Connection.PongToken, socket: WebSocket, socketid: number) => {
+            await this.pongHandler(token, socket, socketid);
+        });
+        this.functionMaps.set("startPvsProcess", async (token: Connection.StartPvsProcessToken, socket: WebSocket, socketid: number) => {
+            await this.startPvsProcessHandler(token, socket, socketid);
+        });
+        this.functionMaps.set("stopPvsProcess", async (token: Connection.StopPvsProcessToken, socket: WebSocket, socketid: number) => {
+            await this.stopPvsProcessHandler(token, socket, socketid);
+        });
+        this.functionMaps.set("readFile", async (token: Connection.ReadFileToken, socket: WebSocket, socketid: number) => {
+            await this.readFileHandler(token, socket, socketid);
+        });
+        this.functionMaps.set("writeFile", async (token: Connection.WriteFileToken, socket: WebSocket, socketid: number) => {
+            await this.writeFileHandler(token, socket, socketid);
+        });
+        this.functionMaps.set("deleteFile", async (token: Connection.DeleteFileToken, socket: WebSocket, socketid: number) => {
+            await this.deleteFileHandler(token, socket, socketid);
+        });
+        this.functionMaps.set("renameFile", async (token: Connection.RenameFileToken, socket: WebSocket, socketid: number) => {
+            await this.renameFileHandler(token, socket, socketid);
+        });
+        this.functionMaps.set("fileExists", async (token: Connection.FileExistsToken, socket: WebSocket, socketid: number) => {
+            await this.fileExistsHandler(token, socket, socketid);
+        });
+        this.functionMaps.set("readFolder", async (token: Connection.ReadFolderToken, socket: WebSocket, socketid: number) => {
+            await this.readFolderHandler(token, socket, socketid);
+        });
+        this.functionMaps.set("readExamplesFolder", async (token: Connection.ReadExamplesFolderToken, socket: WebSocket, socketid: number) => {
+            await this.readExampleFolderHandler(token, socket, socketid);
+        });
+        this.functionMaps.set("writeFolder", async (token: Connection.WriteFolderToken, socket: WebSocket, socketid: number) => {
+            await this.writeFolderHandler(token, socket, socketid);
+        });
+        this.functionMaps.set("deleteFolder", async (token: Connection.DeleteFolderToken, socket: WebSocket, socketid: number) => {
+            await this.deleteFolderHandler(token, socket, socketid);
+        });
+        this.functionMaps.set("renameProject", async (token: Connection.RenameProjectToken, socket: WebSocket, socketid: number) => {
+            await this.renameProjectHandler(token, socket, socketid);
+        });
+        this.functionMaps.set("ctrl", async (token: Connection.CtrlToken, socket: WebSocket, socketid: number) => {
+            await this.controlHandler(token, socket, socketid);
+        });
+        this.functionMaps.set("execJava", async (token: Connection.JavaToken, socket: WebSocket, socketid: number) => {
+            await this.execJavaHandler(token, socket, socketid);
+        });
+        this.functionMaps.set("startSapereEE", async (token: Connection.StartSapereEEToken, socket: WebSocket, socketid: number) => {
+            await this.startSapereHandler(token, socket, socketid);
+        });
+        this.functionMaps.set("startIVY", async (token: Connection.StartIVYToken, socket: WebSocket, socketid: number) => {
+            await this.startIvyHandler(token, socket, socketid);
+        });
+        this.functionMaps.set("stopSapereEE", async (token: Connection.StopSapereEEToken, socket: WebSocket, socketid: number) => {
+            await this.stopSapereHandler(token, socket, socketid);
+        });
     }
 }
 

@@ -8,13 +8,13 @@ import { BasicDisplayEVO as BasicDisplay } from '../../../client/plugins/Prototy
 import { LedEVO as LED } from '../../../client/plugins/PrototypeBuilder/widgets/core/LedEVO';
 import { MouseCursor } from '../../../client/plugins/PrototypeBuilder/widgets/media/MouseCursor';
 import { Stylus } from '../../../client/plugins/PrototypeBuilder/widgets/media/Stylus';
-
-import { ActionsQueue } from '../../../client/env/ActionsQueue';
+import { ActionsQueue } from '../../../client/plugins/PrototypeBuilder/ActionsQueue';
 
 import { Player } from '../../../client/util/playback/Player';
 
 import { WebSocketConnection, WebSocketConnectionEvents } from '../../../client/env/WebSocketConnection';
-import { StartPvsProcessRequest, SendCommandRequest } from '../../../client/env/Connection';
+import { StartPvsProcessToken, SendCommandToken } from '../../../client/env/Connection';
+import { uuid } from '../../../client/env/Utils';
 
 enum Demo { NONE = 0, ACCESS_HOME_PAGE = 1, HUB_NEW_PT = 2, HUB_KNOWN_PT = 3, HOLTER = 4, TERMINATE_HUB_MODE = 5, TERMINATE_HOLTER_MODE = 6,
     NEW_EXAM_HUB_MODE = 7, TEST_ELECTRODES_HUB = 8, VIEW_EXAMS_HUB = 9, VIEW_INTERPRETATION_HUB = 10, VIEW_INTERPRETATION_HOLTER = 11,
@@ -189,7 +189,7 @@ class MT32Demo {
 
     single_tick(timeout) {
         setTimeout(() => {
-            ActionsQueue.queueGUIAction("tick", this.connection, (err, res) => {
+            ActionsQueue.queueGUIAction("tick", "", this.connection, (err, res) => {
                 this.onMessageReceived(err, res);
             });
             this.tick = null;
@@ -200,7 +200,7 @@ class MT32Demo {
         opt.interval = opt.interval || 1000;
         if (!this.tick) {
             this.tick = setInterval(() => {
-                ActionsQueue.queueGUIAction("tick", this.connection, (err, res) => {
+                ActionsQueue.queueGUIAction("tick", "", this.connection, (err, res) => {
                     this.onMessageReceived(err, res);
                 });
             }, opt.interval);
@@ -3454,77 +3454,98 @@ class MT32Demo {
     }
 
     async activate(): Promise<void> {
+        const id: string = uuid();
 
         //register event listener for websocket connection from the client
         this.connection.on(WebSocketConnectionEvents.ConnectionOpened, (evt?) => {
             console.log("web socket connected");
             //start pvs process
-            const req: StartPvsProcessRequest = {
-                type: "startProcess",
+            const req: StartPvsProcessToken = {
+                type: 'startPvsProcess',
+                id,
                 data: {
                     fileName: "main",
                     fileExtension: ".pvs",
                     contextFolder: "demos/MT32-evo2/pvs"
                 }
             };
-            this.connection.sendRequest(req, (err, res) => {
+            this.connection?.sendRequest("startPvsProcess", req);
+            this.connection?.onRequest("startPvsProcess", (err, res) => {
                 if (this.demo === Demo.ECG_EXAM_12DER_KNOWN_PT || this.demo === Demo.HOLTER_EXAM) {
-                    const req: SendCommandRequest = {
+                    const req: SendCommandToken = {
                         type: "sendCommand",
+                        id,
                         command: "init(ECG_EXAM_12DER_KNOWN_PT);"
                     };
-                    this.connection.sendRequest(req, (err, res) => { this.onMessageReceived(err, res); });
+                    this.connection.sendRequest("sendCommand", req);
+                    this.connection.onRequest("sendCommand", (err, res) => { this.onMessageReceived(err, res); });
                     $(".MT32-case").css("display", "none");
                     // client.getWebSocket().sendGuiAction("init(ECG_EXAM_12DER_KNOWN_PT) WITH [ mt32 := mtinit WITH [ mo := HUB ]];", onMessageReceived);
                 } else if (this.demo === Demo.TERMINATE_HUB_MODE) {
-                    const req: SendCommandRequest = {
+                    const req: SendCommandToken = {
                         type: "sendCommand",
+                        id,
                         command: "init(TERMINATE_HUB_MODE);"
                     };
-                    this.connection.sendRequest(req, (err, res) => { this.onMessageReceived(err, res); });
+                    this.connection.sendRequest("sendCommand", req);
+                    this.connection.onRequest("sendCommand", (err, res) => { this.onMessageReceived(err, res); });
                 }  else if (this.demo === Demo.TRANSFER_DATA_MICROSD) {
-                    const req: SendCommandRequest = {
+                    const req: SendCommandToken = {
                         type: "sendCommand",
+                        id,
                         command: "init(TRANSFER_DATA_MICROSD);"
                     };
-                    this.connection.sendRequest(req, (err, res) => { this.onMessageReceived(err, res); });
+                    this.connection.sendRequest("sendCommand", req);
+                    this.connection.onRequest("sendCommand", (err, res) => { this.onMessageReceived(err, res); });
                 } else if (this.demo === Demo.VIEW_MEDICAL_REPORT) {
-                    const req: SendCommandRequest = {
+                    const req: SendCommandToken = {
                         type: "sendCommand",
+                        id,
                         command: "init(VIEW_MEDICAL_REPORT);"
                     };
-                    this.connection.sendRequest(req, (err, res) => { this.onMessageReceived(err, res); });
+                    this.connection.sendRequest("sendCommand", req);
+                    this.connection.onRequest("sendCommand", (err, res) => { this.onMessageReceived(err, res); });
                 } else if (this.demo === Demo.TEST_ELECTRODES_HUB) {
-                    const req: SendCommandRequest = {
+                    const req: SendCommandToken = {
                         type: "sendCommand",
+                        id,
                         command: "init(TEST_ELECTRODES_HUB);"
                     };
-                    this.connection.sendRequest(req, (err, res) => { this.onMessageReceived(err, res); });
+                    this.connection.sendRequest("sendCommand", req);
+                    this.connection.onRequest("sendCommand", (err, res) => { this.onMessageReceived(err, res); });
                 } else if (this.demo === Demo.CREATE_NEW_PATIENT) {
-                    const req: SendCommandRequest = {
+                    const req: SendCommandToken = {
                         type: "sendCommand",
+                        id,
                         command: "init(CREATE_NEW_PATIENT);"
                     };
-                    this.connection.sendRequest(req, (err, res) => { this.onMessageReceived(err, res); });
+                    this.connection.sendRequest("sendCommand", req);
+                    this.connection.onRequest("sendCommand", (err, res) => { this.onMessageReceived(err, res); });
                 } else if (this.demo === Demo.VIEW_INTERPRETATION_HUB) {
-                    const req: SendCommandRequest = {
+                    const req: SendCommandToken = {
                         type: "sendCommand",
+                        id,
                         command: "init(VIEW_INTERPRETATION_HUB);"
                     };
-                    this.connection.sendRequest(req, (err, res) => { this.onMessageReceived(err, res); });
+                    this.connection.sendRequest("sendCommand", req);
+                    this.connection.onRequest("sendCommand", (err, res) => { this.onMessageReceived(err, res); });
                 } else if (this.demo === Demo.INTRO) {
-                    const req: SendCommandRequest = {
+                    const req: SendCommandToken = {
                         type: "sendCommand",
+                        id,
                         command: "init(INTRO);"
                     };
-                    this.connection.sendRequest(req, (err, res) => { this.onMessageReceived(err, res); });
+                    this.connection.sendRequest("sendCommand", req);
+                    this.connection.onRequest("sendCommand", (err, res) => { this.onMessageReceived(err, res); });
                     $(".MT32-case").css("display", "none");
                 } else {
-                    const req: SendCommandRequest = {
+                    const req: SendCommandToken = {
                         type: "sendCommand",
+                        id,
                         command: "init(STD);"
                     };
-                    this.connection.sendRequest(req, (err, res) => { this.onMessageReceived(err, res); });
+                    this.connection.sendRequest("sendCommand", req);
+                    this.connection.onRequest("sendCommand", (err, res) => { this.onMessageReceived(err, res); });
                 }
                 $(".demo-splash").css("display", "none");
 

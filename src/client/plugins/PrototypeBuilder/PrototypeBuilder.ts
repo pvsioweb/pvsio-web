@@ -4,8 +4,8 @@ import { Connection } from '../../env/Connection';
 import * as Utils from '../../env/Utils';
 import { BuilderView } from './views/BuilderView';
 import { WidgetsListView } from './views/WidgetsListView';
-import { SettingsView } from './views/SettingsView';
-import { BuilderEvents, CreateWidgetEvent, DeleteWidgetEvent, CutWidgetEvent, SelectWidgetEvent, CentralView, CentralViewEvents } from './views/CentralView';
+import { Settings, SettingsView } from './views/SettingsView';
+import { BuilderEvents, CreateWidgetEvent, DeleteWidgetEvent, CutWidgetEvent, SelectWidgetEvent, CentralView, CentralViewEvents, WidgetsMap } from './views/CentralView';
 import { SideView } from './views/SideView';
 import { SimulatorView } from './views/SimulatorView';
 
@@ -88,10 +88,13 @@ const toolbar: string = `
 </div>
 `;
 
-export interface PrototypeBuilderViews<T> {
-    Settings?: T,
-    Builder?: T,
-    Simulator?: T
+export interface CentralViews {
+    Settings: SettingsView,
+    Builder: BuilderView,
+    Simulator: SimulatorView
+};
+export interface SideViews {
+    Builder: SideView
 };
 
 export class PrototypeBuilder implements PVSioWebPlugin {
@@ -107,8 +110,8 @@ export class PrototypeBuilder implements PVSioWebPlugin {
 
     protected collapsed: boolean = false;
 
-    protected sideViews: PrototypeBuilderViews<SideView>;
-    protected centralViews: PrototypeBuilderViews<CentralView>;
+    protected sideViews: SideViews;
+    protected centralViews: CentralViews;
 
     async activate (connection?: Connection): Promise<boolean> {
         // save connection
@@ -230,7 +233,7 @@ export class PrototypeBuilder implements PVSioWebPlugin {
      * Switches the prototoyping layer to the builder layer
      */
     switchToBuilderView(): void {
-        (<BuilderView> this.centralViews?.Builder)?.builderView();
+        this.centralViews?.Builder?.builderView();
         // this.widgetManager.stopTimers();
         this.expandWidgetsList();
     }
@@ -238,8 +241,11 @@ export class PrototypeBuilder implements PVSioWebPlugin {
     /**
      * Switches the prototyping layer to the simulator/testing layer
      */
-    switchToSimulatorView(): void {
-        (<BuilderView> this.centralViews?.Builder)?.simulatorView();
+    async switchToSimulatorView(): Promise<void> {
+        this.centralViews?.Builder?.simulatorView();
+        const settings: Settings = this.centralViews?.Settings?.getSettings();
+        const widgets: WidgetsMap = this.centralViews?.Builder?.getWidgets();
+        const success: boolean = await this.centralViews?.Simulator?.initSimulation({ settings, widgets });
         // this.widgetManager.initWidgets();
         // this.widgetManager.startTimers();
         this.collapseWidgetsList();

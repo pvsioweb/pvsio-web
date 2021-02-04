@@ -1,4 +1,4 @@
-import { ActionsQueue, ActionCallback } from "../../../../../client/env/ActionsQueue";
+import { ActionsQueue, ActionCallback } from "../../ActionsQueue";
 import { ButtonOptions } from "./ButtonEVO";
 import { DialEventData, DialEVO, DialOptions } from "./DialEVO";
 import { Coords, CSS } from "./WidgetEVO";
@@ -60,7 +60,7 @@ export class SelectorEVO extends DialEVO {
             // send rotate action over the connection
             const fun: string = this.attr.customFunction || ("rotate_" + this.attr.buttonName);
             const callback: ActionCallback = this.callback;
-            ActionsQueue.queueGUIAction(fun, this.connection, callback);
+            ActionsQueue.queueGUIAction(fun, this.id, this.connection, callback);
             // trigger rotate event
             const data: DialEventData = {
                 evt: "rotate",

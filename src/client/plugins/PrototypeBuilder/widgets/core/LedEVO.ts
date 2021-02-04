@@ -21,7 +21,7 @@
  });
  *
  */
-import { ActionCallback } from "../../../../env/ActionsQueue";
+import { ActionCallback } from "../../ActionsQueue";
 import { WidgetOptions, Coords, WidgetEVO, CSS, Renderable, WidgetAttr } from "./WidgetEVO";
 
 export interface LedOptions extends WidgetOptions {

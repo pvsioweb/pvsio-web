@@ -2,7 +2,7 @@
  * Loopback connection -- useful to build prototypes without a server component
  */
 
-import { Connection, PVSioWebRequest, PVSioWebCallBack } from './Connection';
+import { Connection, PVSioWebRequest, PVSioWebCallBack, RequestType } from './Connection';
 import * as Backbone from 'backbone';
 
 const dbg: boolean = true;
@@ -19,6 +19,8 @@ export class LoopbackConnection extends Backbone.Model implements Connection {
 
     protected serverUrl: string = "ws://localhost";
     protected serverPort: number = 8082;
+
+    protected callbackRegistry: { [type: string]: PVSioWebCallBack } = {};
 
     constructor (opt?: { keepAlive?: boolean, keepAliveInterval?: number }) {
         super();
@@ -58,12 +60,21 @@ export class LoopbackConnection extends Backbone.Model implements Connection {
         this.trigger(ConnectionEvents.ConnectionOpened);
         return true;
     };
+    onRequest (type: RequestType, cb?: PVSioWebCallBack): void {
+        if (type && typeof cb === "function") {
+            this.callbackRegistry[type] = cb;
+        }
+    }
     /**
      * echoes the message.
      */
-    async sendRequest (request?: PVSioWebRequest, cb?: PVSioWebCallBack): Promise<boolean> {
-        if (cb) {
-            cb(null, request);
+    async sendRequest (type: RequestType, request?: PVSioWebRequest): Promise<boolean> {
+        if (type) {
+            setTimeout(() => {
+                if (this.callbackRegistry && typeof this.callbackRegistry[type] === "function") {
+                    this.callbackRegistry[type](null, request);
+                }
+            }, 50);
         }
         return true;
     };

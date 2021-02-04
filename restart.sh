@@ -56,23 +56,25 @@ elif [ -f "../pvs" ] && [ -f "../pvsio" ] && [ -f "../proveit" ]; then
 	cd dist/server
 	node PVSioWebServer.js pvsdir:$PVS_DIR restart
 else
-	pvsio -version
-	if [ $? -eq 0 ]; then
-		cd dist/server
-		node PVSioWebServer.js restart
-	else
-		#FAIL
-        echo "================================================================"
-        echo "================================================================"
-		echo "====   ERROR: Failed to locate PVS executable files         ===="
-        echo "================================================================"
-        echo "====   Please install PVSio-web within the PVS folder       ===="
-        echo "====   or alternatively place the PVS executable files on   ===="
-        echo "====   your PATH (see README.md for installation details).  ===="
-        echo "================================================================"
-        echo "================================================================"
-		#start in any case the UI, this is useful for developing additional PVSio-web UI components even without PVS
-		cd dist/server
-		node PVSioWebServer.js restart
-	fi
+	# pvsio -version
+	# if [ $? -eq 0 ]; then
+	# 	cd dist/server
+	# 	node PVSioWebServer.js restart
+	# else
+	# 	#FAIL
+    #     echo "================================================================"
+    #     echo "================================================================"
+	# 	echo "====   ERROR: Failed to locate PVS executable files         ===="
+    #     echo "================================================================"
+    #     echo "====   Please install PVSio-web within the PVS folder       ===="
+    #     echo "====   or alternatively place the PVS executable files on   ===="
+    #     echo "====   your PATH (see README.md for installation details).  ===="
+    #     echo "================================================================"
+    #     echo "================================================================"
+	# 	#start in any case the UI, this is useful for developing additional PVSio-web UI components even without PVS
+	# 	cd dist/server
+	# 	node PVSioWebServer.js restart
+	# fi
+	cd dist/server
+	node PVSioWebServer.js "$@"
 fi

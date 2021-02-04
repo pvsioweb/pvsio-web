@@ -3,11 +3,9 @@
  * @author Patrick Oladimeji, Paolo Masci
  * @date 6/26/14 11:29:07 AM
  */
-import { ExecException, execSync } from 'child_process';
+import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as util from 'util';
-
 
 const imageExts: string[] = [".jpg", ".jpeg", ".png"];
 const baseProjectDir: string = path.join(__dirname, "../../examples/projects/");
@@ -76,7 +74,7 @@ export function isImage(fullPath: string): boolean {
     return false;
 }
 
-export type FileDescriptor = {
+export declare type NodeJSFileDescriptor = {
     path: string,
     name?: string,
     content?: string,
@@ -112,7 +110,7 @@ export function fileOrFolderExists (fullPath: string): boolean {
  * @param {string?} encoding the encoding to use for writing the file (defaults to utf8)
  * @returns {Promise} a promise that resolves when file has been written or rejects when an error occurs
  */
-export async function writeFile(fullPath: string, content: string, encoding?: "base64" | "utf8", opt?: { overWrite?: boolean }): Promise<FileDescriptor> {
+export async function writeFile(fullPath: string, content: string, encoding?: "base64" | "utf8", opt?: { overWrite?: boolean }): Promise<NodeJSFileDescriptor> {
     encoding = encoding || "utf8";
     opt = opt || {};
     //remove prefixes from file content before saving images
@@ -156,7 +154,7 @@ export function removeFile (file: string, opt?: { contextFolder?: string }): boo
  * @returns {Promise} a promise that resolves with an array of objects  for the files in the given directory.
  * The object may contain just path property or may include content if the getContent parameter was passed
  */
-export async function getFolderTree(fullPath: string, filter?: string[]): Promise<FileDescriptor[]> {
+export async function getFolderTree(fullPath: string, filter?: string[]): Promise<NodeJSFileDescriptor[]> {
     const stats: fs.Stats =  await stat(fullPath);
     if (stats.isDirectory()) {
         return new Promise((resolve, reject) => {
@@ -170,7 +168,7 @@ export async function getFolderTree(fullPath: string, filter?: string[]): Promis
                     });
 
                     Promise.all(promises).then((res) => {
-                        const flattened: FileDescriptor[] = res.reduce((a: FileDescriptor[], b: FileDescriptor | FileDescriptor[]) => {
+                        const flattened: NodeJSFileDescriptor[] = res.reduce((a: NodeJSFileDescriptor[], b: NodeJSFileDescriptor | NodeJSFileDescriptor[]) => {
                             if (Array.isArray(b)) {
                                 return a.concat(b);
                             } else {
@@ -213,7 +211,7 @@ export async function getFolderTree(fullPath: string, filter?: string[]): Promis
     }
 }
 
-export type ProjectDescriptor = { name: string, descriptors?: FileDescriptor[], image?: string }
+export type ProjectDescriptor = { name: string, descriptors?: NodeJSFileDescriptor[], image?: string }
 
 /**
  * open a project with the specified projectName
@@ -226,11 +224,11 @@ export async function openProject(projectName: string): Promise<ProjectDescripto
     const res: ProjectDescriptor = { name: projectName };
 
     //get filepaths and their contents
-    const files: FileDescriptor[] = await getFolderTree(projectPath, filesFilter);
+    const files: NodeJSFileDescriptor[] = await getFolderTree(projectPath, filesFilter);
     if (files) {
-        res.descriptors = files.filter((desc: FileDescriptor) => {
+        res.descriptors = files.filter((desc: NodeJSFileDescriptor) => {
             return !desc.isDirectory;
-        }).map((desc: FileDescriptor) => {
+        }).map((desc: NodeJSFileDescriptor) => {
             desc.name = desc.path.split("/").slice(-1).join("");
             desc.path = desc.path.replace(projectPath, projectName);
             return desc;

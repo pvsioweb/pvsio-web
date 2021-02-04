@@ -41,7 +41,7 @@
 
 import { Coords, BasicEvent, WidgetEVO, WidgetOptions, WidgetAttr, CSS, BasicEventData } from "./WidgetEVO";
 import { Timer } from "../../../../util/Timer"
-import { ActionsQueue, ActionCallback } from "../../../../env/ActionsQueue";
+import { ActionsQueue, ActionCallback } from "../../ActionsQueue";
 import { Connection } from "../../../../env/Connection";
 import { mouseButtons } from "../../../../env/Utils";
 
@@ -307,7 +307,7 @@ export class ButtonEVO extends WidgetEVO {
 
         const fun: string = opt.customFunction || this.attr.customFunction || (evt + "_" + this.attr.buttonName);
         const callback: ActionCallback = opt.callback || this.callback;
-        ActionsQueue.queueGUIAction(fun, this.connection, callback);
+        ActionsQueue.queueGUIAction(fun, this.id, this.connection, callback);
         
         const data: BasicEventData = { evt, fun };
         this.trigger(evt, data);
