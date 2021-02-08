@@ -1,4 +1,4 @@
-import { PVSioWebPlugin, MouseEventHandlers } from "./PVSioWeb";
+import { PVSioWebPlugin, MouseEventHandlers } from "../env/PVSioWeb";
 
 /**
  * Creates a collapsible panel on the client app
@@ -107,12 +107,24 @@ const collapsiblePanelTemplate: string = `
 }
 .pvsioweb-collapsible-panel span {
     font-size: small;
+    padding-left: 10px;
 }
 </style>
 <div id="{{id}}-panel" class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow pvsioweb-collapsible-panel">
-    <span class="navbar-brand col-sm-3 col-md-2 mr-0">
-        <i id="{{id}}-collapse-icon" class="icon toggle-collapse fa {{#if showContent}}fa-minus-square{{else}}fa-plus-square{{/if}}"></i>
-        <span id="{{id}}-label" class="label">{{name}} {{#if showContent}}{{else}}(click to expand){{/if}}</span>
+    <span class="navbar-brand p-0" style="width:100%;">
+        <span class="dropdown">
+            <button type="button" class="btn btn-sm btn-outline-light fa fa-bars" id="{{id}}-menu-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+            <div class="dropdown-menu" style="margin:10px;" aria-labelledby="{{id}}-menu-btn">
+                <a class="dropdown-item btn-sm" href="#">New Prototype..</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item btn-sm" href="#">Open..</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item btn-sm" href="#">Save</a>
+                <a class="dropdown-item btn-sm" href="#">Save As..</a>
+            </div>
+        </span>
+        <span id="{{id}}-label" class="label">{{name}}</span>
+        <span data-toggle="collapse" data-target="#{{id}}-content" id="{{id}}-collapse-icon" style="float:right; padding-right:34px;" class="icon toggle-collapse fa {{#if showContent}}fa-minus-square{{else}}fa-plus-square{{/if}}"></i>
     </span>
     {{#if toolbar}}
     <span class="toolbar">
@@ -120,7 +132,7 @@ const collapsiblePanelTemplate: string = `
     </span>
     {{/if}}
 </div>
-<div id="{{id}}-content" class="content collapsible-panel" style="display:block;"></div>
+<div id="{{id}}-content" class="content collapsible-panel {{#if showContent}}show{{/if}}"></div>
 `;
 const menuTemplate: string = `
 <div id="{{menuId}}" class="fade show" style="position:absolute;width:0px;height:0px;top:{{top}}px;left:{{left}}px;">
@@ -201,14 +213,9 @@ export function createCollapsiblePanel (owner: PVSioWebPlugin, opt?: {
 
     if (!opt?.isDemo) {
         $collapseBtn.on("click", () => {
-            console.log("click");
-            if ($content.css("display") === "block") {
-                $label.text(`${pluginName} (click to expand)`);
-                $content.attr("style", "display: none");
+            if ($content.hasClass("show")) {
                 $collapseBtn.addClass("fa-plus-square").removeClass("fa-minus-square");
             } else {
-                $label.text(pluginName);
-                $content.attr("style", "display: block");
                 $collapseBtn.removeClass("fa-plus-square").addClass("fa-minus-square");
             }
         });
@@ -338,166 +345,15 @@ export function requiredBrowserWarning(): string {
 }
 
 
-/**
- * MIME type utils
- */
-const imageExtensions: string[] = [".jpg", ".jpeg", ".png"];
-const modelExtensions: string[] = [".pvs", ".muz", ".tex", ".i", ".emdl", ".vdmsl", ".aadl", ".adb", ".ads", ".c", ".h", ".smv", ".als"];
-const otherExtensions: string[] = [".txt" ]; //, ".json"];
-const fileExtensions: string[] = modelExtensions.concat(imageExtensions).concat(otherExtensions);
-
-export type FileDescriptor = { contextFolder: string, fileName: string, fileExtension: string, fileContent?: string };
-
-export function getFileName (fname: string): string {
-    let ans: string = fname || "";
-    ans = ans.includes("/") ? ans.substr(ans.lastIndexOf("/") + 1) : ans;
-    ans = ans.includes(".") ? ans.substr(0, ans.lastIndexOf(".")) : ans;
-    return ans.trim();
-}
-export function getFileExtension (fname: string, opt?: { toLowerCase?: boolean }): string {
-    let ans: string = fname || "";
-    ans = ans.includes("/") ? ans.substr(ans.lastIndexOf("/") + 1) : ans;
-    ans = ans.includes(".") ? ans.substr(ans.lastIndexOf(".")) : "";
-    return (opt?.toLowerCase) ? ans.toLocaleLowerCase().trim() : ans.trim();
-}
-export function getContextFolder (fname: string): string {
-    let ans: string = fname || "";
-    ans = ans.includes("/") ? ans.substr(0, ans.lastIndexOf("/") + 1) : ans;
-    return ans.trim();
-}
-export function desc2fname (desc: FileDescriptor): string | null {
-    if (desc) {
-        return `${desc.contextFolder}/${desc.fileName}${desc.fileExtension}`;
-    }
-    return null;
-}
 export const whiteGif: string = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 export const blackGif: string = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
 export const transparentGif: string = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-
-export function isHiddenFile (fname: string): boolean {
-    return fname ? getFileName(fname).indexOf(".") === 0 : false;
-};
-export function isSupportedFile (fname: string): boolean {
-    const ext: string = fname ? getFileExtension(fname) : null;
-    return ext && fileExtensions.includes(ext);
-};
-
-export function checkExt(fname: string, legalExts: string[]): boolean {
-    if (fname && typeof fname === "string") {
-        const ext: string = getFileExtension(fname, { toLowerCase: true });
-        if (ext && ext.length > 0) {
-            return legalExts.indexOf("." + ext[0].toLowerCase()) > -1;
-        }
-        return false;
-    }
-    return false;
-}
-
-export function isImageFile (fileName: string): boolean {
-    return checkExt(fileName, imageExtensions);
-};
-
-export function isModelFile (fileName: string): boolean {
-    return checkExt(fileName, modelExtensions);
-};
-
-export function isPvsFile (fileName: string): boolean {
-    return checkExt(fileName, [".pvs"]);
-};
-
-export function isEmuchartsFile (fileName: string): boolean {
-    return checkExt(fileName, [".emdl"]);
-};
-
-export function isPimFile (fileName: string): boolean {
-    return checkExt(fileName, [".muz"]);
-};
-
-export function imageFilter (desc: { path: string, isDirectory: boolean }): boolean {
-    return (isHiddenFile(desc.path) === false) && (desc.isDirectory || isImageFile(desc.path));
-};
-
-export function modelFilter (desc: { path: string, isDirectory: boolean }): boolean {
-    return (isHiddenFile(desc.path) === false) && (desc.isDirectory || isModelFile(desc.path));
-};
-
-export function pvsFilter (desc: { path: string, isDirectory: boolean }): boolean {
-    return (isHiddenFile(desc.path) === false) && (desc.isDirectory || isPvsFile(desc.path));
-};
-
-export function filter (exts: string[]): (desc: { path: string, isDirectory: boolean }) => boolean {
-    return function (desc: { path: string, isDirectory: boolean }) {
-        return (isHiddenFile(desc.path) === false) && (desc.isDirectory || checkExt(desc.path, exts));
-    };
-};
 
 export function removeSpaceDash (str: string): string {
     if (str) {
         return str.replace(/[\s|-]/g, "");
     }
     return str;
-}
-
-export type SimpleExpression = { type: "boolexpr" | "constexpr", binop?: string, attr?: string, constant: string };
-/**
- * Lightweight parser for simple expressions with boolean constants (true/false)
- * and equality/inequality operators between attributes and constants, e.g., attr = const, attr != const
- */
-export function simpleExpressionParser (expr: string | boolean): {
-    res: SimpleExpression,
-    err?: string
-} {
-    const ans = { res: null, err: null };
-    if (typeof expr === "string") {
-        if (expr.indexOf("!=") >= 0) {
-            ans.res = expr.split("!=");
-            ans.res = { type: "boolexpr", binop: "!=", attr: ans.res[0].trim(), constant: ans.res[1].trim() };
-        } else if (expr.indexOf("=") >= 0) {
-            ans.res = expr.split("=");
-            ans.res = { type: "boolexpr", binop: "=", attr: ans.res[0].trim(), constant: ans.res[1].trim() };
-        } else if (expr.toLowerCase() === "true") {
-            ans.res = { type: "constexpr", constant: "true" };
-        } else if (expr.toLowerCase() === "false") {
-            ans.res = { type: "constexpr", constant: "false" };
-        }
-    } else {
-        // boolean expression
-        ans.res = { type: "constexpr", constant: `${expr}` };
-    } 
-    return ans;
-}
-
-export function resolve(state: string | {}, property: string): string {
-    const pChain = property.split(".");
-    let obj = state;
-    let key: string = "";
-
-    for (let i = 0; i < pChain.length && obj; i++) {
-        key = pChain[i];
-        obj = obj[key];
-    }
-    return (obj) ? (typeof obj === "string") ? obj : JSON.stringify(obj) : "";
-}
-
-/**
- * Evaluates the number contained in the string passed as argument.
- * If the value is in the form a/b, where a and b are numbers, then the funtion performs the division and returns a string representing the evaluated real value.
- * Otherwise the string is simply trimmed to remove initial and trailing white spaces.
-*/
-export function evaluate(str: string | number): string {
-    if (str !== null && str !== undefined) {
-        if (typeof str === "string") {
-            str = str.trim();
-            const args: string[] = str.split("/");
-            if (args.length === 2 && !isNaN(+args[0]) && !isNaN(+args[1])) {
-                return (+args[0] / +args[1]).toString();
-            }
-            return str;
-        }
-        return str.toString().trim();
-    }
-    return "";
 }
 
 /**

@@ -1,5 +1,3 @@
-import * as Utils from '../../../env/Utils';
-
 import { WidgetEVO, Coords, WidgetOptions } from "../widgets/core/WidgetEVO";
 import { Connection } from '../../../env/Connection';
 import { HotspotEditor, HotspotEditorEvents, HotspotData, HotspotsMap } from './editors/HotspotEditor';
@@ -7,6 +5,9 @@ import { HotspotEditor, HotspotEditorEvents, HotspotData, HotspotsMap } from './
 import { CentralViewOptions, CreateWidgetEvent, WidgetsMap, BuilderEvents, MIN_WIDTH, MIN_HEIGHT, CentralView } from './CentralView';
 import { WidgetData, WidgetEditor, WidgetEditorEvents } from './editors/WidgetEditor';
 import { WidgetClassDescriptor, widgets } from '../widgets/widgets';
+
+import * as utils from '../../../utils/pvsiowebUtils';
+import * as fsUtils from '../../../utils/fsUtils';
 
 const contentTemplate: string = `
 <style>
@@ -199,7 +200,11 @@ export class BuilderView extends CentralView {
         // install handlers for hotspot events
         this.hotspotEditor.on(HotspotEditorEvents.DidCreateHotspot, async (data: HotspotData) => {
             // automatically open widget editor
-            await this.editWidget(data);
+            const widget: WidgetEVO = await this.editWidget(data);
+            if (!widget) {
+                // the user has pressed 'Cancel', delete the hotspot
+                this.hotspotEditor.deleteHotspot(data);
+            }
         });
         this.hotspotEditor.on(HotspotEditorEvents.DidSelectHotspot, (data: HotspotData) => {
             this.trigger(BuilderEvents.DidSelectWidget, data);
@@ -291,7 +296,7 @@ export class BuilderView extends CentralView {
         this.loadPicture({
             fileName: "whiteboard",
             fileExtension: ".gif",
-            fileContent: Utils.transparentGif
+            fileContent: utils.transparentGif
         }, {
             ...size,
             border: "1px solid black"
@@ -303,7 +308,7 @@ export class BuilderView extends CentralView {
         this.loadPicture({
             fileName: "image-frame",
             fileExtension: ".gif",
-            fileContent: Utils.transparentGif
+            fileContent: utils.transparentGif
         }, {
             ...size,
             border: "1px solid black",
@@ -358,8 +363,8 @@ export class BuilderView extends CentralView {
                     $(".load-picture-form").trigger("reset");
                     if (fileContent) {
                         const picture: Picture = {
-                            fileName: Utils.getFileName(file.name),
-                            fileExtension: Utils.getFileExtension(file.name),
+                            fileName: fsUtils.getFileName(file.name),
+                            fileExtension: fsUtils.getFileExtension(file.name),
                             fileContent
                         };
                         this.loadPicture(picture);

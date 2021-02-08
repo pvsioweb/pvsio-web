@@ -1,5 +1,5 @@
 import * as Backbone from 'backbone';
-import { createDialog, setDialogTitle, uuid } from '../../../../env/Utils';
+import { createDialog, setDialogTitle, uuid } from '../../../../utils/pvsiowebUtils';
 import { Coords, CSS, WidgetEVO, WidgetAttr, BasicEventData, VizOptions, WidgetOptions } from '../../widgets/core/WidgetEVO';
 import { HotspotData } from './HotspotEditor';
 import { widgets } from '../../widgets/widgets';

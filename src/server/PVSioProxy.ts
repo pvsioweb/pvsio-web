@@ -1,6 +1,6 @@
 import { spawn, ChildProcess, execSync } from 'child_process';
 import * as path from 'path';
-import { FileDescriptor } from '../client/env/Utils';
+import { FileDescriptor } from '../client/utils/fsUtils';
 
 import * as stateParser from './PVSioStateParser';
 

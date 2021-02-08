@@ -1,5 +1,5 @@
 import * as Backbone from 'backbone';
-import * as Utils from '../../../../env/Utils';
+import * as Utils from '../../../../utils/pvsiowebUtils';
 import { Coords } from "../../widgets/core/WidgetEVO";
 
 export const HotspotEditorEvents = {
@@ -39,7 +39,7 @@ const tooltipDistance: number = 20; // px
 
 // templates
 const markerOverlayTemplate: string = `
-<div class="marker-tooltip noselect" style="display:block; z-index:100; position:absolute; background-color:white; color:black; opacity:0.8; padding:2px 8px; border-radius:8px;">
+<div class="marker-tooltip noselect" style="display:none; z-index:100; position:absolute; background-color:white; color:black; opacity:0.8; padding:2px 8px; border-radius:8px;">
     <div class="marker-tooltip-label" style="display:block; z-index:100;"></div>
 </div>
 <div class="marker-areas" style="position:absolute; top:0px; left:0px; display:block; z-index:100; opacity:0.9; background-color:green;"></div>
@@ -77,6 +77,14 @@ export function getMouseCoords (evt: JQuery.MouseUpEvent | JQuery.MouseOverEvent
         left: left < 0 ? 0 : left
     }
 }
+
+function showCoords ($elem: JQuery<HTMLElement>, coords: Coords<number>, opt?: { showSize?: boolean }): void {
+    opt = opt || {};
+    const info: string = opt.showSize ? `(top:${coords.top}px, left:${coords.left}px, width:${coords.width}, height:${coords.height})`
+        : `(top:${coords.top}px, left:${coords.left}px)`;
+    $elem.html(info);
+}
+
 
 // Utility classes
 abstract class HotspotHandler extends Backbone.View {
@@ -184,15 +192,15 @@ abstract class HotspotHandler extends Backbone.View {
             $activeMarker.css(data);
         }
     }
-    showTooltip (coords: Coords<number>, info: string): void {
-        this.$tooltip.css({ display: "block", top: `${coords.top + tooltipDistance}px`, left: `${coords.left + tooltipDistance}px`, background: "black", color: "white" });
-        this.$tooltip.find(".marker-tooltip-label").html(info);
-    }
+    // showTooltip (coords: Coords<number>, info: string): void {
+    //     this.$tooltip.css({ display: "block", top: `${coords.top + tooltipDistance}px`, left: `${coords.left + tooltipDistance}px`, background: "black", color: "white" });
+    //     this.$tooltip.find(".marker-tooltip-label").html(info);
+    // }
     hideTooltip (): void {
         this.$tooltip.css({ display: "none" });
     }
-    showCoords (coords: Coords<number>): void {
-        this.$builderCoords.html(`(top:${coords.top}px, left:${coords.left}px)`);
+    showCoords (coords: Coords<number>, opt?: { showSize?: boolean }): void {
+        showCoords(this.$builderCoords, coords, opt);
     }
 };
 class ResizeHandler extends HotspotHandler {
@@ -211,9 +219,13 @@ class ResizeHandler extends HotspotHandler {
             this.trigger(HotspotEditorEvents.DidResizeHotspot, data);
 
             const mousePosition: Coords<number> = getMouseCoords(evt, this.$el);
-            const info: string = `width:${coords.width.toFixed(0)}px<br>height:${coords.height.toFixed(0)}px`;
-            this.showTooltip(mousePosition, info);
-            this.showCoords(mousePosition);
+            // const info: string = `width:${coords.width.toFixed(0)}px<br>height:${coords.height.toFixed(0)}px`;
+            // this.showTooltip(mousePosition, info);
+            this.showCoords({
+                ...mousePosition,
+                width: +coords.width.toFixed(0),
+                height: +coords.height.toFixed(0)    
+            }, { showSize: true });
             return true;
         }
         return false;
@@ -410,8 +422,8 @@ export class HotspotEditor extends Backbone.View {
             scroll: "onScroll"
         };
     }
-    showCoords (coords: Coords<number>): void {
-        this.$builderCoords.html(`(top:${coords.top}px, left:${coords.left}px)`);
+    showCoords (coords: Coords<number>, opt?: { showSize?: boolean }): void {
+        showCoords(this.$builderCoords, coords, opt);
     }
     protected mouseEventHandler (evt: JQuery.MouseDownEvent | JQuery.MouseOverEvent | JQuery.MouseMoveEvent): void {
         const mousePosition: Coords<number> = getMouseCoords(evt, this.$el);
@@ -447,11 +459,15 @@ export class HotspotEditor extends Backbone.View {
         if (mousePosition?.top < this.anchorCoords?.top) {
             this.$marker.css({ top: mousePosition.top });
         }
-        this.showTooltip({
-            top: mousePosition.top,
-            left: mousePosition.left
-        }, `width:${width.toFixed(0)}px<br>height:${height.toFixed(0)}px`);
-        this.showCoords(mousePosition);
+        // this.showTooltip({
+        //     top: mousePosition.top,
+        //     left: mousePosition.left
+        // }, `width:${width.toFixed(0)}px<br>height:${height.toFixed(0)}px`);
+        this.showCoords({
+            ...mousePosition,
+            width: +width.toFixed(0),
+            height: +height.toFixed(0)
+        }, { showSize: true });
     }
     showTooltip (coords: Coords<number>, info: string): void {
         this.$tooltip.css({ display: "block", top: `${coords.top + tooltipDistance}px`, left: `${coords.left + tooltipDistance}px`, background: "black", color: "white" });

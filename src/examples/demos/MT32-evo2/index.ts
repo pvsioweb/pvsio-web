@@ -14,7 +14,7 @@ import { Player } from '../../../client/util/playback/Player';
 
 import { WebSocketConnection, WebSocketConnectionEvents } from '../../../client/env/WebSocketConnection';
 import { StartPvsProcessToken, SendCommandToken } from '../../../client/env/Connection';
-import { uuid } from '../../../client/env/Utils';
+import { uuid } from '../../../client/utils/pvsiowebUtils';
 
 enum Demo { NONE = 0, ACCESS_HOME_PAGE = 1, HUB_NEW_PT = 2, HUB_KNOWN_PT = 3, HOLTER = 4, TERMINATE_HUB_MODE = 5, TERMINATE_HOLTER_MODE = 6,
     NEW_EXAM_HUB_MODE = 7, TEST_ELECTRODES_HUB = 8, VIEW_EXAMS_HUB = 9, VIEW_INTERPRETATION_HUB = 10, VIEW_INTERPRETATION_HOLTER = 11,

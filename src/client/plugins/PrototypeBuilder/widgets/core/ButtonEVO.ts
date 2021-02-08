@@ -43,7 +43,7 @@ import { Coords, BasicEvent, WidgetEVO, WidgetOptions, WidgetAttr, CSS, BasicEve
 import { Timer } from "../../../../util/Timer"
 import { ActionsQueue, ActionCallback } from "../../ActionsQueue";
 import { Connection } from "../../../../env/Connection";
-import { mouseButtons } from "../../../../env/Utils";
+import { mouseButtons } from "../../../../utils/pvsiowebUtils";
 
 const CLICK_RATE = 250; // 250 milliseconds, default interval for repeating button clicks when the button is pressed and held down
                             // going below 250ms may cause multiple unintended activations when pressing the button

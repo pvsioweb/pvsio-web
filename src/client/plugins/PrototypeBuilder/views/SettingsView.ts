@@ -1,7 +1,7 @@
 import * as Backbone from 'backbone';
 import { Connection } from '../../../env/Connection';
 import { CentralView, CentralViewOptions } from './CentralView';
-import * as utils from '../../../env/Utils';
+import * as fsUtils from '../../../utils/fsUtils';
 
 export const contentTemplate: string = `
 <div class="builder-settings container-fluid" style="padding-left:0;">
@@ -99,8 +99,8 @@ export class SettingsView extends CentralView {
         const tickFunction: string = this.getTickFunction();
         const tickFrequency: number = this.getTickFrequency();
         return {
-            fileName: utils.getFileName(fname),
-            fileExtension: utils.getFileExtension(fname),
+            fileName: fsUtils.getFileName(fname),
+            fileExtension: fsUtils.getFileExtension(fname),
             contextFolder,
             initFunction,
             tickFunction,

@@ -8,8 +8,9 @@
  */
 
 // import * as StateParser from "../../../util/PVSioStateParser";
-import * as Utils from '../../../../env/Utils';
-import { dimColor } from "../../../../env/Utils";
+import * as parserUtils from '../../../../utils/parserUtils';
+import * as utils from '../../../../utils/pvsiowebUtils';
+import { dimColor } from "../../../../utils/pvsiowebUtils";
 import { ActionCallback } from "../../ActionsQueue";
 import { Connection } from "../../../../env/Connection";
 import * as Backbone from 'backbone';
@@ -260,7 +261,7 @@ export abstract class WidgetEVO extends Backbone.Model {
     protected rendered?: boolean = false;
 
     static uuid (): string {
-        return "wdg" + Utils.uuid("Wxxxx");    
+        return "wdg" + utils.uuid("Wxxxx");    
     }
     /**
      * Creates an instance of the widget.
@@ -535,14 +536,14 @@ export abstract class WidgetEVO extends Backbone.Model {
         let vizAttribute: boolean = true;
         if (state && typeof state === "object") {
             vizAttribute = false;
-            const expr: { res: Utils.SimpleExpression, err?: string } = Utils.simpleExpressionParser(this.viz?.visible);
+            const expr: { res: parserUtils.SimpleExpression, err?: string } = parserUtils.simpleExpressionParser(this.viz?.visible);
             if (expr && expr.res) {
                 if (expr.res.type === "constexpr" && expr.res.constant === "true") {
                     vizAttribute = true;
                 } else if (expr.res.type === "boolexpr" && expr.res.binop) {
-                    let str: string = Utils.resolve(state, expr.res.attr);
+                    let str: string = parserUtils.resolveAttribute (state, expr.res.attr);
                     if (str) {
-                        str = Utils.evaluate(str);
+                        str = parserUtils.evaluate(str);
                         if ((expr.res.binop === "=" && str === expr.res.constant) ||
                             (expr.res.binop === "!=" && str !== expr.res.constant)) {
                                 vizAttribute = true;
@@ -565,9 +566,9 @@ export abstract class WidgetEVO extends Backbone.Model {
      */
     evaluate (attr: string, state: {}): string {
         if (attr && state && typeof state === "object") {
-            var disp = Utils.resolve(state, attr);
+            var disp = parserUtils.resolveAttribute (state, attr);
             if (disp !== null && disp !== undefined) {
-                return Utils.evaluate(disp).replace(new RegExp("\"", "g"), "");
+                return parserUtils.evaluate(disp).replace(new RegExp("\"", "g"), "");
             } else {
                 console.log("Warning: WidgetEVO.evaluate could not find state attribute " + attr + " requested by " + this.id);
             }

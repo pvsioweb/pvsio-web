@@ -1,7 +1,7 @@
 import { PVSioWebPlugin } from '../../env/PVSioWeb';
 import { Connection } from '../../env/Connection';
 
-import * as Utils from '../../env/Utils';
+import * as Utils from '../../utils/pvsiowebUtils';
 import { BuilderView } from './views/BuilderView';
 import { WidgetsListView } from './views/WidgetsListView';
 import { Settings, SettingsView } from './views/SettingsView';

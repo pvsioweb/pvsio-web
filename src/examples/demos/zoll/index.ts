@@ -10,7 +10,7 @@ import { PushButtonEVO } from '../../../client/plugins/PrototypeBuilder/widgets/
 import { BasicDisplayEVO } from '../../../client/plugins/PrototypeBuilder/widgets/core/BasicDisplayEVO';
 import { Coords } from '../../../client/plugins/PrototypeBuilder/widgets/core/WidgetEVO';
 import { SelectorEVO } from '../../../client/plugins/PrototypeBuilder/widgets/core/SelectorEVO';
-import { fontOutlineStyle } from '../../../client/env/Utils';
+import { fontOutlineStyle } from '../../../client/utils/pvsiowebUtils';
 
 function kg2lb (kg: number): number {
     return Math.floor(kg * 2.205);

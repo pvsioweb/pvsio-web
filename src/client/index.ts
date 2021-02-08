@@ -1,7 +1,7 @@
 /**
  * Interactive prototype builder for PVSio based on the html map attribute
  */
-import { Client } from './env/Client';
+import { PVSioWebClient } from './env/PVSioWebClient';
 
-const client: Client = new Client();
+const client: PVSioWebClient = new PVSioWebClient();
 client.start();

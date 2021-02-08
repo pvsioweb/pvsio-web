@@ -1,8 +1,8 @@
 /**
  * @module LayoutManager
  */
-import * as plugins from '../plugins/plugins';
-import * as Utils from './Utils';
+import { plugins } from '../plugins/pluginList';
+import * as Utils from '../utils/pvsiowebUtils';
 import { PVSioWebPlugin } from './PVSioWeb';
 import { Connection } from './Connection';
 import * as Backbone from 'backbone';
@@ -116,15 +116,19 @@ export class LayoutManager extends Backbone.Model {
     protected version: string;
     protected collapsed: boolean = false;
 
+    protected pluginsObj: { [name: string]: PVSioWebPlugin } = {};
+    protected activePlugins: { [name: string]: boolean } = {};
+
     constructor (opt?: { version: string }) {
         super();
         this.version = opt?.version || "";
     }
 
-    activate (connection: Connection): boolean {
+    async activate (connection: Connection): Promise<boolean> {
         this.connection = connection;
         this.createHtmlElements();
         this.installHandlers();
+        await this.activatePlugins();
         return true;
     }
 
@@ -277,6 +281,27 @@ export class LayoutManager extends Backbone.Model {
             }
         }
         return this;
+    }
+
+    async activatePlugins (): Promise<boolean> {
+        for (let i in plugins) {
+            const obj: PVSioWebPlugin = new plugins[i].cons();
+            this.pluginsObj[i] = obj;
+            if (plugins[i].autoload) {
+                const success: boolean = await obj.activate(this.connection);
+                const msg: string = success ? `[plugin-manager] Plugin ${obj.getName()} active!`
+                    : `[plugin-manager] Failed to activate plugin ${obj.getName()}`;
+                this.activePlugins[i] = success;
+                success ? console.log(msg) : console.warn(msg);
+            } else {
+                this.activePlugins[i] = false;
+            }
+        }
+        return true;
+    }
+
+    isActive (plugin: string): boolean {
+        return this.activePlugins[plugin];
     }
 
 

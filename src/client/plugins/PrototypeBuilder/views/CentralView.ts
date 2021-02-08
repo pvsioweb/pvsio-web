@@ -1,5 +1,5 @@
 import * as Backbone from 'backbone';
-import * as Utils from '../../../env/Utils';
+import * as Utils from '../../../utils/pvsiowebUtils';
 import { Connection } from '../../../env/Connection';
 import { HotspotsMap } from './editors/HotspotEditor';
 import { Coords, WidgetEVO } from '../widgets/core/WidgetEVO';
