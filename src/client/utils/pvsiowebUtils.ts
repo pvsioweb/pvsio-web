@@ -63,7 +63,7 @@ export function createDialog (data: DialogOptions): JQuery<HTMLElement> {
         // append new dialog
         $("body").append(dialogView);
     }
-    return $("body").find("#pvsioweb-modal");
+    return $("body").find("#pvsioweb-modal").css({ position: "absolute", overflow: "auto" });
 }
 export function revealDialog (): JQuery<HTMLElement> {
     return $("body").find("#pvsioweb-modal").css("display", "block");
@@ -74,9 +74,9 @@ export function setDialogTitle (title: string): JQuery<HTMLElement> {
 export const DBLCLICK_TIMEOUT: number = 300; //ms -- if two consecutive clicks are registered in a time frame lower than this timeout, then it's a double click
 export const dialogTemplate: string = `
 <div class="modal fade show" id="{{dialogId}}" tabindex="-1" role="dialog" aria-labelledby="{{dialogId}}-title" aria-hidden="true" style="display:{{#if hidden}}none{{else}}block{{/if}};">
-    <div class="modal-dialog-shadow" style="width: 100%; height: 100%; position: absolute; background: black; opacity: 0.8;"></div>
+    <div class="modal-dialog-shadow" style="width:100%; height:100%; position:fixed; background: black; opacity: 0.8;"></div>
     <div class="modal-dialog modal-dialog-centered{{#if largeModal}} modal-lg{{/if}}" role="document">
-        <div class="modal-content">
+        <div class="modal-content" style="transform:scale(0.8); transform-origin:top left;">
             <div class="modal-header">
                 <h5 class="modal-title tile" id="{{dialogId}}-title">{{title}}</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -103,11 +103,9 @@ const collapsiblePanelTemplate: string = `
     display: block;
     position: sticky;
     top: 28px;
-    height: 28px;
 }
 .pvsioweb-collapsible-panel span {
     font-size: small;
-    padding-left: 10px;
 }
 </style>
 <div id="{{id}}-panel" class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow pvsioweb-collapsible-panel">

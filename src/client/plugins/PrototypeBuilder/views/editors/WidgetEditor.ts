@@ -21,7 +21,7 @@ export const WidgetEditorEvents = {
 // all input forms must have attributes "name" and "value", as they will be used to identify key and value of coords, attr, css
 const containerTemplate: string = `
 <div class="card">
-    <div class="card-header" style="position:absolute; left:-180px; background:gainsboro; border-radius:4px; padding-bottom:22px;">
+    <div class="card-header" style="position:absolute; left:-160px; background:gainsboro; border-radius:4px; padding-bottom:22px;">
         <ul class="nav flex-column flex-nowrap nav-pills card-header-tabs widget-list" style="overflow-y:auto; overflow-x:hidden; max-height:408px;">
             {{#each widgets}}
             <li class="nav-item">

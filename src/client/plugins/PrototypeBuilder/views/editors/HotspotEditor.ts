@@ -80,8 +80,8 @@ export function getMouseCoords (evt: JQuery.MouseUpEvent | JQuery.MouseOverEvent
 
 function showCoords ($elem: JQuery<HTMLElement>, coords: Coords<number>, opt?: { showSize?: boolean }): void {
     opt = opt || {};
-    const info: string = opt.showSize ? `(top:${coords.top}px, left:${coords.left}px, width:${coords.width}, height:${coords.height})`
-        : `(top:${coords.top}px, left:${coords.left}px)`;
+    const info: string = opt.showSize ? `(top:${coords.top}, left:${coords.left}, width:${coords.width}, height:${coords.height})`
+        : `(top:${coords.top}, left:${coords.left})`;
     $elem.html(info);
 }
 

@@ -26,7 +26,6 @@ const sidebarStyle: string = `
 .widget-list {
     margin-left: -4px;
     width: 110%;
-    transform: scale(0.8);
 }
 .widget-list-item.active::after {
     content: '';

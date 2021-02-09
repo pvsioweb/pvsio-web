@@ -21,9 +21,8 @@ const contentTemplate: string = `
 }
 .builder-toolbar {
     position:absolute; 
-    top:0; 
-    left:35%; 
     transform:scale(0.8);
+    transform-origin:left;
 }
 .builder-toolbar .btn {
     height:2.5em;
@@ -32,7 +31,9 @@ const contentTemplate: string = `
     position:absolute;
     color:darkslategray; 
     top:0.6em;
+    left:300px;
     font-size:small;
+    white-space:nowrap;
 }
 .prototype-image-frame {
     position: absolute;
@@ -47,16 +48,16 @@ const contentTemplate: string = `
 }
 </style>
 <div class="row" style="height:36px;">
-    <div class="builder-coords"></div>
     <div class="builder-toolbar">
         <form class="load-picture-form">
-            <div class="custom-file" style="position:absolute; width:13em;">
+            <div class="custom-file" style="position:absolute;">
                 <input type="file" class="custom-file-input load-picture-btn" accept="image/*">
-                <label class="custom-file-label btn-sm" style="padding-right:20px; width:15em;"><i class="fa fa-upload"></i> Upload Picture</label>
+                <label class="custom-file-label btn-sm" style="width:14em;">Upload Picture</label>
             </div>
-            <button class="btn btn-outline-danger btn-lg load-whiteboard-btn btn-sm" style="margin-left:16em; width:15em;">Remove Picture</button>
+            <button class="btn btn-outline-danger btn-lg load-whiteboard-btn btn-sm" style="margin-left:15em; width:12em;">Remove Picture</button>
         </form>
     </div>
+    <div class="builder-coords"></div>
 </div>
 <div class="prototype row">
     <div class="prototype-image view-div container-fluid"></div>
