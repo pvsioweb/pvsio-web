@@ -60,7 +60,7 @@
     "test": "grunt test",
     "local-test": "jasmine-node --verbose dist/server/servertests; node client-test.js",
     "start": "node dist/server/PVSioWebServer.js",
-    "webpack": "webpack --config webpack.client.config.js"
+    "webpack": "webpack --config webpack.prototype-builder.config.js"
   },
   "repository": {
     "type": "git",

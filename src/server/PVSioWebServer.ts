@@ -170,6 +170,7 @@ class PvsiowebServer {
         webserver.use(/(\/demos\/[^\/]+)?\/jquery\.js/, express.static(path.join(clientDir, `node_modules/jquery/dist/jquery.min.js`)));
 
         webserver.use(/(\/demos\/[^\/]+)?\/pvsioweb\.min\.js/, express.static(path.join(bundleDir, `client/pvsioweb.min.js`)));
+        webserver.use(/(\/demos\/[^\/]+)?\/prototype-builder\.min\.js/, express.static(path.join(bundleDir, `client/prototype-builder.min.js`)));
 
         this.wsServer = new ws.Server({ server: this.httpServer });
         this.wsServer.on("connection", (socket: WebSocket) => {

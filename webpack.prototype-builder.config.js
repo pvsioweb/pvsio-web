@@ -2,9 +2,9 @@
 'use strict';
 const path = require('path');
 module.exports = {
-    entry: './src/client/bundle.ts',
+    entry: './src/client/builder.ts',
     output: {
-        filename: 'pvsioweb.min.js',
+        filename: 'prototype-builder.min.js',
         path: path.resolve(__dirname, 'bundle/client')
     },
     devtool: 'source-map',
