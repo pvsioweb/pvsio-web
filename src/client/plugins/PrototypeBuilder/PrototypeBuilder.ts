@@ -22,7 +22,6 @@ const sidebarStyle: string = `
     width:30%; 
     min-width:10px; 
     position:relative;
-    padding:0;
 }
 .widget-list {
     margin-left: -4px;
@@ -71,7 +70,7 @@ ${sidebarStyle}
                 <ul class="nav nav-tabs card-header-tabs d-flex flex-nowrap prototype-screen-list">
                 </ul>
             </div>
-            <div class="card-body prototype-screens tab-content" style="margin:0px;">
+            <div class="card-body prototype-screens tab-content py-0" style="margin:0px;">
             </div>
         </div>
     </div>

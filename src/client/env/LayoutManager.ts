@@ -16,7 +16,7 @@ const toolkitInterface: string = `
     </div>
 </div>
 <div id="warnings" class="warnings" style="display:none"><button type="button" id="dismissWarnings">Dismiss</button></div>
-<div id="content" class="center pvsioweb-content" style="position:absolute; top:30px;">
+<div id="content" class="center pvsioweb-content" style="position:absolute; height:28px; top:28px;">
     <div class="container-fluid row no-gutters" style="padding:0;">
         <div id="toolkit-body" class="container-fluid col no-gutters">
         <!-- plugin panels go here -->
@@ -81,22 +81,22 @@ const toolkitInterface: string = `
             </div>
         </div>
     </div>
-    <div id="toolkit-header" class="btn-group" style="width:100%;position:fixed;top:0px; z-index:99999;">
+    <div id="toolkit-header" class="btn-group container-fluid p-0" style="position:fixed;top:0px;z-index:99999;">
         <div id="projectTitle">
             <div class="btn prototype-name"></div>
-            <div style="width:100%">
+            <div class="container-fluid">
                 <div class="toolkit-toolbar btn-group pull-right" style="position:sticky; top:0;">
                     <button type="button" class="btn btn-sm" id="newProject">New Project</button>
                     <button type="button" class="btn btn-sm" id="openProject">Open Project</button>
-                    <div class="btn-group pull-right" style="display:flex; width:158px;">
+                    <div class="btn-group pull-right">
                         <button type="button" class="btn btn-sm" id="btnSaveProject">Save Project</button>
                         <button type="button" class="btn btn-sm dropdown-toggle" data-toggle="dropdown"></button>
                         <div class="dropdown-menu dropdown-menu-right" role="menu" style="background-color:#08589a;">
-                            <button class="btn btn-sm" id="btnSaveProjectAs" style="border-radius:0; margin:-8px 0 -8px; padding-left:16px; width:100%; text-align:left;">Save As...</button>
+                            <button class="btn btn-sm" id="btnSaveProjectAs" style="border-radius:0; margin:-8px 0 -8px; padding-right:2em; width:100%; text-align:right;">Save As...</button>
                         </div>
                     </div>
-                    <button type="button" class="btn btn-sm" id="btnLoadPicture">Change Picture</button>
-                    <div class="pull-right" style="min-width: 260px; display:inline-flex;">
+                    <button type="button" class="btn btn-sm" id="btnLoadPicture" style="display:none;">Change Picture</button>
+                    <div class="pull-right" style="min-width: 260px; display:none;">
                         <button id="btnReconnect" class="btn btn-sm" style="display:none;">Try to reconnect to WebServer <span class="fa fa-random"></span></button>
                         <button id="lblWebSocketStatus" class="btn btn-sm status" style="background:rgb(8, 88, 154); cursor:default;">WebServer <span class="fa fa-check"></span></button>
                         <button id="logo" class="btn btn-sm status" style="background:rgb(8, 88, 154); cursor:default;"><span>PVSio-web {{version}}</span></button>
@@ -115,13 +115,16 @@ export class LayoutManager extends Backbone.Model {
     protected connection: Connection;
     protected version: string;
     protected collapsed: boolean = false;
+    protected parent: string;
 
     protected pluginsObj: { [name: string]: PVSioWebPlugin } = {};
     protected activePlugins: { [name: string]: boolean } = {};
 
-    constructor (opt?: { version: string }) {
+    constructor (opt?: { version: string, parent?: string }) {
         super();
         this.version = opt?.version || "";
+        this.parent = opt?.parent || "body";
+        console.log(`[layout-manager] Parent is ${this.parent}`);
     }
 
     async activate (connection: Connection): Promise<boolean> {
@@ -137,7 +140,7 @@ export class LayoutManager extends Backbone.Model {
             plugins,
             version: this.version
         });
-        $("body").append(mainView);
+        $(this.parent).html(mainView);
         // hide pvsio-web loading screen if noSplash is set in opt and make the tool visible
         if (opt?.removeSplash) {
             this.hideSplash();

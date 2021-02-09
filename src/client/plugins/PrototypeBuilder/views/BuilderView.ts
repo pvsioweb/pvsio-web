@@ -9,6 +9,8 @@ import { WidgetClassDescriptor, widgets } from '../widgets/widgets';
 import * as utils from '../../../utils/pvsiowebUtils';
 import * as fsUtils from '../../../utils/fsUtils';
 
+const toolbarHeight: number = 36; //px
+
 const contentTemplate: string = `
 <style>
 .view-div {
@@ -19,7 +21,7 @@ const contentTemplate: string = `
 }
 .builder-toolbar {
     position:absolute; 
-    top:-2.2em; 
+    top:0; 
     left:35%; 
     transform:scale(0.8);
 }
@@ -29,31 +31,37 @@ const contentTemplate: string = `
 .builder-coords {
     position:absolute;
     color:darkslategray; 
-    top:-1.8em; 
-    transform:scale(0.8); 
+    top:0.6em;
     font-size:small;
 }
 .prototype-image-frame {
+    position: absolute;
+    cursor: crosshair;
+}
+.prototype-image-overlay {
+    position: absolute;
     cursor: crosshair;
 }
 .prototype {
     transform-origin: top left;
 }
 </style>
-<div class="builder-coords"></div>
-<div class="builder-toolbar">
-    <form class="load-picture-form">
-        <div class="custom-file" style="position:absolute; width:13em;">
-            <input type="file" class="custom-file-input load-picture-btn" accept="image/*">
-            <label class="custom-file-label btn-sm" style="padding-right:20px; width:15em;"><i class="fa fa-upload"></i> Upload Picture</label>
-        </div>
-        <button class="btn btn-outline-danger btn-lg load-whiteboard-btn btn-sm" style="margin-left:16em; width:15em;">Remove Picture</button>
-    </form>
+<div class="row" style="height:36px;">
+    <div class="builder-coords"></div>
+    <div class="builder-toolbar">
+        <form class="load-picture-form">
+            <div class="custom-file" style="position:absolute; width:13em;">
+                <input type="file" class="custom-file-input load-picture-btn" accept="image/*">
+                <label class="custom-file-label btn-sm" style="padding-right:20px; width:15em;"><i class="fa fa-upload"></i> Upload Picture</label>
+            </div>
+            <button class="btn btn-outline-danger btn-lg load-whiteboard-btn btn-sm" style="margin-left:16em; width:15em;">Remove Picture</button>
+        </form>
+    </div>
 </div>
-<div class="prototype">
+<div class="prototype row">
     <div class="prototype-image view-div container-fluid"></div>
     <div class="prototype-image-frame view-div container-fluid"></div>
-    <div class="prototype-image-overlay container-fluid" style="padding-left:0;"></div>
+    <div class="prototype-image-overlay container-fluid"></div>
 </div>`;
 
 export interface Picture {
@@ -292,7 +300,7 @@ export class BuilderView extends CentralView {
     }
 
     createWhiteboard (): void {
-        const size: { width: number, height: number } = this.getActiveScreenSize();
+        const size: { width: number, height: number } = this.getActivePanelSize();
         this.loadPicture({
             fileName: "whiteboard",
             fileExtension: ".gif",
@@ -304,7 +312,7 @@ export class BuilderView extends CentralView {
     }
 
     protected createImageFrametLayer (): void {
-        const size: { width: number, height: number } = this.getActiveScreenSize();
+        const size: { width: number, height: number } = this.getActivePanelSize();
         this.loadPicture({
             fileName: "image-frame",
             fileExtension: ".gif",
@@ -328,7 +336,7 @@ export class BuilderView extends CentralView {
             // load the image
             const imageElement: HTMLImageElement = new Image();
             imageElement.src = desc.fileContent;
-            const maxSize: { width: number, height: number } = this.getActiveScreenSize();
+            const maxSize: { width: number, height: number } = this.getActivePanelSize();
             if (opt.width) { imageElement.width = opt.width; }
             if (opt.height) { imageElement.height = opt.height; }
             $el.html(imageElement);
@@ -344,13 +352,13 @@ export class BuilderView extends CentralView {
 
     getActiveImageSize (): { width: number, height: number } {
         const width: number = parseFloat($(`.prototype-screens .tab-pane.active .prototype-image`).css("width")) || window.innerWidth || MIN_WIDTH;
-        const height: number = parseFloat($(`.prototype-screens .tab-pane.active .prototype-image`).css("height")) || window.innerHeight || MIN_HEIGHT;
+        const height: number = parseFloat($(`.prototype-screens .tab-pane.active .prototype-image`).css("height")) || (window.innerHeight - toolbarHeight) || MIN_HEIGHT;
         return { width, height };
     }
-    getActiveScreenSize (): { width: number, height: number } {
+    getActivePanelSize (): { width: number, height: number } {
         const width: number = parseFloat($(`.prototype-screens .tab-pane.active`).css("width")) || window.innerWidth || MIN_WIDTH;
         const height: number = parseFloat($(`.prototype-screens .tab-pane.active`).css("height")) || window.innerHeight || MIN_HEIGHT;
-        return { width, height };
+        return { width, height: height - (1.5 * toolbarHeight) };
     }
 
     protected async onLoadPicture (evt: JQuery.ChangeEvent): Promise<Picture> {

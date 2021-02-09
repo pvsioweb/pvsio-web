@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
 		"target": "es6",
-		"module": "commonjs", // webpack required commonjs but ultimately creates a UMD bundle
+		"module": "UMD",
 		"moduleResolution": "node",
 		"removeComments": true,
 		"sourceMap": true,

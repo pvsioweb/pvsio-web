@@ -42,6 +42,7 @@ const examplesDir: string = path.join(__dirname, "../examples");
 const projectsDir: string = path.join(examplesDir, "projects");
 const demosDir: string = path.join(examplesDir, "demos");
 const tutorialsDir: string = path.join(examplesDir, "tutorials");
+const bundleDir: string = path.join(__dirname, "../../bundle");
 
 const helpMsg: string = `
     Usage: node PVSioWebServer.js [options]
@@ -167,6 +168,8 @@ class PvsiowebServer {
         webserver.use(/(\/demos\/[^\/]+)?\/backbone\.js/, express.static(path.join(clientDir, `node_modules/backbone/backbone.js`)));
         webserver.use(/(\/demos\/[^\/]+)?\/underscore\.js/, express.static(path.join(clientDir, `node_modules/underscore/underscore-min.js`)));
         webserver.use(/(\/demos\/[^\/]+)?\/jquery\.js/, express.static(path.join(clientDir, `node_modules/jquery/dist/jquery.min.js`)));
+
+        webserver.use(/(\/demos\/[^\/]+)?\/pvsioweb\.min\.js/, express.static(path.join(bundleDir, `client/pvsioweb.min.js`)));
 
         this.wsServer = new ws.Server({ server: this.httpServer });
         this.wsServer.on("connection", (socket: WebSocket) => {

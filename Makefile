@@ -8,7 +8,18 @@ compile:
 	npm run build
 
 build:
-	npm run build
+	make compile
+	make copy
+	make bundle
+
+bundle:
+	npm run webpack
+
+devel:
+	npm run devel
+	make copy
+
+copy:
 	-cp src/client/*.html dist/client
 	-cp src/client/*.ico dist/client
 	-cp src/client/*.json dist/client
@@ -92,5 +103,6 @@ copy-handlebars:
 
 clean:
 	rm -rf dist
+	rm -rf bundle
 
 .PHONY: examples

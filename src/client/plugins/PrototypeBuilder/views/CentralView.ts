@@ -25,8 +25,10 @@ const headerTemplate: string = `
 <a draggable="false" class="nav-link{{#if active}} active{{/if}}" id="{{tabId}}" data-toggle="tab" href="#{{controls}}" role="tab" aria-controls="{{controls}}" aria-selected="true">{{label}}</a>
 </li>`;
 
+const minHeight: number = 480; // px
+
 const bodyTemplate: string = `
-<div id="{{panelId}}" class="container-fluid tab-pane show no-gutters{{#if active}} active{{/if}}" aria-labelledby="{{controlledBy}}" style="padding:0; position:relative; min-height:480px; top:1em;">
+<div id="{{panelId}}" class="container-fluid tab-pane show no-gutters{{#if active}} active{{/if}}" aria-labelledby="{{controlledBy}}" style="padding:0; position:relative; min-height:${minHeight}px;">
     {{content}}
 </div>`;
 
@@ -51,7 +53,7 @@ export type DeleteWidgetEvent = CreateWidgetEvent;
 export type CutWidgetEvent = CreateWidgetEvent; 
 
 export const MIN_WIDTH: number = 800; //px
-export const MIN_HEIGHT: number = 400; //px
+export const MIN_HEIGHT: number = minHeight; //px
 
 export abstract class CentralView extends Backbone.View {
     protected connection: Connection;

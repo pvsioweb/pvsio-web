@@ -102,8 +102,8 @@ const collapsiblePanelTemplate: string = `
 .pvsioweb-collapsible-panel {
     display: block;
     position: sticky;
-    top: 30px;
-    height: 30px;
+    top: 28px;
+    height: 28px;
 }
 .pvsioweb-collapsible-panel span {
     font-size: small;
@@ -111,7 +111,7 @@ const collapsiblePanelTemplate: string = `
 }
 </style>
 <div id="{{id}}-panel" class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow pvsioweb-collapsible-panel">
-    <span class="navbar-brand p-0" style="width:100%;">
+    <span class="navbar-brand container-fluid px-0">
         <span class="dropdown">
             <button type="button" class="btn btn-sm btn-outline-light fa fa-bars" id="{{id}}-menu-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
             <div class="dropdown-menu" style="margin:10px;" aria-labelledby="{{id}}-menu-btn">
@@ -122,8 +122,8 @@ const collapsiblePanelTemplate: string = `
                 <a class="dropdown-item btn-sm" href="#">Save</a>
                 <a class="dropdown-item btn-sm" href="#">Save As..</a>
             </div>
+            <span id="{{id}}-label" class="label">{{name}}</span>
         </span>
-        <span id="{{id}}-label" class="label">{{name}}</span>
         <span data-toggle="collapse" data-target="#{{id}}-content" id="{{id}}-collapse-icon" style="float:right; padding-right:34px;" class="icon toggle-collapse fa {{#if showContent}}fa-minus-square{{else}}fa-plus-square{{/if}}"></i>
     </span>
     {{#if toolbar}}

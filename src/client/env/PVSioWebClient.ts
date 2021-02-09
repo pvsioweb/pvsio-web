@@ -9,9 +9,10 @@ export class PVSioWebClient {
 
     protected layoutManager: LayoutManager;
 
-    constructor (opt?: { connection?: Connection}) {
+    constructor (opt?: { connection?: Connection, autostart?: boolean }) {
         this.connection = opt?.connection || new WebSocketConnection();
-        this.layoutManager = new LayoutManager({ version: this.pvsioweb_version });
+        this.layoutManager = new LayoutManager({ version: this.pvsioweb_version, parent: "#pvsioweb" });
+        if (opt?.autostart) { this.start(); }
     }
 
     async start (): Promise<boolean> {
