@@ -1,6 +1,7 @@
 //@ts-check
 'use strict';
 const path = require('path');
+const TerserPlugin = require("terser-webpack-plugin");
 module.exports = {
     entry: './src/client/builder.ts',
     output: {
@@ -12,7 +13,18 @@ module.exports = {
         extensions: ['.tsx', '.ts', '.js']
     },
     optimization: {
-        minimize: false
+        minimize: true,
+        minimizer: [
+            new TerserPlugin({
+                terserOptions: {
+                    // https://github.com/webpack-contrib/terser-webpack-plugin#terseroptions
+                    mangle: true,
+                    compress: true,
+                    keep_fnames: false,
+                    keep_classnames: true
+                }
+            })
+        ]
     },
     module: {
         rules: [
