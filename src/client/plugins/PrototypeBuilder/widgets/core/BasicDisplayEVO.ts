@@ -72,12 +72,12 @@ export class BasicDisplayEVO extends WidgetEVO {
      */
     constructor (id: string, coords: Coords, opt?: DisplayOptions) {
         super(id, coords, opt);
+        this.kind = "Display";
 
         opt = opt || {};
         opt.css = opt.css || {};
 
         // override default style options of WidgetEVO as necessary before creating the DOM element with the constructor of module WidgetEVO
-        this.type = opt.type || "display";
         this.css["background-color"] = opt.css["background-color"] || "black";
         this.css.color = opt.css.color || "white";
         this.css.cursor = opt.css.cursor || "default";
@@ -145,7 +145,7 @@ export class BasicDisplayEVO extends WidgetEVO {
     }
 
     getDescription (): string {
-        return "Basic display, suitable for rendering text and numbers.";
+        return "Suitable for rendering text and numbers.";
     }
 
     /**

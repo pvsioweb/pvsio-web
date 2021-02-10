@@ -118,7 +118,6 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
         opt.css = opt.css || {};
 
         // override options
-        this.type = opt.type || "numericdisplay";
         this.css["background-color"] = (opt.css["background-color"] && opt.css["background-color"] !== "transparent") ? opt.css["background-color"] : "black";
 
         // invoke BasicDisplayEVO constructor to create the widget
@@ -286,7 +285,7 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
                 };
                 //  console.log(frac_style);
                 const dom = Handlebars.compile(digitsTemplate, { noEscape: true })({
-                    type: this.type,
+                    type: this.getConstructorName(),
                     whole: whole_style,
                     frac: frac_style,
                     point: point_style
@@ -312,9 +311,7 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
     }
 
     getDescription (): string {
-        return `Numeric display, suitable for rendering numbers. 
-                Enhances the visibility of decimal point and fractional digits.
-                Provides a cursor for highlighting digits.`;
+        return `Enhances the visibility of digits, and provides a cursor for highlighing digits.`;
     }
 
     // @override

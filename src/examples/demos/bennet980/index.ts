@@ -6,7 +6,7 @@
 import { LoopbackConnection as Connection } from '../../../client/env/LoopbackConnection';
 
 import { ToggleButtonEVO } from '../../../client/plugins/PrototypeBuilder/widgets/core/ToggleButtonEVO';
-import { PushButtonEVO } from '../../../client/plugins/PrototypeBuilder/widgets/core/PushButtonEVO';
+import { SelectionButtonEVO } from '../../../client/plugins/PrototypeBuilder/widgets/core/SelectionButtonEVO';
 import { DialEVO } from '../../../client/plugins/PrototypeBuilder/widgets/core/DialEVO';
 
 type Mode = "mainScreen" | "ventSetupScreen" | "ventSetupScreenGH" | "ventSetupScreenW"
@@ -36,8 +36,8 @@ class Bennet980 {
             cancel: ToggleButtonEVO,
             start: ToggleButtonEVO,
             weight: ToggleButtonEVO,
-            male: PushButtonEVO,
-            female: PushButtonEVO,
+            male: SelectionButtonEVO,
+            female: SelectionButtonEVO,
             height: ToggleButtonEVO
         },
         ventSetup: {
@@ -267,7 +267,7 @@ class Bennet980 {
                         this.render();
                     }
                 }),
-                male:  new PushButtonEVO("male", {
+                male:  new SelectionButtonEVO("male", {
                     top: 293, left: 137, width: 38, height: 48
                 }, { 
                     connection: this.connection,
@@ -292,7 +292,7 @@ class Bennet980 {
                         this.render();
                     }
                 }),
-                female:  new PushButtonEVO("female", {
+                female:  new SelectionButtonEVO("female", {
                     top: 293, left: 183, width: 38, height: 48
                 }, { 
                     connection: this.connection,

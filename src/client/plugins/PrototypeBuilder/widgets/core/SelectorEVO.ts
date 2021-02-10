@@ -79,7 +79,7 @@ export class SelectorEVO extends DialEVO {
 
     // @override
     getDescription (): string {
-        return `Selector widget, emulates a rotary switch that can be operated with clicks.`;
+        return `N-positions rotary switch.`;
     }
 
 }

@@ -5,7 +5,7 @@ export interface PushButtonOptions extends ButtonOptions {
     activeColor?: string
 };
 
-export class PushButtonEVO extends ButtonEVO {
+export class SelectionButtonEVO extends ButtonEVO {
 
     protected activeFlag: boolean = false; // false means disabled, true means enabled
 
@@ -20,7 +20,6 @@ export class PushButtonEVO extends ButtonEVO {
         // override default button style
         this.activeColor = opt.activeColor || "black";
         this.inactiveColor = this.css["background-color"];
-        this.type = opt.type || "pushbutton";
     }
 
     isActive (): boolean {
@@ -85,7 +84,6 @@ export class PushButtonEVO extends ButtonEVO {
     }
 
     getDescription (): string {
-        return `Touchscreen display, renders touch-screen elements.
-            Click events are emitted when the element is released.`;
+        return `Becomes enabled when pressed, and remains enabled.`;
     }
 }

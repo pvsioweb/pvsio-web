@@ -71,9 +71,6 @@ export class MouseCursor extends WidgetEVO {
         opt = opt || {};
         opt.css = opt.css || {};
 
-        // set widget type
-        this.type = this.type || "MouseCursor";
-
         // override default style options of WidgetEVO as necessary before creating the DOM element with the constructor of module WidgetEVO
         this.css["background-color"] = "transparent";
         this.css.opacity = opt.css.opacity || 0.9;

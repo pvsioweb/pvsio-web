@@ -26,7 +26,7 @@ export class PIMWidget extends TouchScreenEVO {
 
     constructor (id: string, coords: Coords, opt: PIMWidgetOptions) {
         super(id, coords);
-        this.type = "pim-button";
+        // this.type = "pim-button";
         opt.evts = ["click"];
 
         this.name = opt.name || "New widget";

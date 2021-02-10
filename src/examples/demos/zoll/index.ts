@@ -6,7 +6,7 @@
 import { LoopbackConnection as Connection } from '../../../client/env/LoopbackConnection';
 
 import { ToggleButtonEVO } from '../../../client/plugins/PrototypeBuilder/widgets/core/ToggleButtonEVO';
-import { PushButtonEVO } from '../../../client/plugins/PrototypeBuilder/widgets/core/PushButtonEVO';
+import { SelectionButtonEVO } from '../../../client/plugins/PrototypeBuilder/widgets/core/SelectionButtonEVO';
 import { BasicDisplayEVO } from '../../../client/plugins/PrototypeBuilder/widgets/core/BasicDisplayEVO';
 import { Coords } from '../../../client/plugins/PrototypeBuilder/widgets/core/WidgetEVO';
 import { SelectorEVO } from '../../../client/plugins/PrototypeBuilder/widgets/core/SelectorEVO';

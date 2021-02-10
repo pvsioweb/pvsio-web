@@ -38,13 +38,13 @@ export class TouchScreenEVO extends ButtonEVO {
     
     constructor (id: string, coords: Coords, opt?: TouchScreenOptions) {
         super(id, coords, opt);
+        this.kind = "Touchscreen";
         opt = opt || {};
         opt.css = opt.css || {};
 
         // override default button style
         this.css["background-color"] = opt.css["background-color"] || "steelblue";
         this.css["font-color"] = opt.css["font-color"] || "white";
-        this.type = opt.type || "touchscreendisplay";
 
         // set widget keys
         this.attr.displayName = opt.displayName || id;
@@ -86,7 +86,7 @@ export class TouchScreenEVO extends ButtonEVO {
     }
 
     getDescription (): string {
-        return `Touchscreen display, renders touch-screen elements.
+        return `Renders touch-screen elements.
             Click events are emitted when the element is released.`;
     }
 }

@@ -23,6 +23,7 @@ export class DialEVO extends ButtonEVO {
     
     constructor (id: string, coords: Coords, opt?: DialOptions) {
         super(id, { width: 64, height: 64, ...coords }, { keyCodes: "ArrowUp, ArrowDown", ...opt });
+        this.kind = "Dial";
 
         opt = opt || {};
         opt.css = opt.css || {};
@@ -158,9 +159,7 @@ export class DialEVO extends ButtonEVO {
 
     // @override
     getDescription (): string {
-        return `Dial widget, emulates buttons that can be rotated and pressed.
-            The mouse wheel can be used to rotate the dial.
-            Rotate events are emitted when the button is pressed.`;
+        return `Can be rotated to any angle. Can also be pressed.`;
     }
 
 }

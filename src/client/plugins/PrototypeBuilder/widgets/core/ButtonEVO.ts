@@ -91,12 +91,12 @@ export class ButtonEVO extends WidgetEVO {
 
     constructor (id: string, coords: Coords, opt?: ButtonOptions) {
         super(id, coords, opt);
-
+        this.kind = "Button";
+        
         opt = opt || {};
         opt.css = opt.css || {};
 
         // override default style options of WidgetEVO as necessary before creating the DOM element with the constructor of module WidgetEVO
-        this.type = opt.type || "button";
         this.css["background-color"] = opt.css["background-color"] || "transparent";
         this.css.color = opt.css.color || "white";
         this.css["cursor"] = opt.css.cursor || "pointer";
@@ -375,7 +375,7 @@ export class ButtonEVO extends WidgetEVO {
     }
 
     getDescription (): string {
-        return `Button widget, a semi-transparent element that captures user interactions with physical buttons.
+        return `Creates transparent hotspot areas over button widgets.
             Click events are emitted when the button is pressed.`;
     }
 

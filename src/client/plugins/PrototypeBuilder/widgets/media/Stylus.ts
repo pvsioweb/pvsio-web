@@ -61,9 +61,6 @@ export class Stylus extends WidgetEVO {
         coords = coords || {};
         opt = opt || {};
 
-        // set widget type
-        this.type = this.type || "Stylus";
-
         // adjust position, based on the stylus size: the coordinates are indicating the position of the stylus pointer
         this.width = 40;
         this.height = 640;

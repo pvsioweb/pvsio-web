@@ -1,7 +1,7 @@
-import { PushButtonEVO, PushButtonOptions } from "./PushButtonEVO";
+import { SelectionButtonEVO, PushButtonOptions } from "./SelectionButtonEVO";
 import { Coords } from "./WidgetEVO";
 
-export class ToggleButtonEVO extends PushButtonEVO {
+export class ToggleButtonEVO extends SelectionButtonEVO {
 
     protected activeFlag: boolean = false; // false means disabled, true means enabled
 
@@ -10,7 +10,6 @@ export class ToggleButtonEVO extends PushButtonEVO {
 
     constructor (id: string, coords: Coords, opt?: PushButtonOptions) {
         super(id, coords, opt);
-        this.type = opt?.type || "togglebutton";
     }
 
     /**
@@ -37,7 +36,7 @@ export class ToggleButtonEVO extends PushButtonEVO {
     }
 
     getDescription (): string {
-        return `Touchscreen display, renders touch-screen elements.
-            Click events are emitted when the element is released.`;
+        return `On/Off toggle button.`;
+
     }
 }

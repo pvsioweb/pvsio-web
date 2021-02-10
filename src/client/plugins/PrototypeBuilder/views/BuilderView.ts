@@ -4,7 +4,7 @@ import { HotspotEditor, HotspotEditorEvents, HotspotData, HotspotsMap } from './
 
 import { CentralViewOptions, CreateWidgetEvent, WidgetsMap, BuilderEvents, MIN_WIDTH, MIN_HEIGHT, CentralView } from './CentralView';
 import { WidgetData, WidgetEditor, WidgetEditorEvents } from './editors/WidgetEditor';
-import { WidgetClassDescriptor, widgets } from '../widgets/widgets';
+import { WidgetClassDescriptor, widgetList } from '../widgets/widgetList';
 
 import * as utils from '../../../utils/pvsiowebUtils';
 import * as fsUtils from '../../../utils/fsUtils';
@@ -167,8 +167,8 @@ export class BuilderView extends CentralView {
     createWidget (widgetData: WidgetData): WidgetEVO {
         if (widgetData) {
             // console.log(widgetData);
-            if (widgetData.cons) {
-                const desc: WidgetClassDescriptor = widgets.find((desc: WidgetClassDescriptor) => {
+            if (widgetData.cons && widgetData.kind) {
+                const desc: WidgetClassDescriptor = widgetList[widgetData.kind].find((desc: WidgetClassDescriptor) => {
                     return desc.name === widgetData.cons;
                 });
                 // console.log(desc);
@@ -258,8 +258,9 @@ export class BuilderView extends CentralView {
                     const widgetData: WidgetData = {
                         ...data.clone,
                         name: widget.getName(),
+                        kind: widget.getKind(),
                         opt: widget.getOptions(),
-                        cons: widget.getType()
+                        cons: widget.getConstructorName()
                     };
                     this.createWidget(widgetData);
                 }
@@ -282,8 +283,9 @@ export class BuilderView extends CentralView {
                         id,
                         coords,
                         name: this.widgetsMap[id]?.getName() || WidgetEVO.uuid(),
+                        kind: this.widgetsMap[id]?.getKind(),
                         opt: this.widgetsMap[id]?.getOptions(),
-                        cons: this.widgetsMap[id]?.getType()
+                        cons: this.widgetsMap[id]?.getConstructorName()
                     }
                     const editor: WidgetEditor = new WidgetEditor({ widgetData });
                     editor.on(WidgetEditorEvents.ok, (widgetData: WidgetData) => {

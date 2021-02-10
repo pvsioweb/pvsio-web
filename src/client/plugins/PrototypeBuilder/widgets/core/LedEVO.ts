@@ -71,6 +71,7 @@ export class LedEVO extends WidgetEVO {
      */
     constructor (id: string, coords: Coords, opt?: LedOptions) {
         super(id, coords, opt);
+        this.kind = "LED";
 
         opt = opt || {};
         opt.css = opt.css || {};
@@ -84,7 +85,6 @@ export class LedEVO extends WidgetEVO {
         this.radius = Math.min(width, height, maxWidth, maxHeight) / 2;
 
         // override default style options of WidgetEVO as necessary before creating the DOM element with the constructor of module WidgetEVO
-        this.type = opt.type || "led";
         this.css["background-color"] = opt.css["color"] || opt.css["background-color"] || COLOR.brightGreen;
         this.css.cursor = opt.css.cursor || "default";
         this.css["border-radius"] = opt.css["border-radius"] || `${this.radius}px`;
@@ -159,6 +159,6 @@ export class LedEVO extends WidgetEVO {
 
     // @override
     getDescription (): string {
-        return "LED widget, renders multi-color LED lights.";
+        return "Multi-color LED light.";
     }
 }

@@ -103,7 +103,7 @@ export type Renderable = string | number | {};
 export type Coords<T = string | number> = { top?: T, left?: T, width?: T, height?: T };
 export type WidgetDescriptor = {
     id: string,
-    type: string,
+    cons: string, // constructor name
     attr: WidgetAttr,
     coords: Coords,
     style: CSS,
@@ -229,12 +229,12 @@ export type WidgetAttr = {
 
 export abstract class WidgetEVO extends Backbone.Model {
     static readonly MAX_COORDINATES_ACCURACY: number = 0; // max 0 decimal digits for coordinates, i.e., position accuracy is 1px
-    readonly widget: boolean = true; // this flag can be used to identify whether an object is a widget
+    readonly widget: boolean = true; // this is used in the playback player to recognize widgets. TODO: remove this attribute.
 
     protected attr: WidgetAttr = {};
+    protected kind: string = "widget"; // e.g., display, button, dial.. useful for grouping together similar widgets. This attribute will be overridden by concrete classes.
 
     id: string;
-    type: string;
 
     $parent: JQuery<HTMLElement>;
     parentSelector: string; // this is useful for debugging purposes
@@ -256,7 +256,6 @@ export abstract class WidgetEVO extends Backbone.Model {
     marker: JQuery<HTMLElement>;
 
     evts: WidgetEvents = null;
-    alias: string;
     readonly fontPadding: number = 6;
     protected rendered?: boolean = false;
 
@@ -276,7 +275,6 @@ export abstract class WidgetEVO extends Backbone.Model {
         opt.css = opt.css || {};
         coords = coords || {};
         this.id = id;
-        this.type = opt.type || "widget";
         opt.parent = opt.parent || "body";
         this.parentSelector = (typeof opt.parent === "string") ? 
             opt.parent === "body" || opt.parent.startsWith("#") || opt.parent.startsWith(".") ? opt.parent : `#${opt.parent}`
@@ -663,6 +661,13 @@ export abstract class WidgetEVO extends Backbone.Model {
     }
 
     /**
+     * Returns the widget kind, useful for grouping together similar widgets.
+     */
+    getKind (): string {
+        return this.kind || this.getConstructorName();
+    }
+
+    /**
      * Sets the first attribute the widget, which is considered the widget name.
      * The function has no effect if the widget does not have attributes.
      */
@@ -788,8 +793,8 @@ export abstract class WidgetEVO extends Backbone.Model {
         return this.setPositionAndSize(data);
     }
 
-    getType (): string {
-        return this.type;
+    getConstructorName (): string {
+        return this.constructor.name;
     }
 
     getId (): string {
@@ -923,7 +928,7 @@ export abstract class WidgetEVO extends Backbone.Model {
     toJSON (): WidgetDescriptor {
         return {
             id: this.id,
-            type: this.alias || this.getType(),
+            cons: this.getConstructorName(),
             attr: this.getAttributes(),
             coords: this.getCoordinates(),
             evts: this.getEvents(),

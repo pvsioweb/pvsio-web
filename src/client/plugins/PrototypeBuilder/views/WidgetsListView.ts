@@ -3,7 +3,7 @@ import { SideView, SideViewOptions } from './SideView';
 
 const widgetsListViewTemplate: string = `
 {{#each widgets}}
-<button type="button" class="btn-sm list-group-item list-group-item-action widget-list-item" widget-id="{{widget-id}}" widget-name="{{name}}">{{type}}: {{name}}</button>
+<button type="button" class="btn-sm list-group-item list-group-item-action widget-list-item" widget-id="{{widget-id}}" widget-name="{{name}}">{{kind}}: {{name}}</button>
 {{/each}}
 `;
 
@@ -16,9 +16,9 @@ export class WidgetsListView extends SideView {
     }
 
     refresh (widgetsMap: WidgetsMap): void {
-        const data: { [id: string]: { "widget-id": string, type: string, name: string }} = {};
+        const data: { [id: string]: { "widget-id": string, kind: string, name: string }} = {};
         for (let i in widgetsMap) {
-            data[i] = { "widget-id": widgetsMap[i].getId(), type: widgetsMap[i].getType(), name: widgetsMap[i].getName() };
+            data[i] = { "widget-id": widgetsMap[i].getId(), kind: widgetsMap[i].getKind(), name: widgetsMap[i].getName() };
         }
         // update DOM
         const content: string = Handlebars.compile(widgetsListViewTemplate, { noEscape: true })({
