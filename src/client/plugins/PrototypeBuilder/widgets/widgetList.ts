@@ -17,25 +17,24 @@ export interface WidgetClassDescriptor {
 
 export interface WidgetClassMap { [ kind: string ]: WidgetClassDescriptor[] };
 
-// NOTE: name cannot not contain white spaces for now
 export const widgetList: WidgetClassMap = {
-    "Display": [ // the kind should be consistent with that declared in the class
-        { label: "Basic-Display", cons: BasicDisplayEVO },
-        { label: "Numeric-Display", cons: NumericDisplayEVO }
+    "Display": [ // the kind should be identical with that declared in the class
+        { label: "Basic Display", cons: BasicDisplayEVO },
+        { label: "Numeric Display", cons: NumericDisplayEVO }
     ],
     "Button": [
-        { label: "Standard-Button", cons: ButtonEVO },
-        { label: "Selection-Button", cons: SelectionButtonEVO },
-        { label: "Toggle-Switch", cons: ToggleButtonEVO }
+        { label: "Standard Button", cons: ButtonEVO },
+        { label: "Selection Button", cons: SelectionButtonEVO },
+        { label: "Toggle Switch", cons: ToggleButtonEVO }
     ],
     "Touchscreen": [
-        { label: "TouchScreen-Element", cons: TouchScreenEVO }
+        { label: "TouchScreen Element", cons: TouchScreenEVO }
     ],
     "Dial": [
-        { label: "Rotary-Dial", cons: DialEVO },
-        { label: "Switch-Selector", cons: SelectorEVO }
+        { label: "Rotary Dial", cons: DialEVO },
+        { label: "Switch Selector", cons: SelectorEVO }
     ],
     "LED": [
-        { label: "Multicolor-LED", cons: LedEVO }
+        { label: "Multicolor LED", cons: LedEVO }
     ]
 };

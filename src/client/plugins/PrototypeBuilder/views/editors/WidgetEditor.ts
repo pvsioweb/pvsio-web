@@ -63,7 +63,7 @@ const containerTemplate: string = `
                                 <div id="{{cons.name}}-evts" class="text-muted" style="min-width:200px; height:60px; overflow:auto; margin-top:8px;">
                                 <!-- {{cons.name}}-events -->
                                 </div>
-                                <h5>{{cons.name}}</h5>
+                                <h5>{{this.label}}</h5>
                                 <small id="{{cons.name}}-desc" class="text-muted carousel-description">
                                 <!-- {{cons.name}}-description -->
                                 </small>
