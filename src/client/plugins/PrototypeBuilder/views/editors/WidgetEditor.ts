@@ -20,7 +20,7 @@ export const WidgetEditorEvents = {
 };
 
 const previewHeight: number = 31; //px
-// all input forms must have attributes "name" and "value", as they will be used to identify key and value of coords, attr, css
+// all input forms must have attributes "name" and "value", which will be used to identify the attribute name (coords, attr, css) and its value
 const containerTemplate: string = `
 <div id="editorId" class="card">
     <div class="card-header" style="position:absolute; left:-160px; background:gainsboro; border-radius:4px; padding-bottom:22px;">
@@ -49,7 +49,7 @@ const containerTemplate: string = `
                     <!-- carousel indicators -->
                     <ol class="carousel-indicators" style="position:relative;">
                         {{#each this}}
-                        <li data-target="#{{kind}}-carousel" kind="{{kind}}" cons="{{name}}" data-slide-to="{{@index}}" {{#if @first}}class="active"{{/if}}></li>
+                        <li data-target="#{{kind}}-carousel" kind="{{kind}}" cons="{{cons.name}}" data-slide-to="{{@index}}" {{#if @first}}class="active"{{/if}}></li>
                         {{/each}}
                     </ol>
                     <div class="carousel-inner">
@@ -57,15 +57,15 @@ const containerTemplate: string = `
                         {{#each this}}
                         <div class="carousel-item {{#if @first}}active{{/if}}">
                             <div style="width:60%; margin-left:20%;">
-                                <div id="{{name}}-preview" class="widget-preview" style="min-width:200px; height:${previewHeight}px; position:relative; box-shadow:0px 0px 10px #666;">
-                                <!-- {{name}}-preview -->
+                                <div id="{{cons.name}}-preview" class="widget-preview" style="min-width:200px; height:${previewHeight}px; position:relative; box-shadow:0px 0px 10px #666;">
+                                <!-- {{cons.name}}-preview -->
                                 </div>
-                                <div id="{{name}}-evts" class="text-muted" style="min-width:200px; height:60px; overflow:auto; margin-top:8px;">
-                                <!-- {{name}}-events -->
+                                <div id="{{cons.name}}-evts" class="text-muted" style="min-width:200px; height:60px; overflow:auto; margin-top:8px;">
+                                <!-- {{cons.name}}-events -->
                                 </div>
-                                <h5>{{name}}</h5>
-                                <small id="{{name}}-desc" class="text-muted carousel-description">
-                                <!-- {{name}}-description -->
+                                <h5>{{cons.name}}</h5>
+                                <small id="{{cons.name}}-desc" class="text-muted carousel-description">
+                                <!-- {{cons.name}}-description -->
                                 </small>
                             </div>
                         </div>
@@ -83,20 +83,20 @@ const containerTemplate: string = `
                 </div>
 
                 {{#each this}}
-                <div id="{{kind}}-{{this.name}}" class="col-md-6 ml-auto" style="height:400px; overflow:auto; display:{{#if @first}}block{{else}}none{{/if}};">
+                <div id="{{kind}}-{{cons.name}}" class="col-md-6 ml-auto" style="height:400px; overflow:auto; display:{{#if @first}}block{{else}}none{{/if}};">
                     <div class="widget-id input-group input-group-sm" style="display:none;">
                         <div class="input-group-prepend" style="min-width:40%;">
                             <span class="input-group-text" style="width:100%;">ID</span>
                         </div>
-                        <input type="text" class="form-control" value="{{../../id}}" placeholder="{{../../id}}" aria-label="{{../../id}}" aria-describedby="{{name}}-id">
+                        <input type="text" class="form-control" value="{{../../id}}" placeholder="{{../../id}}" aria-label="{{../../id}}" aria-describedby="{{cons.name}}-id">
                         <br>
                     </div>
                     
-                    <div id="{{name}}-attr" class="widget-attr">
-                    <!-- {{name}}-attributes -->
+                    <div id="{{cons.name}}-attr" class="widget-attr">
+                    <!-- {{cons.name}}-attributes -->
                     </div>
                     
-                    <div id="{{name}}-coords" class="widget-coords" style="display:none;">
+                    <div id="{{cons.name}}-coords" class="widget-coords" style="display:none;">
                         <br>
                         {{#each ../../coords}}
                         <div class="input-group input-group-sm">
@@ -108,9 +108,9 @@ const containerTemplate: string = `
                         {{/each}}
                     </div>
                     <br>
-                    <div id="{{name}}-viz" class="widget-viz"></div>
+                    <div id="{{cons.name}}-viz" class="widget-viz"></div>
                     <br>
-                    <div id="{{name}}-css" class="widget-css"></div>
+                    <div id="{{cons.name}}-css" class="widget-css"></div>
                 </div>
                 {{/each}}
             </div>
@@ -163,15 +163,27 @@ export class WidgetEditor extends Backbone.View {
         this.installHandlers();
     }
 
-    selectTab (desc: { kind: string, cons: string }): boolean {
+    /**
+     * Replaces whitespaces and '.' with '-'. This is needed if the string is used as a class name or identifier in the HTML
+     * @param str 
+     */
+    protected safeString (str: string): string {
+        return str?.replace(/[\.\s]/g, "-") || "";
+    }
+
+    /**
+     * Click on a tab. Tab names are specified by giving widget kind and widget constructor name
+     */
+    protected selectTab (desc: { kind: string, cons: string }): boolean {
         if (desc && desc.kind) {
             $(".widget-class").removeClass("active");
             $(`#${desc.kind}-tab`).addClass("active");
             $(".widget-info").removeClass("active show");
             $(`#${desc.kind}`).addClass("active show");
             if (desc.cons) {
-                $(`#${desc.kind}-carousel .carousel-indicators li`).removeClass("active");
-                $(`#${desc.kind}-carousel .carousel-indicators li[cons='${desc.cons}']`).addClass("active");                
+                // $(`#${desc.kind}-carousel .carousel-indicators li`).removeClass("active");
+                // $(`#${desc.kind}-carousel .carousel-indicators li[cons='${desc.cons}']`).addClass("active");   
+                $(`#${desc.kind}-carousel .carousel-indicators li[cons='${desc.cons}']`).trigger("click");             
             }
             return true;
         }
@@ -206,85 +218,87 @@ export class WidgetEditor extends Backbone.View {
         for (let kind in widgetList) {
             const widgetsDesc: WidgetClassDescriptor[] = widgetList[kind];
             for (let i = 0; i < widgetsDesc.length; i++) {
-                // create widget preview
-                const widgetName: string = widgetsDesc[i].name;
-                const coords: Coords = { width, height };
-                const previewId: string = uuid();
-                const options: WidgetOptions = {
-                    ...this.widgetData?.opt,
-                    parent: `${widgetName}-preview`
-                };
-                const obj: WidgetEVO = new widgetsDesc[i].cons(previewId, coords, options);
-                obj.setName(this.widgetData.name);
+                if (widgetsDesc[i].cons?.name) {
+                    // create widget preview
+                    const cons: string = widgetsDesc[i].cons.name;
+                    const coords: Coords = { width, height };
+                    const previewId: string = uuid();
+                    const options: WidgetOptions = {
+                        ...this.widgetData?.opt,
+                        parent: `${cons}-preview`
+                    };
+                    const obj: WidgetEVO = new widgetsDesc[i].cons(previewId, coords, options);
+                    obj.setName(this.widgetData.name);
 
-                // set css style
-                const css: CSS = obj.getCSS({
-                    all: true
-                });
-                const style: string = Handlebars.compile(styleTemplate)({
-                    style: css
-                });
-                $(`#${widgetName}-css`).html(style);
-                $(`#${widgetName}-css input`).on("input", (evt: JQuery.ChangeEvent) => {
-                    const key: string = evt.currentTarget?.name;
-                    if (key) {
-                        const value: string = evt.currentTarget?.value;
-                        $(evt.currentTarget).attr("value", value);
-                        const style: CSS = {};
-                        style[key] = value;
-                        obj.setCSS(style);
-                        obj.renderSample();
-                    }
-                });
-
-                // set viz options
-                let vizOp: VizOptions = obj.getViz();
-                const viz: string = Handlebars.compile(vizTemplate)({
-                    viz: vizOp
-                });
-                $(`#${widgetName}-viz`).html(viz);
-
-                // set widget attributes
-                const attr: string = Handlebars.compile(attrTemplate)({
-                    attr: obj.getAttributes({ nameReplace: this.widgetData.id, keyCode: false })
-                });
-                $(`#${widgetName}-attr`).html(attr);
-                $(`#${widgetName}-attr input`).on("input", (evt: JQuery.ChangeEvent) => {
-                    const value: string = evt.currentTarget?.value;
-                    const key: string = evt.currentTarget?.name;
-                    let attr: WidgetAttr = {};
-                    if (key) {
-                        $(evt.currentTarget).attr("value", value);
-                        if (key === "keyCode") {
-                            // TODO: render appropriate controls to simplify keyboard key binding
-                        } else {
-                            attr[key] = value;
-                            obj.setAttr(attr);
+                    // set css style
+                    const css: CSS = obj.getCSS({
+                        all: true
+                    });
+                    const style: string = Handlebars.compile(styleTemplate)({
+                        style: css
+                    });
+                    $(`#${cons}-css`).html(style);
+                    $(`#${cons}-css input`).on("input", (evt: JQuery.ChangeEvent) => {
+                        const key: string = evt.currentTarget?.name;
+                        if (key) {
+                            const value: string = evt.currentTarget?.value;
+                            $(evt.currentTarget).attr("value", value);
+                            const style: CSS = {};
+                            style[key] = value;
+                            obj.setCSS(style);
                             obj.renderSample();
                         }
-                    }
-                    console.log(key, value);
-                });
-
-                // set widget events
-                const evts: string[] = obj.getEvents();
-                for (let i = 0; i < evts?.length; i++) {
-                    const evt: string = evts[i];
-                    this.listenTo(obj, evt, (data: BasicEventData) => {
-                        const fun: string = data?.fun.replace(previewId, this.widgetData.id);
-                        console.log(fun);
-                        $(`#${widgetName}-evts`).append(`<div><i class="fa fa-bolt"></i> ${fun}</div>`);
-                        clearTimeout(this.timer);
-                        this.timer = setTimeout(() => {
-                            $(`#${widgetName}-evts`).html("");
-                            this.timer = null;
-                        }, 1200);
                     });
+
+                    // set viz options
+                    let vizOp: VizOptions = obj.getViz();
+                    const viz: string = Handlebars.compile(vizTemplate)({
+                        viz: vizOp
+                    });
+                    $(`#${cons}-viz`).html(viz);
+
+                    // set widget attributes
+                    const attr: string = Handlebars.compile(attrTemplate)({
+                        attr: obj.getAttributes({ nameReplace: this.widgetData.id, keyCode: false })
+                    });
+                    $(`#${cons}-attr`).html(attr);
+                    $(`#${cons}-attr input`).on("input", (evt: JQuery.ChangeEvent) => {
+                        const value: string = evt.currentTarget?.value;
+                        const key: string = evt.currentTarget?.name;
+                        let attr: WidgetAttr = {};
+                        if (key) {
+                            $(evt.currentTarget).attr("value", value);
+                            if (key === "keyCode") {
+                                // TODO: render appropriate controls to simplify keyboard key binding
+                            } else {
+                                attr[key] = value;
+                                obj.setAttr(attr);
+                                obj.renderSample();
+                            }
+                        }
+                        // console.log(key, value);
+                    });
+
+                    // set widget events
+                    const evts: string[] = obj.getEvents();
+                    for (let i = 0; i < evts?.length; i++) {
+                        const evt: string = evts[i];
+                        this.listenTo(obj, evt, (data: BasicEventData) => {
+                            const fun: string = data?.fun.replace(previewId, this.widgetData.id);
+                            console.log(fun);
+                            $(`#${cons}-evts`).append(`<div><i class="fa fa-bolt"></i> ${fun}</div>`);
+                            clearTimeout(this.timer);
+                            this.timer = setTimeout(() => {
+                                $(`#${cons}-evts`).html("");
+                                this.timer = null;
+                            }, 1200);
+                        });
+                    }
+                    // attach widget description
+                    $(`#${cons}-desc`).html(obj.getDescription());
+                    // render widget sample
+                    obj.renderSample();
                 }
-                // attach widget description
-                $(`#${widgetName}-desc`).html(obj.getDescription());
-                // render widget sample
-                obj.renderSample();
             }
         }
         // attach handlers to the carousel controls so we can select the div with the attributes based on the active widget
@@ -298,8 +312,8 @@ export class WidgetEditor extends Backbone.View {
                     const isNext: boolean = $(evt?.currentTarget).hasClass("carousel-control-next");
                     const nextIndex: number = isNext ? (activeIndex + 1) % widgetList[kind]?.length
                         : Math.abs((activeIndex - 1) % widgetList[kind]?.length);
-                    const activeName: string = widgetList[kind][activeIndex].name;
-                    const nextName: string = widgetList[kind][nextIndex].name;
+                    const activeName: string = widgetList[kind][activeIndex]?.cons?.name;
+                    const nextName: string = widgetList[kind][nextIndex]?.cons?.name;
                     $(`#${kind}-${activeName}`).css({ display: "none" });
                     $(`#${kind}-${nextName}`).css({ display: "block" });
                 }
@@ -316,8 +330,8 @@ export class WidgetEditor extends Backbone.View {
                 if (idx && next && +idx < widgetList[kind]?.length && +next < widgetList[kind]?.length) {
                     const activeIndex: number = +idx;
                     const nextIndex: number = +next;
-                    const activeName: string = widgetList[kind][activeIndex].name;
-                    const nextName: string = widgetList[kind][nextIndex].name;
+                    const activeName: string = widgetList[kind][activeIndex]?.cons?.name;
+                    const nextName: string = widgetList[kind][nextIndex]?.cons?.name;
                     $(`#${kind}-${activeName}`).css({ display: "none" });
                     $(`#${kind}-${nextName}`).css({ display: "block" });
                 }

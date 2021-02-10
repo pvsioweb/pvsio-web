@@ -169,7 +169,7 @@ export class BuilderView extends CentralView {
             // console.log(widgetData);
             if (widgetData.cons && widgetData.kind) {
                 const desc: WidgetClassDescriptor = widgetList[widgetData.kind].find((desc: WidgetClassDescriptor) => {
-                    return desc.name === widgetData.cons;
+                    return desc.cons.name === widgetData.cons;
                 });
                 // console.log(desc);
                 if (desc) {

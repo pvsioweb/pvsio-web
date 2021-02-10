@@ -132,7 +132,7 @@ export class ButtonEVO extends WidgetEVO {
 
         // prepare timers necessary for executing press & hold actions
         this._timer = new Timer(this.rate);
-        this.callback = opt.callback || function (err, res) { console.warn("[button-widget] Warning: " + this.id + " does not have a callback :/"); };
+        this.callback = opt.callback || ((err, res) => { console.warn("[button-widget] Warning: " + this.id + " does not have a callback :/"); });
 
         this._tick_listener = () => {
             if (this._tick) {

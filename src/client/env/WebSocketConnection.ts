@@ -95,7 +95,7 @@ export class WebSocketConnection extends Backbone.Model implements Connection {
                             console.warn("[websocket-connection] Warning: server replied with error state", token.err);
                             // these are critical errors such as websocket being closed
                             if (token.err.code !== "EPIPE") {
-                                console.error(JSON.stringify(token)); // errors should always be reported in the browser console
+                                console.warn(JSON.stringify(token)); // errors should always be reported in the browser console
                             }
                         }
                         // if (token.type === "ctrl") {

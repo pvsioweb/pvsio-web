@@ -11,7 +11,7 @@ import { SelectionButtonEVO } from './core/SelectionButtonEVO';
 import { ToggleButtonEVO } from './core/ToggleButtonEVO';
 
 export interface WidgetClassDescriptor {
-    name: string,
+    label: string,
     cons: Constructable<WidgetEVO>
 };
 
@@ -20,22 +20,22 @@ export interface WidgetClassMap { [ kind: string ]: WidgetClassDescriptor[] };
 // NOTE: name cannot not contain white spaces for now
 export const widgetList: WidgetClassMap = {
     "Display": [ // the kind should be consistent with that declared in the class
-        { name: "Basic-Display", cons: BasicDisplayEVO },
-        { name: "Numeric-Display", cons: NumericDisplayEVO }
+        { label: "Basic-Display", cons: BasicDisplayEVO },
+        { label: "Numeric-Display", cons: NumericDisplayEVO }
     ],
     "Button": [
-        { name: "Standard-Button", cons: ButtonEVO },
-        { name: "Selection-Button", cons: SelectionButtonEVO },
-        { name: "Toggle-Switch", cons: ToggleButtonEVO }
+        { label: "Standard-Button", cons: ButtonEVO },
+        { label: "Selection-Button", cons: SelectionButtonEVO },
+        { label: "Toggle-Switch", cons: ToggleButtonEVO }
     ],
     "Touchscreen": [
-        { name: "TouchScreen-Element", cons: TouchScreenEVO }
+        { label: "TouchScreen-Element", cons: TouchScreenEVO }
     ],
     "Dial": [
-        { name: "Rotary-Dial", cons: DialEVO },
-        { name: "Switch-Selector", cons: SelectorEVO }
+        { label: "Rotary-Dial", cons: DialEVO },
+        { label: "Switch-Selector", cons: SelectorEVO }
     ],
     "LED": [
-        { name: "Multicolor-LED", cons: LedEVO }
+        { label: "Multicolor-LED", cons: LedEVO }
     ]
 };
