@@ -1,6 +1,8 @@
 /**
  * Interactive prototype builder for PVSio based on the html map attribute
  */
+import './css/pvsio-web.css';
+import './css/style.css';
 import { PrototypeBuilder } from './plugins/PrototypeBuilder/PrototypeBuilder';
 
 //@ts-ignore

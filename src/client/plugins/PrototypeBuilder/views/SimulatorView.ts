@@ -17,10 +17,14 @@ export class SimulatorView extends CentralView {
             data: desc?.settings
         };
         let success: boolean = await new Promise((resolve, reject) => {
-            this.connection?.sendRequest("startPvsProcess", reqStart);
-            this.connection?.onRequest("startPvsProcess", () => {
-                resolve(true);
-            });
+            if (this.connection) {
+                this.connection.sendRequest("startPvsProcess", reqStart);
+                this.connection.onRequest("startPvsProcess", () => {
+                    resolve(true);
+                });
+            } else {
+                resolve(false);
+            }
         });
         if (success && desc?.settings?.initFunction) {
             const reqInit: SendCommandToken = {

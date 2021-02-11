@@ -1,10 +1,8 @@
 /**
  * @module LayoutManager
  */
-import { plugins } from '../plugins/pluginList';
 import * as Utils from '../utils/pvsiowebUtils';
 import { PVSioWebPlugin } from './PVSioWeb';
-import { Connection } from './Connection';
 import * as Backbone from 'backbone';
 
 const toolkitInterface: string = `
@@ -110,31 +108,35 @@ const toolkitInterface: string = `
 </div>
 <div id="audio"></div>`;
 
+// the set of plugins is declared in pluginList
+import { plugins } from '../plugins/pluginList';
+
 export class LayoutManager extends Backbone.Model {
 
-    protected connection: Connection;
     protected version: string;
     protected collapsed: boolean = false;
     protected parent: string;
 
-    protected pluginsObj: { [name: string]: PVSioWebPlugin } = {};
-    protected activePlugins: { [name: string]: boolean } = {};
-
-    constructor (opt?: { version: string, parent?: string }) {
+    constructor () {
         super();
-        this.version = opt?.version || "";
-        this.parent = opt?.parent || "body";
-        console.log(`[layout-manager] Parent is ${this.parent}`);
     }
 
-    async activate (connection: Connection): Promise<boolean> {
-        this.connection = connection;
+    async activate (opt?: { version?: string, parent?: string }): Promise<boolean> {
+        this.version = opt?.version || "";
+        this.parent = opt?.parent || "body";
+        console.log(`Browser version: ${Utils.getVersion()}`);
+        console.log(`Toolkit version: PVSio-web ${this.version}`);
+        // console.log(`[layout-manager] Parent is ${this.parent}`);
         this.createHtmlElements();
         this.installHandlers();
-        await this.activatePlugins();
+        this.hideSplash({ fade: true });
         return true;
     }
 
+    /**
+     * Creates the user interface layout, which includes a top-level toolbar and a central panel where plugins will be appended
+     * @param opt 
+     */
     protected createHtmlElements (opt?: { removeSplash?: boolean }): void {
         const mainView: string = Handlebars.compile(toolkitInterface)({
             plugins,
@@ -148,8 +150,6 @@ export class LayoutManager extends Backbone.Model {
     }
     
     protected installHandlers (): void {
-        console.log(`Browser version: ${Utils.getVersion()}`);
-        console.log(`Toolkit version: PVSio-web ${this.version}`);
         // Forward key events to the active panel. By using this instead of registering their own global key listeners,
         // panels avoid breaking the functionality of other panels or causing behaviour that is confusing for the user.
         $("body").on("keydown.global", (evt: JQuery.Event) => {
@@ -286,26 +286,6 @@ export class LayoutManager extends Backbone.Model {
         return this;
     }
 
-    async activatePlugins (): Promise<boolean> {
-        for (let i in plugins) {
-            const obj: PVSioWebPlugin = new plugins[i].cons();
-            this.pluginsObj[i] = obj;
-            if (plugins[i].autoload) {
-                const success: boolean = await obj.activate(this.connection);
-                const msg: string = success ? `[plugin-manager] Plugin ${obj.getName()} active!`
-                    : `[plugin-manager] Failed to activate plugin ${obj.getName()}`;
-                this.activePlugins[i] = success;
-                success ? console.log(msg) : console.warn(msg);
-            } else {
-                this.activePlugins[i] = false;
-            }
-        }
-        return true;
-    }
-
-    isActive (plugin: string): boolean {
-        return this.activePlugins[plugin];
-    }
 
 
     // /**

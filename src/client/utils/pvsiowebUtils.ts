@@ -102,7 +102,7 @@ const collapsiblePanelTemplate: string = `
 .pvsioweb-collapsible-panel {
     display: block;
     position: sticky;
-    top: 28px;
+    top: {{top}}px;
 }
 .pvsioweb-collapsible-panel span {
     font-size: small;
@@ -189,17 +189,20 @@ export function createCollapsiblePanel (owner: PVSioWebPlugin, opt?: {
     handlers?: MouseEventHandlers,
     headerText?: string,
     toolbar?: string,
-    width?: string
+    width?: string,
+    top?: number
 }): CollapsiblePanel {
     opt = opt || {};
     const parent: string = opt.parent ? `#${opt.parent}` : "body";
     const pluginId: string = owner.getId() || "";
     const pluginName: string = owner.getName() || "";
     const width: string = opt.width || "100%";
+    const top: number = opt.top || 0;
     
     const panel: string = Handlebars.compile(collapsiblePanelTemplate, { noEscape: true })({
         showContent: !!opt?.showContent,
-        width: width,
+        width,
+        top,
         id: pluginId,
         name: pluginName,
         toolbar: opt?.toolbar

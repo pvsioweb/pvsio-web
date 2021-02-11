@@ -94,10 +94,16 @@ export interface CentralViews {
 export interface SideViews {
     Builder: SideView
 };
+export const PrototypeBuilderEvents = {
+    ready: "ready"
+};
+import * as Backbone from 'backbone';
 
-export class PrototypeBuilder implements PVSioWebPlugin {
-    readonly name: string = "Prototype Builder";
+export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
+    readonly name: string = "Prototype-Builder";
     readonly id: string = Utils.removeSpaceDash(this.name);
+
+    protected activeFlag: boolean = false;
 
     protected connection: Connection;
 
@@ -111,13 +117,15 @@ export class PrototypeBuilder implements PVSioWebPlugin {
     protected sideViews: SideViews;
     protected centralViews: CentralViews;
 
-    async activate (connection?: Connection): Promise<boolean> {
+    async activate (opt?: { connection?: Connection, parent?: string, top?: number }): Promise<boolean> {
+        opt = opt || {};
+
         // save connection
-        this.connection = connection;
+        this.connection = opt.connection;
 
         // create panel, toolbar, and body
         this.panel = Utils.createCollapsiblePanel(this, {
-            parent: "toolkit-body",
+            parent: opt.parent,
             showContent: true
         });
         this.body = this.createPanelBody({
@@ -169,7 +177,15 @@ export class PrototypeBuilder implements PVSioWebPlugin {
         this.installHandlers();
         // refresh the view
         this.onResizeCentralView();
-        return true;
+        // signal ready
+        this.trigger(PrototypeBuilderEvents.ready);
+        // update active flag
+        this.activeFlag = true;
+        return this.activeFlag;
+    }
+
+    isActive (): boolean {
+        return this.activeFlag;
     }
 
     protected onResizeCentralView (desc?: { width: string, height: string }): void {
@@ -241,12 +257,12 @@ export class PrototypeBuilder implements PVSioWebPlugin {
      */
     async switchToSimulatorView(): Promise<void> {
         this.centralViews?.Builder?.simulatorView();
+        this.collapseWidgetsList();
         const settings: Settings = this.centralViews?.Settings?.getSettings();
         const widgets: WidgetsMap = this.centralViews?.Builder?.getWidgets();
         const success: boolean = await this.centralViews?.Simulator?.initSimulation({ settings, widgets });
         // this.widgetManager.initWidgets();
         // this.widgetManager.startTimers();
-        this.collapseWidgetsList();
     }
 
     updateControlsHeight(): void {

@@ -3,7 +3,7 @@
 const path = require('path');
 const TerserPlugin = require("terser-webpack-plugin");
 module.exports = {
-    entry: './src/client/builder.ts',
+    entry: './src/client/builder.min.ts',
     output: {
         filename: 'prototype-builder.min.js',
         path: path.resolve(__dirname, 'bundle/client')

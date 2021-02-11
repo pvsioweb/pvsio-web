@@ -4,7 +4,8 @@ export declare interface PVSioWebPlugin {
     getName: () => string;
     getId: () => string;
     getDependencies?: () => string[];
-    activate(connection?: Connection): Promise<boolean>;
+    activate(opt?: { connection?: Connection, parent?: string, top?: number }): Promise<boolean>;
+    isActive(): boolean
 }
 export declare interface MouseEventHandlers {
     handleKeyDownEvent?: (evt: JQuery.Event) => void;
