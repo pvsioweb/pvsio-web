@@ -1,5 +1,9 @@
 .toolkit-toolbar .btn {
     color: white;
+    position:sticky;
+    top:0;
+    transform:scale(0.9);
+    transform-origin: left;
 }
 .toolkit-toolbar .btn:hover {
     background-color: black;

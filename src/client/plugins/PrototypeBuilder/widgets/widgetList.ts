@@ -18,7 +18,7 @@ export interface WidgetClassDescriptor {
 export interface WidgetClassMap { [ kind: string ]: WidgetClassDescriptor[] };
 
 export const widgetList: WidgetClassMap = {
-    "Display": [ // the kind should be identical with that declared in the class
+    "Display": [ // the widget kind indicated here must be identical with that declared in the class
         { label: "Basic Display", cons: BasicDisplayEVO },
         { label: "Numeric Display", cons: NumericDisplayEVO }
     ],
