@@ -1,6 +1,7 @@
 all:
 	npm install
 	make build
+	make devel
 
 pvsioweb: build
 
