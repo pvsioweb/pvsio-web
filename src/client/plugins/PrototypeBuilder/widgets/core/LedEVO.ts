@@ -21,12 +21,10 @@
  });
  *
  */
-import { ActionCallback } from "../../ActionsQueue";
 import { WidgetOptions, Coords, WidgetEVO, CSS, Renderable, WidgetAttr } from "./WidgetEVO";
 
 export interface LedOptions extends WidgetOptions {
-    ledName?: string,
-    callback?: ActionCallback
+    ledName?: string
 };
 
 const COLOR = {

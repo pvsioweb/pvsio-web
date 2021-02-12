@@ -1,5 +1,5 @@
 import { PVSioWebPlugin } from '../../env/PVSioWeb';
-import { Connection } from '../../env/Connection';
+import { BackboneConnection, Connection } from '../../env/Connection';
 
 import * as Utils from '../../utils/pvsiowebUtils';
 import { BuilderView } from './views/BuilderView';
@@ -105,7 +105,8 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
 
     protected activeFlag: boolean = false;
 
-    protected connection: Connection;
+    // the connection is public, so objects using PrototypeBuilder can set listeners and trigger events
+    connection: Connection;
 
     protected panel: Utils.CollapsiblePanel;
     protected body: Utils.ResizableLeftPanel;
@@ -120,8 +121,8 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
     async activate (opt?: { connection?: Connection, parent?: string, top?: number }): Promise<boolean> {
         opt = opt || {};
 
-        // save connection
-        this.connection = opt.connection;
+        // use connection indicated in the options of the constructor, or use a basic backbone connection
+        this.connection = opt.connection || new BackboneConnection();
 
         // create panel, toolbar, and body
         this.panel = Utils.createCollapsiblePanel(this, {

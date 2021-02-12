@@ -3,12 +3,9 @@
  * @author Paolo Masci
  * @date 2020/12/16
  */
-import { LoopbackConnection as Connection } from '../../../client/env/LoopbackConnection';
+import { LoopbackConnection as Connection } from '../../../client/env/Connection';
 
-import { ToggleButtonEVO } from '../../../client/plugins/PrototypeBuilder/widgets/core/ToggleButtonEVO';
-import { SelectionButtonEVO } from '../../../client/plugins/PrototypeBuilder/widgets/core/SelectionButtonEVO';
 import { BasicDisplayEVO } from '../../../client/plugins/PrototypeBuilder/widgets/core/BasicDisplayEVO';
-import { Coords } from '../../../client/plugins/PrototypeBuilder/widgets/core/WidgetEVO';
 import { SelectorEVO } from '../../../client/plugins/PrototypeBuilder/widgets/core/SelectorEVO';
 import { fontOutlineStyle } from '../../../client/utils/pvsiowebUtils';
 

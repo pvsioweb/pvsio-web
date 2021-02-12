@@ -1,8 +1,7 @@
 /**
  * Manages a queue of messages to send to the server
  */
-import { uuid } from '../../utils/pvsiowebUtils';
-import { Connection, RequestType, SendCommandToken } from '../../env/Connection';
+import { Connection, RequestType, SendCommandToken } from './Connection';
 export type ActionCallback = (err: string | null, res: {}) => void;
 export class ActionsQueue {
     static guiActions: Promise<any> = Promise.resolve();

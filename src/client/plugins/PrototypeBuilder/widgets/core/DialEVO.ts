@@ -1,4 +1,5 @@
-import { ActionCallback, ActionsQueue } from "../../ActionsQueue";
+// import { ActionCallback, ActionsQueue } from "../../ActionsQueue";
+import { SendCommandToken, PVSioWebCallBack } from "../../../../env/Connection";
 import { ButtonEVO, ButtonOptions } from "./ButtonEVO";
 import { Coords, img_template, CSS, BasicEvent } from "./WidgetEVO";
 
@@ -82,13 +83,26 @@ export class DialEVO extends ButtonEVO {
             // rotate the dial
             this.rotate(this.rotation);
             // send rotate action over the connection
-            const fun: string = this.attr.customFunction || ("rotate_" + this.attr.buttonName);
-            const callback: ActionCallback = this.callback;
-            ActionsQueue.queueGUIAction(fun, this.id, this.connection, callback);
+            const action: string = this.attr.customFunction || ("rotate_" + this.attr.buttonName);
+            const callback: PVSioWebCallBack = this.callback;
+
+            const req: SendCommandToken = {
+                id: this.id,
+                type: "sendCommand",
+                command: action
+            };
+            this.connection?.sendRequest("sendCommand", req);
+            if (callback) {
+                this.connection?.onRequest("sendCommand", (err, res) => {
+                    callback(err, res);
+                });
+            }
+            // ActionsQueue.queueGUIAction(fun, this.id, this.connection, callback);
+
             // trigger rotate event
             const data: DialEventData = {
                 evt: "rotate",
-                fun,
+                fun: action,
                 val: this.rotation
             };
             this.trigger("rotate", data);

@@ -3,7 +3,7 @@
  * @author Paolo Masci
  * @date 2020/12/16
  */
-import { LoopbackConnection as Connection } from '../../../client/env/LoopbackConnection';
+import { LoopbackConnection as Connection } from '../../../client/env/Connection';
 
 import { ToggleButtonEVO } from '../../../client/plugins/PrototypeBuilder/widgets/core/ToggleButtonEVO';
 import { SelectionButtonEVO } from '../../../client/plugins/PrototypeBuilder/widgets/core/SelectionButtonEVO';

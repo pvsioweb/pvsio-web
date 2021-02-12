@@ -11,8 +11,8 @@
 import * as parserUtils from '../../../../utils/parserUtils';
 import * as utils from '../../../../utils/pvsiowebUtils';
 import { dimColor } from "../../../../utils/pvsiowebUtils";
-import { ActionCallback } from "../../ActionsQueue";
-import { Connection } from "../../../../env/Connection";
+// import { ActionCallback } from "../../ActionsQueue";
+import { Connection, PVSioWebCallBack } from "../../../../env/Connection";
 import * as Backbone from 'backbone';
 
 // const normalised = {
@@ -208,7 +208,7 @@ export interface WidgetOptions {
     viz?: VizOptions,
     type?: string, // widget type, e.g., "Button", "Display"
     widget_template?: string, // HTML template for rendering the widget
-    callback?: ActionCallback,
+    callback?: PVSioWebCallBack,
     connection?: Connection
 };
 

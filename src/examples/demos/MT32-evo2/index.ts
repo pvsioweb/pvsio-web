@@ -8,11 +8,11 @@ import { BasicDisplayEVO as BasicDisplay } from '../../../client/plugins/Prototy
 import { LedEVO as LED } from '../../../client/plugins/PrototypeBuilder/widgets/core/LedEVO';
 import { MouseCursor } from '../../../client/plugins/PrototypeBuilder/widgets/media/MouseCursor';
 import { Stylus } from '../../../client/plugins/PrototypeBuilder/widgets/media/Stylus';
-import { ActionsQueue } from '../../../client/plugins/PrototypeBuilder/ActionsQueue';
+import { ActionsQueue } from '../../../client/env/ActionsQueue';
 
 import { Player } from '../../../client/util/playback/Player';
 
-import { WebSocketConnection, WebSocketConnectionEvents } from '../../../client/env/WebSocketConnection';
+import { WebSocketConnection, ConnectionEvents } from '../../../client/env/Connection';
 import { StartPvsProcessToken, SendCommandToken } from '../../../client/env/Connection';
 import { uuid } from '../../../client/utils/pvsiowebUtils';
 
@@ -3457,7 +3457,7 @@ class MT32Demo {
         const id: string = uuid();
 
         //register event listener for websocket connection from the client
-        this.connection.on(WebSocketConnectionEvents.ConnectionOpened, (evt?) => {
+        this.connection.on(ConnectionEvents.DidOpenConnection, (evt?) => {
             console.log("web socket connected");
             //start pvs process
             const req: StartPvsProcessToken = {
@@ -3554,7 +3554,7 @@ class MT32Demo {
 
                 $(".content").css("display", "block");
             });
-        }).on(WebSocketConnectionEvents.ConnectionClosed, (evt?) => {
+        }).on(ConnectionEvents.DidCloseConnection, (evt?) => {
             console.log("web socket closed");
         });
         // .addListener(WebSocketEvents.ProcessExited, function (e) {

@@ -285,7 +285,7 @@ export class WidgetEditor extends Backbone.View {
                         const evt: string = evts[i];
                         this.listenTo(obj, evt, (data: BasicEventData) => {
                             const fun: string = data?.fun.replace(previewId, this.widgetData.id);
-                            console.log(fun);
+                            // console.log(fun);
                             $(`#${cons}-evts`).append(`<div><i class="fa fa-bolt"></i> ${fun}</div>`);
                             clearTimeout(this.timer);
                             this.timer = setTimeout(() => {

@@ -41,8 +41,8 @@
 
 import { Coords, BasicEvent, WidgetEVO, WidgetOptions, WidgetAttr, CSS, BasicEventData } from "./WidgetEVO";
 import { Timer } from "../../../../util/Timer"
-import { ActionsQueue, ActionCallback } from "../../ActionsQueue";
-import { Connection } from "../../../../env/Connection";
+// import { ActionsQueue, ActionCallback } from "../../ActionsQueue";
+import { Connection, PVSioWebCallBack, SendCommandToken } from "../../../../env/Connection";
 import { mouseButtons } from "../../../../utils/pvsiowebUtils";
 
 const CLICK_RATE = 250; // 250 milliseconds, default interval for repeating button clicks when the button is pressed and held down
@@ -76,7 +76,7 @@ export class ButtonEVO extends WidgetEVO {
     protected dblclick_timeout: number;
     protected dblclick_timer: NodeJS.Timer;
     protected _timer: Timer;
-    protected callback: ActionCallback;
+    protected callback: PVSioWebCallBack;
     protected _tick_listener: () => void;
     protected _tick: () => void;
 
@@ -302,16 +302,28 @@ export class ButtonEVO extends WidgetEVO {
         if (this._tick) { this.onButtonRelease(); }
     };
 
-    protected btn_action(evt: BasicEvent, opt?: { buttonName?: string, customFunction?: string, callback?: ActionCallback }) {
+    protected btn_action(evt: BasicEvent, opt?: { buttonName?: string, customFunction?: string, callback?: PVSioWebCallBack }) {
         opt = opt || {};
 
-        const fun: string = opt.customFunction || this.attr.customFunction || (evt + "_" + this.attr.buttonName);
-        const callback: ActionCallback = opt.callback || this.callback;
-        ActionsQueue.queueGUIAction(fun, this.id, this.connection, callback);
+        const action: string = opt.customFunction || this.attr.customFunction || (evt + "_" + this.attr.buttonName);
+        const callback: PVSioWebCallBack = opt.callback || this.callback;
+
+        const req: SendCommandToken = {
+            id: this.id,
+            type: "sendCommand",
+            command: action
+        };
+        this.connection?.sendRequest("sendCommand", req);
+        if (callback) {
+            this.connection?.onRequest("sendCommand", (err, res) => {
+                callback(err, res);
+            });
+        }
+        // ActionsQueue.queueGUIAction(fun, this.id, this.connection, callback);
         
-        const data: BasicEventData = { evt, fun };
+        const data: BasicEventData = { evt, fun: action };
         this.trigger(evt, data);
-        console.log(fun);
+        console.log(action);
     }
     
     // @override
