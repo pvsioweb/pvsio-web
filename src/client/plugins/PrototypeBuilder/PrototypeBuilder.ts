@@ -22,10 +22,12 @@ const sidebarStyle: string = `
     width:30%; 
     min-width:10px; 
     position:relative;
+    border: 1px solid lightgray;
 }
 .widget-list {
     margin-left: -4px;
     width: 110%;
+    transform:scale(0.8);
 }
 .widget-list-item.active::after {
     content: '';
@@ -65,7 +67,7 @@ ${sidebarStyle}
     <div id="{{id}}-resize-bar" style="width:6px;background-color:#4c4c4c;"></div>
     <div id="{{id}}-central" class="flex-grow-1 no-gutters" style="position:relative; width:66%; overflow:hidden;">
         <div class="card">
-            <div class="card-header" style="margin-top:-8px;">
+            <div class="card-header" style="margin-top:-8px; font-size:small;">
                 <ul class="nav nav-tabs card-header-tabs d-flex flex-nowrap prototype-screen-list">
                 </ul>
             </div>
@@ -86,6 +88,17 @@ const toolbar: string = `
 </div>
 `;
 
+const menu: string = `
+<button type="button" class="btn btn-sm btn-outline-light fa fa-bars" id="{{id}}-dropdown-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+<div class="dropdown-menu dropdown-menu-right" aria-labelledby="{{id}}-dropdown-menu">
+    <button type="button" class="dropdown-item btn-sm new-prototype">New Prototype..</button>
+    <div class="dropdown-divider"></div>
+    <button type="button" class="dropdown-item btn-sm open">Open..</button>
+    <div class="dropdown-divider"></div>
+    <button type="button" class="dropdown-item btn-sm save">Save</button>
+    <button type="button" class="dropdown-item btn-sm save-as">Save As..</button>
+</div>`;
+
 export interface CentralViews {
     Settings: SettingsView,
     Builder: BuilderView,
@@ -95,7 +108,11 @@ export interface SideViews {
     Builder: SideView
 };
 export const PrototypeBuilderEvents = {
-    ready: "ready"
+    DidActivatePlugin: "DidActivatePlugin",
+    WillCreateNewPrototype: "WillCreateNewPrototype",
+    WillSave: "WillSave",
+    WillSaveAs: "WillSaveAs",
+    WillOpen: "WillOpen"
 };
 import * as Backbone from 'backbone';
 
@@ -105,11 +122,13 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
 
     protected activeFlag: boolean = false;
 
-    // the connection is public, so objects using PrototypeBuilder can set listeners and trigger events
+    // the connection is public, so objects using PrototypeBuilder can set listeners and trigger events on the connection
     connection: Connection;
 
     protected panel: Utils.CollapsiblePanel;
     protected body: Utils.ResizableLeftPanel;
+
+    protected $menu: JQuery<HTMLElement>;
 
     protected width: string = "0px"; // side panel width
 
@@ -127,14 +146,25 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         // create panel, toolbar, and body
         this.panel = Utils.createCollapsiblePanel(this, {
             parent: opt.parent,
-            showContent: true
+            showContent: true,
+            "dropdown-menu": menu
         });
         this.body = this.createPanelBody({
             parent: this.panel.$content
         });
-        // this.$simulatorView = this.panel?.$div.find(".toggle-simulator-view");
-        // this.$builderView = this.panel?.$div.find(".toggle-builder-view");
-        // this.$toolbar = this.panel?.$toolbar;
+        // install menu handlers
+        this.panel.$dropdownMenu.find(".new-prototype").on("click", (evt: JQuery.ClickEvent) => {
+            this.trigger(PrototypeBuilderEvents.WillCreateNewPrototype);
+        });
+        this.panel.$dropdownMenu.find(".open").on("click", (evt: JQuery.ClickEvent) => {
+            this.trigger(PrototypeBuilderEvents.WillOpen);
+        });
+        this.panel.$dropdownMenu.find(".save").on("click", (evt: JQuery.ClickEvent) => {
+            this.trigger(PrototypeBuilderEvents.WillSave);
+        });
+        this.panel.$dropdownMenu.find(".save-as").on("click", (evt: JQuery.ClickEvent) => {
+            this.trigger(PrototypeBuilderEvents.WillSaveAs);
+        });
         
         // create central view and side view
         const bodyDiv: HTMLElement = this.panel.$content.find(`.prototype-screens`)[0];
@@ -179,7 +209,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         // refresh the view
         this.onResizeCentralView();
         // signal ready
-        this.trigger(PrototypeBuilderEvents.ready);
+        this.trigger(PrototypeBuilderEvents.DidActivatePlugin);
         // update active flag
         this.activeFlag = true;
         return this.activeFlag;

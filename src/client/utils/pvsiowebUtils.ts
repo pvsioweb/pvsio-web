@@ -32,7 +32,8 @@ export interface CollapsiblePanel extends Panel {
     $label: JQuery<HTMLElement>,
     $collapseBtn?: JQuery<HTMLElement>,
     $toolbar?: JQuery<HTMLElement>
-}
+    $dropdownMenu?: JQuery<HTMLElement>
+};
 /**
  * The dialog template creates a modal dialog with bootstrap. 
  * The template should be compiled with Handlebars, using option { noEscape: true }.
@@ -109,21 +110,13 @@ const collapsiblePanelTemplate: string = `
 }
 </style>
 <div id="{{id}}-panel" class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow pvsioweb-collapsible-panel">
-    <span class="navbar-brand container-fluid px-0">
-        <span>
-            <span data-toggle="collapse" data-target="#{{id}}-content" id="{{id}}-collapse-icon" class="icon toggle-collapse fa {{#if showContent}}fa-minus-square{{else}}fa-plus-square{{/if}}"></span>
-            <span id="{{id}}-label" class="label">{{name}}</span>
-        </span>
+    <span class="navbar navbar-brand container-fluid px-0">
+        <span data-toggle="collapse" style="margin-left:10px;" data-target="#{{id}}-content" id="{{id}}-collapse-icon" class="icon toggle-collapse fa {{#if showContent}}fa-minus-square{{else}}fa-plus-square{{/if}}"></span>
+        <span id="{{id}}-label" class="label">{{name}}</span>
         <span class="dropdown" style="margin-right:12px;">
-            <button type="button" class="btn btn-sm btn-outline-light fa fa-bars" id="{{id}}-menu-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
-            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="{{id}}-menu-btn">
-                <a class="dropdown-item btn-sm" href="#">New Prototype..</a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item btn-sm" href="#">Open..</a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item btn-sm" href="#">Save</a>
-                <a class="dropdown-item btn-sm" href="#">Save As..</a>
-            </div>
+            {{#if dropdown-menu}}
+            {{dropdown-menu}}
+            {{/if}}
         </span>
     </span>
     {{#if toolbar}}
@@ -189,6 +182,7 @@ export function createCollapsiblePanel (owner: PVSioWebPlugin, opt?: {
     handlers?: MouseEventHandlers,
     headerText?: string,
     toolbar?: string,
+    "dropdown-menu"?: string,
     width?: string,
     top?: number
 }): CollapsiblePanel {
@@ -205,7 +199,8 @@ export function createCollapsiblePanel (owner: PVSioWebPlugin, opt?: {
         top,
         id: pluginId,
         name: pluginName,
-        toolbar: opt?.toolbar
+        toolbar: opt.toolbar,
+        "dropdown-menu": opt["dropdown-menu"]
     });
     $(parent).append(panel);
     const $div: JQuery<HTMLDivElement> = $(`#${pluginId}-panel`);
@@ -213,6 +208,7 @@ export function createCollapsiblePanel (owner: PVSioWebPlugin, opt?: {
     const $collapseBtn: JQuery<HTMLElement> = $(`#${pluginId}-collapse-icon`);
     const $label: JQuery<HTMLElement> = $(`#${pluginId}-label`);
     const $toolbar: JQuery<HTMLElement> = $div.find(".toolbar");
+    const $dropdownMenu: JQuery<HTMLElement> = $div.find(".navbar .dropdown");
 
     if (!opt?.isDemo) {
         $collapseBtn.on("click", () => {
@@ -228,7 +224,7 @@ export function createCollapsiblePanel (owner: PVSioWebPlugin, opt?: {
         $div.attr("active-panel", pluginId);
     });
 
-    return { $div, $collapseBtn, $content, $label, $toolbar };
+    return { $div, $collapseBtn, $content, $label, $toolbar, $dropdownMenu };
 };
 
 export function enableResizeLeft (desc: ResizableLeftPanel, opt?: { initialWidth?: number }): ResizableLeftPanel {

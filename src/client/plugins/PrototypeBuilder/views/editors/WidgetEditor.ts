@@ -22,8 +22,21 @@ export const WidgetEditorEvents = {
 const previewHeight: number = 31; //px
 // all input forms must have attributes "name" and "value", which will be used to identify the attribute name (coords, attr, css) and its value
 const containerTemplate: string = `
+<style>
+.widget-class {
+    white-space:nowrap;
+}
+.spinner-left {
+    position:absolute;
+    left:-160px; 
+    background:gainsboro; 
+    border-radius:4px; 
+    padding-bottom:22px;
+    width:140px;
+}
+</style>
 <div id="editorId" class="card">
-    <div class="card-header" style="position:absolute; left:-160px; background:gainsboro; border-radius:4px; padding-bottom:22px;">
+    <div class="card-header spinner-left px-1">
         <ul class="nav flex-column flex-nowrap nav-pills card-header-tabs widget-list" style="overflow-y:auto; overflow-x:hidden; max-height:408px;">
             {{#each widgets as |item kind|}}
             <li class="nav-item">

@@ -81,7 +81,7 @@ const toolkitInterface: string = `
     </div>
     <div id="toolkit-header" class="btn-group container-fluid p-0" style="position:fixed;top:0px;z-index:99999;">
         <div id="projectTitle">
-            <div class="container-fluid px-0">
+            <div class="container-fluid px-1">
                 <div class="toolkit-toolbar btn-group">
                     <button type="button" class="btn btn-sm" id="newProject">New Project</button>
                     <button type="button" class="btn btn-sm" id="openProject">Open Project</button>

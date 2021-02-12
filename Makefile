@@ -13,7 +13,7 @@ build:
 	make copy
 	make bundle
 
-bundle:
+bundle: clean-bundle
 	npm run webpack
 
 devel:
@@ -102,8 +102,10 @@ copy-handlebars:
 	-mkdir -p  dist/client/app/preferences/templates
 	-cp src/client/app/preferences/templates/*.handlebars dist/client/app/preferences/templates/
 
-clean:
+clean: clean-bundle
 	rm -rf dist
+
+clean-bundle:
 	rm -rf bundle
 
 .PHONY: examples
