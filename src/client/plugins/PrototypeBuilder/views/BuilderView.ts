@@ -1,9 +1,9 @@
-import { WidgetEVO, Coords, WidgetOptions } from "../widgets/core/WidgetEVO";
+import { WidgetEVO, Coords, WidgetOptions, WidgetData } from "../widgets/core/WidgetEVO";
 import { Connection } from '../../../env/Connection';
 import { HotspotEditor, HotspotEditorEvents, HotspotData, HotspotsMap } from './editors/HotspotEditor';
 
 import { CentralViewOptions, CreateWidgetEvent, WidgetsMap, BuilderEvents, MIN_WIDTH, MIN_HEIGHT, CentralView } from './CentralView';
-import { WidgetData, WidgetEditor, WidgetEditorEvents } from './editors/WidgetEditor';
+import { WidgetObjectData, WidgetEditor, WidgetEditorEvents } from './editors/WidgetEditor';
 import { WidgetClassDescriptor, widgetList } from '../widgets/widgetList';
 
 import * as utils from '../../../utils/pvsiowebUtils';
@@ -65,7 +65,7 @@ const contentTemplate: string = `
     <div class="prototype-image-overlay container-fluid"></div>
 </div>`;
 
-export interface Picture {
+export type Picture = {
     fileName: string,
     fileExtension: string,
     fileContent: string
@@ -76,46 +76,80 @@ export interface PictureOptions {
     border?: string,
     $el?: JQuery<HTMLElement>
 };
+export interface PictureData extends Picture {
+    "max-width": "auto" | string,
+    "max-height": "auto" | string,
+};
+export type WidgetsData = WidgetData[]; 
 
 export class BuilderView extends CentralView {
     
+    /**
+     * jQuery pointers to relevant elements of the view
+     */
     protected $imageDiv: JQuery<HTMLElement>;
     protected $imageFrame: JQuery<HTMLElement>;
     protected $imageOverlay: JQuery<HTMLElement>;
     protected $coords: JQuery<HTMLElement>;
     protected $toolbar: JQuery<HTMLElement>;
 
+    /**
+     * Editor for creating hotspot areas over the picture of the prototype
+     */
     protected hotspotEditor: HotspotEditor;
+
+    /**
+     * List of widgets created for the prototype opened in builder view
+     */
     protected widgetsMap: WidgetsMap = {};
 
+    /**
+     * Clipboard, stored information for copy/paste operations in builder view
+     */
     protected clipboard: WidgetEVO;
 
+    /**
+     * Builder view constructor
+     * @param data 
+     * @param connection 
+     */
     constructor (data: CentralViewOptions, connection: Connection) {
         super(data, connection);
     }
 
+    /**
+     * Returns the list of widgets created for the current prototype opened in builder view
+     */
     getWidgets (): WidgetsMap {
         return this.widgetsMap;
     }
 
+    /**
+     * Returns the list of hotspot areas created for the current prototype opened in builder view
+     * The list of hotspots is a super-set of the list of widgets (some hotspots may not have been instantiated yet)
+     */
     getHotspots (): HotspotsMap {
         return this.hotspotEditor.getHotspots();
     }
 
-    render (opt?: CentralViewOptions): BuilderView {
+    /**
+     * Renders the view
+     * The view includes three layers:
+     * - a bottom layer (prototype-image) contains the prototype image
+     * - a mid layer (prototype-image-frame) for rendering widgets -- this facilitates porting the set of widgets from one prototype to another when swapping the prototype image
+     * - an upper layer (prototype-image-overlay) shows the hotspot areas. This layer becomes hidden in simulator view.  
+     * @param opt 
+     */
+    render (): BuilderView {
         const content: string = Handlebars.compile(contentTemplate, { noEscape: true })({});
         super.render({ ...this.viewOptions, content });
-        // each prototype has three layers:
-        // - a bottom layer (prototype-image) contains the prototype image
-        // - a mid layer (prototype-image-frame) for rendering widgets -- this facilitates porting the set of widgets from one prototype to another when swapping the prototype image
-        // - an upper layer (prototype-image-overlay) shows the resizeable hotspot areas while building the prototype. This layer become hidden during simulation runs.  
         this.$imageDiv = this.$el.find(".prototype-image");
         this.$imageFrame = this.$el.find(".prototype-image-frame");
         this.$imageOverlay = this.$el.find(".prototype-image-overlay");
         this.$coords = this.$el.find(".builder-coords");
         this.$toolbar = this.$el.find(".builder-toolbar");
         this.createWhiteboard();
-        this.createImageFrametLayer();
+        this.createImageFrameLayer();
         this.resizeView();
         this.installHandlers();
         // create hotspot editor on top of the image
@@ -123,83 +157,10 @@ export class BuilderView extends CentralView {
         return this;
     }
 
-    selectWidget (data: { id: string }): void {
-        this.hotspotEditor.selectHotspot(data);
-    }
-    deselectWidget (data: { id: string }): void {
-        this.hotspotEditor.deselectHotspot(data);
-    }
-
-    /**
-     * User interface controls
+        /**
+     * Internal function, creates the hotspot editor
      */
-    hideCoords (): void {
-        this.$coords?.css("display", "none");
-    }
-    revealCoords (): void {
-        this.$coords?.css("display", "block");
-    }
-    hideToolbar (): void {
-        this.$toolbar?.css("display", "none");
-    }
-    revealToolbar (): void {
-        this.$toolbar?.css("display", "block");
-    }
-    revealHotspots (): void {
-        this.$imageOverlay?.css("display", "block");
-        this.$imageFrame?.css("cursor", "crosshair");
-    }
-    hideHotspots (): void {
-        this.$imageOverlay?.css("display", "none");
-        this.$imageFrame?.css("cursor", "default");
-    }
-    builderView (): void {
-        this.revealHotspots();
-        this.revealCoords();
-        this.revealToolbar();
-    }
-    simulatorView (): void {
-        this.hideHotspots();
-        this.hideCoords();
-        this.hideToolbar();
-    }
-
-    createWidget (widgetData: WidgetData): WidgetEVO {
-        if (widgetData) {
-            // console.log(widgetData);
-            if (widgetData.cons && widgetData.kind) {
-                const desc: WidgetClassDescriptor = widgetList[widgetData.kind].find((desc: WidgetClassDescriptor) => {
-                    return desc.cons.name === widgetData.cons;
-                });
-                // console.log(desc);
-                if (desc) {
-                    if (this.widgetsMap[widgetData.id]) {
-                        this.widgetsMap[widgetData.id].remove();
-                    }
-                    const options: WidgetOptions = { 
-                        parent: this.$imageFrame,
-                        type: widgetData.cons,
-                        ...widgetData?.opt,
-                        connection: this.connection
-                    };
-                    const widget: WidgetEVO = new desc.cons(widgetData.id, widgetData.coords, options);
-                    widget.renderSample();
-                    // console.log(widget);
-                    this.widgetsMap[widgetData.id] = widget;
-                    const evt: CreateWidgetEvent = {
-                        id: widgetData.id,
-                        name: widgetData.name,
-                        widgets: this.getWidgets(),
-                        hotspots: this.getHotspots()
-                    };
-                    this.trigger(BuilderEvents.DidCreateWidget, evt);
-                    return widget;
-                }
-            }
-        }
-        return null;
-    }
-    createHotspotEditor (): void {
+    protected createHotspotEditor (): void {
         this.hotspotEditor = new HotspotEditor({
             el: this.$imageFrame.find("img")[0],
             overlay: this.$imageOverlay[0],
@@ -255,7 +216,7 @@ export class BuilderView extends CentralView {
                 const id: string = data.origin.id;
                 const widget: WidgetEVO = this.widgetsMap[id] || this.clipboard;
                 if (widget) {
-                    const widgetData: WidgetData = {
+                    const widgetData: WidgetObjectData = {
                         ...data.clone,
                         name: widget.getName(),
                         kind: widget.getKind(),
@@ -268,18 +229,196 @@ export class BuilderView extends CentralView {
         });
     }
 
+    /**
+     * Selects (i.e., highlights) a widget
+     * @param data 
+     */
+    selectWidget (data: { id: string }): void {
+        this.hotspotEditor.selectHotspot(data);
+    }
+
+    /**
+     * Deselects a widget
+     * @param data 
+     */
+    deselectWidget (data: { id: string }): void {
+        this.hotspotEditor.deselectHotspot(data);
+    }
+
+    /**
+     * Hide coordinates
+     */
+    hideCoords (): void {
+        this.$coords?.css("display", "none");
+    }
+
+    /**
+     * Reveal coordinates
+     */
+    revealCoords (): void {
+        this.$coords?.css("display", "block");
+    }
+
+    /**
+     * Hide toolbar
+     */
+    hideToolbar (): void {
+        this.$toolbar?.css("display", "none");
+    }
+
+    /**
+     * Reveal toolbar
+     */
+    revealToolbar (): void {
+        this.$toolbar?.css("display", "block");
+    }
+
+    /**
+     * Hide hotspot areas
+     */
+    hideHotspots (): void {
+        this.$imageOverlay?.css("display", "none");
+        this.$imageFrame?.css("cursor", "default");
+    }
+
+    /**
+     * Reveal hotspot areas
+     */
+    revealHotspots (): void {
+        this.$imageOverlay?.css("display", "block");
+        this.$imageFrame?.css("cursor", "crosshair");
+    }
+
+    /**
+     * Switch to builder view
+     */
+    builderView (): void {
+        this.revealHotspots();
+        this.revealCoords();
+        this.revealToolbar();
+    }
+
+    /**
+     * Switch to simulator view
+     */
+    simulatorView (): void {
+        this.hideHotspots();
+        this.hideCoords();
+        this.hideToolbar();
+    }
+
+    /**
+     * Returns the picture name and content
+     */
+    getPicture (): Picture {
+        const fileContent: string = <string> this.$imageFrame?.find("img").attr("src");
+        const fname: string = <string> <string> this.$imageFrame?.attr("fname");
+        return {
+            fileContent,
+            fileName: fsUtils.getFileName(fname),
+            fileExtension: fsUtils.getFileExtension(fname)
+        };
+    }
+
+    /**
+     * Returns the picture size
+     */
+    getPictureSize (): { "max-width": string, "max-height": string } {
+        return {
+            "max-width": <string> this.$imageFrame?.find("img").css("max-width"),
+            "max-height": <string> this.$imageFrame?.find("img").css("max-height")
+        };
+    }
+
+    /**
+     * Returns the picture data (name, content, and size)
+     */
+    getPictureData (): PictureData {
+        const picture: Picture = this.getPicture();
+        const size: { "max-width": string, "max-height": string } = this.getPictureSize();
+        return {
+            ...picture,
+            ...size
+        };
+    }
+
+    /**
+     * Returns the widgets descriptors
+     * TODO: harmonize WidgetData and WidgetObjectData
+     */
+    getWidgetsData (): WidgetsData {
+        if (this.widgetsMap) {
+            const keys: string[] = Object.keys(this.widgetsMap);
+            const ans: WidgetData[] = [];
+            for (let i = 0; i < keys.length; i++) {
+                const desc: WidgetData = this.widgetsMap[keys[i]].toJSON();
+                ans.push(desc);
+            }
+            return ans;
+        }
+        return [];
+    }
+
+    /**
+     * Create a widget
+     * @param widgetData 
+     */
+    createWidget (widgetData: WidgetObjectData): WidgetEVO {
+        if (widgetData) {
+            // console.log(widgetData);
+            if (widgetData.cons && widgetData.kind) {
+                const desc: WidgetClassDescriptor = widgetList[widgetData.kind].find((desc: WidgetClassDescriptor) => {
+                    return desc.cons.name === widgetData.cons;
+                });
+                // console.log(desc);
+                if (desc) {
+                    if (this.widgetsMap[widgetData.id]) {
+                        this.widgetsMap[widgetData.id].remove();
+                    }
+                    const options: WidgetOptions = { 
+                        parent: this.$imageFrame,
+                        type: widgetData.cons,
+                        ...widgetData?.opt,
+                        connection: this.connection
+                    };
+                    const widget: WidgetEVO = new desc.cons(widgetData.id, widgetData.coords, options);
+                    widget.renderSample();
+                    // console.log(widget);
+                    this.widgetsMap[widgetData.id] = widget;
+                    const evt: CreateWidgetEvent = {
+                        id: widgetData.id,
+                        name: widgetData.name,
+                        widgets: this.getWidgets(),
+                        hotspots: this.getHotspots()
+                    };
+                    this.trigger(BuilderEvents.DidCreateWidget, evt);
+                    return widget;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Delete a widget
+     * @param widgetData 
+     */
     deleteWidget (widgetData: { id: string }): void {
         this.widgetsMap[widgetData.id]?.remove();
         delete this.widgetsMap[widgetData.id];
     }
 
+    /**
+     * Edit a widget
+     * @param widgetData 
+     */
     async editWidget (data: { id: string, coords?: Coords }): Promise<WidgetEVO | null> {
         if (data?.id) {
             const id: string = data.id;
             const coords: Coords = data?.coords || this.hotspotEditor.getCoords(id);
             return new Promise((resolve, reject) => {
                 if (id && coords) {
-                    const widgetData: WidgetData = {
+                    const widgetData: WidgetObjectData = {
                         id,
                         coords,
                         name: this.widgetsMap[id]?.getName() || WidgetEVO.uuid(),
@@ -288,11 +427,11 @@ export class BuilderView extends CentralView {
                         cons: this.widgetsMap[id]?.getConstructorName()
                     }
                     const editor: WidgetEditor = new WidgetEditor({ widgetData });
-                    editor.on(WidgetEditorEvents.ok, (widgetData: WidgetData) => {
+                    editor.on(WidgetEditorEvents.ok, (widgetData: WidgetObjectData) => {
                         const widget: WidgetEVO = this.createWidget(widgetData);
                         resolve(widget);
                     });
-                    editor.on(WidgetEditorEvents.cancel, (data: WidgetData) => {
+                    editor.on(WidgetEditorEvents.cancel, (data: WidgetObjectData) => {
                         resolve(null);
                     });
                 } else {
@@ -302,6 +441,9 @@ export class BuilderView extends CentralView {
         }
     }
 
+    /**
+     * Uses a whiteboard as prototype picture
+     */
     createWhiteboard (): void {
         const size: { width: number, height: number } = this.getActivePanelSize();
         this.loadPicture({
@@ -314,7 +456,10 @@ export class BuilderView extends CentralView {
         });
     }
 
-    protected createImageFrametLayer (): void {
+    /**
+     * Internal function, creates the frame where widgets will be rendered
+     */
+    protected createImageFrameLayer (): void {
         const size: { width: number, height: number } = this.getActivePanelSize();
         this.loadPicture({
             fileName: "image-frame",
@@ -325,6 +470,24 @@ export class BuilderView extends CentralView {
             border: "1px solid black",
             $el: this.$imageFrame
         });
+    }
+
+    /**
+     * Returns the size of the current picture loaded in builder view
+     */
+    getActivePictureSize (): { width: number, height: number } {
+        const width: number = parseFloat($(`.prototype-screens .tab-pane.active .prototype-image`).css("width")) || window.innerWidth || MIN_WIDTH;
+        const height: number = parseFloat($(`.prototype-screens .tab-pane.active .prototype-image`).css("height")) || (window.innerHeight - toolbarHeight) || MIN_HEIGHT;
+        return { width, height };
+    }
+
+    /**
+     * Returns the size of the central panel
+     */
+    getActivePanelSize (): { width: number, height: number } {
+        const width: number = parseFloat($(`.prototype-screens .tab-pane.active`).css("width")) || window.innerWidth || MIN_WIDTH;
+        const height: number = parseFloat($(`.prototype-screens .tab-pane.active`).css("height")) || window.innerHeight || MIN_HEIGHT;
+        return { width, height: height - (1.5 * toolbarHeight) };
     }
 
     /**
@@ -344,26 +507,19 @@ export class BuilderView extends CentralView {
             if (opt.height) { imageElement.height = opt.height; }
             $el.html(imageElement);
             $el.find("img").css({ "max-width": `${maxSize.width}px`, "max-height": `${maxSize.height}px` });
-            $el.attr("name", `${desc.fileName}${desc.fileExtension}`);
             // update size of image frame
             this.$imageFrame.find("img").css({ "max-width": `${maxSize.width}px`, "max-height": `${maxSize.height}px` });
+            this.$imageFrame.attr("fname", `${desc.fileName}${desc.fileExtension}`);
             if (opt.border) { this.$imageFrame.css({ border: "1px solid black" }); }
             return true;
         }
         return false;
     }
 
-    getActiveImageSize (): { width: number, height: number } {
-        const width: number = parseFloat($(`.prototype-screens .tab-pane.active .prototype-image`).css("width")) || window.innerWidth || MIN_WIDTH;
-        const height: number = parseFloat($(`.prototype-screens .tab-pane.active .prototype-image`).css("height")) || (window.innerHeight - toolbarHeight) || MIN_HEIGHT;
-        return { width, height };
-    }
-    getActivePanelSize (): { width: number, height: number } {
-        const width: number = parseFloat($(`.prototype-screens .tab-pane.active`).css("width")) || window.innerWidth || MIN_WIDTH;
-        const height: number = parseFloat($(`.prototype-screens .tab-pane.active`).css("height")) || window.innerHeight || MIN_HEIGHT;
-        return { width, height: height - (1.5 * toolbarHeight) };
-    }
-
+    /**
+     * Internal function, handles clicks on load-picture-btn
+     * @param evt 
+     */
     protected async onLoadPicture (evt: JQuery.ChangeEvent): Promise<Picture> {
         return new Promise ((resolve, reject) => {
             const file: File = evt?.currentTarget?.files[0];
@@ -391,6 +547,9 @@ export class BuilderView extends CentralView {
         });
     }
 
+    /**
+     * Internal function, installs event handlers
+     */
     protected installHandlers (): void {
         $(document).find(".load-whiteboard-btn").on("click", (evt: JQuery.ClickEvent) => {
             this.createWhiteboard();

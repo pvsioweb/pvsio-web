@@ -1,17 +1,17 @@
 import * as Backbone from 'backbone';
 import { createDialog, setDialogTitle, uuid } from '../../../../utils/pvsiowebUtils';
-import { Coords, CSS, WidgetEVO, WidgetAttr, BasicEventData, VizOptions, WidgetOptions, WidgetDescriptor } from '../../widgets/core/WidgetEVO';
+import { Coords, CSS, WidgetEVO, WidgetAttr, BasicEventData, VizOptions, WidgetOptions, WidgetData } from '../../widgets/core/WidgetEVO';
 import { HotspotData } from './HotspotEditor';
 import { WidgetClassDescriptor, WidgetClassMap, widgetList } from '../../widgets/widgetList';
 
-export interface WidgetData extends HotspotData {
+export interface WidgetObjectData extends HotspotData {
     name: string,
     kind: string,
     cons?: string, // constructor name
     opt?: WidgetOptions
 };
 export interface WidgetEditorData extends Backbone.ViewOptions {
-    widgetData: WidgetData
+    widgetData: WidgetObjectData
 };
 
 export const WidgetEditorEvents = {
@@ -53,14 +53,34 @@ const containerTemplate: string = `
     .carousel-indicators .active {
         background-color: #444;
     }
+    .carousel-indicators {
+        position: relative;
+        min-width:290px;
+    }
+    .carousel-inner {
+        min-width: 362px;
+        margin: 20px 0;
+    }
+    .widget-attributes {
+        min-width: 362px;
+    }
+    .widget-editor-card {
+        height:400px;
+        padding-top:0px;
+        overflow:auto;
+    }
+    .widget-info {
+        position:relative;
+        overflow:auto;
+    }
     </style>
-    <div class="card-body tab-content" style="height:400px; padding-top:0px;">
+    <div class="widget-editor-card card-body tab-content">
         {{#each widgets as |item kind|}}
-        <div id="{{kind}}" class="widget-info body modal-body container-fluid tab-pane fade show no-gutters{{#if @first}} active{{/if}}" aria-labelledby="{{kind}}-tab" style="padding:0; position:relative;">
+        <div id="{{kind}}" class="widget-info p-0 modal-body container-fluid tab-pane fade show no-gutters{{#if @first}} active{{/if}}" aria-labelledby="{{kind}}-tab">
             <div class="row">
                 <div id="{{kind}}-carousel" class="carousel slide col-md-6" data-interval="false">
                     <!-- carousel indicators -->
-                    <ol class="carousel-indicators" style="position:relative;">
+                    <ol class="carousel-indicators">
                         {{#each this}}
                         <li data-target="#{{kind}}-carousel" kind="{{kind}}" cons="{{cons.name}}" data-slide-to="{{@index}}" {{#if @first}}class="active"{{/if}}></li>
                         {{/each}}
@@ -96,7 +116,7 @@ const containerTemplate: string = `
                 </div>
 
                 {{#each this}}
-                <div id="{{kind}}-{{cons.name}}" class="col-md-6 ml-auto" style="height:400px; overflow:auto; display:{{#if @first}}block{{else}}none{{/if}};">
+                <div id="{{kind}}-{{cons.name}}" class="widget-attributes col-md-6 ml-auto" style="height:400px; overflow:auto; display:{{#if @first}}block{{else}}none{{/if}};">
                     <div class="widget-id input-group input-group-sm" style="display:none;">
                         <div class="input-group-prepend" style="min-width:40%;">
                             <span class="input-group-text" style="width:100%;">ID</span>
@@ -161,7 +181,7 @@ const attrTemplate: string = `
 
 export class WidgetEditor extends Backbone.View {
     protected mode: "create" | "edit"; // dialog modes
-    protected widgetData: WidgetData;
+    protected widgetData: WidgetObjectData;
     protected editorId: string = uuid();
 
     protected $dialog: JQuery<HTMLElement>;

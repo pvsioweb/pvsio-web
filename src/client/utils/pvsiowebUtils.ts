@@ -192,6 +192,8 @@ export function createCollapsiblePanel (owner: PVSioWebPlugin, opt?: {
     const pluginName: string = owner.getName() || "";
     const width: string = opt.width || "100%";
     const top: number = opt.top || 0;
+
+    console.log(`[pvsioweb-utils] Creating panel, parent is ${parent}`);
     
     const panel: string = Handlebars.compile(collapsiblePanelTemplate, { noEscape: true })({
         showContent: !!opt?.showContent,

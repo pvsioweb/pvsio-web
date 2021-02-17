@@ -7,6 +7,7 @@ import { PrototypeBuilder } from './plugins/PrototypeBuilder/PrototypeBuilder';
 
 //@ts-ignore
 if (pvsioweb) {
+    console.log("[builder-min] detected global variable pvsioweb");
     const builder: PrototypeBuilder = new PrototypeBuilder();
     const name: string = builder.getName();
     //@ts-ignore
@@ -14,4 +15,4 @@ if (pvsioweb) {
 }
 //@ts-ignore
 const builder: PVSioWebPlugin = pvsioweb?.builder || new PrototypeBuilder();
-builder.activate({ parent: "pvsioweb"});
+// builder.activate({ parent: "pvsioweb"});

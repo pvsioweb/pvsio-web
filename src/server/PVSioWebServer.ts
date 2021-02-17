@@ -735,7 +735,7 @@ class PvsiowebServer {
             this.processCallback(res, socket);
         }, 500);
     }
-    protected async startPvsProcessHandler (token: Connection.StartPvsProcessToken, socket: WebSocket, socketid: number): Promise<void> {
+    protected async startPvsProcessHandler (token: Connection.StartProcessToken, socket: WebSocket, socketid: number): Promise<void> {
         this.initProcessMap(socketid);
         token.socketId = socketid;
         if (token?.data?.fileName && token?.data?.contextFolder && token?.data?.fileExtension) {
@@ -753,11 +753,11 @@ class PvsiowebServer {
             const res: boolean = await this.pvsioProcessMap[socketid].start({ contextFolder: root, fileName: token.data.fileName, fileExtension: ".pvs" });
             console.log(`[pvsioweb-server] PVSio process started`);
         } else {
-            console.warn(`[pvsioweb-server] Warning: token does not indicate a pvs file`);
+            console.warn(`[pvsioweb-server] Warning: token does not specify required fields contextFolder, fileName, fileExtension`, token);
         }
         this.processCallback(token, socket);
     }
-    protected async stopPvsProcessHandler (token: Connection.StopPvsProcessToken, socket: WebSocket, socketid: number): Promise<void> {
+    protected async stopPvsProcessHandler (token: Connection.StopProcessToken, socket: WebSocket, socketid: number): Promise<void> {
         //closes pvs process
         this.initProcessMap(socketid);
         token.socketId = socketid;
@@ -1065,10 +1065,10 @@ class PvsiowebServer {
         this.functionMaps.set("<pong>", async (token: Connection.PongToken, socket: WebSocket, socketid: number) => {
             await this.pongHandler(token, socket, socketid);
         });
-        this.functionMaps.set("startPvsProcess", async (token: Connection.StartPvsProcessToken, socket: WebSocket, socketid: number) => {
+        this.functionMaps.set("startProcess", async (token: Connection.StartProcessToken, socket: WebSocket, socketid: number) => {
             await this.startPvsProcessHandler(token, socket, socketid);
         });
-        this.functionMaps.set("stopPvsProcess", async (token: Connection.StopPvsProcessToken, socket: WebSocket, socketid: number) => {
+        this.functionMaps.set("stopProcess", async (token: Connection.StopProcessToken, socket: WebSocket, socketid: number) => {
             await this.stopPvsProcessHandler(token, socket, socketid);
         });
         this.functionMaps.set("readFile", async (token: Connection.ReadFileToken, socket: WebSocket, socketid: number) => {

@@ -1,114 +1,128 @@
 import * as Backbone from 'backbone';
 import { Connection } from '../../../env/Connection';
 import { CentralView, CentralViewOptions } from './CentralView';
-import * as fsUtils from '../../../utils/fsUtils';
 
-export const contentTemplate: string = `
+const settingsTemplate: string = `
+{{#each settings}}
+<div id="{{id}}" class="input-group input-group-sm mb-3">
+    <div class="input-group-prepend">
+    <span class="input-group-text" id="{{id}}-label" style="min-width:10em;">{{#if label}}{{label}}{{else}}{{id}}{{/if}}</span>
+    </div>
+    <input id="{{id}}-input" type="text" value="{{value}}" class="form-control" placeholder="{{placeholder}}" aria-label="{{#if label}}{{label}}{{else}}{{id}}{{/if}}" aria-describedby="{{id}}-label">
+</div>
+{{/each}}
+`;
+
+const contentTemplate: string = `
 <div class="builder-settings container-fluid" style="padding-left:0;">
     <div class="card">
-        <div class="card-header">Prototype Configuration</div>
-        <div class="card-body">
-            {{#each settings}}
-            <div id="{{@key}}" class="input-group input-group-sm mb-3">
-                <div class="input-group-prepend">
-                <span class="input-group-text" id="{{@key}}-label" style="min-width:10em;">{{label}}</span>
-                </div>
-                <input id="{{@key}}-input" type="text" class="form-control" placeholder="{{placeholder}}" aria-label="{{label}}" aria-describedby="{{id}}-label">
-            </div>
-            {{/each}}
+        <div class="card-header">Settings</div>
+        <div class="card-body settings">
+        ${settingsTemplate}
         </div>
     </div>
 </div>`;
 
-const settings: { [key: string]: { label: string, placeholder?: string } } = {
-    "main-file": { label: "Main File" },
-    "context-folder": { label: "Context Folder" },
-    "init-function": { label: "Init Function" },
-    "tick-function": { label: "Tick Function" },
-    "tick-frequency": { label: "Tick Frequency" }
+export type SettingId = "mainFile" | "contextFolder" | "initFunction" | "tickFunction" | "tickFrequency" | "jsonPrinter" | string;
+export interface Settings {
+    id: SettingId,
+    label?: string,
+    value?: string, 
+    placeholder?: string, 
+    init?: boolean // indicates whether this setting will be sent to the server to initialize the simulation
 };
 
-export interface Settings {
-    fileName: string,
-    fileExtension: string,
-    contextFolder: string,
-    initFunction: string,
-    tickFunction: string,
-    tickFrequency: number // ms
-};
+export interface SettingsViewOptions extends CentralViewOptions {
+    settings?: Settings[]
+}
+
+export const fileSettings: Settings[] = [
+    { id: "mainFile", label: "Main File", value: "" },
+    { id: "contextFolder", label: "Context Folder", value: "" }
+];
+export const functionSettings: Settings[] = [
+    { id: "initFunction", label: "Init Function", value: "" },
+    { id: "tickFunction", label: "Tick Function", value: "" },
+    { id: "tickFrequency", label: "Tick Frequency", value: "250ms" }
+];
+export const printerSettings: Settings[] = [
+    { id: "jsonPrinter", label: "JSON Printer", value: "" }
+];
+export const basicSettings: Settings[] = fileSettings.concat(functionSettings).concat(printerSettings);
 
 export class SettingsView extends CentralView {
-    protected $settings: { [key: string]: JQuery<HTMLElement> } = {};
+    protected viewOptions: SettingsViewOptions;
+
+    /**
+     * Pointer to the DOM element with settings
+     */
+    protected $settings: JQuery<HTMLElement>;
+    protected keys: string[]; // we are keeping the keys so the value of the settings to make sure the value is always taken from the DOM
     
-    constructor (data: CentralViewOptions, connection: Connection) {
+    /**
+     * Constructor
+     * @param data 
+     * @param connection 
+     */
+    constructor (data: SettingsViewOptions, connection: Connection) {
         super(data, connection);
     }
 
-    render (data?: CentralViewOptions): SettingsView {
+    /**
+     * Renders view content
+     * @param data 
+     */
+    render (): SettingsView {
+        const settings: Settings[] = this.viewOptions?.settings || basicSettings;
         const content: string = Handlebars.compile(contentTemplate, { noEscape: true })({ settings });
-        super.render({ ...data, content, label: `<i class="fa fa-cogs"></i>` });
-        const keys: string[] = Object.keys(settings);
-        for (let i = 0; i < keys.length; i++) {
-            this.$settings[keys[i]] = this.$el.find(`#${keys[i]} input`);
-        }
+        super.render({ ...this.viewOptions, content, label: `<i class="fa fa-cogs"></i>` });
+        this.$settings = this.$el.find(`.settings`);
+        this.keys = this.viewOptions?.settings ? this.viewOptions.settings.map((elem: Settings) => {
+            return elem.id;
+        }) : [];
         return this;
     }
 
-    getMainFile (): string {
-        return <string> this.$settings["main-file"].val();
-    }
-    setMainFile (fname: string): void {
-        this.$settings["main-file"].val(fname);
-    }
-    getContextFolder (): string {
-        return <string> this.$settings["context-folder"].val() || "";
-    }
-    setContextFolder (fname: string): void {
-        this.$settings["context-folder"].val(fname);
-    }
-    getInitFunction (): string {
-        return <string> this.$settings["init-function"].val();
-    }
-    setInitFunction (init: string): void {
-        this.$settings["init-function"].val(init) || "";
-    }
-    getTickFunction (): string {
-        return <string> this.$settings["tick-function"].val();
-    }
-    setTickFunction (tick: string): void {
-        this.$settings["tick-function"].val(tick) || "";
-    }
-    getTickFrequency (): number {
-        const elem: string = <string> this.$settings["tick-frequency"].val();
-        if (elem) {
-            return parseFloat(elem);
-        }
-        return 250;
-    }
-    setTickFrequency (ms: number): void {
-        if (ms) {
-            this.$settings["tick-frequency"].val(`${ms}ms`);
-        } else {
-            this.$settings["tick-frequency"].val("");
+    /**
+     * Configures the list of settings shown in the panel 
+     * @param settings 
+     */
+    configure (data: { settings: Settings[] }): void {
+        if (data) {
+            console.log(`[settings-view] Updating settings`, data);
+            const settings: Settings[] = data?.settings;
+            const content: string = Handlebars.compile(settingsTemplate, { noEscape: true})({ settings });
+            this.$settings.html(content);
+            this.keys = Object.keys(settings);
         }
     }
-    getSettings (): Settings {
-        const fname: string = this.getMainFile();
-        const contextFolder: string = this.getContextFolder();
-        const initFunction: string = this.getInitFunction();
-        const tickFunction: string = this.getTickFunction();
-        const tickFrequency: number = this.getTickFrequency();
-        return {
-            fileName: fsUtils.getFileName(fname),
-            fileExtension: fsUtils.getFileExtension(fname),
-            contextFolder,
-            initFunction,
-            tickFunction,
-            tickFrequency
-        };
+
+    /**
+     * Get the current value of a given setting
+     * @param name 
+     */
+    getValue (id: SettingId): string {
+        return <string> this.$settings?.find(`#${id} input`)?.val();
+    }
+
+    /**
+     * Get the current value of all settings
+     */
+    getSettings (): Settings[] {
+        const ans: Settings[] = [];
+        for (let i = 0; i < this.keys?.length; i++) {
+            const id: SettingId = this.keys[i];
+            ans[id] = {
+                id,
+                value: this.getValue(id)
+            };
+        }
+        return ans;
     }
     
-
+    /**
+     * Returns the backbone events handled by this view 
+     */
     events (): Backbone.EventsHash {
         return { };
     }

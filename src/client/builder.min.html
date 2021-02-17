@@ -17,7 +17,6 @@
         <!-- <link href="css/pvsio-web.css" rel="stylesheet">
         <link href="css/style.css" rel="stylesheet">
         <link href="app/plugins/graphbuilder/graph.css" rel="stylesheet"> -->
-
     </head>
 <body>
     <div id="pvsioweb" class="container-fluid p-0" style="position:absolute; top:0; left:0;"></div>
@@ -26,7 +25,22 @@
     <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="node_modules/underscore/underscore-min.js"></script>
     <script src="node_modules/backbone/backbone-min.js"></script>
-    <script>const pvsioweb = {};</script>
+    <script>
+        // FIXME: need to understand how to export a global variable 'pvsioweb' in webpack
+        const pvsioweb = {};
+    </script>
     <script src="prototype-builder.min.js"></script>
+    <script>
+        const settings = [
+            { id: "mainFile", label: "Main File", value: "" },
+            { id: "contextFolder", label: "Context Folder", value: "" },
+            { id: "theoryName", label: "Theory", value: "" },
+            { id: "initFunction", label: "Init Function", value: "" },
+            { id: "tickFunction", label: "Tick Function", value: "" },
+            { id: "tickFrequency", label: "Tick Frequency", value: "250ms" },
+            { id: "jsonPrinter", label: "JSON Printer", value: "" }
+        ];
+        pvsioweb["Prototype Builder"].activate({ parent: "pvsioweb", settings });
+    </script>
 </body>
 </html>

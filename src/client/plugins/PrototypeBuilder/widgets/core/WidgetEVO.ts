@@ -101,9 +101,10 @@ export const img_template: string = `
 `;
 export type Renderable = string | number | {};
 export type Coords<T = string | number> = { top?: T, left?: T, width?: T, height?: T };
-export type WidgetDescriptor = {
+export type WidgetData = {
     id: string,
     cons: string, // constructor name
+    kind: string,
     attr: WidgetAttr,
     coords: Coords,
     style: CSS,
@@ -925,9 +926,10 @@ export abstract class WidgetEVO extends Backbone.Model {
         }
     }
 
-    toJSON (): WidgetDescriptor {
+    toJSON (): WidgetData {
         return {
             id: this.id,
+            kind: this.kind,
             cons: this.getConstructorName(),
             attr: this.getAttributes(),
             coords: this.getCoordinates(),

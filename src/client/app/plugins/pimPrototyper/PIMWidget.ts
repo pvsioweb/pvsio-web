@@ -3,7 +3,7 @@
  * @desc Widget within the PIM prototype editor
  * @author Nathaniel Watson
  */
-import { WidgetEVO, Coords, WidgetOptions, WidgetDescriptor } from '../../../plugins/PrototypeBuilder/widgets/core/WidgetEVO';
+import { WidgetEVO, Coords, WidgetOptions, WidgetData } from '../../../plugins/PrototypeBuilder/widgets/core/WidgetEVO';
 import { TouchScreenEVO } from '../../../plugins/PrototypeBuilder/widgets/core/TouchScreenEVO';
 
 export interface PIMWidgetOptions extends WidgetOptions {
@@ -13,7 +13,7 @@ export interface PIMWidgetOptions extends WidgetOptions {
     evts?: string[]
 };
 
-export interface PIMWidgetDescriptor extends WidgetDescriptor {
+export interface PIMWidgetDescriptor extends WidgetData {
     name: string,
     targetScreen: string,
     image: string

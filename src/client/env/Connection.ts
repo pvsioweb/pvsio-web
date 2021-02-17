@@ -6,7 +6,7 @@ import * as Backbone from 'backbone';
 
 export declare type RequestType = TokenType;
 export declare type ResponseType = TokenType;
-export declare type TokenType = "startPvsProcess" | "stopPvsProcess" | "sendCommand" | "execJava"
+export declare type TokenType = "startProcess" | "stopProcess" | "sendCommand" | "execJava"
     | "readFile" | "writeFile" | "deleteFile" | "deleteFolder" | "writeFolder" | "readFolder"
     | "keepAlive" | "activate-server" | "setMainFile" | "changeProjectSetting" | "listProjects"
     | "openProject" | "typeCheck" | "<ping>" | "<pong>" | "renameFile" | "fileExists"
@@ -83,18 +83,23 @@ export interface ListProjectsToken extends TokenId {
     projects: serverUtils.ProjectDescriptor[]
 }
 export interface FileDescriptor {
-    fileName: string,
-    fileExtension: string,
-    contextFolder: string
+    fileName?: string,
+    fileExtension?: string,
+    contextFolder?: string
 }
-
-export interface StartPvsProcessToken extends TokenId {
-    type: "startPvsProcess",
-    data: FileDescriptor
+export interface PvsTheory extends FileDescriptor {
+    theoryName: string
 }
-export interface StopPvsProcessToken extends TokenId {
-    type: "stopPvsProcess",
-    data: FileDescriptor,
+export interface StartProcessData extends FileDescriptor {
+    [key: string]: string
+}
+export interface StartProcessToken extends TokenId {
+    type: "startProcess",
+    data: StartProcessData
+}
+export interface StopProcessToken extends TokenId {
+    type: "stopProcess",
+    data: StartProcessData,
     message?: string
 }
 export interface ReadFileToken extends TokenId {
@@ -192,8 +197,8 @@ export interface PongToken extends TokenId {
 
 export type Token = PongToken | PingToken | FileSystemUpdateToken | StartIVYToken | StopSapereEEToken | StartSapereEEToken
     | JavaToken | CtrlToken | RenameProjectToken | DeleteFolderToken | WriteFolderToken | ReadFolderToken
-    | FileExistsToken | RenameFileToken | DeleteFileToken | WriteFileToken | ReadFileToken | StopPvsProcessToken
-    | StartPvsProcessToken | ListProjectsToken | SendCommandToken | TypecheckToken | OpenProjectToken | ReadExamplesFolderToken
+    | FileExistsToken | RenameFileToken | DeleteFileToken | WriteFileToken | ReadFileToken | StopProcessToken
+    | StartProcessToken | ListProjectsToken | SendCommandToken | TypecheckToken | OpenProjectToken | ReadExamplesFolderToken
     | ChangeProjectSettingsToken | SetMainFileToken | ErrorToken | StartServerToken;
 
 

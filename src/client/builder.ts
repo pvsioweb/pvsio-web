@@ -2,6 +2,12 @@
  * Interactive prototype builder for PVSio based on the html map attribute
  */
 import { PrototypeBuilder } from './plugins/PrototypeBuilder/PrototypeBuilder';
+import { fileSettings, functionSettings, printerSettings, Settings } from './plugins/PrototypeBuilder/views/SettingsView';
+
+// augment the basic settings with a new field 'theoryName'
+export const pvsSettings: Settings[] = fileSettings.concat([
+    { id: "mainFile", label: "Main File", value: "" }
+]).concat(functionSettings).concat(printerSettings);
 
 //@ts-ignore
 if (pvsioweb) {
@@ -12,4 +18,4 @@ if (pvsioweb) {
 }
 //@ts-ignore
 const builder: PVSioWebPlugin = pvsioweb?.builder || new PrototypeBuilder();
-builder.activate({ parent: "pvsioweb"});
+builder.activate({ parent: "pvsioweb", settings: pvsSettings });

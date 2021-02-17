@@ -22,7 +22,7 @@ export const CentralViewEvents = {
 
 const headerTemplate: string = `
 <li class="nav-item">
-<a draggable="false" class="nav-link{{#if active}} active{{/if}}" id="{{tabId}}" data-toggle="tab" href="#{{controls}}" role="tab" aria-controls="{{controls}}" aria-selected="true">{{label}}</a>
+<button draggable="false" class="nav-link{{#if active}} active{{/if}}" id="{{tabId}}" data-toggle="tab" href="#{{controls}}" role="tab" aria-controls="{{controls}}" aria-selected="true">{{label}}</button>
 </li>`;
 
 const minHeight: number = 480; // px

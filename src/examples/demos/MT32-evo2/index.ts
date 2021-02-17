@@ -13,7 +13,7 @@ import { ActionsQueue } from '../../../client/env/ActionsQueue';
 import { Player } from '../../../client/util/playback/Player';
 
 import { WebSocketConnection, ConnectionEvents } from '../../../client/env/Connection';
-import { StartPvsProcessToken, SendCommandToken } from '../../../client/env/Connection';
+import { StartProcessToken, SendCommandToken } from '../../../client/env/Connection';
 import { uuid } from '../../../client/utils/pvsiowebUtils';
 
 enum Demo { NONE = 0, ACCESS_HOME_PAGE = 1, HUB_NEW_PT = 2, HUB_KNOWN_PT = 3, HOLTER = 4, TERMINATE_HUB_MODE = 5, TERMINATE_HOLTER_MODE = 6,
@@ -3460,8 +3460,8 @@ class MT32Demo {
         this.connection.on(ConnectionEvents.DidOpenConnection, (evt?) => {
             console.log("web socket connected");
             //start pvs process
-            const req: StartPvsProcessToken = {
-                type: 'startPvsProcess',
+            const req: StartProcessToken = {
+                type: 'startProcess',
                 id,
                 data: {
                     fileName: "main",
@@ -3470,7 +3470,7 @@ class MT32Demo {
                 }
             };
             this.connection?.sendRequest("startPvsProcess", req);
-            this.connection?.onRequest("startPvsProcess", (err, res) => {
+            this.connection?.onRequest("startProcess", (err, res) => {
                 if (this.demo === Demo.ECG_EXAM_12DER_KNOWN_PT || this.demo === Demo.HOLTER_EXAM) {
                     const req: SendCommandToken = {
                         type: "sendCommand",
