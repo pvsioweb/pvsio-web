@@ -15,6 +15,9 @@ export interface CentralViewOptions extends Backbone.ViewOptions {
     parentDiv: HTMLElement
 };
 
+export const MIN_WIDTH: number = 800; //px
+export const MIN_HEIGHT: number = 480; //px
+
 export const CentralViewEvents = {
     DidShowView: "DidShowView",
     DidHideView: "DidHideView"
@@ -25,10 +28,8 @@ const headerTemplate: string = `
 <button draggable="false" class="nav-link{{#if active}} active{{/if}}" id="{{tabId}}" data-toggle="tab" href="#{{controls}}" role="tab" aria-controls="{{controls}}" aria-selected="true">{{label}}</button>
 </li>`;
 
-const minHeight: number = 480; // px
-
 const bodyTemplate: string = `
-<div id="{{panelId}}" class="container-fluid tab-pane show no-gutters{{#if active}} active{{/if}}" aria-labelledby="{{controlledBy}}" style="padding:0; position:relative; min-height:${minHeight}px;">
+<div id="{{panelId}}" class="container-fluid tab-pane show no-gutters{{#if active}} active{{/if}}" aria-labelledby="{{controlledBy}}" style="padding:0; position:relative; min-height:${MIN_HEIGHT}px;">
     {{content}}
 </div>`;
 
@@ -52,9 +53,6 @@ export interface CreateWidgetEvent extends SelectWidgetEvent {
 export type DeleteWidgetEvent = CreateWidgetEvent; 
 export type CutWidgetEvent = CreateWidgetEvent; 
 
-export const MIN_WIDTH: number = 800; //px
-export const MIN_HEIGHT: number = minHeight; //px
-
 export abstract class CentralView extends Backbone.View {
     protected connection: Connection;
     
@@ -77,13 +75,24 @@ export abstract class CentralView extends Backbone.View {
         this.$parentDiv = $(data?.parentDiv);
     }
 
-    resizeView (coords?: Coords): void { }
+    /**
+     * Resize the view
+     * @param coords View size
+     */
+    resizeView (coords?: Coords): void {
+        if (coords) {
+            const width: number = coords.width ? parseFloat(`${coords.width}`) : 0;
+            if (width) { this.$el.css({ width }); }
+            const height: number = coords.height ? parseFloat(`${coords.height}`) : 0;
+            if (height) { this.$el.css({ height }); }            
+        }
+    }
 
     /**
      * Attaches a new panel to prototype builder. This function should be invoked only once.
      * @param opt 
      */
-    render (opt?: CentralViewOptions): CentralView {
+    async renderView (opt?: CentralViewOptions): Promise<CentralView> {
         // append header tab
         if (this.$headerDiv) {
             const label: string = opt?.label || this.panelId;

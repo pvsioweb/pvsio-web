@@ -60,9 +60,9 @@ export class SimulatorView extends CentralView {
         return false;
     }
 
-    render (opt?: CentralViewOptions): SimulatorView {
+    async renderView (opt?: CentralViewOptions): Promise<SimulatorView> {
         const content: string = "";
-        super.render({ ...this.viewOptions, content });
+        await super.renderView({ ...this.viewOptions, content });
         return this;
     }
 

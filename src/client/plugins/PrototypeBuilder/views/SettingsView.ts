@@ -72,10 +72,10 @@ export class SettingsView extends CentralView {
      * Renders view content
      * @param data 
      */
-    render (): SettingsView {
+    async renderView (): Promise<SettingsView> {
         const settings: Settings[] = this.viewOptions?.settings || basicSettings;
         const content: string = Handlebars.compile(contentTemplate, { noEscape: true })({ settings });
-        super.render({ ...this.viewOptions, content, label: `<i class="fa fa-cogs"></i>` });
+        await super.renderView({ ...this.viewOptions, content, label: `<i class="fa fa-cogs"></i>` });
         this.$settings = this.$el.find(`.settings`);
         this.keys = this.viewOptions?.settings ? this.viewOptions.settings.map((elem: Settings) => {
             return elem.id;

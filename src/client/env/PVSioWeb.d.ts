@@ -34,8 +34,8 @@ export declare interface PVSioWebFile {
     },
     picture: {
         fname: string,
-        "max-height": number | string | "auto",
-        "max-width": number | string | "auto"
+        width: number,
+        height: number
     },
     widgets: WidgetsData
 }

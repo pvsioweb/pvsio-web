@@ -11,7 +11,8 @@ import { SimulatorView } from './views/SimulatorView';
 
 import * as fsUtils from "../../utils/fsUtils";
 
-const sidebarStyle: string = `
+const prototypeBuilderBody: string = `
+<style>
 .builder-sidebar-heading {
     color: white;
     display: block;
@@ -51,13 +52,25 @@ const sidebarStyle: string = `
     left: 32px;
     transform: scale(0.8);
 }
-`;
-
-//        <button id="{{id}}-reboot-btn" class="btn btn-outline-danger btn-sm pim-convert-button" style="margin-left:36em;">Reboot Prototype</button>
-
-const prototypeBuilderBody: string = `
-<style>
-${sidebarStyle}
+.resize-bar {
+    width:6px;
+    background-color:#4c4c4c;
+}
+.central-panel {
+    position:relative;
+    width:66%;
+    overflow:hidden;
+}
+.central-panel-inner {
+    overflow:auto;
+}
+.central-panel-inner-header {
+    margin-top:-8px;
+    font-size:small;
+}
+.prototype-screens {
+    margin:0px;
+}
 </style>
 <div id="{{id}}" class="row d-flex">
     <div id="{{id}}-left" class="left-panel container-fluid no-gutters">
@@ -65,14 +78,14 @@ ${sidebarStyle}
         <div id="{{id}}-widget-list" class="widget-list list-group"></div>
         <div id="{{id}}-timers-list" class="list-group"></div>
     </div>
-    <div id="{{id}}-resize-bar" style="width:6px;background-color:#4c4c4c;"></div>
-    <div id="{{id}}-central" class="flex-grow-1 no-gutters" style="position:relative; width:66%; overflow:hidden;">
-        <div class="card">
-            <div class="card-header" style="margin-top:-8px; font-size:small;">
+    <div id="{{id}}-resize-bar" class="resize-bar"></div>
+    <div id="{{id}}-central" class="flex-grow-1 no-gutters central-panel">
+        <div class="card central-panel-inner">
+            <div class="card-header central-panel-inner-header">
                 <ul class="nav nav-tabs card-header-tabs d-flex flex-nowrap prototype-screen-list">
                 </ul>
             </div>
-            <div class="card-body prototype-screens tab-content py-0" style="margin:0px;">
+            <div class="card-body prototype-screens tab-content py-0">
             </div>
         </div>
     </div>
@@ -221,7 +234,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
             }, this.connection)
         };
         // render views
-        this.renderViews();
+        await this.renderViews();
         // install handlers
         this.installHandlers();
         // refresh the view
@@ -293,9 +306,9 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
     /**
      * Internal function, renders the panels (central panel and side panel)
      */
-    protected renderViews (): void {
+    protected async renderViews (): Promise<void> {
         for (let i in this.centralViews) {
-            this.centralViews[i].render();
+            await this.centralViews[i].renderView();
             // add listeners for side views, so they can he shown/hidden together with the corresponding central view
             this.centralViews[i].on(CentralViewEvents.DidShowView, (data: { id: string }) => {
                 for (let j in this.sideViews) {
@@ -386,19 +399,20 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
     }
 
     /**
-     * Loads prototype data given as argument
+     * Loads prototype data
+     * @param data prototype data to be loaded
      * @returns true if the prototype has been loaded successfully
      */
-    loadPrototypeData (data: PrototypeData): boolean {
+    async loadPrototypeData (data: PrototypeData): Promise<PictureData> {
         if (data?.main && data['picture-data']) {
             const picture: Picture = {
                 fileName: fsUtils.getFileName(data.main.fname),
                 fileExtension: fsUtils.getFileExtension(data.main.fname),
                 fileContent: data['picture-data']
             }
-            return this.centralViews.Builder.loadPicture(picture);
+            return await this.centralViews.Builder.loadPicture(picture);
         }
-        return false;
+        return null;
     }
 
     /**
@@ -418,8 +432,8 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
                 widgets: widgetsData,
                 picture: {
                     fname: pictureData?.fileName && pictureData?.fileExtension ? `${pictureData.fileName}${pictureData.fileExtension}` : "",
-                    "max-height": pictureData?.['max-height'],
-                    "max-width": pictureData?.['max-width']
+                    width: pictureData?.width,
+                    height: pictureData?.height,
                 },
                 "picture-data": pictureData?.fileContent || ""
             };

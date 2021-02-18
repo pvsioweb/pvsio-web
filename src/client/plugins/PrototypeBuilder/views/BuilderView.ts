@@ -14,10 +14,8 @@ const toolbarHeight: number = 36; //px
 const contentTemplate: string = `
 <style>
 .view-div {
-    position: absolute;
+    position:absolute;
     padding-left:0;
-    margin-right:30px;
-    overflow:hidden;
 }
 .builder-toolbar {
     position:absolute; 
@@ -35,6 +33,9 @@ const contentTemplate: string = `
     font-size:small;
     white-space:nowrap;
 }
+.prototype-image {
+    overflow: hidden;
+}
 .prototype-image-frame {
     position: absolute;
     cursor: crosshair;
@@ -49,20 +50,20 @@ const contentTemplate: string = `
 </style>
 <div class="row" style="height:36px;">
     <div class="builder-toolbar">
-        <form class="load-picture-form">
-            <div class="custom-file" style="position:absolute;">
+        <div class="custom-file" style="position:absolute; width:12em;">
+            <form class="load-picture-form">
                 <input type="file" class="custom-file-input load-picture-btn" accept="image/*">
                 <label class="custom-file-label btn-sm" style="width:14em;">Upload Picture</label>
-            </div>
-            <button class="btn btn-outline-danger btn-lg load-whiteboard-btn btn-sm" style="margin-left:15em; width:12em;">Remove Picture</button>
-        </form>
+            </form>
+        </div>
+        <button class="btn btn-outline-danger btn-lg load-whiteboard-btn btn-sm" style="margin-left:15em; width:12em;">Remove Picture</button>
     </div>
     <div class="builder-coords"></div>
 </div>
 <div class="prototype row">
-    <div class="prototype-image view-div container-fluid"></div>
-    <div class="prototype-image-frame view-div container-fluid"></div>
-    <div class="prototype-image-overlay container-fluid"></div>
+    <div class="prototype-image view-div container-fluid p-0"></div>
+    <div class="prototype-image-frame view-div container-fluid p-0"></div>
+    <div class="prototype-image-overlay container-fluid p-0"></div>
 </div>`;
 
 export type Picture = {
@@ -76,14 +77,15 @@ export interface PictureOptions {
     border?: string,
     $el?: JQuery<HTMLElement>
 };
-export interface PictureData extends Picture {
-    "max-width": "auto" | string,
-    "max-height": "auto" | string,
-};
+export interface PictureSize {
+    width: number,
+    height: number
+}
+export type PictureData = Picture & PictureSize;
+
 export type WidgetsData = WidgetData[]; 
 
-export class BuilderView extends CentralView {
-    
+export class BuilderView extends CentralView {    
     /**
      * jQuery pointers to relevant elements of the view
      */
@@ -92,6 +94,11 @@ export class BuilderView extends CentralView {
     protected $imageOverlay: JQuery<HTMLElement>;
     protected $coords: JQuery<HTMLElement>;
     protected $toolbar: JQuery<HTMLElement>;
+
+    /**
+     * Default panel size
+     */
+    readonly defaultPanelSize: PictureSize = { width: MIN_WIDTH, height: MIN_HEIGHT };
 
     /**
      * Editor for creating hotspot areas over the picture of the prototype
@@ -140,16 +147,16 @@ export class BuilderView extends CentralView {
      * - an upper layer (prototype-image-overlay) shows the hotspot areas. This layer becomes hidden in simulator view.  
      * @param opt 
      */
-    render (): BuilderView {
+    async renderView (): Promise<BuilderView> {
         const content: string = Handlebars.compile(contentTemplate, { noEscape: true })({});
-        super.render({ ...this.viewOptions, content });
+        await super.renderView({ ...this.viewOptions, content });
         this.$imageDiv = this.$el.find(".prototype-image");
         this.$imageFrame = this.$el.find(".prototype-image-frame");
         this.$imageOverlay = this.$el.find(".prototype-image-overlay");
         this.$coords = this.$el.find(".builder-coords");
         this.$toolbar = this.$el.find(".builder-toolbar");
-        this.createWhiteboard();
-        this.createImageFrameLayer();
+        await this.createWhiteboard();
+        await this.createImageFrameLayer();
         this.resizeView();
         this.installHandlers();
         // create hotspot editor on top of the image
@@ -157,7 +164,35 @@ export class BuilderView extends CentralView {
         return this;
     }
 
-        /**
+    /**
+     * Resize picture. If size is not provided, then the current image loaded in the picture is used to refresh the panel.
+     */
+    resizePicture (size?: PictureSize): void {
+        if (size) {
+            this.$imageDiv.find("img").attr("width", size.width).attr("height", size.height);
+        }
+        size = size || this.getPictureSize();
+        if (size) {
+            // resize image div
+            this.$imageDiv.css({ width: `${size.width}px`, height: `${size.height}px` });
+            // resize frame
+            this.$imageFrame.find("img").attr("width", size.width).attr("height", size.height);
+            this.$imageFrame.css({ width: `${size.width}px`, height: `${size.height}px` });
+        }
+    }
+
+    /**
+     * Automatically resize the view based on the size of the image loaded in the view
+     * @param coords 
+     */
+    resizeView (coords?: Coords): void {
+        super.resizeView({
+            width: parseFloat(this.$imageDiv.css("width")),
+            height: parseFloat(this.$imageDiv.css("height")) + 1.2 * parseFloat(this.$toolbar.css("height"))
+        });
+    }
+
+    /**
      * Internal function, creates the hotspot editor
      */
     protected createHotspotEditor (): void {
@@ -311,8 +346,8 @@ export class BuilderView extends CentralView {
      * Returns the picture name and content
      */
     getPicture (): Picture {
-        const fileContent: string = <string> this.$imageFrame?.find("img").attr("src");
-        const fname: string = <string> <string> this.$imageFrame?.attr("fname");
+        const fileContent: string = <string> this.$imageDiv?.find("img").attr("src");
+        const fname: string = <string> <string> this.$imageDiv?.attr("fname") || "prototype.png";
         return {
             fileContent,
             fileName: fsUtils.getFileName(fname),
@@ -323,10 +358,12 @@ export class BuilderView extends CentralView {
     /**
      * Returns the picture size
      */
-    getPictureSize (): { "max-width": string, "max-height": string } {
+    getPictureSize (): PictureSize {
+        const img: HTMLImageElement = this.$imageFrame?.find("img")[0];
+        // console.log(img);
         return {
-            "max-width": <string> this.$imageFrame?.find("img").css("max-width"),
-            "max-height": <string> this.$imageFrame?.find("img").css("max-height")
+            width: img ? img.width : 0,
+            height: img ? img.height : 0
         };
     }
 
@@ -335,7 +372,7 @@ export class BuilderView extends CentralView {
      */
     getPictureData (): PictureData {
         const picture: Picture = this.getPicture();
-        const size: { "max-width": string, "max-height": string } = this.getPictureSize();
+        const size: PictureSize = this.getPictureSize();
         return {
             ...picture,
             ...size
@@ -444,9 +481,9 @@ export class BuilderView extends CentralView {
     /**
      * Uses a whiteboard as prototype picture
      */
-    createWhiteboard (): void {
-        const size: { width: number, height: number } = this.getActivePanelSize();
-        this.loadPicture({
+    async createWhiteboard (): Promise<PictureData> {
+        const size: PictureSize = this.defaultPanelSize;
+        return await this.loadPicture({
             fileName: "whiteboard",
             fileExtension: ".gif",
             fileContent: utils.transparentGif
@@ -459,9 +496,9 @@ export class BuilderView extends CentralView {
     /**
      * Internal function, creates the frame where widgets will be rendered
      */
-    protected createImageFrameLayer (): void {
+    protected async createImageFrameLayer (): Promise<void> {
         const size: { width: number, height: number } = this.getActivePanelSize();
-        this.loadPicture({
+        await this.loadPicture({
             fileName: "image-frame",
             fileExtension: ".gif",
             fileContent: utils.transparentGif
@@ -476,18 +513,25 @@ export class BuilderView extends CentralView {
      * Returns the size of the current picture loaded in builder view
      */
     getActivePictureSize (): { width: number, height: number } {
-        const width: number = parseFloat($(`.prototype-screens .tab-pane.active .prototype-image`).css("width")) || window.innerWidth || MIN_WIDTH;
-        const height: number = parseFloat($(`.prototype-screens .tab-pane.active .prototype-image`).css("height")) || (window.innerHeight - toolbarHeight) || MIN_HEIGHT;
-        return { width, height };
+        const width: number = parseFloat($(`.prototype-screens .tab-pane.active .prototype-image`).css("width")) || window.innerWidth;
+        const height: number = parseFloat($(`.prototype-screens .tab-pane.active .prototype-image`).css("height")) || (window.innerHeight - toolbarHeight);
+        return {
+            width: Math.min(width, MIN_WIDTH),
+            height: Math.min(height, MIN_HEIGHT)
+        };
     }
 
     /**
      * Returns the size of the central panel
      */
-    getActivePanelSize (): { width: number, height: number } {
-        const width: number = parseFloat($(`.prototype-screens .tab-pane.active`).css("width")) || window.innerWidth || MIN_WIDTH;
+    getActivePanelSize (): PictureSize {
+        const margin: number = 1.5 * toolbarHeight;
+        const width: number = parseFloat($(`.prototype-screens`).css("width")) || window.innerWidth || MIN_WIDTH;
         const height: number = parseFloat($(`.prototype-screens .tab-pane.active`).css("height")) || window.innerHeight || MIN_HEIGHT;
-        return { width, height: height - (1.5 * toolbarHeight) };
+        return {
+            width,
+            height: height - margin
+        };
     }
 
     /**
@@ -495,94 +539,91 @@ export class BuilderView extends CentralView {
      * @param desc 
      * @param opt 
      */
-    loadPicture (desc: Picture, opt?: PictureOptions): boolean {
+    async loadPicture (desc: Picture, opt?: PictureOptions): Promise<PictureData> {
         if (desc && desc.fileName && desc.fileContent && desc.fileExtension) {
             opt = opt || {};
-            const $el: JQuery<HTMLElement> = opt.$el || this.$imageDiv;
+            const $imageDiv: JQuery<HTMLElement> = opt.$el || this.$imageDiv;
+            const $imageFrame: JQuery<HTMLElement> = this.$imageFrame;
             // load the image
             const imageElement: HTMLImageElement = new Image();
             imageElement.src = desc.fileContent;
-            const maxSize: { width: number, height: number } = this.getActivePanelSize();
+            // const maxSize: { width: number, height: number } = this.getActivePanelSize();
             if (opt.width) { imageElement.width = opt.width; }
             if (opt.height) { imageElement.height = opt.height; }
-            $el.html(imageElement);
-            $el.find("img").css({ "max-width": `${maxSize.width}px`, "max-height": `${maxSize.height}px` });
-            // update size of image frame
-            this.$imageFrame.find("img").css({ "max-width": `${maxSize.width}px`, "max-height": `${maxSize.height}px` });
-            this.$imageFrame.attr("fname", `${desc.fileName}${desc.fileExtension}`);
-            if (opt.border) { this.$imageFrame.css({ border: "1px solid black" }); }
-            return true;
+            if (opt.border) { $imageFrame.css({ border: "1px solid black" }); }   
+            
+            return new Promise ((resolve, reject) => {
+                imageElement.onload = (res: Event) => {
+                    const width: number = res?.target["width"];
+                    const height: number = res?.target["height"];
+                    // append image
+                    $imageDiv.html(imageElement);
+                    $imageDiv.attr("fname", `${desc.fileName}${desc.fileExtension}`);
+                    // resize picture
+                    this.resizePicture({ width, height });
+                    // resize view
+                    this.resizeView();
+                    // return the picture data
+                    const pictureData: PictureData = {
+                        fileName: desc.fileName,
+                        fileExtension: desc.fileExtension,
+                        fileContent: imageElement.src,
+                        height,
+                        width
+                    };
+                    resolve(pictureData);
+                }
+                imageElement.onerror = (res) => {
+                    console.warn("Failed to load picture " + desc);
+                    resolve(null);
+                }
+            });
         }
-        return false;
+        return null;
     }
 
     /**
      * Internal function, handles clicks on load-picture-btn
      * @param evt 
      */
-    protected async onLoadPicture (evt: JQuery.ChangeEvent): Promise<Picture> {
-        return new Promise ((resolve, reject) => {
-            const file: File = evt?.currentTarget?.files[0];
-            if (file) {
-                const reader: FileReader = new FileReader();
-                reader.addEventListener('loadend', (evt: ProgressEvent<FileReader>) => {
-                    const fileContent: string = reader.result?.toString();
-                    $(".load-picture-form").trigger("reset");
-                    if (fileContent) {
-                        const picture: Picture = {
-                            fileName: fsUtils.getFileName(file.name),
-                            fileExtension: fsUtils.getFileExtension(file.name),
-                            fileContent
-                        };
-                        this.loadPicture(picture);
-                        resolve(picture);
-                    } else {
-                        resolve(null);
-                    }
-                });
-                reader.readAsDataURL(file);
-            } else {
-                resolve(null);
-            }
-        });
+    protected async onChangePictureEvent (evt: JQuery.ChangeEvent): Promise<PictureData> {
+        if (evt) {
+            return new Promise ((resolve, reject) => {
+                const file: File = evt?.currentTarget?.files[0];
+                if (file) {
+                    const reader: FileReader = new FileReader();
+                    reader.addEventListener('loadend', async (evt: ProgressEvent<FileReader>) => {
+                        const fileContent: string = evt.target.result?.toString();
+                        $(".load-picture-form").trigger("reset");
+                        if (fileContent) {
+                            const picture: Picture = {
+                                fileName: fsUtils.getFileName(file.name),
+                                fileExtension: fsUtils.getFileExtension(file.name),
+                                fileContent
+                            };
+                            const pictureData: PictureData = await this.loadPicture(picture);
+                            resolve(pictureData);
+                        } else {
+                            resolve(null);
+                        }
+                    });
+                    reader.readAsDataURL(file);
+                } else {
+                    resolve(null);
+                }
+            });
+        }
     }
 
     /**
      * Internal function, installs event handlers
      */
     protected installHandlers (): void {
-        $(document).find(".load-whiteboard-btn").on("click", (evt: JQuery.ClickEvent) => {
-            this.createWhiteboard();
+        $(document).find(".load-whiteboard-btn").on("click", async (evt: JQuery.ClickEvent) => {
+            await this.createWhiteboard();
         });
         $(document).find(".load-picture-btn").on("input", async (evt: JQuery.ChangeEvent) => {
-            await this.onLoadPicture(evt);
+            await this.onChangePictureEvent(evt);
         });
     }
-
-    // async sendLoadImageRequest(desc: Utils.FileDescriptor): Promise<boolean> {
-    //     const fname: string = Utils.desc2fname(desc);
-    //     const req: ReadFileRequest = {
-    //         type: "readFile",
-    //         encoding: "base64",
-    //         path: fname
-    //     }
-    //     return new Promise ((resolve, reject) => {
-    //         this.connection.sendRequest(req, (res: ReadFileResponse) => {
-    //             if (res?.content) {
-    //                 const img: HTMLImageElement = new Image();
-    //                 img.onload = (res) => {
-    //                     resolve(true);
-    //                 }
-    //                 img.onerror = (res) => {
-    //                     //show the image drag and drop div
-    //                     this.$el.filter(".dndcontainer").css("display", "block");
-    //                     alert("Failed to load picture " + fname);
-    //                     resolve(false);
-    //                 };
-    //                 // this.img.name = image.path;
-    //                 img.src = res.content;        
-    //             }
-    //         });
-    //     });
-    // }
 }

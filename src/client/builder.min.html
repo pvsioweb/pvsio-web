@@ -41,6 +41,10 @@
             { id: "jsonPrinter", label: "JSON Printer", value: "" }
         ];
         pvsioweb["Prototype Builder"].activate({ parent: "pvsioweb", settings });
+        // test
+        pvsioweb["Prototype Builder"].connection.on("SavePrototype", (data) => {
+            console.log(`Received SavePrototype request`);
+        });
     </script>
 </body>
 </html>
