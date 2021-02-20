@@ -1,17 +1,10 @@
 import * as Backbone from 'backbone';
 import { createDialog, setDialogTitle, uuid } from '../../../../utils/pvsiowebUtils';
 import { Coords, CSS, WidgetEVO, WidgetAttr, BasicEventData, VizOptions, WidgetOptions, WidgetData } from '../../widgets/core/WidgetEVO';
-import { HotspotData } from './HotspotEditor';
 import { WidgetClassDescriptor, WidgetClassMap, widgetList } from '../../widgets/widgetList';
 
-export interface WidgetObjectData extends HotspotData {
-    name: string,
-    kind: string,
-    cons?: string, // constructor name
-    opt?: WidgetOptions
-};
 export interface WidgetEditorData extends Backbone.ViewOptions {
-    widgetData: WidgetObjectData
+    widgetData: WidgetData
 };
 
 export const WidgetEditorEvents = {
@@ -181,17 +174,27 @@ const attrTemplate: string = `
 
 export class WidgetEditor extends Backbone.View {
     protected mode: "create" | "edit"; // dialog modes
-    protected widgetData: WidgetObjectData;
+    protected widgetData: WidgetData;
     protected editorId: string = uuid();
 
     protected $dialog: JQuery<HTMLElement>;
 
     protected timer: NodeJS.Timer;
 
+    /**
+     * Constructor
+     * @param data 
+     */
     constructor (data: WidgetEditorData) {
         super(data);
         this.widgetData = data?.widgetData;
         this.mode = "create";
+    }
+
+    /**
+     * Renders the editor dialog
+     */
+    renderView (): void {
         this.render();
         this.installHandlers();
     }

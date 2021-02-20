@@ -1,9 +1,9 @@
-import { WidgetEVO, Coords, WidgetOptions, WidgetData } from "../widgets/core/WidgetEVO";
+import { WidgetEVO, Coords, WidgetOptions, HotspotData, WidgetData } from "../widgets/core/WidgetEVO";
 import { Connection } from '../../../env/Connection';
-import { HotspotEditor, HotspotEditorEvents, HotspotData, HotspotsMap } from './editors/HotspotEditor';
+import { HotspotEditor, HotspotEditorEvents, HotspotsMap } from './editors/HotspotEditor';
 
 import { CentralViewOptions, CreateWidgetEvent, WidgetsMap, BuilderEvents, MIN_WIDTH, MIN_HEIGHT, CentralView } from './CentralView';
-import { WidgetObjectData, WidgetEditor, WidgetEditorEvents } from './editors/WidgetEditor';
+import { WidgetEditor, WidgetEditorEvents } from './editors/WidgetEditor';
 import { WidgetClassDescriptor, widgetList } from '../widgets/widgetList';
 
 import * as utils from '../../../utils/pvsiowebUtils';
@@ -201,6 +201,7 @@ export class BuilderView extends CentralView {
             overlay: this.$imageOverlay[0],
             builderCoords: this.$coords[0]
         });
+        this.hotspotEditor.renderView();
 
         // install handlers for hotspot events
         this.hotspotEditor.on(HotspotEditorEvents.DidCreateHotspot, async (data: HotspotData) => {
@@ -251,7 +252,7 @@ export class BuilderView extends CentralView {
                 const id: string = data.origin.id;
                 const widget: WidgetEVO = this.widgetsMap[id] || this.clipboard;
                 if (widget) {
-                    const widgetData: WidgetObjectData = {
+                    const widgetData: WidgetData = {
                         ...data.clone,
                         name: widget.getName(),
                         kind: widget.getKind(),
@@ -381,7 +382,6 @@ export class BuilderView extends CentralView {
 
     /**
      * Returns the widgets descriptors
-     * TODO: harmonize WidgetData and WidgetObjectData
      */
     getWidgetsData (): WidgetsData {
         if (this.widgetsMap) {
@@ -400,7 +400,8 @@ export class BuilderView extends CentralView {
      * Create a widget
      * @param widgetData 
      */
-    createWidget (widgetData: WidgetObjectData): WidgetEVO {
+    createWidget (widgetData: WidgetData): WidgetEVO {
+        console.log(`[builder] Creating widget`);
         if (widgetData) {
             // console.log(widgetData);
             if (widgetData.cons && widgetData.kind) {
@@ -418,7 +419,9 @@ export class BuilderView extends CentralView {
                         ...widgetData?.opt,
                         connection: this.connection
                     };
+                    console.log(`[builder] Loading widget constructor`);
                     const widget: WidgetEVO = new desc.cons(widgetData.id, widgetData.coords, options);
+                    // this is useful to increase widget visibility on the prototype, e.g., the display will have some text instead of being empty
                     widget.renderSample();
                     // console.log(widget);
                     this.widgetsMap[widgetData.id] = widget;
@@ -428,6 +431,7 @@ export class BuilderView extends CentralView {
                         widgets: this.getWidgets(),
                         hotspots: this.getHotspots()
                     };
+                    console.log("[builder] Widget created", widget);
                     this.trigger(BuilderEvents.DidCreateWidget, evt);
                     return widget;
                 }
@@ -455,7 +459,7 @@ export class BuilderView extends CentralView {
             const coords: Coords = data?.coords || this.hotspotEditor.getCoords(id);
             return new Promise((resolve, reject) => {
                 if (id && coords) {
-                    const widgetData: WidgetObjectData = {
+                    const widgetDataObject: WidgetData = {
                         id,
                         coords,
                         name: this.widgetsMap[id]?.getName() || WidgetEVO.uuid(),
@@ -463,12 +467,14 @@ export class BuilderView extends CentralView {
                         opt: this.widgetsMap[id]?.getOptions(),
                         cons: this.widgetsMap[id]?.getConstructorName()
                     }
-                    const editor: WidgetEditor = new WidgetEditor({ widgetData });
-                    editor.on(WidgetEditorEvents.ok, (widgetData: WidgetObjectData) => {
+                    console.log("[builder] Creating widget editor dialog");
+                    const editor: WidgetEditor = new WidgetEditor({ widgetData: widgetDataObject });
+                    editor.renderView();
+                    editor.on(WidgetEditorEvents.ok, (widgetData: WidgetData) => {
                         const widget: WidgetEVO = this.createWidget(widgetData);
                         resolve(widget);
                     });
-                    editor.on(WidgetEditorEvents.cancel, (data: WidgetObjectData) => {
+                    editor.on(WidgetEditorEvents.cancel, (data: WidgetData) => {
                         resolve(null);
                     });
                 } else {
@@ -476,6 +482,43 @@ export class BuilderView extends CentralView {
                 }
             });
         }
+    }
+
+    /**
+     * Load a widget programmatically
+     * @param data 
+     */
+    async loadWidget (data: WidgetData): Promise<WidgetEVO | null> {
+        console.log(`[builder] Loading widget`, data);
+        if (data?.id) {
+            const id: string = data.id;
+            const coords: Coords = data?.coords || this.hotspotEditor.getCoords(id);
+            return new Promise((resolve, reject) => {
+                if (id && coords) {
+                    const widgetData: WidgetData = {
+                        id,
+                        coords,
+                        name: data.id || WidgetEVO.uuid(),
+                        kind: data.kind,
+                        opt: this.widgetsMap[id]?.getOptions(),
+                        cons: data.cons
+                    }
+                    const widget: WidgetEVO = this.createWidget(widgetData);
+                    resolve(widget);
+                } else {
+                    resolve(null);
+                    console.warn(`[builder] Warning: unable to load widget`, data);
+                }
+            });
+        }
+    }
+
+    /**
+     * Create a hotspot programmatically
+     * @param data 
+     */
+    createHotspot (data: WidgetData): HotspotData {
+        return this.hotspotEditor.createHotspot(data);
     }
 
     /**
@@ -544,40 +587,44 @@ export class BuilderView extends CentralView {
             opt = opt || {};
             const $imageDiv: JQuery<HTMLElement> = opt.$el || this.$imageDiv;
             const $imageFrame: JQuery<HTMLElement> = this.$imageFrame;
-            // load the image
-            const imageElement: HTMLImageElement = new Image();
-            imageElement.src = desc.fileContent;
-            // const maxSize: { width: number, height: number } = this.getActivePanelSize();
-            if (opt.width) { imageElement.width = opt.width; }
-            if (opt.height) { imageElement.height = opt.height; }
-            if (opt.border) { $imageFrame.css({ border: "1px solid black" }); }   
-            
-            return new Promise ((resolve, reject) => {
-                imageElement.onload = (res: Event) => {
-                    const width: number = res?.target["width"];
-                    const height: number = res?.target["height"];
-                    // append image
-                    $imageDiv.html(imageElement);
-                    $imageDiv.attr("fname", `${desc.fileName}${desc.fileExtension}`);
-                    // resize picture
-                    this.resizePicture({ width, height });
-                    // resize view
-                    this.resizeView();
-                    // return the picture data
-                    const pictureData: PictureData = {
-                        fileName: desc.fileName,
-                        fileExtension: desc.fileExtension,
-                        fileContent: imageElement.src,
-                        height,
-                        width
-                    };
-                    resolve(pictureData);
-                }
-                imageElement.onerror = (res) => {
-                    console.warn("Failed to load picture " + desc);
-                    resolve(null);
-                }
-            });
+            if (desc.fileContent.startsWith("data:image/")) {
+                // create the image object
+                const imageElement: HTMLImageElement = new Image();
+                // const maxSize: { width: number, height: number } = this.getActivePanelSize();
+                if (opt.width) { imageElement.width = opt.width; }
+                if (opt.height) { imageElement.height = opt.height; }
+                if (opt.border) { $imageFrame.css({ border: "1px solid black" }); }   
+                
+                // load the image
+                imageElement.src = desc.fileContent;
+                return new Promise ((resolve, reject) => {
+                    imageElement.onload = (res: Event) => {
+                        const width: number = (<HTMLImageElement> res?.target)?.width;
+                        const height: number = (<HTMLImageElement> res?.target)?.height;
+                        const fileContent: string = (<HTMLImageElement> res?.target)?.src;
+                        // append image
+                        $imageDiv.html(imageElement);
+                        $imageDiv.attr("fname", `${desc.fileName}${desc.fileExtension}`);
+                        // resize picture
+                        this.resizePicture({ width, height });
+                        // resize view
+                        this.resizeView();
+                        // return the picture data
+                        const pictureData: PictureData = {
+                            fileName: desc.fileName,
+                            fileExtension: desc.fileExtension,
+                            fileContent,
+                            height,
+                            width
+                        };
+                        resolve(pictureData);
+                    }
+                    imageElement.onerror = (err) => {
+                        console.warn("Failed to load picture ", desc, err);
+                        resolve(null);
+                    }
+                });
+            }
         }
         return null;
     }

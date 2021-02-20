@@ -76,22 +76,23 @@ import * as Backbone from 'backbone';
 export const widget_template: string = `
 {{#if template_description}}<!--
     Basic widget template. Provides a base layer for rendering the visual appearance of the widget
-    The widget has three layers:
-      - a div layer defining position and size of the widget
-      - a base layer renders the visual appearance
-      - an overlay layer captures user interactions with the widget -->{{/if}}
+    The widget has the following layers:
+      - an outer div layer defining position and size of the widget
+      - an inner base layer renders the visual appearance
+      - an inner img layer renders images
+      - an inner transparent overlay layer captures user interactions with the widget -->{{/if}}
 <div id="{{id}}"
-     style="position:absolute; width:{{width}}px; height:{{height}}px; top:{{top}}px; left:{{left}}px; z-index:{{css.z-index}}; overflow:{{css.overflow}};"
-     class="{{type}} noselect{{#if css.blinking}} blink{{/if}}">
-     <div id="{{id}}_img"
-        style="position:absolute;"
-        class="img"></div>
+    style="position:absolute; width:{{width}}px; height:{{height}}px; top:{{top}}px; left:{{left}}px; z-index:{{css.z-index}}; overflow:{{css.overflow}};"
+    class="{{type}} noselect{{#if css.blinking}} blink{{/if}}">
     <div id="{{id}}_base"
-         style="position:absolute; width:{{width}}px; height:{{height}}px; {{#each css}} {{@key}}:{{this}};{{/each}}"
-         class="base"></div>
+        style="position:absolute; top:0; width:{{width}}px; height:{{height}}px; {{#each css}} {{@key}}:{{this}};{{/each}}"
+        class="base"></div>
+    <div id="{{id}}_img"
+        style="position:absolute; top:0;"
+        class="img"></div>
     <div id="{{id}}_overlay"
-         style="position:absolute; width:{{width}}px; height:{{height}}px; {{#if css.z-index}}z-index:{{css.z-index}};{{/if}} border-radius:{{css.border-radius}}; cursor:{{css.cursor}}; opacity:0;"
-         class="overlay"></div>
+        style="position:absolute; top:0; left:0; width:{{width}}px; height:{{height}}px; {{#if css.z-index}}z-index:{{css.z-index}};{{/if}} border-radius:{{css.border-radius}}; cursor:{{css.cursor}}; opacity:0;"
+        class="overlay"></div>
 </div>`;
 
 export const img_template: string = `
@@ -101,15 +102,15 @@ export const img_template: string = `
 `;
 export type Renderable = string | number | {};
 export type Coords<T = string | number> = { top?: T, left?: T, width?: T, height?: T };
-export type WidgetData = {
-    id: string,
-    cons: string, // constructor name
-    kind: string,
-    attr: WidgetAttr,
-    coords: Coords,
-    style: CSS,
-    evts: string[]
-};
+// export type WidgetData = {
+//     id: string,
+//     cons: string, // constructor name
+//     kind: string,
+//     attr: WidgetAttr,
+//     coords: Coords,
+//     style: CSS,
+//     evts: string[]
+// };
 // export interface WidgetStyle {
 //     position?: "absolute" | "relative",
 //     parent?: string,
@@ -226,6 +227,18 @@ export type BasicEventData = {
 export type WidgetEvents = { [evt in BasicEvent]?: boolean };
 export type WidgetAttr = {
     // [key: string]: string
+};
+
+export interface HotspotData {
+    id: string,
+    coords: Coords
+};
+export interface WidgetData extends HotspotData {
+    name: string,
+    kind: string,
+    cons?: string, // constructor name
+    opt?: WidgetOptions,
+    evts?: string[]
 };
 
 export abstract class WidgetEVO extends Backbone.Model {
@@ -926,15 +939,18 @@ export abstract class WidgetEVO extends Backbone.Model {
         }
     }
 
+    /**
+     * Returns a JSON representation of the characteristics of the widget
+     */
     toJSON (): WidgetData {
         return {
             id: this.id,
+            coords: this.getCoordinates(),
+            name: this.getName(),
             kind: this.kind,
             cons: this.getConstructorName(),
-            attr: this.getAttributes(),
-            coords: this.getCoordinates(),
-            evts: this.getEvents(),
-            style: this.getCSS()
+            opt: this.getOptions(),
+            evts: this.getEvents()
         };
     }
 

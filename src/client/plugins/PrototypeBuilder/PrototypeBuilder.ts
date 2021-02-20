@@ -129,6 +129,7 @@ export const PrototypeBuilderEvents = {
     OpenPrototype: "OpenPrototype"
 };
 import * as Backbone from 'backbone';
+import { WidgetData } from './widgets/core/WidgetEVO';
 
 export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
     readonly name: string = "Prototype Builder";
@@ -403,16 +404,30 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
      * @param data prototype data to be loaded
      * @returns true if the prototype has been loaded successfully
      */
-    async loadPrototypeData (data: PrototypeData): Promise<PictureData> {
-        if (data?.main && data['picture-data']) {
-            const picture: Picture = {
-                fileName: fsUtils.getFileName(data.main.fname),
-                fileExtension: fsUtils.getFileExtension(data.main.fname),
-                fileContent: data['picture-data']
+    async loadPrototypeData (data: PrototypeData): Promise<void> {
+        console.log(`[pvsio-web] loading prototype data`, data);
+        if (data) {
+            // load picture
+            if (data.picture && data['picture-data']) {
+                const fname: string = data.picture.fname;
+                const picture: Picture = {
+                    fileName: fsUtils.getFileName(fname),
+                    fileExtension: fsUtils.getFileExtension(fname),
+                    fileContent: data['picture-data']
+                }
+                await this.centralViews.Builder.loadPicture(picture);
             }
-            return await this.centralViews.Builder.loadPicture(picture);
+            // load widgets
+            if (data.widgets) {
+                for (let i = 0; i < data.widgets.length; i++) {
+                    const wdata: WidgetData = data.widgets[i];
+                    await this.centralViews.Builder.loadWidget(wdata);
+                    this.centralViews.Builder.createHotspot(wdata);
+                }
+            }
+        } else {
+            console.warn(`[pvsio-web] Warning: prototype data is null`);   
         }
-        return null;
     }
 
     /**
@@ -425,6 +440,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
             const pictureData: PictureData = this.centralViews.Builder?.getPictureData();
             const widgetsData: WidgetsData = this.centralViews.Builder?.getWidgetsData();
             const data: PrototypeData = {
+                version: 3.0,
                 contextFolder,
                 main: {
                     fname: mainFile
@@ -441,10 +457,5 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         }
         return null;
     }
-
-    // updateControlsHeight(): void {
-    //     $("#builder-controls").css("height", $("#prototype-builder-container")[0].getBoundingClientRect().height + "px");
-    // }
-
 }
 

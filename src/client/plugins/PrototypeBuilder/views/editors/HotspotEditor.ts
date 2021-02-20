@@ -1,6 +1,6 @@
 import * as Backbone from 'backbone';
 import * as Utils from '../../../../utils/pvsiowebUtils';
-import { Coords } from "../../widgets/core/WidgetEVO";
+import { Coords, HotspotData } from "../../widgets/core/WidgetEVO";
 
 export const HotspotEditorEvents = {
     DidCreateHotspot: "DidCreateHotspot",
@@ -13,10 +13,6 @@ export const HotspotEditorEvents = {
     DidPasteHotspot: "DidPasteHotspot",
     DidDeleteHotspot: "DidDeleteHotspot",
     DidClearSelection: "DidClearSelection"
-};
-export interface HotspotData {
-    id: string,
-    coords: Coords
 };
 export interface HotspotEditorData extends Backbone.ViewOptions {
     overlay: HTMLElement,
@@ -342,13 +338,19 @@ export class HotspotEditor extends Backbone.View {
     protected resizeHandler: ResizeHandler;
 
     protected hotspots: HotspotsMap = {};
+
+    protected data: HotspotEditorData;
     
     constructor (data: HotspotEditorData) {
         super(data);
-        this.$overlay = $(data.overlay);
-        this.render(data);
+        this.data = data;
+    }
+
+    renderView (): void {
+        this.$overlay = $(this.data.overlay);
+        this.render(this.data);
         this.$tooltip = this.$overlay.find(".marker-tooltip");
-        this.$builderCoords = $(data.builderCoords);
+        this.$builderCoords = $(this.data.builderCoords);
 
         this.moveHandler = new MoveHandler(this.$el, { $tooltip: this.$tooltip, $builderCoords: this.$builderCoords });
         this.resizeHandler = new ResizeHandler(this.$el, { $tooltip: this.$tooltip, $builderCoords: this.$builderCoords });
@@ -386,6 +388,7 @@ export class HotspotEditor extends Backbone.View {
         return JSON.parse(coords);
     }
     render (data?: HotspotEditorData): HotspotEditor {
+        data = data || this.data;
         const content: string = Handlebars.compile(markerOverlayTemplate)({});
         const parent: HTMLElement = data?.overlay || $("body")[0];
         $(parent).append(content);
@@ -639,6 +642,11 @@ export class HotspotEditor extends Backbone.View {
         }
     }
 
+    /**
+     * Create a hotspot programmatically
+     * @param data 
+     * @param opt 
+     */
     createHotspot (data: HotspotData, opt?: { useFreshId?: boolean }): HotspotData {
         const id: string = opt?.useFreshId ? `marker-${Utils.uuid()}` : data?.id;
         const hotspotData: HotspotData = {
@@ -813,7 +821,6 @@ export class HotspotEditor extends Backbone.View {
         }
 
         // end creation
-        this.trigger(HotspotEditorEvents.DidCreateHotspot, hotspotData);
         this.hotspots[id] = {
             $marker: $activeMarker
         };
@@ -851,6 +858,7 @@ export class HotspotEditor extends Backbone.View {
                         };
                         const hotspotData: HotspotData = { id, coords };
                         this.createHotspot(hotspotData);
+                        this.trigger(HotspotEditorEvents.DidCreateHotspot, hotspotData); // this will open the editor dialog -- see handlers listening to the event
                     }
                     this.$marker = null;
                 }
