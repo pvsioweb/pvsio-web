@@ -2,7 +2,7 @@ import { PVSioWebPlugin, PrototypeData } from '../../env/PVSioWeb';
 import { BackboneConnection, Connection } from '../../env/Connection';
 
 import * as Utils from '../../utils/pvsiowebUtils';
-import { BuilderView, builderMenu, Picture, PictureData, WidgetsData } from './views/BuilderView';
+import { BuilderView, editMenuData, fileMenuData, Picture, PictureData, WidgetsData } from './views/BuilderView';
 import { WidgetsListView } from './views/WidgetsListView';
 import { Settings, SettingsView } from './views/SettingsView';
 import { BuilderEvents, CreateWidgetEvent, DeleteWidgetEvent, CutWidgetEvent, SelectWidgetEvent, CentralViewEvents, WidgetsMap } from './views/CentralView';
@@ -11,26 +11,7 @@ import { SimulatorView } from './views/SimulatorView';
 
 import * as fsUtils from "../../utils/fsUtils";
 
-const menu: string = `
-<style>
-.builder-menu {
-    background:whitesmoke;
-}
-</style>
-<div class="btn-group builder-menu" role="group">
-    <span class="dropdown btn btn-sm btn-outline-dark py-0">
-        <button type="button" class="btn btn-sm btn-light" id="{{id}}-file-dropdown-menu" data-toggle="dropdown">File</button>
-        <div class="dropdown-menu dropdown-menu-right r-10" aria-labelledby="{{id}}-file-dropdown-menu">
-            <button type="button" class="dropdown-item btn-sm new-prototype">New Prototype..</button>
-            <div class="dropdown-divider"></div>
-            <button type="button" class="dropdown-item btn-sm open">Open..</button>
-            <div class="dropdown-divider"></div>
-            <button type="button" class="dropdown-item btn-sm save">Save</button>
-            <button type="button" class="dropdown-item btn-sm save-as">Save As..</button>
-        </div>
-    </span>
-    ${builderMenu}
-</div>`;
+const MIN_WIDTH_LEFT: number = 10; //px
 
 const prototypeBuilderBody: string = `
 <style>
@@ -44,7 +25,7 @@ const prototypeBuilderBody: string = `
 .left-panel {
     overflow-x:hidden;
     width:30%; 
-    min-width:10px; 
+    min-width:${MIN_WIDTH_LEFT}px; 
     position:relative;
     border: 1px solid lightgray;
 }
@@ -100,10 +81,6 @@ const prototypeBuilderBody: string = `
 .r-10 {
     right:10px !important;
 }
-.dropdown-menu {
-    top:8px !important;
-    left:8px !important;
-}
 </style>
 <div id="{{id}}" class="row d-flex">
     <div id="{{id}}-left" class="left-panel container-fluid no-gutters p-0">
@@ -117,7 +94,11 @@ const prototypeBuilderBody: string = `
             <div class="card-header central-panel-inner-header">
                 <ul class="nav nav-tabs card-header-tabs d-flex flex-nowrap prototype-screen-list"></ul>
                 <ul class="nav nav-tabs card-header-dropdown-menu r-10 d-flex flex-nowrap">
-                ${menu}
+                    <div class="d-flex">
+                        {{#each menus}}
+                        {{this}}
+                        {{/each}}
+                    </div>
                 </ul>
             </div>
             <div class="card-body prototype-screens tab-content py-0">
@@ -210,7 +191,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
             this.connection?.trigger(PrototypeBuilderEvents.SaveAs, req);
         });
 
-        this.$menu = this.panel?.$content.find(".builder-menu");
+        this.$menu = this.panel?.$content.find(".panel-menu");
         
         // create central view and side view
         const bodyDiv: HTMLElement = this.panel.$content.find(`.prototype-screens`)[0];
@@ -297,8 +278,14 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
      */
     protected createPanelBody (desc: { parent: JQuery<HTMLElement> }): Utils.ResizableLeftPanel {
         const id: string = `${this.id}-panel`;
-        const content: string = Handlebars.compile(prototypeBuilderBody)({
-            id
+        const fileMenu: string = Handlebars.compile(Utils.dropdownMenuTemplate, { noEscape: true })(fileMenuData);
+        const editMenu: string = Handlebars.compile(Utils.dropdownMenuTemplate, { noEscape: true })(editMenuData);
+        const content: string = Handlebars.compile(prototypeBuilderBody, { noEscape: true })({
+            id,
+            menus: [
+                fileMenu,
+                editMenu
+            ]
         });
         desc.parent.append(content);
         const $div: JQuery<HTMLDivElement> = $(`#${id}`);
@@ -418,7 +405,10 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
      */
     collapseSidePanel (): void {
         this.body.disableResize = true;
-        this.width = this.body.$left.css("width");
+        const width: string = this.body.$left.css("width");
+        if (parseFloat(width) > 2 * MIN_WIDTH_LEFT) {
+            this.width = width;
+        }
         this.body.$left?.animate({ width: "0px" }, 500);
     }
 

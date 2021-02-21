@@ -56,33 +56,35 @@ const contentTemplate: string = `
     <div class="prototype-image-overlay container-fluid p-0"></div>
 </div>`;
 
-export const builderMenu: string = `
-<style>
-.w-200 {
-    width:200px;
-}
-.dropdown-custom-file {
-    width:220px;
-    margin-top:4px;
-    padding:10px;
-} 
-</style>
-<span class="dropdown btn btn-sm btn-outline-dark py-0">
-    <button type="button" class="btn btn-sm btn-light" id="{{id}}-edit-dropdown-menu" data-toggle="dropdown">Edit</button>
-    <div class="dropdown-menu dropdown-custom-file dropdown-menu-right r-10" aria-labelledby="{{id}}-edit-dropdown-menu">
-        <div class="custom-file w-200">
+export const fileMenuData: utils.DropdownMenuData = {
+    id: "builder-file-dropdown-menu",
+    name: "File",
+    style: ".builder-file-dropdown-menu { top: 4px !important; }",
+    content : `
+        <button type="button" class="dropdown-item btn-sm new-prototype">New Prototype..</button>
+        <div class="dropdown-divider"></div>
+        <button type="button" class="dropdown-item btn-sm open">Open..</button>
+        <div class="dropdown-divider"></div>
+        <button type="button" class="dropdown-item btn-sm save">Save</button>
+        <button type="button" class="dropdown-item btn-sm save-as">Save As..</button>`
+};
+
+export const editMenuData: utils.DropdownMenuData = {
+    id: "builder-edit-dropdown-menu",
+    name: "Edit",
+    style: ".builder-edit-dropdown-menu { top: 4px !important; min-width:220px; padding:10px; }",
+    content : `
+        <div class="custom-file">
             <form class="load-picture-form">
                 <input type="file" class="custom-file-input load-picture-btn" accept="image/*">
-                <label class="custom-file-label btn-sm w-200">Upload Picture</label>
+                <label class="custom-file-label btn-sm">Upload Picture</label>
             </form>
         </div>
         <div class="dropdown-divider"></div>
-        <button class="btn btn-outline-danger btn-lg load-whiteboard-btn btn-sm w-200">Remove Picture</button>
-    </div>
-</span>
-`;
+        <button class="btn btn-outline-danger btn-lg load-whiteboard-btn btn-sm" style="width:100%;">Remove Picture</button>`
+};
 
-export type Picture = {
+export interface Picture {
     fileName: string,
     fileExtension: string,
     fileContent: string

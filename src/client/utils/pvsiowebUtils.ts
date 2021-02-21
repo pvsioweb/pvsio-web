@@ -363,6 +363,22 @@ export function removeSpaceDash (str: string): string {
     return str;
 }
 
+export interface DropdownMenuData {
+    id: string,
+    name: string,
+    content: string,
+    style?: string
+};
+export const dropdownMenuTemplate = `
+<div class="dropdown mr-1 panel-menu">
+    <button type="button" class="btn btn-sm btn-light dropdown-toggle" id="{{id}}" data-toggle="dropdown">{{name}}</button>
+    {{#if style}}<style>{{style}}</style>{{/if}}
+    <div class="dropdown-menu {{id}}" aria-labelledby="{{id}}">
+        {{content}}
+    </div>
+</div>
+`;
+
 /**
  * Key bindings
  * @author Paolo Masci
