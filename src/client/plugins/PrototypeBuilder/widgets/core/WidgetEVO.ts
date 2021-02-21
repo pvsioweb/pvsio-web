@@ -226,7 +226,7 @@ export type BasicEventData = {
 };
 export type WidgetEvents = { [evt in BasicEvent]?: boolean };
 export type WidgetAttr = {
-    // [key: string]: string
+    [key: string]: string
 };
 
 export interface HotspotData {
@@ -250,26 +250,26 @@ export abstract class WidgetEVO extends Backbone.Model {
 
     id: string;
 
-    $parent: JQuery<HTMLElement>;
-    parentSelector: string; // this is useful for debugging purposes
+    protected $parent: JQuery<HTMLElement>;
+    protected parentSelector: string; // this is useful for debugging purposes
     
-    top: number;
-    left: number;
-    width: number;
-    height: number;
+    protected top: number;
+    protected left: number;
+    protected width: number;
+    protected height: number;
     
-    viz: VizOptions = {};
-    css: CSS = {};
+    protected viz: VizOptions = {};
+    protected css: CSS = {};
 
-    widget_template: string;
+    protected widget_template: string;
 
-    $div: JQuery<HTMLDivElement>;
-    $img: JQuery<HTMLElement>;
-    $base: JQuery<HTMLElement>;
-    $overlay: JQuery<HTMLElement>;
-    marker: JQuery<HTMLElement>;
+    protected $div: JQuery<HTMLDivElement>;
+    protected $img: JQuery<HTMLElement>;
+    protected $base: JQuery<HTMLElement>;
+    protected $overlay: JQuery<HTMLElement>;
+    protected marker: JQuery<HTMLElement>;
 
-    evts: WidgetEvents = null;
+    protected evts: WidgetEvents = null;
     readonly fontPadding: number = 6;
     protected rendered?: boolean = false;
 
@@ -703,6 +703,10 @@ export abstract class WidgetEVO extends Backbone.Model {
         this.$base.css("color", this.css["background-color"]);
     }
 
+    /**
+     * Utility function, checks if the given color is transparent
+     * @param color 
+     */
     isTransparent (color: string): boolean {
         return color === "transparent" || color === "rgba(0, 0, 0, 0)";
     }

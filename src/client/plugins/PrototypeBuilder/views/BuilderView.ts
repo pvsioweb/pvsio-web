@@ -29,7 +29,6 @@ const contentTemplate: string = `
     position:absolute;
     color:darkslategray; 
     top:0.6em;
-    left:300px;
     font-size:small;
     white-space:nowrap;
 }
@@ -49,15 +48,6 @@ const contentTemplate: string = `
 }
 </style>
 <div class="row" style="height:36px;">
-    <div class="builder-toolbar">
-        <div class="custom-file" style="position:absolute; width:12em;">
-            <form class="load-picture-form">
-                <input type="file" class="custom-file-input load-picture-btn" accept="image/*">
-                <label class="custom-file-label btn-sm" style="width:14em;">Upload Picture</label>
-            </form>
-        </div>
-        <button class="btn btn-outline-danger btn-lg load-whiteboard-btn btn-sm" style="margin-left:15em; width:12em;">Remove Picture</button>
-    </div>
     <div class="builder-coords"></div>
 </div>
 <div class="prototype row">
@@ -65,6 +55,32 @@ const contentTemplate: string = `
     <div class="prototype-image-frame view-div container-fluid p-0"></div>
     <div class="prototype-image-overlay container-fluid p-0"></div>
 </div>`;
+
+export const builderMenu: string = `
+<style>
+.w-200 {
+    width:200px;
+}
+.dropdown-custom-file {
+    width:220px;
+    margin-top:4px;
+    padding:10px;
+} 
+</style>
+<span class="dropdown btn btn-sm btn-outline-dark py-0">
+    <button type="button" class="btn btn-sm btn-light" id="{{id}}-edit-dropdown-menu" data-toggle="dropdown">Edit</button>
+    <div class="dropdown-menu dropdown-custom-file dropdown-menu-right r-10" aria-labelledby="{{id}}-edit-dropdown-menu">
+        <div class="custom-file w-200">
+            <form class="load-picture-form">
+                <input type="file" class="custom-file-input load-picture-btn" accept="image/*">
+                <label class="custom-file-label btn-sm w-200">Upload Picture</label>
+            </form>
+        </div>
+        <div class="dropdown-divider"></div>
+        <button class="btn btn-outline-danger btn-lg load-whiteboard-btn btn-sm w-200">Remove Picture</button>
+    </div>
+</span>
+`;
 
 export type Picture = {
     fileName: string,
@@ -490,27 +506,12 @@ export class BuilderView extends CentralView {
      */
     async loadWidget (data: WidgetData): Promise<WidgetEVO | null> {
         console.log(`[builder] Loading widget`, data);
-        if (data?.id) {
-            const id: string = data.id;
-            const coords: Coords = data?.coords || this.hotspotEditor.getCoords(id);
-            return new Promise((resolve, reject) => {
-                if (id && coords) {
-                    const widgetData: WidgetData = {
-                        id,
-                        coords,
-                        name: data.id || WidgetEVO.uuid(),
-                        kind: data.kind,
-                        opt: this.widgetsMap[id]?.getOptions(),
-                        cons: data.cons
-                    }
-                    const widget: WidgetEVO = this.createWidget(widgetData);
-                    resolve(widget);
-                } else {
-                    resolve(null);
-                    console.warn(`[builder] Warning: unable to load widget`, data);
-                }
-            });
+        if (data?.id && data.coords) {
+            const widget: WidgetEVO = this.createWidget(data);
+            return widget;
         }
+        console.warn(`[builder] Warning: unable to load widget`, data);
+        return null;
     }
 
     /**

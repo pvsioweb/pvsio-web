@@ -7,7 +7,7 @@ import { fileSettings, functionSettings, printerSettings, Settings } from './plu
 
 // augment the basic settings with a new field 'theoryName'
 export const pvsSettings: Settings[] = fileSettings.concat([
-    { id: "mainFile", label: "Main File", value: "" }
+    { id: "theoryName", label: "Theory", value: "" }
 ]).concat(functionSettings).concat(printerSettings);
 
 //@ts-ignore

@@ -2,14 +2,35 @@ import { PVSioWebPlugin, PrototypeData } from '../../env/PVSioWeb';
 import { BackboneConnection, Connection } from '../../env/Connection';
 
 import * as Utils from '../../utils/pvsiowebUtils';
-import { BuilderView, Picture, PictureData, WidgetsData } from './views/BuilderView';
+import { BuilderView, builderMenu, Picture, PictureData, WidgetsData } from './views/BuilderView';
 import { WidgetsListView } from './views/WidgetsListView';
 import { Settings, SettingsView } from './views/SettingsView';
-import { BuilderEvents, CreateWidgetEvent, DeleteWidgetEvent, CutWidgetEvent, SelectWidgetEvent, CentralView, CentralViewEvents, WidgetsMap } from './views/CentralView';
+import { BuilderEvents, CreateWidgetEvent, DeleteWidgetEvent, CutWidgetEvent, SelectWidgetEvent, CentralViewEvents, WidgetsMap } from './views/CentralView';
 import { SideView } from './views/SideView';
 import { SimulatorView } from './views/SimulatorView';
 
 import * as fsUtils from "../../utils/fsUtils";
+
+const menu: string = `
+<style>
+.builder-menu {
+    background:whitesmoke;
+}
+</style>
+<div class="btn-group builder-menu" role="group">
+    <span class="dropdown btn btn-sm btn-outline-dark py-0">
+        <button type="button" class="btn btn-sm btn-light" id="{{id}}-file-dropdown-menu" data-toggle="dropdown">File</button>
+        <div class="dropdown-menu dropdown-menu-right r-10" aria-labelledby="{{id}}-file-dropdown-menu">
+            <button type="button" class="dropdown-item btn-sm new-prototype">New Prototype..</button>
+            <div class="dropdown-divider"></div>
+            <button type="button" class="dropdown-item btn-sm open">Open..</button>
+            <div class="dropdown-divider"></div>
+            <button type="button" class="dropdown-item btn-sm save">Save</button>
+            <button type="button" class="dropdown-item btn-sm save-as">Save As..</button>
+        </div>
+    </span>
+    ${builderMenu}
+</div>`;
 
 const prototypeBuilderBody: string = `
 <style>
@@ -63,6 +84,7 @@ const prototypeBuilderBody: string = `
 }
 .central-panel-inner {
     overflow:auto;
+    height:110%;
 }
 .central-panel-inner-header {
     margin-top:-8px;
@@ -71,46 +93,37 @@ const prototypeBuilderBody: string = `
 .prototype-screens {
     margin:0px;
 }
+.card-header-dropdown-menu {
+    position:absolute;
+    top:8px;
+}
+.r-10 {
+    right:10px !important;
+}
+.dropdown-menu {
+    top:8px !important;
+    left:8px !important;
+}
 </style>
 <div id="{{id}}" class="row d-flex">
-    <div id="{{id}}-left" class="left-panel container-fluid no-gutters">
+    <div id="{{id}}-left" class="left-panel container-fluid no-gutters p-0">
         <div class="builder-sidebar-heading"></div>
         <div id="{{id}}-widget-list" class="widget-list list-group"></div>
         <div id="{{id}}-timers-list" class="list-group"></div>
     </div>
     <div id="{{id}}-resize-bar" class="resize-bar"></div>
-    <div id="{{id}}-central" class="flex-grow-1 no-gutters central-panel">
+    <div id="{{id}}-central" class="flex-grow-1 no-gutters p-0 central-panel">
         <div class="card central-panel-inner">
             <div class="card-header central-panel-inner-header">
-                <ul class="nav nav-tabs card-header-tabs d-flex flex-nowrap prototype-screen-list">
+                <ul class="nav nav-tabs card-header-tabs d-flex flex-nowrap prototype-screen-list"></ul>
+                <ul class="nav nav-tabs card-header-dropdown-menu r-10 d-flex flex-nowrap">
+                ${menu}
                 </ul>
             </div>
             <div class="card-body prototype-screens tab-content py-0">
             </div>
         </div>
     </div>
-</div>`;
-
-const toolbar: string = `
-<div class="btn-group builder-controls" role="group" aria-label="Toggle View">
-<button type="button" class="btn btn-primary btn-sm toggle-builder-view">
-    Builder View
-</button>
-<button type="button" class="btn btn-outline-secondary btn-sm toggle-simulator-view">
-    Simulator View
-</button>
-</div>
-`;
-
-const menu: string = `
-<button type="button" class="btn btn-sm btn-outline-light fa fa-bars" id="{{id}}-dropdown-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
-<div class="dropdown-menu dropdown-menu-right" aria-labelledby="{{id}}-dropdown-menu">
-    <button type="button" class="dropdown-item btn-sm new-prototype">New Prototype..</button>
-    <div class="dropdown-divider"></div>
-    <button type="button" class="dropdown-item btn-sm open">Open..</button>
-    <div class="dropdown-divider"></div>
-    <button type="button" class="dropdown-item btn-sm save">Save</button>
-    <button type="button" class="dropdown-item btn-sm save-as">Save As..</button>
 </div>`;
 
 export interface CentralViews {
@@ -138,13 +151,13 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
     protected activeFlag: boolean = false;
     protected parent: string = "body";
 
+    protected $menu: JQuery<HTMLElement>;
+
     // the connection is public, so objects using PrototypeBuilder can set listeners and trigger events on the connection
     connection: Connection;
 
     protected panel: Utils.CollapsiblePanel;
     protected body: Utils.ResizableLeftPanel;
-
-    protected $menu: JQuery<HTMLElement>;
 
     protected width: string = "0px"; // side panel width
 
@@ -168,7 +181,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         this.panel = Utils.createCollapsiblePanel(this, {
             parent: this.parent,
             showContent: true,
-            "dropdown-menu": menu
+            hideNavbar: true
         });
         this.body = this.createPanelBody({
             parent: this.panel.$content
@@ -196,6 +209,8 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
             console.log(`[prototype-builder] SaveAsRequest`, req);
             this.connection?.trigger(PrototypeBuilderEvents.SaveAs, req);
         });
+
+        this.$menu = this.panel?.$content.find(".builder-menu");
         
         // create central view and side view
         const bodyDiv: HTMLElement = this.panel.$content.find(`.prototype-screens`)[0];
@@ -260,6 +275,20 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
      */
     isActive (): boolean {
         return this.activeFlag;
+    }
+
+    /**
+     * Hide dropdown menus
+     */
+    hideMenu (): void {
+        this.$menu?.css("display", "none");
+    }
+
+    /**
+     * Reveal dropdown menus
+     */
+    revealMenu (): void {
+        this.$menu?.css("display", "block");
     }
 
     /**
@@ -364,6 +393,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         this.centralViews?.Builder?.builderView();
         // this.widgetManager.stopTimers();
         this.expandSidePanel();
+        this.revealMenu();
     }
 
     /**
@@ -374,6 +404,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         this.collapseSidePanel();
         const settings: Settings[] = this.centralViews?.Settings?.getSettings();
         const widgets: WidgetsMap = this.centralViews?.Builder?.getWidgets();
+        this.hideMenu();
         const success: boolean = await this.centralViews?.Simulator?.initSimulation({
             settings,
             widgets 

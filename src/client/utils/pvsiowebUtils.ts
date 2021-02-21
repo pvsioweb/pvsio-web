@@ -110,12 +110,12 @@ const collapsiblePanelTemplate: string = `
 }
 </style>
 <div id="{{id}}-panel" class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow pvsioweb-collapsible-panel">
-    <span class="navbar navbar-brand container-fluid px-0">
+    <span class="navbar navbar-brand container-fluid px-0" {{#if hideNavbar}}style="display:none"{{/if}}>
         <span data-toggle="collapse" style="margin-left:10px;" data-target="#{{id}}-content" id="{{id}}-collapse-icon" class="icon toggle-collapse fa {{#if showContent}}fa-minus-square{{else}}fa-plus-square{{/if}}"></span>
         <span id="{{id}}-label" class="label">{{name}}</span>
         <span class="dropdown" style="margin-right:12px;">
-            {{#if dropdown-menu}}
-            {{dropdown-menu}}
+            {{#if dropdownMenu}}
+            {{dropdownMenu}}
             {{/if}}
         </span>
     </span>
@@ -182,7 +182,8 @@ export function createCollapsiblePanel (owner: PVSioWebPlugin, opt?: {
     handlers?: MouseEventHandlers,
     headerText?: string,
     toolbar?: string,
-    "dropdown-menu"?: string,
+    dropdownManu?: string,
+    hideNavbar?: boolean,
     width?: string,
     top?: number
 }): CollapsiblePanel {
@@ -202,7 +203,8 @@ export function createCollapsiblePanel (owner: PVSioWebPlugin, opt?: {
         id: pluginId,
         name: pluginName,
         toolbar: opt.toolbar,
-        "dropdown-menu": opt["dropdown-menu"]
+        dropdownMenu: opt.dropdownManu,
+        hideNavbar: opt.hideNavbar
     });
     $(parent).append(panel);
     const $div: JQuery<HTMLDivElement> = $(`#${pluginId}-panel`);
@@ -246,7 +248,10 @@ export function enableResizeLeft (desc: ResizableLeftPanel, opt?: { initialWidth
                 : opt.leftWidth;
             const padding: number = parseFloat(desc.$resizeBar.css("width")) * 2;
             desc.$left.css("width", leftWidth + padding);
-            desc.$central.css({ "width": maxWidth - leftWidth });
+            desc.$central.css({
+                "width": maxWidth - leftWidth - 2 * padding,
+                "margin-right": padding
+            });
         }
         desc.$left.css("width", leftWidth);
         // make side panel resizeable
@@ -287,6 +292,7 @@ export function enableResizeLeft (desc: ResizableLeftPanel, opt?: { initialWidth
                 adjustPanels({ leftWidth });
             }
         });
+        adjustPanels();
     }
     return desc;
 }
@@ -298,7 +304,7 @@ export function enableResizeLeft (desc: ResizableLeftPanel, opt?: { initialWidth
  */
 export function uuid (format?: string) {
     let d: number = new Date().getTime();
-    format = format || 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx';
+    format = format || 'xxxxxxxx_xxxx_4xxx_yxxx_xxxxxxxxxxxx';
     const uuid = format.replace(/[xy]/g, (c: string) => {
         const r: number = ((d + Math.random() * 16) % 16) | 0;
         d = Math.floor(d / 16);

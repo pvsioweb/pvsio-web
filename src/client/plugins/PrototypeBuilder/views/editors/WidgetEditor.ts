@@ -258,7 +258,7 @@ export class WidgetEditor extends Backbone.View {
                     // create widget preview
                     const cons: string = widgetsDesc[i].cons.name;
                     const coords: Coords = { width, height };
-                    const previewId: string = uuid();
+                    const previewId: string = WidgetEVO.uuid();
                     const options: WidgetOptions = {
                         ...this.widgetData?.opt,
                         parent: `${cons}-preview`

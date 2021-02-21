@@ -24,12 +24,17 @@ export const CentralViewEvents = {
 };
 
 const headerTemplate: string = `
+<style>
+.nav-link {
+    white-space:nowrap;
+}
+</style>
 <li class="nav-item">
-<button draggable="false" class="nav-link{{#if active}} active{{/if}}" id="{{tabId}}" data-toggle="tab" href="#{{controls}}" role="tab" aria-controls="{{controls}}" aria-selected="true">{{label}}</button>
+<button draggable="false" class="nav-link {{#if active}}active{{/if}}" id="{{tabId}}" data-toggle="tab" href="#{{controls}}" role="tab" aria-controls="{{controls}}" aria-selected="true">{{label}}</button>
 </li>`;
 
 const bodyTemplate: string = `
-<div id="{{panelId}}" class="container-fluid tab-pane show no-gutters{{#if active}} active{{/if}}" aria-labelledby="{{controlledBy}}" style="padding:0; position:relative; min-height:${MIN_HEIGHT}px;">
+<div id="{{panelId}}" class="container-fluid tab-pane show no-gutters p-0 {{#if active}}active{{/if}}" aria-labelledby="{{controlledBy}}" style="position:relative; min-height:${MIN_HEIGHT}px;">
     {{content}}
 </div>`;
 

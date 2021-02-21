@@ -434,7 +434,7 @@ export class HotspotEditor extends Backbone.View {
         const width: number = Math.abs(this.anchorCoords?.left - mousePosition?.left);
         const height: number = Math.abs(this.anchorCoords?.top - mousePosition?.top);
         if (!this.$marker) {
-            const id: string = `marker-${Utils.uuid()}`;
+            const id: string = `marker_${Utils.uuid()}`;
             const marker: string = Handlebars.compile(markerTemplate)({
                 id,
                 top: mousePosition.top,//pageY,
@@ -648,7 +648,7 @@ export class HotspotEditor extends Backbone.View {
      * @param opt 
      */
     createHotspot (data: HotspotData, opt?: { useFreshId?: boolean }): HotspotData {
-        const id: string = opt?.useFreshId ? `marker-${Utils.uuid()}` : data?.id;
+        const id: string = opt?.useFreshId ? `marker_${Utils.uuid()}` : data?.id;
         const hotspotData: HotspotData = {
             ...data, id
         };
