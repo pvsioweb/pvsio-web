@@ -1,6 +1,26 @@
 import * as Backbone from 'backbone';
+import { PVSioWebFileAttributes } from '../../../utils/pvsiowebUtils';
 import { Connection } from '../../../env/Connection';
 import { CentralView, CentralViewOptions } from './CentralView';
+
+export declare type SettingsElemValue = string;
+export declare interface Settings {
+    id: PVSioWebFileAttributes,
+    value: SettingsElemValue // initial value of the setting
+}
+export declare interface SettingsElem extends Settings {
+    label?: string,
+    placeholder?: string
+}
+export declare interface SettingsMap { 
+    [key: string]: Settings
+}
+export declare interface SettingsElemMap {
+    [key:string]: SettingsElem
+}
+export interface SettingsViewOptions extends CentralViewOptions {
+    settings?: SettingsElem[]
+}
 
 const settingsTemplate: string = `
 {{#each settings}}
@@ -23,41 +43,35 @@ const contentTemplate: string = `
     </div>
 </div>`;
 
-export type SettingId = "mainFile" | "contextFolder" | "initFunction" | "tickFunction" | "tickFrequency" | "jsonPrinter" | string;
-export interface Settings {
-    id: SettingId,
-    label?: string,
-    value?: string, 
-    placeholder?: string, 
-    init?: boolean // indicates whether this setting will be sent to the server to initialize the simulation
-};
 
-export interface SettingsViewOptions extends CentralViewOptions {
-    settings?: Settings[]
-}
-
-export const fileSettings: Settings[] = [
-    { id: "mainFile", label: "Main File", value: "" },
-    { id: "contextFolder", label: "Context Folder", value: "" }
+// keys need to be consistent with the fields declared in PVSioWebFile (see pvsioweb.d.ts)
+export const fileSettings: SettingsElem[] = [
+    { id: PVSioWebFileAttributes.mainFile, label: "Main File", value: "", placeholder: "" },
+    { id: PVSioWebFileAttributes.mainFunction, label: "Main Function", value: "", placeholder: "" },
+    { id: PVSioWebFileAttributes.contextFolder, label: "Context Folder", value: "", placeholder: "" }
 ];
-export const functionSettings: Settings[] = [
-    { id: "initFunction", label: "Init Function", value: "" },
-    { id: "tickFunction", label: "Tick Function", value: "" },
-    { id: "tickFrequency", label: "Tick Frequency", value: "250ms" }
+export const functionSettings: SettingsElem[] = [
+    { id: PVSioWebFileAttributes.initFunction, label: "Init Function", value: "init", placeholder: "" },
+    { id: PVSioWebFileAttributes.tickFunction, label: "Tick Function", value: "", placeholder: "" },
+    { id: PVSioWebFileAttributes.tickFrequency, label: "Tick Frequency", value: "1000ms", placeholder: "" }
 ];
-export const printerSettings: Settings[] = [
-    { id: "jsonPrinter", label: "JSON Printer", value: "" }
+export const printerSettings: SettingsElem[] = [
+    { id: PVSioWebFileAttributes.jsonPrinter, label: "JSON Printer", value: "", placeholder: "" }
 ];
-export const basicSettings: Settings[] = fileSettings.concat(functionSettings).concat(printerSettings);
+export const basicSettings: SettingsElem[] = fileSettings.concat(functionSettings).concat(printerSettings);
 
 export class SettingsView extends CentralView {
     protected viewOptions: SettingsViewOptions;
 
     /**
+     * Settings map
+     */
+    protected settings: SettingsElemMap;
+
+    /**
      * Pointer to the DOM element with settings
      */
     protected $settings: JQuery<HTMLElement>;
-    protected keys: string[]; // we are keeping the keys so the value of the settings to make sure the value is always taken from the DOM
     
     /**
      * Constructor
@@ -66,6 +80,22 @@ export class SettingsView extends CentralView {
      */
     constructor (data: SettingsViewOptions, connection: Connection) {
         super(data, connection);
+        this.updateSettings(data?.settings);
+    }
+
+    /**
+     * Internal function, updates settings
+     * @param settings 
+     */
+    protected updateSettings (settings: SettingsElem[]): void {
+        this.settings = {}
+        if (this.viewOptions?.settings?.length) {
+            for (let i = 0; i < this.viewOptions?.settings.length; i++) {
+                const elem: SettingsElem = this.viewOptions?.settings[i];
+                const id: string = elem.id;
+                this.settings[id] = elem;
+            }
+        }
     }
 
     /**
@@ -73,13 +103,10 @@ export class SettingsView extends CentralView {
      * @param data 
      */
     async renderView (): Promise<SettingsView> {
-        const settings: Settings[] = this.viewOptions?.settings || basicSettings;
+        const settings: SettingsElem[] = this.viewOptions?.settings || basicSettings;
         const content: string = Handlebars.compile(contentTemplate, { noEscape: true })({ settings });
         await super.renderView({ ...this.viewOptions, content, label: `<i class="fa fa-cogs"></i>` });
         this.$settings = this.$el.find(`.settings`);
-        this.keys = this.viewOptions?.settings ? this.viewOptions.settings.map((elem: Settings) => {
-            return elem.id;
-        }) : [];
         return this;
     }
 
@@ -87,13 +114,12 @@ export class SettingsView extends CentralView {
      * Configures the list of settings shown in the panel 
      * @param settings 
      */
-    configure (data: { settings: Settings[] }): void {
+    configure (data: { settings: SettingsElem[] }): void {
         if (data) {
-            console.log(`[settings-view] Updating settings`, data);
-            const settings: Settings[] = data?.settings;
+            const settings: SettingsElem[] = data?.settings;
+            this.updateSettings(settings);
             const content: string = Handlebars.compile(settingsTemplate, { noEscape: true})({ settings });
             this.$settings.html(content);
-            this.keys = Object.keys(settings);
         }
     }
 
@@ -101,20 +127,20 @@ export class SettingsView extends CentralView {
      * Get the current value of a given setting
      * @param name 
      */
-    getValue (id: SettingId): string {
+    getValue (id: PVSioWebFileAttributes): string {
         return <string> this.$settings?.find(`#${id} input`)?.val();
     }
 
     /**
      * Get the current value of all settings
      */
-    getSettings (): Settings[] {
-        const ans: Settings[] = [];
-        for (let i = 0; i < this.keys?.length; i++) {
-            const id: SettingId = this.keys[i];
-            ans[id] = {
-                id,
-                value: this.getValue(id)
+    getCurrentSettings (): SettingsMap {
+        const ans: SettingsMap = {};
+        for (let key in this.settings) {
+            const settings: Settings = this.settings[key];
+            ans[key] = {
+                id: settings.id,
+                value: this.getValue(settings.id)
             };
         }
         return ans;

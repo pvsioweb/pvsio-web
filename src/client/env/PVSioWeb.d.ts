@@ -20,20 +20,3 @@ export declare interface PVSioWebPluginDescriptor {
     cons: Constructable<PVSioWebPlugin>,
     autoload?: boolean
 }
-export declare interface PVSioWebFile {
-    version: 3.0,
-    main?: {
-        fname: string // file name, including extension
-    },
-    picture?: {
-        fname: string, // file name, including extension
-        width: number,
-        height: number
-    },
-    widgets?: WidgetsData
-}
-export declare interface PrototypeData extends PVSioWebFile {
-    contextFolder: string,
-    // "main-data": string,
-    "picture-data"?: string
-} 

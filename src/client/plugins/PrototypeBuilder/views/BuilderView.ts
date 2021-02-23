@@ -2,12 +2,13 @@ import { WidgetEVO, Coords, WidgetOptions, HotspotData, WidgetData } from "../wi
 import { Connection } from '../../../env/Connection';
 import { HotspotEditor, HotspotEditorEvents, HotspotsMap } from './editors/HotspotEditor';
 
-import { CentralViewOptions, CreateWidgetEvent, WidgetsMap, BuilderEvents, MIN_WIDTH, MIN_HEIGHT, CentralView } from './CentralView';
+import { CreateWidgetEvent, WidgetsMap, BuilderEvents, MIN_WIDTH, MIN_HEIGHT, CentralView } from './CentralView';
 import { WidgetEditor, WidgetEditorEvents } from './editors/WidgetEditor';
 import { WidgetClassDescriptor, widgetList } from '../widgets/widgetList';
 
 import * as utils from '../../../utils/pvsiowebUtils';
 import * as fsUtils from '../../../utils/fsUtils';
+import { CentralViewOptions } from "./CentralView";
 
 const toolbarHeight: number = 36; //px
 
@@ -55,34 +56,6 @@ const contentTemplate: string = `
     <div class="prototype-image-frame view-div container-fluid p-0"></div>
     <div class="prototype-image-overlay container-fluid p-0"></div>
 </div>`;
-
-export const fileMenuData: utils.DropdownMenuData = {
-    id: "builder-file-dropdown-menu",
-    name: "File",
-    style: ".builder-file-dropdown-menu { top: 4px !important; }",
-    content : `
-        <button type="button" class="dropdown-item btn-sm new-prototype">New Prototype..</button>
-        <div class="dropdown-divider"></div>
-        <button type="button" class="dropdown-item btn-sm open">Open..</button>
-        <div class="dropdown-divider"></div>
-        <button type="button" class="dropdown-item btn-sm save">Save</button>
-        <button type="button" class="dropdown-item btn-sm save-as">Save As..</button>`
-};
-
-export const editMenuData: utils.DropdownMenuData = {
-    id: "builder-edit-dropdown-menu",
-    name: "Edit",
-    style: ".builder-edit-dropdown-menu { top: 4px !important; min-width:220px; padding:10px; }",
-    content : `
-        <div class="custom-file">
-            <form class="load-picture-form">
-                <input type="file" class="custom-file-input load-picture-btn" accept="image/*">
-                <label class="custom-file-label btn-sm">Upload Picture</label>
-            </form>
-        </div>
-        <div class="dropdown-divider"></div>
-        <button class="btn btn-outline-danger btn-lg load-whiteboard-btn btn-sm" style="width:100%;">Remove Picture</button>`
-};
 
 export interface Picture {
     fileName: string,
@@ -173,10 +146,14 @@ export class BuilderView extends CentralView {
         this.$imageOverlay = this.$el.find(".prototype-image-overlay");
         this.$coords = this.$el.find(".builder-coords");
         this.$toolbar = this.$el.find(".builder-toolbar");
+        // create whiteboard
         await this.createWhiteboard();
+        // create frame
         await this.createImageFrameLayer();
-        this.resizeView();
+        // install handlers
         this.installHandlers();
+        // resize view to fit current window size
+        this.resizeView();
         // create hotspot editor on top of the image
         this.createHotspotEditor();
         return this;
@@ -365,8 +342,8 @@ export class BuilderView extends CentralView {
      * Returns the picture name and content
      */
     getPicture (): Picture {
-        const fileContent: string = <string> this.$imageDiv?.find("img").attr("src");
-        const fname: string = <string> <string> this.$imageDiv?.attr("fname") || "prototype.png";
+        const fileContent: string = this.getPictureContent();
+        const fname: string = this.getPictureFileName();
         return {
             fileContent,
             fileName: fsUtils.getFileName(fname),
@@ -375,15 +352,44 @@ export class BuilderView extends CentralView {
     }
 
     /**
+     * Returns the picture file name
+     */
+    getPictureFileName (): string {
+        return <string> this.$imageDiv?.attr(utils.PVSioWebFileAttributes.pictureFile);
+    }
+
+    /**
+     * Returns the picture content
+     */
+    getPictureContent (): string {
+        return <string> this.$imageDiv?.find("img").attr("src");
+    }
+
+    /**
      * Returns the picture size
      */
     getPictureSize (): PictureSize {
-        const img: HTMLImageElement = this.$imageFrame?.find("img")[0];
         // console.log(img);
         return {
-            width: img ? img.width : 0,
-            height: img ? img.height : 0
+            width: this.getPictureWidth(),
+            height: this.getPictureHeight()
         };
+    }
+
+    /**
+     * Returns picture width
+     */
+    getPictureWidth (): number {
+        const img: HTMLImageElement = this.$imageFrame?.find("img")[0];
+        return img.width || 0;
+    }
+
+    /**
+     * Returns picture height
+     */
+    getPictureHeight (): number {
+        const img: HTMLImageElement = this.$imageFrame?.find("img")[0];
+        return img.height || 0;
     }
 
     /**
@@ -607,7 +613,7 @@ export class BuilderView extends CentralView {
                         const fileContent: string = (<HTMLImageElement> res?.target)?.src;
                         // append image
                         $imageDiv.html(imageElement);
-                        $imageDiv.attr("fname", `${desc.fileName}${desc.fileExtension}`);
+                        $imageDiv.attr(utils.PVSioWebFileAttributes.pictureFile, `${desc.fileName}${desc.fileExtension}`);
                         // resize picture
                         this.resizePicture({ width, height });
                         // resize view
@@ -633,11 +639,13 @@ export class BuilderView extends CentralView {
     }
 
     /**
-     * Internal function, handles clicks on load-picture-btn
+     * Internal function, handles clicks on change-picture-btn
      * @param evt 
      */
-    protected async onChangePictureEvent (evt: JQuery.ChangeEvent): Promise<PictureData> {
+    protected async onChangePicture (evt: JQuery.ChangeEvent): Promise<PictureData> {
         if (evt) {
+            // close all dropdown menus
+            $(".dropdown-menu").removeClass("show");
             return new Promise ((resolve, reject) => {
                 const file: File = evt?.currentTarget?.files[0];
                 if (file) {
@@ -646,13 +654,15 @@ export class BuilderView extends CentralView {
                         const fileContent: string = evt.target.result?.toString();
                         $(".load-picture-form").trigger("reset");
                         if (fileContent) {
-                            const picture: Picture = {
+                            const oldPicture: Picture = this.getPicture();
+                            const newPicture: Picture = {
                                 fileName: fsUtils.getFileName(file.name),
                                 fileExtension: fsUtils.getFileExtension(file.name),
                                 fileContent
                             };
-                            const pictureData: PictureData = await this.loadPicture(picture);
+                            const pictureData: PictureData = await this.loadPicture(newPicture);
                             resolve(pictureData);
+                            this.connection?.trigger(BuilderEvents.DidChangePicture, { old: oldPicture, new: newPicture });
                         } else {
                             resolve(null);
                         }
@@ -666,14 +676,15 @@ export class BuilderView extends CentralView {
     }
 
     /**
-     * Internal function, installs event handlers
+     * Internal function, install event handlers
      */
     protected installHandlers (): void {
         $(document).find(".load-whiteboard-btn").on("click", async (evt: JQuery.ClickEvent) => {
             await this.createWhiteboard();
         });
-        $(document).find(".load-picture-btn").on("input", async (evt: JQuery.ChangeEvent) => {
-            await this.onChangePictureEvent(evt);
+        $(document).find(".change-picture-btn").on("input", async (evt: JQuery.ChangeEvent) => {
+            await this.onChangePicture(evt);
         });
+
     }
 }

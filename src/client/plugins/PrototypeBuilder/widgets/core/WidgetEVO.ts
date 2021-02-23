@@ -7,68 +7,11 @@
  *
  */
 
-// import * as StateParser from "../../../util/PVSioStateParser";
 import * as parserUtils from '../../../../utils/parserUtils';
 import * as utils from '../../../../utils/pvsiowebUtils';
 import { dimColor } from "../../../../utils/pvsiowebUtils";
-// import { ActionCallback } from "../../ActionsQueue";
 import { Connection, PVSioWebCallBack } from "../../../../env/Connection";
 import * as Backbone from 'backbone';
-
-// const normalised = {
-//     backgroundcolor: "backgroundColor",
-//     fontsize: "fontSize",
-//     fontfamily: "fontFamily",
-//     fontcolor: "fontColor",
-//     borderwidth: "borderWidth",
-//     borderstyle: "borderStyle",
-//     borderradius: "borderRadius",
-//     bordercolor: "borderColor",
-//     zindex: "zIndex"
-// };
-// function normalise_options(data) {
-//     var opt = {};
-//     if (data) {
-//         let norm_key = null;
-//         for (let key in data) {
-//             norm_key = normalised[key] || key;
-//             opt[norm_key] = data[key];
-//         }
-//     }
-//     return opt;
-// }
-// const html_attributes = {
-//     backgroundColor: "background-color",
-//     backgroundcolor: "background-color",
-//     fontSize: "font-size",
-//     fontsize: "font-size",
-//     fontFamily: "font-family",
-//     fontfamily: "font-family",
-//     fontColor: "color",
-//     fontcolor: "color",
-//     align: "text-align",
-//     borderWidth: "border-width",
-//     borderwidth: "border-width",
-//     borderStyle: "border-style",
-//     borderstyle: "border-style",
-//     borderRadius: "border-radius",
-//     borderradius: "border-radius",
-//     borderColor: "border-color",
-//     bordercolor: "border-color",
-//     zIndex: "z-index"
-// };
-// function toHtmlStyle (style: WidgetStyle): HtmlStyle {
-//     var style = {};
-//     if (data) {
-//         data = normalise_options(data);
-//         let html_key = null;
-//         for (let key in data) {
-//             html_key = html_attributes[key] || key;
-//             style[html_key] = data[key];
-//         }
-//     }
-//     return style;
-// }
 
 /**
  * Note: the css of all divs in the templates must indicate "position:absolute" otherwise z-index is not used by the browser, and coordinates are automatically re-arranged by the browser
@@ -102,47 +45,6 @@ export const img_template: string = `
 `;
 export type Renderable = string | number | {};
 export type Coords<T = string | number> = { top?: T, left?: T, width?: T, height?: T };
-// export type WidgetData = {
-//     id: string,
-//     cons: string, // constructor name
-//     kind: string,
-//     attr: WidgetAttr,
-//     coords: Coords,
-//     style: CSS,
-//     evts: string[]
-// };
-// export interface WidgetStyle {
-//     position?: "absolute" | "relative",
-//     parent?: string,
-//     cursor?: string,
-//     backgroundColor?: string,
-//     fontSize?: number | string,
-//     fontFamily?: string,
-//     fontColor?: string, // equivalent to "color"
-//     color?: string,
-//     align?: string,
-//     borderWidth?: number | string,
-//     borderStyle?: string,
-//     borderRadius?: number | string,
-//     borderColor?: string,
-//     overflow?: "hidden" | "visible",
-//     opacity?: number | string,
-//     blinking?: boolean,
-//     marginLeft?: number | string,
-//     marginTop?: number | string,
-//     duration?: number | string,
-//     overlayColor?: string,
-//     transitionTimingFunction?: "ease-in" | "ease-out",
-//     transformOrigin?: "center"
-//     zIndex?: number | string,
-//     letterSpacing?: number | string,
-//     whiteSpace?: "normal" | "nowrap",
-//     lineHeight?: string,
-//     paddingTop?: string,
-//     paddingLeft?: string,
-//     paddingRight?: string,
-//     paddingBottom?: string,
-// }
 
 // keys and type
 export const cssKeys = {

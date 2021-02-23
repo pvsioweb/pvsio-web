@@ -1,17 +1,46 @@
-import { PVSioWebPlugin, PrototypeData } from '../../env/PVSioWeb';
+import { PVSioWebPlugin } from '../../env/PVSioWeb';
 import { BackboneConnection, Connection } from '../../env/Connection';
 
 import * as Utils from '../../utils/pvsiowebUtils';
-import { BuilderView, editMenuData, fileMenuData, Picture, PictureData, WidgetsData } from './views/BuilderView';
+import { BuilderView, Picture } from './views/BuilderView';
 import { WidgetsListView } from './views/WidgetsListView';
-import { Settings, SettingsView } from './views/SettingsView';
+import { SettingsView } from './views/SettingsView';
 import { BuilderEvents, CreateWidgetEvent, DeleteWidgetEvent, CutWidgetEvent, SelectWidgetEvent, CentralViewEvents, WidgetsMap } from './views/CentralView';
 import { SideView } from './views/SideView';
 import { SimulatorView } from './views/SimulatorView';
+import { SettingsElem, SettingsMap } from './views/SettingsView';
 
 import * as fsUtils from "../../utils/fsUtils";
 
 const MIN_WIDTH_LEFT: number = 10; //px
+
+export const fileMenuData: DropdownMenuData = {
+    id: "builder-file-dropdown-menu",
+    name: "File",
+    style: ".builder-file-dropdown-menu { top: 4px !important; }",
+    content : `
+        <button type="button" class="dropdown-item btn-sm new-prototype">New Prototype..</button>
+        <div class="dropdown-divider"></div>
+        <button type="button" class="dropdown-item btn-sm open">Open..</button>
+        <div class="dropdown-divider"></div>
+        <button type="button" class="dropdown-item btn-sm save">Save</button>
+        <button type="button" class="dropdown-item btn-sm save-as">Save As..</button>`
+};
+
+export const pictureMenuData: DropdownMenuData = {
+    id: "builder-picture-dropdown-menu",
+    name: "Picture",
+    style: ".builder-picture-dropdown-menu { top: 4px !important; min-width:220px; padding:10px; }",
+    content : `
+        <div class="custom-file">
+            <form class="load-picture-form">
+                <input type="file" class="custom-file-input change-picture-btn" accept="image/*">
+                <label class="custom-file-label btn-sm">Change Picture</label>
+            </form>
+        </div>
+        <div class="dropdown-divider"></div>
+        <button class="btn btn-outline-danger btn-lg load-whiteboard-btn btn-sm" style="width:100%;">Remove Picture</button>`
+};
 
 const prototypeBuilderBody: string = `
 <style>
@@ -120,10 +149,13 @@ export const PrototypeBuilderEvents = {
     NewPrototype: "NewPrototype",
     SavePrototype: "SavePrototype",
     SaveAs: "SaveAs",
-    OpenPrototype: "OpenPrototype"
+    OpenPrototype: "OpenPrototype",
+    DidSwitchToSimulatorView: "DidSwitchToSimulatorView",
+    DidSwitchToBuilderView: "DidSwitchToBuilderView"
 };
 import * as Backbone from 'backbone';
 import { WidgetData } from './widgets/core/WidgetEVO';
+import { DropdownMenuData, PrototypeData, PVSioWebFileAttributes } from '../../utils/pvsiowebUtils';
 
 export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
     readonly name: string = "Prototype Builder";
@@ -151,7 +183,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
      * Activate the plugin, i.e., create the panel and install event handlers
      * @param opt 
      */
-    async activate (opt?: { connection?: Connection, parent?: string, top?: number, settings?: Settings[] }): Promise<boolean> {
+    async activate (opt?: { connection?: Connection, parent?: string, top?: number, settings?: SettingsElem[] }): Promise<boolean> {
         opt = opt || {};
         this.parent = opt.parent || this.parent;
 
@@ -167,31 +199,6 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         this.body = this.createPanelBody({
             parent: this.panel.$content
         });
-        // install menu handlers
-        this.panel.$dropdownMenu.find(".new-prototype").on("click", (evt: JQuery.ClickEvent) => {
-            const req: PrototypeData = this.getPrototypeData();
-            // send information on the current prototype, so the user can choose to save the current prototype before creating the new prototype
-            console.log(`[prototype-builder] NewPrototypeRequest`, req);
-            this.connection?.trigger(PrototypeBuilderEvents.NewPrototype, req);
-        });
-        this.panel.$dropdownMenu.find(".open").on("click", (evt: JQuery.ClickEvent) => {
-            const req: PrototypeData = this.getPrototypeData();
-            // send information on the current prototype, so the user can choose to save the current prototype before opening a new prototype
-            console.log(`[prototype-builder] OpenPrototypeRequest`, req);
-            this.connection?.trigger(PrototypeBuilderEvents.OpenPrototype, req);
-        });
-        this.panel.$dropdownMenu.find(".save").on("click", (evt: JQuery.ClickEvent) => {
-            const req: PrototypeData = this.getPrototypeData();
-            console.log(`[prototype-builder] SavePrototypeRequest`, req);
-            this.connection?.trigger(PrototypeBuilderEvents.SavePrototype, req);
-        });
-        this.panel.$dropdownMenu.find(".save-as").on("click", (evt: JQuery.ClickEvent) => {
-            const req: PrototypeData = this.getPrototypeData();
-            console.log(`[prototype-builder] SaveAsRequest`, req);
-            this.connection?.trigger(PrototypeBuilderEvents.SaveAs, req);
-        });
-
-        this.$menu = this.panel?.$content.find(".panel-menu");
         
         // create central view and side view
         const bodyDiv: HTMLElement = this.panel.$content.find(`.prototype-screens`)[0];
@@ -232,6 +239,8 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         };
         // render views
         await this.renderViews();
+        // initialize pointer to the menu
+        this.$menu = this.panel?.$content.find(".panel-menu");
         // install handlers
         this.installHandlers();
         // refresh the view
@@ -279,7 +288,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
     protected createPanelBody (desc: { parent: JQuery<HTMLElement> }): Utils.ResizableLeftPanel {
         const id: string = `${this.id}-panel`;
         const fileMenu: string = Handlebars.compile(Utils.dropdownMenuTemplate, { noEscape: true })(fileMenuData);
-        const editMenu: string = Handlebars.compile(Utils.dropdownMenuTemplate, { noEscape: true })(editMenuData);
+        const editMenu: string = Handlebars.compile(Utils.dropdownMenuTemplate, { noEscape: true })(pictureMenuData);
         const content: string = Handlebars.compile(prototypeBuilderBody, { noEscape: true })({
             id,
             menus: [
@@ -317,6 +326,29 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         });
         this.centralViews?.Builder?.on(CentralViewEvents.DidShowView, () => {
             this.switchToBuilderView();
+        });
+        // menu handlers
+        this.panel.$content.find(".new-prototype").on("click", (evt: JQuery.ClickEvent) => {
+            const req: PrototypeData = this.getPrototypeData();
+            // send information on the current prototype, so the user can choose to save the current prototype before creating the new prototype
+            console.log(`[prototype-builder] NewPrototypeRequest`, req);
+            this.connection?.trigger(PrototypeBuilderEvents.NewPrototype, req);
+        });
+        this.panel.$content.find(".open").on("click", (evt: JQuery.ClickEvent) => {
+            const req: PrototypeData = this.getPrototypeData();
+            // send information on the current prototype, so the user can choose to save the current prototype before opening a new prototype
+            console.log(`[prototype-builder] OpenPrototypeRequest`, req);
+            this.connection?.trigger(PrototypeBuilderEvents.OpenPrototype, req);
+        });
+        this.panel.$content.find(".save").on("click", (evt: JQuery.ClickEvent) => {
+            const req: PrototypeData = this.getPrototypeData();
+            console.log(`[prototype-builder] SavePrototypeRequest`, req);
+            this.connection?.trigger(PrototypeBuilderEvents.SavePrototype, req);
+        });
+        this.panel.$content.find(".save-as").on("click", (evt: JQuery.ClickEvent) => {
+            const req: PrototypeData = this.getPrototypeData();
+            console.log(`[prototype-builder] SaveAsRequest`, req);
+            this.connection?.trigger(PrototypeBuilderEvents.SaveAs, req);
         });
     }
 
@@ -377,27 +409,24 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
      * Switches the builder view
      */
     switchToBuilderView(): void {
+        console.log(`[prototype-builder] BuilderView`);
         this.centralViews?.Builder?.builderView();
         // this.widgetManager.stopTimers();
         this.expandSidePanel();
         this.revealMenu();
+        this.connection?.trigger(PrototypeBuilderEvents.DidSwitchToBuilderView);
     }
 
     /**
      * Switches the simulator view
      */
-    async switchToSimulatorView(): Promise<void> {
+    switchToSimulatorView(): void {
+        console.log(`[prototype-builder] SimulatorView`);
         this.centralViews?.Builder?.simulatorView();
         this.collapseSidePanel();
-        const settings: Settings[] = this.centralViews?.Settings?.getSettings();
-        const widgets: WidgetsMap = this.centralViews?.Builder?.getWidgets();
         this.hideMenu();
-        const success: boolean = await this.centralViews?.Simulator?.initSimulation({
-            settings,
-            widgets 
-        });
-        // this.widgetManager.initWidgets();
-        // this.widgetManager.startTimers();
+        const settings: SettingsMap = this.centralViews?.Settings?.getCurrentSettings();
+        this.connection?.trigger(PrototypeBuilderEvents.DidSwitchToSimulatorView, settings);
     }
 
     /**
@@ -429,12 +458,12 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         console.log(`[pvsio-web] loading prototype data`, data);
         if (data) {
             // load picture
-            if (data.picture && data['picture-data']) {
-                const fname: string = data.picture.fname;
+            if (data.pictureFile && data.pictureData) {
+                const fname: string = data.pictureFile;
                 const picture: Picture = {
                     fileName: fsUtils.getFileName(fname),
                     fileExtension: fsUtils.getFileExtension(fname),
-                    fileContent: data['picture-data']
+                    fileContent: data.pictureData
                 }
                 await this.centralViews.Builder.loadPicture(picture);
             }
@@ -456,24 +485,21 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
      */
     getPrototypeData (): PrototypeData {
         if (this.centralViews) {
-            const contextFolder: string = this.centralViews.Settings?.getValue("contextFolder");
-            const mainFile: string = this.centralViews.Settings?.getValue("mainFile");
-            const pictureData: PictureData = this.centralViews.Builder?.getPictureData();
-            const widgetsData: WidgetsData = this.centralViews.Builder?.getWidgetsData();
+            const contextFolder: string = this.centralViews.Settings?.getValue(PVSioWebFileAttributes.contextFolder);
             const data: PrototypeData = {
                 version: 3.0,
-                contextFolder,
-                main: {
-                    fname: mainFile
-                },
-                widgets: widgetsData,
-                picture: {
-                    fname: pictureData?.fileName && pictureData?.fileExtension ? `${pictureData.fileName}${pictureData.fileExtension}` : "",
-                    width: pictureData?.width,
-                    height: pictureData?.height,
-                },
-                "picture-data": pictureData?.fileContent || ""
-            };
+                contextFolder
+            }
+            for (let key in PVSioWebFileAttributes) {
+                const val: string = this.centralViews.Settings?.getValue(PVSioWebFileAttributes[key]);
+                if (val !== undefined) {
+                    data[key] = val;
+                }
+            }
+            data.pictureFile = this.centralViews?.Builder.getPictureFileName();
+            data.pictureWidth = this.centralViews?.Builder.getPictureWidth();
+            data.pictureHeight = this.centralViews?.Builder.getPictureHeight();
+            data.widgets = this.centralViews?.Builder.getWidgetsData();
             return data;
         }
         return null;

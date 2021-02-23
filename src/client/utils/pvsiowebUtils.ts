@@ -1,4 +1,5 @@
 import { PVSioWebPlugin, MouseEventHandlers } from "../env/PVSioWeb";
+import { WidgetsData } from "../plugins/PrototypeBuilder/views/BuilderView";
 
 /**
  * Creates a collapsible panel on the client app
@@ -182,7 +183,7 @@ export function createCollapsiblePanel (owner: PVSioWebPlugin, opt?: {
     handlers?: MouseEventHandlers,
     headerText?: string,
     toolbar?: string,
-    dropdownManu?: string,
+    dropdownMenu?: string,
     hideNavbar?: boolean,
     width?: string,
     top?: number
@@ -203,7 +204,7 @@ export function createCollapsiblePanel (owner: PVSioWebPlugin, opt?: {
         id: pluginId,
         name: pluginName,
         toolbar: opt.toolbar,
-        dropdownMenu: opt.dropdownManu,
+        dropdownMenu: opt.dropdownMenu,
         hideNavbar: opt.hideNavbar
     });
     $(parent).append(panel);
@@ -371,7 +372,7 @@ export interface DropdownMenuData {
 };
 export const dropdownMenuTemplate = `
 <div class="dropdown mr-1 panel-menu">
-    <button type="button" class="btn btn-sm btn-light dropdown-toggle" id="{{id}}" data-toggle="dropdown">{{name}}</button>
+    <button type="button" class="btn btn-sm btn-dark dropdown-toggle" id="{{id}}" data-toggle="dropdown">{{name}}</button>
     {{#if style}}<style>{{style}}</style>{{/if}}
     <div class="dropdown-menu {{id}}" aria-labelledby="{{id}}">
         {{content}}
@@ -522,3 +523,39 @@ export function fontOutlineStyle (col: string): string {
 export const colors = {
     blue: "#007bff"
 };
+
+export enum PVSioWebFileAttributes {
+    version = "version",
+    mainFile = "mainFile",
+    mainFunction = "mainFunction",
+    initFunction = "initFunction",
+    tickFunction = "tickFunction",
+    tickFrequency = "tickFrequency",
+    jsonPrinter = "jsonPrinter",
+    pictureFile = "pictureFile",
+    pictureWidth = "pictureWidth",
+    pictureHeight = "pictureHeight",
+    pictureData = "pictureData",
+    widgets = "widgets",
+    contextFolder = "contextFolder"
+};
+
+export declare interface PVSioWebFile {
+    version: 3.0,
+    mainFile?: string, // name of the main file, including extension
+    mainFunction?: string, // main function -- this is a theory in PVS
+    initFunction?: string // init function name
+    tickFunction?: string, // tick function name
+    tickFrequency?: string // tick frequency
+    jsonPrinter?: string, // name of print function for converting states returned by the server in json format
+    pictureFile?: string, // file name, including extension
+    pictureWidth?: number,
+    pictureHeight?: number,
+    widgets?: WidgetsData
+}
+export declare interface PrototypeData extends PVSioWebFile {
+    contextFolder: string,
+    // "main-data": string,
+    pictureData?: string
+}
+

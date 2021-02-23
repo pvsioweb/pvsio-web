@@ -4,7 +4,7 @@ import { Connection } from '../../../env/Connection';
 import { HotspotsMap } from './editors/HotspotEditor';
 import { Coords, WidgetEVO } from '../widgets/core/WidgetEVO';
 
-export interface CentralViewOptions extends Backbone.ViewOptions {
+export declare interface CentralViewOptions extends Backbone.ViewOptions {
     label: string, // label shown in the tab
     viewId: string, // unique id of the view
     panelId: string, // id of the panel linked to the view
@@ -13,7 +13,7 @@ export interface CentralViewOptions extends Backbone.ViewOptions {
     content?: string,
     active?: boolean,
     parentDiv: HTMLElement
-};
+}
 
 export const MIN_WIDTH: number = 800; //px
 export const MIN_HEIGHT: number = 480; //px
@@ -27,6 +27,11 @@ const headerTemplate: string = `
 <style>
 .nav-link {
     white-space:nowrap;
+}
+.nav-link.active {
+    border-top: 1px solid !important;
+    border-left: 1px solid !important;
+    border-right: 1px solid !important;
 }
 </style>
 <li class="nav-item">
@@ -46,6 +51,7 @@ export const BuilderEvents = {
     DidSelectWidget: "DidSelectWidget",
     DidDeselectWidget: "DidDeselectWidget",
     WillEditWidget: "WillEditWidget",
+    DidChangePicture: "DidChangePicture"
 };
 export interface SelectWidgetEvent {
     id: string

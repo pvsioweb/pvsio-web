@@ -1,14 +1,12 @@
 /**
  * Interactive prototype builder for PVSio based on the html map attribute
  */
-import { PrototypeData } from './env/PVSioWeb';
 import { PrototypeBuilder } from './plugins/PrototypeBuilder/PrototypeBuilder';
-import { fileSettings, functionSettings, printerSettings, Settings } from './plugins/PrototypeBuilder/views/SettingsView';
+import { basicSettings, SettingsElem } from './plugins/PrototypeBuilder/views/SettingsView';
+import { PrototypeData } from './utils/pvsiowebUtils';
 
 // augment the basic settings with a new field 'theoryName'
-export const pvsSettings: Settings[] = fileSettings.concat([
-    { id: "theoryName", label: "Theory", value: "" }
-]).concat(functionSettings).concat(printerSettings);
+export const pvsSettings: SettingsElem[] = basicSettings;
 
 //@ts-ignore
 if (pvsioweb) {
