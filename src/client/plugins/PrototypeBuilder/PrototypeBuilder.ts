@@ -292,8 +292,8 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         const content: string = Handlebars.compile(prototypeBuilderBody, { noEscape: true })({
             id,
             menus: [
-                fileMenu,
-                editMenu
+                editMenu,
+                fileMenu
             ]
         });
         desc.parent.append(content);
@@ -499,6 +499,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
             data.pictureFile = this.centralViews?.Builder.getPictureFileName();
             data.pictureWidth = this.centralViews?.Builder.getPictureWidth();
             data.pictureHeight = this.centralViews?.Builder.getPictureHeight();
+            data.pictureData = this.centralViews?.Builder.getPictureData();
             data.widgets = this.centralViews?.Builder.getWidgetsData();
             return data;
         }

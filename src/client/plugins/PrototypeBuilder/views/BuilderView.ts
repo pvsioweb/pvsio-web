@@ -72,7 +72,7 @@ export interface PictureSize {
     width: number,
     height: number
 }
-export type PictureData = Picture & PictureSize;
+export type PictureInfo = Picture & PictureSize;
 
 export type WidgetsData = WidgetData[]; 
 
@@ -342,7 +342,7 @@ export class BuilderView extends CentralView {
      * Returns the picture name and content
      */
     getPicture (): Picture {
-        const fileContent: string = this.getPictureContent();
+        const fileContent: string = this.getPictureData();
         const fname: string = this.getPictureFileName();
         return {
             fileContent,
@@ -361,7 +361,7 @@ export class BuilderView extends CentralView {
     /**
      * Returns the picture content
      */
-    getPictureContent (): string {
+    getPictureData (): string {
         return <string> this.$imageDiv?.find("img").attr("src");
     }
 
@@ -390,18 +390,6 @@ export class BuilderView extends CentralView {
     getPictureHeight (): number {
         const img: HTMLImageElement = this.$imageFrame?.find("img")[0];
         return img.height || 0;
-    }
-
-    /**
-     * Returns the picture data (name, content, and size)
-     */
-    getPictureData (): PictureData {
-        const picture: Picture = this.getPicture();
-        const size: PictureSize = this.getPictureSize();
-        return {
-            ...picture,
-            ...size
-        };
     }
 
     /**
@@ -533,7 +521,7 @@ export class BuilderView extends CentralView {
     /**
      * Uses a whiteboard as prototype picture
      */
-    async createWhiteboard (): Promise<PictureData> {
+    async createWhiteboard (): Promise<PictureInfo> {
         const size: PictureSize = this.defaultPanelSize;
         return await this.loadPicture({
             fileName: "whiteboard",
@@ -591,7 +579,7 @@ export class BuilderView extends CentralView {
      * @param desc 
      * @param opt 
      */
-    async loadPicture (desc: Picture, opt?: PictureOptions): Promise<PictureData> {
+    async loadPicture (desc: Picture, opt?: PictureOptions): Promise<PictureInfo> {
         if (desc && desc.fileName && desc.fileContent && desc.fileExtension) {
             opt = opt || {};
             const $imageDiv: JQuery<HTMLElement> = opt.$el || this.$imageDiv;
@@ -619,7 +607,7 @@ export class BuilderView extends CentralView {
                         // resize view
                         this.resizeView();
                         // return the picture data
-                        const pictureData: PictureData = {
+                        const pictureData: PictureInfo = {
                             fileName: desc.fileName,
                             fileExtension: desc.fileExtension,
                             fileContent,
@@ -642,7 +630,7 @@ export class BuilderView extends CentralView {
      * Internal function, handles clicks on change-picture-btn
      * @param evt 
      */
-    protected async onChangePicture (evt: JQuery.ChangeEvent): Promise<PictureData> {
+    protected async onChangePicture (evt: JQuery.ChangeEvent): Promise<PictureInfo> {
         if (evt) {
             // close all dropdown menus
             $(".dropdown-menu").removeClass("show");
@@ -660,7 +648,7 @@ export class BuilderView extends CentralView {
                                 fileExtension: fsUtils.getFileExtension(file.name),
                                 fileContent
                             };
-                            const pictureData: PictureData = await this.loadPicture(newPicture);
+                            const pictureData: PictureInfo = await this.loadPicture(newPicture);
                             resolve(pictureData);
                             this.connection?.trigger(BuilderEvents.DidChangePicture, { old: oldPicture, new: newPicture });
                         } else {
