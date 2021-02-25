@@ -39,6 +39,10 @@ export interface DisplayAttr extends WidgetAttr {
 
 export class BasicDisplayEVO extends WidgetEVO {
     protected attr: DisplayAttr;
+    static readonly constructorName: string = "BasicDisplayEVO";
+    getConstructorName (): string {
+        return BasicDisplayEVO.constructorName;
+    }
 
     /**
      * @function <a name="BasicDisplayEVO">BasicDisplayEVO</a>
@@ -109,6 +113,7 @@ export class BasicDisplayEVO extends WidgetEVO {
      * @instance
      */
     render (state?: string | number | {}, opt?: CSS): void {
+        console.log(`[BasicDisplay] rendering state`, state);
         super.render();
         // if (!this.rendered) {
         //     // invoke createHTMLElement to create the widget

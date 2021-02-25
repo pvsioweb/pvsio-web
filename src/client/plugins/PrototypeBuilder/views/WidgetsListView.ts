@@ -1,4 +1,5 @@
-import { BuilderEvents, SelectWidgetEvent, WidgetsMap } from './CentralView';
+import { BuilderEvents, SelectWidgetEvent } from './BuilderView';
+import { WidgetsMap } from './CentralView';
 import { SideView, SideViewOptions } from './SideView';
 
 const widgetsListViewTemplate: string = `

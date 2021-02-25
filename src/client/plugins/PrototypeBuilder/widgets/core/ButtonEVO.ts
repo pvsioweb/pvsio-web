@@ -68,6 +68,11 @@ export interface ButtonAttr extends WidgetAttr {
 };
 
 export class ButtonEVO extends WidgetEVO {
+    static readonly constructorName: string = "ButtonEVO";
+    getConstructorName (): string {
+        return ButtonEVO.constructorName;
+    }
+
     protected attr: ButtonAttr;
 
     protected lineHeight: number;

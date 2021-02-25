@@ -169,8 +169,9 @@ class PvsiowebServer {
         webserver.use(/(\/demos\/[^\/]+)?\/underscore\.js/, express.static(path.join(clientDir, `node_modules/underscore/underscore-min.js`)));
         webserver.use(/(\/demos\/[^\/]+)?\/jquery\.js/, express.static(path.join(clientDir, `node_modules/jquery/dist/jquery.min.js`)));
 
+        webserver.use(/(\/demos\/[^\/]+)?\/builder\.min\.js/, express.static(path.join(bundleDir, `client/builder.min.js`)));
         webserver.use(/(\/demos\/[^\/]+)?\/pvsioweb\.min\.js/, express.static(path.join(bundleDir, `client/pvsioweb.min.js`)));
-        webserver.use(/(\/demos\/[^\/]+)?\/prototype-builder\.min\.js/, express.static(path.join(bundleDir, `client/prototype-builder.min.js`)));
+        webserver.use(/(\/demos\/[^\/]+)?\/widgetLibDials\.min\.js/, express.static(path.join(bundleDir, `client/widgetLibDials.min.js`)));
 
         this.wsServer = new ws.Server({ server: this.httpServer });
         this.wsServer.on("connection", (socket: WebSocket) => {

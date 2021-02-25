@@ -6,7 +6,6 @@ import { PrototypeBuilder } from './PrototypeBuilder/PrototypeBuilder';
  */
 export const plugins: PVSioWebPluginDescriptor[] = [
     {
-        cons: PrototypeBuilder,
-        autoload: true
+        cons: PrototypeBuilder
     }
 ];

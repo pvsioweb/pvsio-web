@@ -44,25 +44,9 @@ const bodyTemplate: string = `
 </div>`;
 
 export type WidgetsMap = { [id: string]: WidgetEVO };
-export const BuilderEvents = {
-    DidCreateWidget: "DidCreateWidget",
-    DidCutWidget: "DidCutWidget",
-    DidDeleteWidget: "DidDeleteWidget",
-    DidSelectWidget: "DidSelectWidget",
-    DidDeselectWidget: "DidDeselectWidget",
-    WillEditWidget: "WillEditWidget",
-    DidChangePicture: "DidChangePicture"
-};
-export interface SelectWidgetEvent {
-    id: string
-}
-export interface CreateWidgetEvent extends SelectWidgetEvent {
-    name: string,
-    widgets: WidgetsMap,
-    hotspots: HotspotsMap
-};
-export type DeleteWidgetEvent = CreateWidgetEvent; 
-export type CutWidgetEvent = CreateWidgetEvent; 
+
+export const DELAYED_TRIGGER_TIMEOUT: number = 2000; //ms
+
 
 export abstract class CentralView extends Backbone.View {
     protected connection: Connection;

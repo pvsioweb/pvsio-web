@@ -2,15 +2,38 @@ import { WidgetEVO, Coords, WidgetOptions, HotspotData, WidgetData } from "../wi
 import { Connection } from '../../../env/Connection';
 import { HotspotEditor, HotspotEditorEvents, HotspotsMap } from './editors/HotspotEditor';
 
-import { CreateWidgetEvent, WidgetsMap, BuilderEvents, MIN_WIDTH, MIN_HEIGHT, CentralView } from './CentralView';
+import { WidgetsMap, MIN_WIDTH, MIN_HEIGHT, CentralView, DELAYED_TRIGGER_TIMEOUT } from './CentralView';
 import { WidgetEditor, WidgetEditorEvents } from './editors/WidgetEditor';
-import { WidgetClassDescriptor, widgetList } from '../widgets/widgetList';
+import { WidgetClassDescriptor, WidgetClassMap } from '../widgets/widgetClassMap';
 
 import * as utils from '../../../utils/pvsiowebUtils';
 import * as fsUtils from '../../../utils/fsUtils';
 import { CentralViewOptions } from "./CentralView";
 
 const toolbarHeight: number = 36; //px
+
+export enum BuilderEvents {
+    DidCreateWidget = "DidCreateWidget",
+    DidCutWidget = "DidCutWidget",
+    DidDeleteWidget = "DidDeleteWidget",
+    DidSelectWidget = "DidSelectWidget",
+    DidDeselectWidget = "DidDeselectWidget",
+    WillEditWidget = "WillEditWidget",
+    DidChangePicture = "DidChangePicture",
+    DidUpdateSettings = "DidUpdateSettings",
+    DidUpdateWidgets = "DidUpdateWidgets"
+};
+export interface SelectWidgetEvent {
+    id: string
+}
+export interface CreateWidgetEvent extends SelectWidgetEvent {
+    name: string,
+    widgets: WidgetsMap,
+    hotspots: HotspotsMap
+};
+export type DeleteWidgetEvent = CreateWidgetEvent; 
+export type CutWidgetEvent = CreateWidgetEvent; 
+
 
 const contentTemplate: string = `
 <style>
@@ -30,6 +53,7 @@ const contentTemplate: string = `
     position:absolute;
     color:darkslategray; 
     top:0.6em;
+    left:45%;
     font-size:small;
     white-space:nowrap;
 }
@@ -74,7 +98,10 @@ export interface PictureSize {
 }
 export type PictureInfo = Picture & PictureSize;
 
-export type WidgetsData = WidgetData[]; 
+export type WidgetsData = WidgetData[];
+export interface BuilderViewOptions extends CentralViewOptions {
+    widgetClassMap: WidgetClassMap
+};
 
 export class BuilderView extends CentralView {    
     /**
@@ -102,17 +129,45 @@ export class BuilderView extends CentralView {
     protected widgetsMap: WidgetsMap = {};
 
     /**
+     * Widget class map
+     */
+    protected widgetClassMap: WidgetClassMap;
+
+    /**
      * Clipboard, stored information for copy/paste operations in builder view
      */
     protected clipboard: WidgetEVO;
+
+    /**
+     * Internal timer, used for delayed triggers
+     */
+    protected timer: NodeJS.Timer = null;
+
 
     /**
      * Builder view constructor
      * @param data 
      * @param connection 
      */
-    constructor (data: CentralViewOptions, connection: Connection) {
+    constructor (data: BuilderViewOptions, connection: Connection) {
         super(data, connection);
+        this.widgetClassMap = data?.widgetClassMap;
+    }
+
+    /**
+     * Updates widget class map
+     * @param widgetClassMap 
+     */
+    setWidgetClassMap (widgetClassMap: WidgetClassMap): void {
+        this.widgetClassMap = widgetClassMap;
+    }
+
+    /**
+     * Returns the current widget class map
+     * @param widgetClassMap 
+     */
+    getWidgetClassMap (): WidgetClassMap {
+        return this.widgetClassMap;
     }
 
     /**
@@ -166,7 +221,7 @@ export class BuilderView extends CentralView {
         if (size) {
             this.$imageDiv.find("img").attr("width", size.width).attr("height", size.height);
         }
-        size = size || this.getPictureSize();
+        size = size || this.getCurrentPictureSize();
         if (size) {
             // resize image div
             this.$imageDiv.css({ width: `${size.width}px`, height: `${size.height}px` });
@@ -185,6 +240,18 @@ export class BuilderView extends CentralView {
             width: parseFloat(this.$imageDiv.css("width")),
             height: parseFloat(this.$imageDiv.css("height")) + 1.2 * parseFloat(this.$toolbar.css("height"))
         });
+    }
+
+    /**
+     * Internal function, reports settings updates on the connection bus after a delay
+     * @param evt 
+     */
+    protected delayedTrigger (evt: BuilderEvents.DidUpdateWidgets): void {
+        clearTimeout(this.timer);
+        this.timer = setTimeout(() => {
+            const data: WidgetsData = this.getCurrentWidgetsData();
+            this.trigger(BuilderEvents.DidUpdateWidgets, data);
+        }, DELAYED_TRIGGER_TIMEOUT);
     }
 
     /**
@@ -212,9 +279,11 @@ export class BuilderView extends CentralView {
         });
         this.hotspotEditor.on(HotspotEditorEvents.DidMoveHotspot, (data: HotspotData) => {
             this.widgetsMap[data.id]?.move(data.coords);
+            this.delayedTrigger(BuilderEvents.DidUpdateWidgets);
         });
         this.hotspotEditor.on(HotspotEditorEvents.DidResizeHotspot, (data: HotspotData) => {
             this.widgetsMap[data.id]?.resize(data.coords);
+            this.delayedTrigger(BuilderEvents.DidUpdateWidgets);
         });
         this.hotspotEditor.on(HotspotEditorEvents.WillEditHotspot, async (data: HotspotData) => {
             await this.editWidget(data);
@@ -229,6 +298,7 @@ export class BuilderView extends CentralView {
                 widgets: this.getWidgets(),
                 hotspots: this.getHotspots()
             });
+            this.delayedTrigger(BuilderEvents.DidUpdateWidgets);
         });
         this.hotspotEditor.on(HotspotEditorEvents.DidCutHotspot, async (data: HotspotData) => {
             this.clipboard = this.widgetsMap[data.id];
@@ -240,6 +310,7 @@ export class BuilderView extends CentralView {
                     widgets: this.getWidgets(),
                     hotspots: this.getHotspots()
                 });
+                this.delayedTrigger(BuilderEvents.DidUpdateWidgets);
             }
         });
         this.hotspotEditor.on(HotspotEditorEvents.DidPasteHotspot, async (data: { origin: HotspotData, clone: HotspotData }) => {
@@ -256,6 +327,7 @@ export class BuilderView extends CentralView {
                     };
                     this.createWidget(widgetData);
                 }
+                this.delayedTrigger(BuilderEvents.DidUpdateWidgets);
             }
         });
     }
@@ -339,11 +411,11 @@ export class BuilderView extends CentralView {
     }
 
     /**
-     * Returns the picture name and content
+     * Returns the current picture name and content
      */
-    getPicture (): Picture {
-        const fileContent: string = this.getPictureData();
-        const fname: string = this.getPictureFileName();
+    getCurrentPicture (): Picture {
+        const fileContent: string = this.getCurrentPictureData();
+        const fname: string = this.getCurrentPictureFileName();
         return {
             fileContent,
             fileName: fsUtils.getFileName(fname),
@@ -352,50 +424,50 @@ export class BuilderView extends CentralView {
     }
 
     /**
-     * Returns the picture file name
+     * Returns the current picture file name
      */
-    getPictureFileName (): string {
-        return <string> this.$imageDiv?.attr(utils.PVSioWebFileAttributes.pictureFile);
+    getCurrentPictureFileName (): string {
+        return <string> this.$imageDiv?.attr(utils.SettingsAttributes.pictureFile);
     }
 
     /**
      * Returns the picture content
      */
-    getPictureData (): string {
+    getCurrentPictureData (): string {
         return <string> this.$imageDiv?.find("img").attr("src");
     }
 
     /**
-     * Returns the picture size
+     * Returns the current picture size
      */
-    getPictureSize (): PictureSize {
+    getCurrentPictureSize (): PictureSize {
         // console.log(img);
         return {
-            width: this.getPictureWidth(),
-            height: this.getPictureHeight()
+            width: this.getCurrentPictureWidth(),
+            height: this.getCurrentPictureHeight()
         };
     }
 
     /**
-     * Returns picture width
+     * Returns the current picture width
      */
-    getPictureWidth (): number {
+    getCurrentPictureWidth (): number {
         const img: HTMLImageElement = this.$imageFrame?.find("img")[0];
         return img.width || 0;
     }
 
     /**
-     * Returns picture height
+     * Returns the current picture height
      */
-    getPictureHeight (): number {
+    getCurrentPictureHeight (): number {
         const img: HTMLImageElement = this.$imageFrame?.find("img")[0];
         return img.height || 0;
     }
 
     /**
-     * Returns the widgets descriptors
+     * Returns the current widgets descriptors
      */
-    getWidgetsData (): WidgetsData {
+    getCurrentWidgetsData (): WidgetsData {
         if (this.widgetsMap) {
             const keys: string[] = Object.keys(this.widgetsMap);
             const ans: WidgetData[] = [];
@@ -417,8 +489,9 @@ export class BuilderView extends CentralView {
         if (widgetData) {
             // console.log(widgetData);
             if (widgetData.cons && widgetData.kind) {
-                const desc: WidgetClassDescriptor = widgetList[widgetData.kind].find((desc: WidgetClassDescriptor) => {
-                    return desc.cons.name === widgetData.cons;
+                const classMap: WidgetClassMap = this.widgetClassMap;
+                const desc: WidgetClassDescriptor = classMap[widgetData.kind].find((desc: WidgetClassDescriptor) => {
+                    return desc.cons.constructorName === widgetData.cons;
                 });
                 // console.log(desc);
                 if (desc) {
@@ -480,11 +553,15 @@ export class BuilderView extends CentralView {
                         cons: this.widgetsMap[id]?.getConstructorName()
                     }
                     console.log("[builder] Creating widget editor dialog");
-                    const editor: WidgetEditor = new WidgetEditor({ widgetData: widgetDataObject });
+                    const editor: WidgetEditor = new WidgetEditor({
+                        widgetData: widgetDataObject, 
+                        widgetClassMap: this.widgetClassMap
+                    });
                     editor.renderView();
                     editor.on(WidgetEditorEvents.ok, (widgetData: WidgetData) => {
                         const widget: WidgetEVO = this.createWidget(widgetData);
                         resolve(widget);
+                        this.delayedTrigger(BuilderEvents.DidUpdateWidgets);
                     });
                     editor.on(WidgetEditorEvents.cancel, (data: WidgetData) => {
                         resolve(null);
@@ -601,7 +678,7 @@ export class BuilderView extends CentralView {
                         const fileContent: string = (<HTMLImageElement> res?.target)?.src;
                         // append image
                         $imageDiv.html(imageElement);
-                        $imageDiv.attr(utils.PVSioWebFileAttributes.pictureFile, `${desc.fileName}${desc.fileExtension}`);
+                        $imageDiv.attr(utils.SettingsAttributes.pictureFile, `${desc.fileName}${desc.fileExtension}`);
                         // resize picture
                         this.resizePicture({ width, height });
                         // resize view
@@ -642,7 +719,7 @@ export class BuilderView extends CentralView {
                         const fileContent: string = evt.target.result?.toString();
                         $(".load-picture-form").trigger("reset");
                         if (fileContent) {
-                            const oldPicture: Picture = this.getPicture();
+                            const oldPicture: Picture = this.getCurrentPicture();
                             const newPicture: Picture = {
                                 fileName: fsUtils.getFileName(file.name),
                                 fileExtension: fsUtils.getFileExtension(file.name),
@@ -667,7 +744,7 @@ export class BuilderView extends CentralView {
      * Internal function, install event handlers
      */
     protected installHandlers (): void {
-        $(document).find(".load-whiteboard-btn").on("click", async (evt: JQuery.ClickEvent) => {
+        $(document).find(".remove-picture-btn").on("click", async (evt: JQuery.ClickEvent) => {
             await this.createWhiteboard();
         });
         $(document).find(".change-picture-btn").on("input", async (evt: JQuery.ChangeEvent) => {

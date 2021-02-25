@@ -15,6 +15,11 @@ export type DialEventData = {
 };
 
 export class DialEVO extends ButtonEVO {
+    static readonly constructorName: string = "DialEVO";
+    getConstructorName (): string {
+        return DialEVO.constructorName;
+    }
+
     protected rotation: number = 0;
     protected delta: number = 0;
     

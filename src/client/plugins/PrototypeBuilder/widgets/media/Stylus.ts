@@ -34,6 +34,11 @@ import { Coords, WidgetEVO, img_template, CSS, WidgetOptions } from "../core/Wid
 import { stylus_white } from "./StylusTemplate";
 
 export class Stylus extends WidgetEVO {
+    static readonly constructorName: string = "Stylus";
+    getConstructorName (): string {
+        return Stylus.constructorName;
+    }
+    
     protected initial_position: {
         top: number,
         left: number

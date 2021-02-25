@@ -1,6 +1,5 @@
-/**
- * PVSioWeb Prototype Builder
- */
+import './css/pvsio-web.css';
+import './css/style.css';
 import { PrototypeBuilder } from './plugins/PrototypeBuilder/PrototypeBuilder';
 
 const builder: PrototypeBuilder = new PrototypeBuilder();

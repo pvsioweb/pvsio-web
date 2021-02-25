@@ -8,6 +8,10 @@ export interface SelectorOptions extends DialOptions {
 }
 
 export class SelectorEVO extends DialEVO {
+    static readonly constructorName: string = "SelectorEVO";
+    getConstructorName (): string {
+        return SelectorEVO.constructorName;
+    }
 
     protected turns: number[];
     protected tIndex: number = 0; // current position, must be a valid index in turns

@@ -175,9 +175,19 @@ export abstract class WidgetEVO extends Backbone.Model {
     readonly fontPadding: number = 6;
     protected rendered?: boolean = false;
 
+    // constructor name -- this is used for dynamic loading of widgets
+    static readonly constructorName: string = "WidgetEVO";
+    // the following method needs to be overridden in all descendant classes
+    abstract getConstructorName (): string
+
+
+    /**
+     * Utility function, returns a unique ID in the format wdgW1234
+     */
     static uuid (): string {
-        return "wdg" + utils.uuid("Wxxxx");    
+        return "wdg" + utils.uuid("Wxxxx");
     }
+
     /**
      * Creates an instance of the widget.
      * The widget is attached to the DOM only with the render function is invoked for the first time.
@@ -188,10 +198,10 @@ export abstract class WidgetEVO extends Backbone.Model {
     constructor (id: string, coords: Coords, opt?: WidgetOptions) {
         super();
         opt = opt || {};
+        opt.parent = opt.parent || "body";
         opt.css = opt.css || {};
         coords = coords || {};
         this.id = id;
-        opt.parent = opt.parent || "body";
         this.parentSelector = (typeof opt.parent === "string") ? 
             opt.parent === "body" || opt.parent.startsWith("#") || opt.parent.startsWith(".") ? opt.parent : `#${opt.parent}`
                 : null;
@@ -580,7 +590,7 @@ export abstract class WidgetEVO extends Backbone.Model {
      * Returns the widget kind, useful for grouping together similar widgets.
      */
     getKind (): string {
-        return this.kind || this.getConstructorName();
+        return this.kind || "widget";
     }
 
     /**
@@ -711,10 +721,6 @@ export abstract class WidgetEVO extends Backbone.Model {
 
     updateLocationAndSize (data: Coords): void {
         return this.setPositionAndSize(data);
-    }
-
-    getConstructorName (): string {
-        return this.constructor.name;
     }
 
     getId (): string {

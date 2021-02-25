@@ -36,6 +36,11 @@ export interface LedAttr extends WidgetAttr {
 };
 
 export class LedEVO extends WidgetEVO {
+    static readonly constructorName: string = "LedEVO";
+    getConstructorName (): string {
+        return LedEVO.constructorName;
+    }
+
     protected attr: LedAttr;
     protected radius: number;
     /**

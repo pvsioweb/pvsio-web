@@ -3,24 +3,14 @@ import { Connection } from '../../../env/Connection';
 import { CentralView, WidgetsMap, CentralViewOptions } from './CentralView';
 import { Renderable } from '../widgets/core/WidgetEVO';
 import { CSS } from '../widgets/core/WidgetEVO';
-import { SettingsElem } from './SettingsView';
 
 export class SimulatorView extends CentralView {
     protected simulatorId: string = uuid();
 
-    protected settings: SettingsElem[];
     protected widgets: WidgetsMap;
 
     constructor (data: CentralViewOptions, connection: Connection) {
         super(data, connection);
-    }
-
-    /**
-     * Saves a pointer to the settings panel
-     * @param settings 
-     */
-    importSettings (settings: SettingsElem[]): void {
-        this.settings = settings;
     }
 
     /**
@@ -36,6 +26,7 @@ export class SimulatorView extends CentralView {
      * @param desc 
      */
     async renderWidgets (state: Renderable, opt?: CSS): Promise<void> {
+        console.log(`[simulator-view] renderWidgets`, this.widgets);
         for (let i in this.widgets) {
             this.widgets[i].render(state, opt);
         }

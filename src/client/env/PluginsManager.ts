@@ -8,37 +8,51 @@ export interface PluginsMap { [pluginName: string]: PVSioWebPlugin };
 
 export class PluginsManager extends Backbone.Model {
     protected connection: Connection;
-
-    protected pluginsObj: PluginsMap = {};
+    protected pluginsMap: PluginsMap = {};
 
     /**
-     * Activates all plugins
+     * Constructor
      */
-    async activate (opt?: { global?: PluginsMap }): Promise<boolean> {
-        opt = opt || {};
+    constructor () {
+        super();
+        this.importPlugins();
+    }
+
+    /**
+     * Imports available plugins -- defined in imported variable pluginList
+     */
+    importPlugins (): boolean {
         for (let i in plugins) {
             const obj: PVSioWebPlugin = new plugins[i].cons();
             const name: string = obj.getName();
-            this.pluginsObj[name] = obj;
-            if (opt?.global) {
-                opt.global[name] = obj;
-            }
-            if (plugins[i].autoload) {
-                const success: boolean = await obj.activate({ connection: this.connection, parent: "toolkit-body", top: 28 });
-                const msg: string = success ? `[plugin-manager] Plugin ${name} active!`
-                    : `[plugin-manager] Failed to activate plugin ${name}`;
-                success ? console.log(msg) : console.warn(msg);
-            }
+            this.pluginsMap[name] = obj;
         }
         return true;
     }
 
-    isActive (pluginName: string): boolean {
-        if (pluginName) {
-            return this.pluginsObj[pluginName]?.isActive();
-        }
-        return false;
+    /**
+     * Activates all plugins
+     */
+    getPlugins (): PluginsMap {
+        return this.pluginsMap;
     }
 
+    /**
+     * Activates all plugins
+     */
+    async activate (): Promise<PluginsMap> {
+        for (let name in this.pluginsMap) {
+            const success: boolean = await this.pluginsMap[name].activate({
+                connection: this.connection,
+                parent: "toolkit-body",
+                top: 28
+            });
+            const msg: string = success ? 
+                `[plugin-manager] Plugin ${name} active!`
+                    : `[plugin-manager] Failed to activate plugin ${name}`;
+            success ? console.log(msg) : console.warn(msg);
+        }
+        return this.pluginsMap;
+    }
 
 }

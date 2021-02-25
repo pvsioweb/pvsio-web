@@ -2,6 +2,11 @@ import { SelectionButtonEVO, PushButtonOptions } from "./SelectionButtonEVO";
 import { Coords } from "./WidgetEVO";
 
 export class ToggleButtonEVO extends SelectionButtonEVO {
+    static readonly constructorName: string = "ToggleButtonEVO";
+    getConstructorName (): string {
+        return ToggleButtonEVO.constructorName;
+    }
+
 
     protected activeFlag: boolean = false; // false means disabled, true means enabled
 

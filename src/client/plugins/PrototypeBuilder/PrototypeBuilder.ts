@@ -2,15 +2,27 @@ import { PVSioWebPlugin } from '../../env/PVSioWeb';
 import { BackboneConnection, Connection } from '../../env/Connection';
 
 import * as Utils from '../../utils/pvsiowebUtils';
-import { BuilderView, Picture } from './views/BuilderView';
+import { BuilderEvents, BuilderView, Picture, CreateWidgetEvent, DeleteWidgetEvent, CutWidgetEvent, SelectWidgetEvent } from './views/BuilderView';
 import { WidgetsListView } from './views/WidgetsListView';
-import { SettingsView } from './views/SettingsView';
-import { BuilderEvents, CreateWidgetEvent, DeleteWidgetEvent, CutWidgetEvent, SelectWidgetEvent, CentralViewEvents, WidgetsMap } from './views/CentralView';
+import { SettingsEvents, SettingsView } from './views/SettingsView';
+import { CentralViewEvents, WidgetsMap } from './views/CentralView';
 import { SideView } from './views/SideView';
 import { SimulatorView } from './views/SimulatorView';
 import { SettingsElem, SettingsMap } from './views/SettingsView';
 
 import * as fsUtils from "../../utils/fsUtils";
+
+export enum PrototypeBuilderEvents {
+    DidActivatePlugin = "DidActivatePlugin",
+    NewPrototype = "NewPrototype",
+    SavePrototype = "SavePrototype",
+    SaveAs = "SaveAs",
+    OpenPrototype = "OpenPrototype",
+    DidSwitchToSimulatorView = "DidSwitchToSimulatorView",
+    DidSwitchToBuilderView = "DidSwitchToBuilderView",
+    DidUpdateWidgets = "DidUpdateWidgets",
+    DidUpdateSettings = "DidUpdateSettings"
+};
 
 const MIN_WIDTH_LEFT: number = 10; //px
 
@@ -39,8 +51,33 @@ export const pictureMenuData: DropdownMenuData = {
             </form>
         </div>
         <div class="dropdown-divider"></div>
-        <button class="btn btn-outline-danger btn-lg load-whiteboard-btn btn-sm" style="width:100%;">Remove Picture</button>`
+        <button class="btn btn-outline-danger btn-lg remove-picture-btn btn-sm">Remove Picture</button>`
 };
+
+export const inlineBuilderMenuData: InlineMenuData = {
+    id: "inline-builder-menu",
+    name: "inline-builder-menu",
+    style: `
+        .custom-file {
+            width: 200px !important;
+        }
+        .custom-file-label {
+            transform: scale(0.9);
+            margin-top: -4px;
+        }
+    `,
+    buttons : [
+        `<div class="custom-file builder-menu">
+            <form class="load-picture-form">
+                <input type="file" class="custom-file-input change-picture-btn" accept="image/*">
+                <label class="custom-file-label btn-sm">Change Picture</label>
+            </form>
+        </div>`,
+        `<button class="btn btn-outline-danger builder-menu btn-lg remove-picture-btn btn-sm">Remove Picture</button>`,
+        `<button class="btn btn-danger btn-lg simulator-menu reboot-prototype-btn btn-sm"><div class="fa fa-undo"></div> Reboot Prototype</button>`
+    ]
+};
+
 
 const prototypeBuilderBody: string = `
 <style>
@@ -49,7 +86,6 @@ const prototypeBuilderBody: string = `
     display: block;
     background-color: #4c4c4c;
     height: 40px;
-    width: 200%;
 }
 .left-panel {
     overflow-x:hidden;
@@ -62,18 +98,9 @@ const prototypeBuilderBody: string = `
     margin-left: 0px;
     width: 100%;
 }
-.widget-list-item.active::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 0;
-    height: 0;
-
-    border-bottom: 20px solid transparent;    
-    border-left: 16px solid whitesmoke;
-
-    clear: both;
+.widget-list-item {
+    padding: 10px 0 10px 22px !important;
+    border: 1px solid black !important;
 }
 .builder-controls {
     position: absolute;
@@ -90,11 +117,12 @@ const prototypeBuilderBody: string = `
 .central-panel {
     position:relative;
     width:66%;
+    height:100%;
     overflow:hidden;
 }
 .central-panel-inner {
     overflow:auto;
-    height:110%;
+    height:100%;
 }
 .central-panel-inner-header {
     margin-top:-8px;
@@ -106,12 +134,18 @@ const prototypeBuilderBody: string = `
 .card-header-dropdown-menu {
     position:absolute;
     top:8px;
+    border: 0px;
 }
 .r-10 {
     right:10px !important;
+    margin-top:-3px !important; 
+}
+.builder-content {
+    height:100%;
+    margin-left:0;
 }
 </style>
-<div id="{{id}}" class="row d-flex">
+<div id="{{id}}" class="builder-content row d-flex p-0">
     <div id="{{id}}-left" class="left-panel container-fluid no-gutters p-0">
         <div class="builder-sidebar-heading"></div>
         <div id="{{id}}-widget-list" class="widget-list list-group"></div>
@@ -123,15 +157,14 @@ const prototypeBuilderBody: string = `
             <div class="card-header central-panel-inner-header">
                 <ul class="nav nav-tabs card-header-tabs d-flex flex-nowrap prototype-screen-list"></ul>
                 <ul class="nav nav-tabs card-header-dropdown-menu r-10 d-flex flex-nowrap">
-                    <div class="d-flex">
+                    <div class="d-flex" style="background-color:whitesmoke;">
                         {{#each menus}}
                         {{this}}
                         {{/each}}
                     </div>
                 </ul>
             </div>
-            <div class="card-body prototype-screens tab-content py-0">
-            </div>
+            <div class="card-body prototype-screens tab-content py-0"></div>
         </div>
     </div>
 </div>`;
@@ -144,27 +177,26 @@ export interface CentralViews {
 export interface SideViews {
     Builder: SideView
 };
-export const PrototypeBuilderEvents = {
-    DidActivatePlugin: "DidActivatePlugin",
-    NewPrototype: "NewPrototype",
-    SavePrototype: "SavePrototype",
-    SaveAs: "SaveAs",
-    OpenPrototype: "OpenPrototype",
-    DidSwitchToSimulatorView: "DidSwitchToSimulatorView",
-    DidSwitchToBuilderView: "DidSwitchToBuilderView"
-};
 import * as Backbone from 'backbone';
-import { WidgetData } from './widgets/core/WidgetEVO';
-import { DropdownMenuData, PrototypeData, PVSioWebFileAttributes } from '../../utils/pvsiowebUtils';
+import { Renderable, WidgetData, CSS } from './widgets/core/WidgetEVO';
+import { DropdownMenuData, InlineMenuData, PrototypeData, SettingsAttributes } from '../../utils/pvsiowebUtils';
+import { WidgetClassManager } from './WidgetClassManager';
 
 export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
     readonly name: string = "Prototype Builder";
     readonly id: string = Utils.removeSpaceDash(this.name);
+    static readonly constructorName: string = "PrototypeBuilder";
+
+    protected mode: "simulator" | "builder" = "builder";
 
     protected activeFlag: boolean = false;
     protected parent: string = "body";
-
     protected $menu: JQuery<HTMLElement>;
+
+    /**
+     * Widget class manager
+     */
+    widgetClassManager: WidgetClassManager = new WidgetClassManager();
 
     // the connection is public, so objects using PrototypeBuilder can set listeners and trigger events on the connection
     connection: Connection;
@@ -225,7 +257,8 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
                 el: bodyDiv,
                 headerDiv,
                 active: true,
-                parentDiv: this.body.$central[0]
+                parentDiv: this.body.$central[0],
+                widgetClassMap: this.widgetClassManager?.getWidgetClassMap() || {}
             }, this.connection),
             Simulator: new SimulatorView({
                 label: "Simulator View",
@@ -247,6 +280,8 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         this.onResizeCentralView();
         // signal ready
         this.trigger(PrototypeBuilderEvents.DidActivatePlugin);
+        // switch to builder view
+        this.switchToBuilderView();
         // update active flag
         this.activeFlag = true;
         return this.activeFlag;
@@ -268,17 +303,40 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
     }
 
     /**
-     * Hide dropdown menus
+     * Hide builder menus
      */
-    hideMenu (): void {
-        this.$menu?.css("display", "none");
+    hideBuilderMenu (): void {
+        this.$menu?.find(".builder-menu").css("display", "none");
     }
 
     /**
-     * Reveal dropdown menus
+     * Reveal builder menus
      */
-    revealMenu (): void {
-        this.$menu?.css("display", "block");
+    revealBuilderMenu (): void {
+        this.$menu?.find(".builder-menu").css("display", "inline-block");
+    }
+
+    /**
+     * Hide builder menus
+     */
+    hideSimulatorMenu (): void {
+        this.$menu?.find(".simulator-menu").css("display", "none");
+    }
+
+    /**
+     * Reveal builder menus
+     */
+    revealSimulatorMenu (): void {
+        this.$menu?.find(".simulator-menu").css("display", "inline-block");
+    }
+
+    /**
+     * Renders all widgets with the given state
+     * @param desc 
+     */
+    async renderWidgets (state: Renderable, opt?: CSS): Promise<void> {
+        console.log(`[pvsio-web] Render widgets`, state, opt);
+        return await this.centralViews?.Simulator?.renderWidgets(state, opt);
     }
 
     /**
@@ -287,13 +345,17 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
      */
     protected createPanelBody (desc: { parent: JQuery<HTMLElement> }): Utils.ResizableLeftPanel {
         const id: string = `${this.id}-panel`;
-        const fileMenu: string = Handlebars.compile(Utils.dropdownMenuTemplate, { noEscape: true })(fileMenuData);
-        const editMenu: string = Handlebars.compile(Utils.dropdownMenuTemplate, { noEscape: true })(pictureMenuData);
+        // const fileMenu: string = Handlebars.compile(Utils.dropdownMenuTemplate, { noEscape: true })(fileMenuData);
+        // const editMenu: string = Handlebars.compile(Utils.dropdownMenuTemplate, { noEscape: true })(pictureMenuData);
+        const inlineMenu: string = Handlebars.compile(Utils.inlineMenuTemplate, { noEscape: true })({
+            ...inlineBuilderMenuData
+        });
         const content: string = Handlebars.compile(prototypeBuilderBody, { noEscape: true })({
             id,
             menus: [
-                editMenu,
-                fileMenu
+                // editMenu,
+                // fileMenu
+                inlineMenu
             ]
         });
         desc.parent.append(content);
@@ -326,6 +388,10 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         });
         this.centralViews?.Builder?.on(CentralViewEvents.DidShowView, () => {
             this.switchToBuilderView();
+        });
+        this.centralViews?.Settings?.on(SettingsEvents.DidUpdateSettings, (data: SettingsMap) => {
+            // trigger update on the connection
+            this.connection?.trigger(PrototypeBuilderEvents.DidUpdateSettings, data);
         });
         // menu handlers
         this.panel.$content.find(".new-prototype").on("click", (evt: JQuery.ClickEvent) => {
@@ -364,6 +430,13 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
                     this.sideViews[j]?.hide();
                 }
                 this.sideViews[i]?.reveal();
+            });
+            this.centralViews[i].on(BuilderEvents.DidUpdateWidgets, (evt: DeleteWidgetEvent) => {
+                // send prototype data on the connection, so interested listeners can save the prototype if they use autosave
+                const data: PrototypeData = this.getPrototypeData();
+                // send information on the current prototype, so the user can choose to save the current prototype before creating the new prototype
+                console.log(`[prototype-builder] DidUpdateWidgets`, data);
+                this.connection?.trigger(PrototypeBuilderEvents.DidUpdateWidgets, data);
             });
             this.centralViews[i].on(BuilderEvents.DidCreateWidget, (evt: CreateWidgetEvent) => {
                 (<WidgetsListView> this.sideViews[i])?.refresh(evt?.widgets);
@@ -413,7 +486,9 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         this.centralViews?.Builder?.builderView();
         // this.widgetManager.stopTimers();
         this.expandSidePanel();
-        this.revealMenu();
+        this.revealBuilderMenu();
+        this.hideSimulatorMenu();
+        this.mode = "builder";
         this.connection?.trigger(PrototypeBuilderEvents.DidSwitchToBuilderView);
     }
 
@@ -424,7 +499,11 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         console.log(`[prototype-builder] SimulatorView`);
         this.centralViews?.Builder?.simulatorView();
         this.collapseSidePanel();
-        this.hideMenu();
+        this.revealSimulatorMenu();
+        this.hideBuilderMenu();
+        const widgets: WidgetsMap = this.centralViews?.Builder?.getWidgets();
+        this.centralViews?.Simulator?.importWidgets(widgets);
+        this.mode = "simulator";
         const settings: SettingsMap = this.centralViews?.Settings?.getCurrentSettings();
         this.connection?.trigger(PrototypeBuilderEvents.DidSwitchToSimulatorView, settings);
     }
@@ -485,22 +564,18 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
      */
     getPrototypeData (): PrototypeData {
         if (this.centralViews) {
-            const contextFolder: string = this.centralViews.Settings?.getValue(PVSioWebFileAttributes.contextFolder);
+            const contextFolder: string = this.centralViews.Settings?.getValue(SettingsAttributes.contextFolder);
+            const settings: SettingsMap = this.centralViews.Settings?.getCurrentSettings();
             const data: PrototypeData = {
                 version: 3.0,
-                contextFolder
-            }
-            for (let key in PVSioWebFileAttributes) {
-                const val: string = this.centralViews.Settings?.getValue(PVSioWebFileAttributes[key]);
-                if (val !== undefined) {
-                    data[key] = val;
-                }
-            }
-            data.pictureFile = this.centralViews?.Builder.getPictureFileName();
-            data.pictureWidth = this.centralViews?.Builder.getPictureWidth();
-            data.pictureHeight = this.centralViews?.Builder.getPictureHeight();
-            data.pictureData = this.centralViews?.Builder.getPictureData();
-            data.widgets = this.centralViews?.Builder.getWidgetsData();
+                contextFolder,
+                ...settings
+            };
+            data.pictureFile = this.centralViews?.Builder.getCurrentPictureFileName();
+            data.pictureWidth = this.centralViews?.Builder.getCurrentPictureWidth();
+            data.pictureHeight = this.centralViews?.Builder.getCurrentPictureHeight();
+            data.pictureData = this.centralViews?.Builder.getCurrentPictureData();
+            data.widgets = this.centralViews?.Builder.getCurrentWidgetsData();
             return data;
         }
         return null;

@@ -78,7 +78,7 @@ export const dialogTemplate: string = `
 <div class="modal fade show" id="{{dialogId}}" tabindex="-1" role="dialog" aria-labelledby="{{dialogId}}-title" aria-hidden="true" style="display:{{#if hidden}}none{{else}}block{{/if}};">
     <div class="modal-dialog-shadow" style="width:100%; height:100%; position:fixed; background: black; opacity: 0.8;"></div>
     <div class="modal-dialog modal-dialog-centered{{#if largeModal}} modal-lg{{/if}}" role="document">
-        <div class="modal-content" style="transform:scale(0.8); transform-origin:top left;">
+        <div class="modal-content" style="transform:scale(0.8); transform-origin:top;">
             <div class="modal-header">
                 <h5 class="modal-title tile" id="{{dialogId}}-title">{{title}}</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -189,7 +189,7 @@ export function createCollapsiblePanel (owner: PVSioWebPlugin, opt?: {
     top?: number
 }): CollapsiblePanel {
     opt = opt || {};
-    const parent: string = opt.parent ? `#${opt.parent}` : "body";
+    const parent: string = opt.parent && opt.parent !== "body" ? `#${opt.parent}` : "body";
     const pluginId: string = owner.getId() || "";
     const pluginName: string = owner.getName() || "";
     const width: string = opt.width || "100%";
@@ -236,22 +236,25 @@ export function enableResizeLeft (desc: ResizableLeftPanel, opt?: { initialWidth
     opt = opt || {};
     if (desc) {
         const min: number = 10;
-        const maxWidth: number = desc.$div.width();
-        let leftWidth: number = opt.initialWidth || maxWidth / 4;
+        // const initialWindowWidth: number = $(window).width();
+        const initialPanelWidth: number = desc.$div.width();
+        // const initialMaxWidth: number = initialPanelWidth < initialWindowWidth ? 
+        //         initialPanelWidth : initialWindowWidth;
+        const padding: number = parseFloat(desc.$resizeBar.css("width")) * 2;
+        let leftWidth: number = opt.initialWidth || initialPanelWidth / 4;
         const adjustPanels = (opt?: { leftWidth?: number }) => {
             opt = opt || {};
             opt.leftWidth = opt.leftWidth ||  desc.$left.width();
             const windowWidth: number = $(window).width();
             const panelWidth: number = desc.$div.width();
             const maxWidth: number = panelWidth < windowWidth ? panelWidth : windowWidth;
+            const rightWidth: number = maxWidth - leftWidth - 2 * padding;
             leftWidth = opt.leftWidth < min ? min 
                 : opt.leftWidth > maxWidth ? maxWidth
                 : opt.leftWidth;
-            const padding: number = parseFloat(desc.$resizeBar.css("width")) * 2;
-            desc.$left.css("width", leftWidth + padding);
+            desc.$left.css("width", leftWidth);
             desc.$central.css({
-                "width": maxWidth - leftWidth - 2 * padding,
-                "margin-right": padding
+                "width": rightWidth
             });
         }
         desc.$left.css("width", leftWidth);
@@ -293,7 +296,7 @@ export function enableResizeLeft (desc: ResizableLeftPanel, opt?: { initialWidth
                 adjustPanels({ leftWidth });
             }
         });
-        adjustPanels();
+        adjustPanels({ leftWidth });
     }
     return desc;
 }
@@ -379,6 +382,22 @@ export const dropdownMenuTemplate = `
     </div>
 </div>
 `;
+
+export interface InlineMenuData {
+    id: string,
+    name: string,
+    buttons: string[],
+    style?: string
+};
+export const inlineMenuTemplate = `
+<div class="mr-2 panel-menu">
+    {{#if style}}<style>{{style}}</style>{{/if}}
+    {{#each buttons}}
+        {{this}}
+    {{/each}}
+</div>
+`;
+
 
 /**
  * Key bindings
@@ -524,7 +543,8 @@ export const colors = {
     blue: "#007bff"
 };
 
-export enum PVSioWebFileAttributes {
+
+export enum SettingsAttributes {
     version = "version",
     mainFile = "mainFile",
     mainFunction = "mainFunction",
@@ -539,7 +559,6 @@ export enum PVSioWebFileAttributes {
     widgets = "widgets",
     contextFolder = "contextFolder"
 };
-
 export declare interface PVSioWebFile {
     version: 3.0,
     mainFile?: string, // name of the main file, including extension

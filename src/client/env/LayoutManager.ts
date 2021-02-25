@@ -14,10 +14,23 @@ const toolkitInterface: string = `
     </div>
 </div>
 <div id="warnings" class="warnings" style="display:none"><button type="button" id="dismissWarnings">Dismiss</button></div>
-<div id="content" class="center pvsioweb-content" style="position:absolute; height:28px; top:28px;">
-    <div class="container-fluid row no-gutters" style="padding:0;">
-        <div id="toolkit-body" class="container-fluid col no-gutters">
-        <!-- plugin panels go here -->
+<style>
+.pvsioweb-panel {
+    height:100%;
+    max-height:800px;
+}
+.toolkit-body {
+    height:100%;
+}
+.pvsioweb-content {
+    position:absolute;
+    top:28px;
+}
+</style>
+<div id="content" class="center pvsioweb-content">
+    <div class="container-fluid row no-gutters p-0 pvsioweb-panel">
+        <div id="toolkit-body" class="container-fluid col no-gutters toolkit-body">
+        <!-- plugin panels are rendered here -->
         </div>
         <div id="toolkit-plugin-list" class="container-fluid col-2 no-gutters" style="display:none;">
             <div id="plugins-group" class="plugins-group">
@@ -117,12 +130,26 @@ export class LayoutManager extends Backbone.Model {
     protected collapsed: boolean = false;
     protected parent: string;
 
-    constructor () {
+    /**
+     * Constructor
+     * @param opt Options
+     *  - autoStart (boolean): flag indicating whether the plugin should automatically run method activate
+     *  - version (string): pvsioweb version
+     *  - parent (string): id of the parent element in the DOM
+     */
+    constructor (opt?: { autoStart?: boolean, version?: string, parent?: string }) {
         super();
+        if (opt?.autoStart) {
+            this.activate(opt);
+        }
     }
 
-    async activate (opt?: { version?: string, parent?: string }): Promise<boolean> {
-        this.version = opt?.version || "";
+    /**
+     * Creates the layout and installs relevant event handlers
+     * @param opt 
+     */
+    activate (opt?: { version?: string, parent?: string }): boolean {
+        this.version = opt?.version || "3.0";
         this.parent = opt?.parent || "body";
         console.log(`Browser version: ${Utils.getVersion()}`);
         console.log(`Toolkit version: PVSio-web ${this.version}`);

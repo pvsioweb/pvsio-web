@@ -33,6 +33,10 @@ export interface TouchScreenOptions extends DisplayOptions, ButtonOptions { };
 export interface TouchScreenAttr extends DisplayAttr, ButtonAttr { };
 
 export class TouchScreenEVO extends ButtonEVO {
+    static readonly constructorName: string = "TouchScreenEVO";
+    getConstructorName (): string {
+        return TouchScreenEVO.constructorName;
+    }
 
     protected attr: TouchScreenAttr;
     

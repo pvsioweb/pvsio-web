@@ -6,6 +6,10 @@ export interface PushButtonOptions extends ButtonOptions {
 };
 
 export class SelectionButtonEVO extends ButtonEVO {
+    static readonly constructorName: string = "SelectionButtonEVO";
+    getConstructorName (): string {
+        return SelectionButtonEVO.constructorName;
+    }
 
     protected activeFlag: boolean = false; // false means disabled, true means enabled
 

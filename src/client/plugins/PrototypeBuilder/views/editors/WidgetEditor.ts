@@ -1,10 +1,11 @@
 import * as Backbone from 'backbone';
 import { createDialog, setDialogTitle, uuid } from '../../../../utils/pvsiowebUtils';
 import { Coords, CSS, WidgetEVO, WidgetAttr, BasicEventData, VizOptions, WidgetOptions, WidgetData } from '../../widgets/core/WidgetEVO';
-import { WidgetClassDescriptor, WidgetClassMap, widgetList } from '../../widgets/widgetList';
+import { WidgetClassDescriptor, WidgetClassMap } from '../../widgets/widgetClassMap';
 
 export interface WidgetEditorData extends Backbone.ViewOptions {
-    widgetData: WidgetData
+    widgetData: WidgetData,
+    widgetClassMap: WidgetClassMap
 };
 
 export const WidgetEditorEvents = {
@@ -73,9 +74,9 @@ const containerTemplate: string = `
             <div class="row">
                 <div id="{{kind}}-carousel" class="carousel slide col-md-6" data-interval="false">
                     <!-- carousel indicators -->
-                    <ol class="carousel-indicators">
+                    <ol class="carousel-indicators mx-0">
                         {{#each this}}
-                        <li data-target="#{{kind}}-carousel" kind="{{kind}}" cons="{{cons.name}}" data-slide-to="{{@index}}" {{#if @first}}class="active"{{/if}}></li>
+                        <li data-target="#{{kind}}-carousel" kind="{{kind}}" cons="{{cons.constructorName}}" data-slide-to="{{@index}}" {{#if @first}}class="active"{{/if}}></li>
                         {{/each}}
                     </ol>
                     <div class="carousel-inner">
@@ -83,15 +84,15 @@ const containerTemplate: string = `
                         {{#each this}}
                         <div class="carousel-item {{#if @first}}active{{/if}}">
                             <div style="width:60%; margin-left:20%;">
-                                <div id="{{cons.name}}-preview" class="widget-preview" style="min-width:200px; height:${previewHeight}px; position:relative; box-shadow:0px 0px 10px #666;">
-                                <!-- {{cons.name}}-preview -->
+                                <div id="{{cons.constructorName}}-preview" class="widget-preview" style="min-width:200px; height:${previewHeight}px; position:relative; box-shadow:0px 0px 10px #666;">
+                                <!-- {{cons.constructorName}}-preview -->
                                 </div>
-                                <div id="{{cons.name}}-evts" class="text-muted" style="min-width:200px; height:60px; overflow:auto; margin-top:8px;">
-                                <!-- {{cons.name}}-events -->
+                                <div id="{{cons.constructorName}}-evts" class="text-muted" style="min-width:200px; height:60px; overflow:auto; margin-top:8px;">
+                                <!-- {{cons.constructorName}}-events -->
                                 </div>
                                 <h5>{{this.label}}</h5>
-                                <small id="{{cons.name}}-desc" class="text-muted carousel-description">
-                                <!-- {{cons.name}}-description -->
+                                <small id="{{cons.constructorName}}-desc" class="text-muted carousel-description">
+                                <!-- {{cons.constructorName}}-description -->
                                 </small>
                             </div>
                         </div>
@@ -109,20 +110,20 @@ const containerTemplate: string = `
                 </div>
 
                 {{#each this}}
-                <div id="{{kind}}-{{cons.name}}" class="widget-attributes col-md-6 ml-auto" style="height:400px; overflow:auto; display:{{#if @first}}block{{else}}none{{/if}};">
+                <div id="{{kind}}-{{cons.constructorName}}" class="widget-attributes col-md-6 ml-auto" style="height:400px; overflow:auto; display:{{#if @first}}block{{else}}none{{/if}};">
                     <div class="widget-id input-group input-group-sm" style="display:none;">
                         <div class="input-group-prepend" style="min-width:40%;">
                             <span class="input-group-text" style="width:100%;">ID</span>
                         </div>
-                        <input type="text" class="form-control" value="{{../../id}}" placeholder="{{../../id}}" aria-label="{{../../id}}" aria-describedby="{{cons.name}}-id">
+                        <input type="text" class="form-control" value="{{../../id}}" placeholder="{{../../id}}" aria-label="{{../../id}}" aria-describedby="{{cons.constructorName}}-id">
                         <br>
                     </div>
                     
-                    <div id="{{cons.name}}-attr" class="widget-attr">
-                    <!-- {{cons.name}}-attributes -->
+                    <div id="{{cons.constructorName}}-attr" class="widget-attr">
+                    <!-- {{cons.constructorName}}-attributes -->
                     </div>
                     
-                    <div id="{{cons.name}}-coords" class="widget-coords" style="display:none;">
+                    <div id="{{cons.constructorName}}-coords" class="widget-coords" style="display:none;">
                         <br>
                         {{#each ../../coords}}
                         <div class="input-group input-group-sm">
@@ -134,9 +135,9 @@ const containerTemplate: string = `
                         {{/each}}
                     </div>
                     <br>
-                    <div id="{{cons.name}}-viz" class="widget-viz"></div>
+                    <div id="{{cons.constructorName}}-viz" class="widget-viz"></div>
                     <br>
-                    <div id="{{cons.name}}-css" class="widget-css"></div>
+                    <div id="{{cons.constructorName}}-css" class="widget-css"></div>
                 </div>
                 {{/each}}
             </div>
@@ -175,10 +176,17 @@ const attrTemplate: string = `
 export class WidgetEditor extends Backbone.View {
     protected mode: "create" | "edit"; // dialog modes
     protected widgetData: WidgetData;
+    protected widgetClassMap: WidgetClassMap;
     protected editorId: string = uuid();
 
+    /**
+     * Pointer to the editor dialog
+     */
     protected $dialog: JQuery<HTMLElement>;
 
+    /**
+     * Internal timer, used to update events generated by the widget samples
+     */
     protected timer: NodeJS.Timer;
 
     /**
@@ -188,6 +196,7 @@ export class WidgetEditor extends Backbone.View {
     constructor (data: WidgetEditorData) {
         super(data);
         this.widgetData = data?.widgetData;
+        this.widgetClassMap = data?.widgetClassMap || {};
         this.mode = "create";
     }
 
@@ -195,7 +204,7 @@ export class WidgetEditor extends Backbone.View {
      * Renders the editor dialog
      */
     renderView (): void {
-        this.render();
+        this.createHtmlContent();
         this.installHandlers();
     }
 
@@ -229,7 +238,7 @@ export class WidgetEditor extends Backbone.View {
     /**
      * Renders the dialog
      */
-    render (): WidgetEditor {
+    protected createHtmlContent (): WidgetEditor {
         const data: {
             editorId: string,
             widgets: WidgetClassMap,
@@ -237,7 +246,7 @@ export class WidgetEditor extends Backbone.View {
             coords: Coords
         } = {
             editorId: this.editorId,
-            widgets: widgetList,
+            widgets: this.widgetClassMap,
             id: this.widgetData?.id,
             coords: this.widgetData?.coords
         };
@@ -251,12 +260,13 @@ export class WidgetEditor extends Backbone.View {
         // const carouselControls: JQuery<HTMLElement> = $(`.carousel-control`);
         const width: number = +parseFloat($(".widget-preview").css("width")).toFixed(0);
         const height: number = +parseFloat($(".widget-preview").css("height")).toFixed(0);
-        for (let kind in widgetList) {
-            const widgetsDesc: WidgetClassDescriptor[] = widgetList[kind];
+        for (let kind in this.widgetClassMap) {
+            const widgetsDesc: WidgetClassDescriptor[] = this.widgetClassMap[kind];
             for (let i = 0; i < widgetsDesc.length; i++) {
-                if (widgetsDesc[i].cons?.name) {
+                console.log(`[widget-editor] loading widget`, widgetsDesc[i].cons?.constructorName, widgetsDesc[i].cons?.constructorName);
+                if (widgetsDesc[i].cons?.constructorName) {
                     // create widget preview
-                    const cons: string = widgetsDesc[i].cons.name;
+                    const cons: string = widgetsDesc[i].cons.constructorName;
                     const coords: Coords = { width, height };
                     const previewId: string = WidgetEVO.uuid();
                     const options: WidgetOptions = {
@@ -278,7 +288,8 @@ export class WidgetEditor extends Backbone.View {
                         const key: string = evt.currentTarget?.name;
                         if (key) {
                             const value: string = evt.currentTarget?.value;
-                            $(evt.currentTarget).attr("value", value);
+                            this.updateInput(key, value);
+                            // re-render sample
                             const style: CSS = {};
                             style[key] = value;
                             obj.setCSS(style);
@@ -303,10 +314,9 @@ export class WidgetEditor extends Backbone.View {
                         const key: string = evt.currentTarget?.name;
                         let attr: WidgetAttr = {};
                         if (key) {
-                            $(evt.currentTarget).attr("value", value);
-                            if (key === "keyCode") {
-                                // TODO: render appropriate controls to simplify keyboard key binding
-                            } else {
+                            this.updateInput(key, value);
+                            if (key !== "keyCode") {
+                                // re-render sample
                                 attr[key] = value;
                                 obj.setAttr(attr);
                                 obj.renderSample();
@@ -343,13 +353,13 @@ export class WidgetEditor extends Backbone.View {
             const kind: string = $(evt.currentTarget).attr("kind");
             if (kind) {
                 const idx: string = $(`#${kind}-carousel li.active`).attr("data-slide-to");
-                if (idx && +idx < widgetList[kind]?.length) {
+                if (idx && +idx < this.widgetClassMap[kind]?.length) {
                     const activeIndex: number = +idx;
                     const isNext: boolean = $(evt?.currentTarget).hasClass("carousel-control-next");
-                    const nextIndex: number = isNext ? (activeIndex + 1) % widgetList[kind]?.length
-                        : Math.abs((activeIndex - 1) % widgetList[kind]?.length);
-                    const activeName: string = widgetList[kind][activeIndex]?.cons?.name;
-                    const nextName: string = widgetList[kind][nextIndex]?.cons?.name;
+                    const nextIndex: number = isNext ? (activeIndex + 1) % this.widgetClassMap[kind]?.length
+                        : Math.abs((activeIndex - 1) % this.widgetClassMap[kind]?.length);
+                    const activeName: string = this.widgetClassMap[kind][activeIndex]?.cons?.constructorName;
+                    const nextName: string = this.widgetClassMap[kind][nextIndex]?.cons?.constructorName;
                     $(`#${kind}-${activeName}`).css({ display: "none" });
                     $(`#${kind}-${nextName}`).css({ display: "block" });
                 }
@@ -363,11 +373,11 @@ export class WidgetEditor extends Backbone.View {
             if (kind) {
                 const idx: string = $(`#${kind}-carousel li.active`).attr("data-slide-to");
                 const next: string = $(evt.currentTarget).attr("data-slide-to");
-                if (idx && next && +idx < widgetList[kind]?.length && +next < widgetList[kind]?.length) {
+                if (idx && next && +idx < this.widgetClassMap[kind]?.length && +next < this.widgetClassMap[kind]?.length) {
                     const activeIndex: number = +idx;
                     const nextIndex: number = +next;
-                    const activeName: string = widgetList[kind][activeIndex]?.cons?.name;
-                    const nextName: string = widgetList[kind][nextIndex]?.cons?.name;
+                    const activeName: string = this.widgetClassMap[kind][activeIndex]?.cons?.constructorName;
+                    const nextName: string = this.widgetClassMap[kind][nextIndex]?.cons?.constructorName;
                     $(`#${kind}-${activeName}`).css({ display: "none" });
                     $(`#${kind}-${nextName}`).css({ display: "block" });
                 }
@@ -380,16 +390,38 @@ export class WidgetEditor extends Backbone.View {
         return this;
     }
 
-    setWidgetId (name: string): void {
-        this.widgetData.id = name;
-        this.$dialog.find(".widget-id input").val(name);
+    /**
+     * Update the widget ID
+     * @param id widget ID
+     */
+    setWidgetId (id: string): void {
+        this.widgetData.id = id;
+        this.$dialog.find(".widget-id input").val(id);
         this.updateDialogTitle();
     }
 
-    protected updateDialogTitle (): void {
+    /**
+     * Update the title of the dialog
+     */
+    updateDialogTitle (): void {
         setDialogTitle("Editing " + this.widgetData.id)
     }
 
+    /**
+     * Programmatically update input for attribute id
+     * @param id name of the attributed
+     * @param value value to be assigned to the attribute
+     */
+    updateInput (id: string, value: string): void {
+        if (id) {
+            // update attributes on all tabs
+            this.$dialog.find(`input[name=${id}]`).attr("value", value);
+        }
+    }
+
+    /**
+     * Internal function for reading information from the edit dialog
+     */
     protected getDialogElement<T> (elem: string): T {
         const elems: JQuery<HTMLElement> = this.$dialog.find(`.active .widget-${elem} input`);
         let res = {};
@@ -402,7 +434,10 @@ export class WidgetEditor extends Backbone.View {
         }
         return <T> res;
     }
-    protected getDialogCoords (): Coords<number> {
+    /**
+     * Get widget coords specified in the input field of the edit dialog
+     */
+    getCurrentCoords (): Coords<number> {
         const coords: Coords = this.getDialogElement<Coords>("coords");
         const ans: Coords<number> = {};
         for (let i in coords) {
@@ -410,44 +445,68 @@ export class WidgetEditor extends Backbone.View {
         }
         return ans;
     }
-    protected getWidgetKind (): string {
+    /**
+     * Get widget kind specified in the input field of the edit dialog
+     */
+    getCurrentWidgetKind (): string {
         return this.$dialog.find(".widget-class.active").attr("kind");
     }
-    protected getDialogCSS (): CSS {
+    /**
+     * Get widget CSS specified in the input field of the edit dialog
+     */
+    getCurrentCSS (): CSS {
         return this.getDialogElement<CSS>("css");
     }
-    protected getDialogAttr (): WidgetAttr {
+    /**
+     * Get widget attributes specified in the input field of the edit dialog
+     */
+    getCurrentAttr (): WidgetAttr {
         return this.getDialogElement<WidgetAttr>("attr");
     }
-    protected getDialogViz (): VizOptions {
+    /**
+     * Get widget viz options specified in the input field of the edit dialog
+     */
+    getCurrentViz (): VizOptions {
         return this.getDialogElement<VizOptions>("viz");
     }
-    protected getDialogWidgetId (): string {
+    /**
+     * Get widget ID specified in the input field of the edit dialog
+     */
+    getCurrentWidgetId (): string {
         return this.$dialog.find(".widget-id input").attr("value");
     }
-    protected getDialogWidgetConstructor (): string {
-        const activeKind: string = this.getWidgetKind();
+    /**
+     * Get widget constructor specified in the input field of the edit dialog
+     */
+    getCurrentWidgetCons (): string {
+        const activeKind: string = this.getCurrentWidgetKind();
         const activeCons: string = $(`#${activeKind}-carousel`).find(`.carousel-indicators li.active`).attr("cons");
         return activeCons;
     }
-    protected getWidgetName (): string {
-        const attr: WidgetAttr = this.getDialogAttr();
+    /**
+     * Get widget name specified in the input field of the edit dialog
+     */
+    getCurrentWidgetName (): string {
+        // widget name is, by convention, the first attribute
+        const attr: WidgetAttr = this.getCurrentAttr();
         const keys: string[] = Object.keys(attr);
         return keys && keys.length ? attr[keys[0]] : "";
     }
-
+    /**
+     * Internal function, install event handlers
+     */
     protected installHandlers (): void {
         this.$dialog.find(".ok-btn").on("click", (evt: JQuery.ClickEvent) => {
             this.widgetData = {
-                cons: this.getDialogWidgetConstructor(),
-                name: this.getWidgetName(),
-                kind: this.getWidgetKind(),
-                id: this.getDialogWidgetId(),
-                coords: this.getDialogCoords(),
+                cons: this.getCurrentWidgetCons(),
+                name: this.getCurrentWidgetName(),
+                kind: this.getCurrentWidgetKind(),
+                id: this.getCurrentWidgetId(),
+                coords: this.getCurrentCoords(),
                 opt: {
-                    css: this.getDialogCSS(),
-                    viz: this.getDialogViz(),
-                    ...this.getDialogAttr()
+                    css: this.getCurrentCSS(),
+                    viz: this.getCurrentViz(),
+                    ...this.getCurrentAttr()
                 }
             };
             // console.log(this.widgetData);
@@ -467,5 +526,4 @@ export class WidgetEditor extends Backbone.View {
             this.setWidgetId(newName);
         });
     }
-
 }

@@ -15,8 +15,8 @@ export declare interface MouseEventHandlers {
 
 export declare interface Constructable<T> {
     new (...args: any) : T;
+    constructorName: string;
 }
 export declare interface PVSioWebPluginDescriptor {
-    cons: Constructable<PVSioWebPlugin>,
-    autoload?: boolean
+    cons: Constructable<PVSioWebPlugin>;
 }

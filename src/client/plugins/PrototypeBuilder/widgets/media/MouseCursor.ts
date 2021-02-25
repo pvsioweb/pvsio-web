@@ -51,6 +51,11 @@ LTExVDA0OjM4OjIzLTA3OjAwPoSR3gAAAABJRU5ErkJggg==" />
 `;
 
 export class MouseCursor extends WidgetEVO {
+    static readonly constructorName: string = "MouseCursor";
+    getConstructorName (): string {
+        return MouseCursor.constructorName;
+    }
+
     /**
      * @function <a name="MouseCursor">MouseCursor</a>
      * @description Constructor.

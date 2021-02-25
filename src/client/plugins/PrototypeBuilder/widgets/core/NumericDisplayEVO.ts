@@ -67,6 +67,11 @@ export interface NumericAttr extends DisplayAttr {
 };
 
 export class NumericDisplayEVO extends BasicDisplayEVO {
+    static readonly constructorName: string = "NumericDisplayEVO";
+    getConstructorName (): string {
+        return NumericDisplayEVO.constructorName;
+    }
+
     protected attr: NumericAttr;
 
     protected maxDecimalDigits: number;
@@ -285,7 +290,7 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
                 };
                 //  console.log(frac_style);
                 const dom = Handlebars.compile(digitsTemplate, { noEscape: true })({
-                    type: this.getConstructorName(),
+                    type: NumericDisplayEVO.constructorName,
                     whole: whole_style,
                     frac: frac_style,
                     point: point_style

@@ -1,11 +1,11 @@
 import * as Backbone from 'backbone';
-import { PVSioWebFileAttributes } from '../../../utils/pvsiowebUtils';
+import { SettingsAttributes } from '../../../utils/pvsiowebUtils';
 import { Connection } from '../../../env/Connection';
-import { CentralView, CentralViewOptions } from './CentralView';
+import { CentralView, CentralViewOptions, DELAYED_TRIGGER_TIMEOUT } from './CentralView';
 
 export declare type SettingsElemValue = string;
 export declare interface Settings {
-    id: PVSioWebFileAttributes,
+    id: SettingsAttributes,
     value: SettingsElemValue // initial value of the setting
 }
 export declare interface SettingsElem extends Settings {
@@ -20,6 +20,9 @@ export declare interface SettingsElemMap {
 }
 export interface SettingsViewOptions extends CentralViewOptions {
     settings?: SettingsElem[]
+}
+export enum SettingsEvents {
+    DidUpdateSettings = "DidUpdateSettings"
 }
 
 const settingsTemplate: string = `
@@ -46,17 +49,17 @@ const contentTemplate: string = `
 
 // keys need to be consistent with the fields declared in PVSioWebFile (see pvsioweb.d.ts)
 export const fileSettings: SettingsElem[] = [
-    { id: PVSioWebFileAttributes.mainFile, label: "Main File", value: "", placeholder: "" },
-    { id: PVSioWebFileAttributes.mainFunction, label: "Main Function", value: "", placeholder: "" },
-    { id: PVSioWebFileAttributes.contextFolder, label: "Context Folder", value: "", placeholder: "" }
+    { id: SettingsAttributes.mainFile, label: "Main File", value: "", placeholder: "" },
+    { id: SettingsAttributes.mainFunction, label: "Main Function", value: "", placeholder: "" },
+    { id: SettingsAttributes.contextFolder, label: "Context Folder", value: "", placeholder: "" }
 ];
 export const functionSettings: SettingsElem[] = [
-    { id: PVSioWebFileAttributes.initFunction, label: "Init Function", value: "init", placeholder: "" },
-    { id: PVSioWebFileAttributes.tickFunction, label: "Tick Function", value: "", placeholder: "" },
-    { id: PVSioWebFileAttributes.tickFrequency, label: "Tick Frequency", value: "1000ms", placeholder: "" }
+    { id: SettingsAttributes.initFunction, label: "Init Function", value: "init", placeholder: "" },
+    { id: SettingsAttributes.tickFunction, label: "Tick Function", value: "", placeholder: "" },
+    { id: SettingsAttributes.tickFrequency, label: "Tick Frequency", value: "1000ms", placeholder: "" }
 ];
 export const printerSettings: SettingsElem[] = [
-    { id: PVSioWebFileAttributes.jsonPrinter, label: "JSON Printer", value: "", placeholder: "" }
+    { id: SettingsAttributes.jsonPrinter, label: "JSON Printer", value: "", placeholder: "" }
 ];
 export const basicSettings: SettingsElem[] = fileSettings.concat(functionSettings).concat(printerSettings);
 
@@ -72,6 +75,11 @@ export class SettingsView extends CentralView {
      * Pointer to the DOM element with settings
      */
     protected $settings: JQuery<HTMLElement>;
+
+    /**
+     * Internal timer, used for delayed triggers
+     */
+    protected timer: NodeJS.Timer = null;
     
     /**
      * Constructor
@@ -107,7 +115,24 @@ export class SettingsView extends CentralView {
         const content: string = Handlebars.compile(contentTemplate, { noEscape: true })({ settings });
         await super.renderView({ ...this.viewOptions, content, label: `<i class="fa fa-cogs"></i>` });
         this.$settings = this.$el.find(`.settings`);
+        // install handlers
+        this.$settings.find("input").on("input", (evt: JQuery.ChangeEvent) => {
+            // use a dealyed trigger to avoid constant write operation on the file system
+            this.delayedTrigger(SettingsEvents.DidUpdateSettings);
+        });
         return this;
+    }
+
+    /**
+     * Internal function, reports settings updates on the connection bus after a delay
+     * @param evt 
+     */
+    protected delayedTrigger (evt: SettingsEvents.DidUpdateSettings): void {
+        clearTimeout(this.timer);
+        this.timer = setTimeout(() => {
+            const data: SettingsMap = this.getCurrentSettings();
+            this.trigger(SettingsEvents.DidUpdateSettings, data);
+        }, DELAYED_TRIGGER_TIMEOUT);
     }
 
     /**
@@ -127,7 +152,7 @@ export class SettingsView extends CentralView {
      * Get the current value of a given setting
      * @param name 
      */
-    getValue (id: PVSioWebFileAttributes): string {
+    getValue (id: SettingsAttributes): string {
         return <string> this.$settings?.find(`#${id} input`)?.val();
     }
 
@@ -138,10 +163,11 @@ export class SettingsView extends CentralView {
         const ans: SettingsMap = {};
         for (let key in this.settings) {
             const settings: Settings = this.settings[key];
-            ans[key] = {
-                id: settings.id,
-                value: this.getValue(settings.id)
-            };
+            const id: SettingsAttributes = settings.id;
+            const value: SettingsElemValue = this.getValue(id);
+            if (value !== undefined) {
+                ans[key] = { id, value };
+            }
         }
         return ans;
     }

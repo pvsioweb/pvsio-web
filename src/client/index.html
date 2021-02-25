@@ -20,13 +20,15 @@
 
     </head>
 <body>
-    <div id="pvsioweb"></div>
+    <div id="pvsio-web"></div>
     <script src="node_modules/jquery/dist/jquery.min.js"></script>
     <script src="node_modules/handlebars/dist/handlebars.min.js"></script>
     <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="node_modules/underscore/underscore-min.js"></script>
     <script src="node_modules/backbone/backbone-min.js"></script>
-    <script>const pvsioweb = {};</script>
-    <script src="node_modules/requirejs/require.js" data-main="index.js"></script>
+    <script src="pvsioweb.min.js"></script>
+    <script>
+        pvsioweb?.activate({ parent: "pvsio-web" });
+    </script>
 </body>
 </html>

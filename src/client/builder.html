@@ -20,13 +20,18 @@
 
     </head>
 <body>
-    <div id="pvsioweb" class="container-fluid p-0" style="position:absolute; top:0; left:0;"></div>
+    <div id="pvsio-web" class="container-fluid p-0" style="position:absolute; top:0; left:0;"></div>
     <script src="node_modules/jquery/dist/jquery.min.js"></script>
     <script src="node_modules/handlebars/dist/handlebars.min.js"></script>
     <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="node_modules/underscore/underscore-min.js"></script>
     <script src="node_modules/backbone/backbone-min.js"></script>
-    <script>const pvsioweb = {};</script>
-    <script src="node_modules/requirejs/require.js" data-main="builder.js"></script>
+    <!-- <script src="widgetLibDials.min.js"></script> -->
+    <script src="builder.min.js"></script>
+    <script>
+        builder?.activate({ parent: "pvsio-web" });
+        // the following line demonstrates how to import external widget libraries at run-time
+        // builder.widgetClassManager.importWidgetClassMap(widgetLibDials.dials);
+    </script>
 </body>
 </html>

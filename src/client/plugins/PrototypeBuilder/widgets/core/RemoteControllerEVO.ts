@@ -9,6 +9,11 @@
 import { Coords, WidgetEVO } from "./WidgetEVO";
 
 export class RemoteControllerEVO extends WidgetEVO {
+    static readonly constructorName: string = "RemoteControllerEVO";
+    getConstructorName (): string {
+        return RemoteControllerEVO.constructorName;
+    }
+
     protected ws: WebSocket;
     protected lastData;
     protected timer: NodeJS.Timer;

@@ -32,9 +32,17 @@ export enum opacity {
 };
 const tooltipDistance: number = 20; // px
 
+const hotspotNamePrefix: string = "hotspot_";
 
 // templates
 const markerOverlayTemplate: string = `
+<style>
+.marker.selected {
+    border: 2px solid yellow;
+    margin-top: 1px;
+    margin-left: 1px;
+}
+</style>
 <div class="marker-tooltip noselect" style="display:none; z-index:100; position:absolute; background-color:white; color:black; opacity:0.8; padding:2px 8px; border-radius:8px;">
     <div class="marker-tooltip-label" style="display:block; z-index:100;"></div>
 </div>
@@ -44,14 +52,14 @@ const markerOverlayTemplate: string = `
 const markerTemplate: string = `
 <div class="marker" coords=${JSON.stringify({ top: 0, left: 0, width: 0, height: 0 })} id="{{id}}" style="z-index:100; top:{{top}}px; left:{{left}}px; width:{{width}}px; height:{{height}}px; position:absolute;">
     <div class="shader" style="z-index:100; width:100%; height:100%; opacity:${opacity.LOW}; background:steelblue; position:absolute; border: 1px solid blue; cursor:pointer;"></div>
-    <div class="tl corner" style="z-index:100; width:10px; height:10px; top:0px; left:0px; position:absolute; cursor:nwse-resize; margin-left:-4px; margin-top:-4px; border: 1px solid blue; opacity:${opacity.NORMAL};"></div>
-    <div class="bl corner" style="z-index:100; width:10px; height:10px; top:100%; left:0px; position:absolute; cursor:nesw-resize; margin-left:-4px; margin-top:-6px; border: 1px solid blue; opacity:${opacity.NORMAL};"></div>
-    <div class="br corner" style="z-index:100; width:10px; height:10px; top:100%; left:100%; position:absolute; cursor:nwse-resize; margin-left:-6px; margin-top:-6px; border: 1px solid blue; opacity:${opacity.NORMAL};"></div>
-    <div class="tr corner" style="z-index:100; width:10px; height:10px; top:0px; left:100%; position:absolute; cursor:nesw-resize; margin-left:-6px; margin-top:-4px; border: 1px solid blue; opacity:${opacity.NORMAL};"></div>
-    <div class="l corner" style="z-index:100; width:10px; height:10px; top:50%; left:0px; position:absolute; cursor:ew-resize; margin-left:-4px; margin-top:-5px; border: 1px solid blue; opacity:${opacity.NORMAL};"></div>
-    <div class="r corner" style="z-index:100; width:10px; height:10px; top:50%; left:100%; position:absolute; cursor:ew-resize; margin-left:-6px; margin-top:-5px; border: 1px solid blue; opacity:${opacity.NORMAL};"></div>
-    <div class="b corner" style="z-index:100; width:10px; height:10px; top:100%; left:50%; position:absolute; cursor:ns-resize; margin-left:-5px; margin-top:-5px; border: 1px solid blue; opacity:${opacity.NORMAL};"></div>
-    <div class="t corner" style="z-index:100; width:10px; height:10px; top:0%; left:50%; position:absolute; cursor:ns-resize; margin-left:-5px; margin-top:-4px; border: 1px solid blue; opacity:${opacity.NORMAL};"></div>
+    <div class="tl corner" style="z-index:100; width:10px; height:10px; top:0px; left:0px; position:absolute; cursor:nwse-resize; margin-left:-7px; margin-top:-7px; border: 1px solid blue; opacity:${opacity.HIGH};"></div>
+    <div class="bl corner" style="z-index:100; width:10px; height:10px; top:100%; left:0px; position:absolute; cursor:nesw-resize; margin-left:-7px; margin-top:-3px; border: 1px solid blue; opacity:${opacity.HIGH};"></div>
+    <div class="br corner" style="z-index:100; width:10px; height:10px; top:100%; left:100%; position:absolute; cursor:nwse-resize; margin-left:-3px; margin-top:-3px; border: 1px solid blue; opacity:${opacity.HIGH};"></div>
+    <div class="tr corner" style="z-index:100; width:10px; height:10px; top:0px; left:100%; position:absolute; cursor:nesw-resize; margin-left:-3px; margin-top:-7px; border: 1px solid blue; opacity:${opacity.HIGH};"></div>
+    <div class="l corner" style="z-index:100; width:10px; height:10px; top:50%; left:0px; position:absolute; cursor:ew-resize; margin-left:-7px; margin-top:-5px; border: 1px solid blue; opacity:${opacity.HIGH};"></div>
+    <div class="r corner" style="z-index:100; width:10px; height:10px; top:50%; left:100%; position:absolute; cursor:ew-resize; margin-left:-3px; margin-top:-5px; border: 1px solid blue; opacity:${opacity.HIGH};"></div>
+    <div class="b corner" style="z-index:100; width:10px; height:10px; top:100%; left:50%; position:absolute; cursor:ns-resize; margin-left:-5px; margin-top:-2px; border: 1px solid blue; opacity:${opacity.HIGH};"></div>
+    <div class="t corner" style="z-index:100; width:10px; height:10px; top:0%; left:50%; position:absolute; cursor:ns-resize; margin-left:-5px; margin-top:-7px; border: 1px solid blue; opacity:${opacity.HIGH};"></div>
 </div>
 `;
 
@@ -348,7 +356,7 @@ export class HotspotEditor extends Backbone.View {
 
     renderView (): void {
         this.$overlay = $(this.data.overlay);
-        this.render(this.data);
+        this.createHtmlContent(this.data);
         this.$tooltip = this.$overlay.find(".marker-tooltip");
         this.$builderCoords = $(this.data.builderCoords);
 
@@ -387,7 +395,7 @@ export class HotspotEditor extends Backbone.View {
         const coords: string = this.hotspots[id]?.$marker.attr("coords") || null;
         return JSON.parse(coords);
     }
-    render (data?: HotspotEditorData): HotspotEditor {
+    protected createHtmlContent (data?: HotspotEditorData): HotspotEditor {
         data = data || this.data;
         const content: string = Handlebars.compile(markerOverlayTemplate)({});
         const parent: HTMLElement = data?.overlay || $("body")[0];
@@ -434,7 +442,7 @@ export class HotspotEditor extends Backbone.View {
         const width: number = Math.abs(this.anchorCoords?.left - mousePosition?.left);
         const height: number = Math.abs(this.anchorCoords?.top - mousePosition?.top);
         if (!this.$marker) {
-            const id: string = `marker_${Utils.uuid()}`;
+            const id: string = `${hotspotNamePrefix}${Utils.uuid()}`;
             const marker: string = Handlebars.compile(markerTemplate)({
                 id,
                 top: mousePosition.top,//pageY,
@@ -648,7 +656,7 @@ export class HotspotEditor extends Backbone.View {
      * @param opt 
      */
     createHotspot (data: HotspotData, opt?: { useFreshId?: boolean }): HotspotData {
-        const id: string = opt?.useFreshId ? `marker_${Utils.uuid()}` : data?.id;
+        const id: string = opt?.useFreshId ? `${hotspotNamePrefix}${Utils.uuid()}` : data?.id;
         const hotspotData: HotspotData = {
             ...data, id
         };
@@ -938,13 +946,13 @@ export class HotspotEditor extends Backbone.View {
     highlightHotspot (data: { id: string }): void {
         if (data?.id) {
             const $el: JQuery<HTMLElement> = this.$overlay.find(`#${data.id}`);
-            const color: string = $el.hasClass("selected") ? Utils.colors.blue : "gray";
+            const color: string = $el.hasClass("selected") ? "yellow" : "gray";
             // put marker under the cursor on top of the other markers
             this.clearHighlight();
             $el.css("z-index", zIndex.FRONT);
             // increase visibility of the marker under the cursor
             $el.find(".shader").css({ border: `1px solid ${color}`});
-            $el.find(".corner").css({ border: `1px solid ${color}`});
+            $el.find(".corner").css({ border: `1px solid ${Utils.colors.blue}`});
             $el.css({ "box-shadow": `${color} 0px 0px 8px` });
         }
     }

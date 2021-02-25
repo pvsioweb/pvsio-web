@@ -3,7 +3,7 @@
 
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>PVSio-Web Prototype Builder</title>
+        <title>PVSio-Web Interactive Prototype Builder</title>
         <link type="image/x-icon" rel="icon" href="pvsioweb.ico">
         <link type="image/x-icon" rel="shortcut icon" href="pvsioweb.ico">
         <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -14,37 +14,19 @@
         <link href="node_modules/codemirror/addon/hint/show-hint.css" rel="stylesheet">
         <link href="node_modules/codemirror/addon/dialog/dialog.css" rel="stylesheet">
         <link href="node_modules/font-awesome/css/font-awesome.min.css" rel="stylesheet">
-        <!-- <link href="css/pvsio-web.css" rel="stylesheet">
+        <link href="css/pvsio-web.css" rel="stylesheet">
         <link href="css/style.css" rel="stylesheet">
-        <link href="app/plugins/graphbuilder/graph.css" rel="stylesheet"> -->
+        <link href="app/plugins/graphbuilder/graph.css" rel="stylesheet">
+
     </head>
 <body>
-    <div id="pvsioweb" class="container-fluid p-0" style="position:absolute; top:0; left:0;"></div>
+    <div id="pvsio-web"></div>
     <script src="node_modules/jquery/dist/jquery.min.js"></script>
     <script src="node_modules/handlebars/dist/handlebars.min.js"></script>
     <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="node_modules/underscore/underscore-min.js"></script>
     <script src="node_modules/backbone/backbone-min.js"></script>
-    <script>
-        // FIXME: need to understand how to export a global variable 'pvsioweb' in webpack
-        const pvsioweb = {};
-    </script>
-    <script src="prototype-builder.min.js"></script>
-    <script>
-        const settings = [
-            { id: "mainFile", label: "Main File", value: "" },
-            { id: "contextFolder", label: "Context Folder", value: "" },
-            { id: "theoryName", label: "Theory", value: "" },
-            { id: "initFunction", label: "Init Function", value: "" },
-            { id: "tickFunction", label: "Tick Function", value: "" },
-            { id: "tickFrequency", label: "Tick Frequency", value: "250ms" },
-            { id: "jsonPrinter", label: "JSON Printer", value: "" }
-        ];
-        pvsioweb["Prototype Builder"].activate({ parent: "pvsioweb", settings });
-        // test
-        pvsioweb["Prototype Builder"].connection.on("SavePrototype", (data) => {
-            console.log(`Received SavePrototype request`);
-        });
-    </script>
+    <!-- <script src="widgetLibDials.min.js"></script> -->
+    <script src="node_modules/requirejs/require.js" data-main="devel.js"></script>
 </body>
 </html>
