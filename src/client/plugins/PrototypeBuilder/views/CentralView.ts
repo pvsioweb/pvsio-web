@@ -25,6 +25,10 @@ export const CentralViewEvents = {
 
 const headerTemplate: string = `
 <style>
+.nav-item {
+    z-index:1;
+    position:relative;
+}
 .nav-link {
     white-space:nowrap;
 }

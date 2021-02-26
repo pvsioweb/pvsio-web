@@ -39,7 +39,7 @@
  *
  */
 
-import { Coords, BasicEvent, WidgetEVO, WidgetOptions, WidgetAttr, CSS, BasicEventData } from "./WidgetEVO";
+import { Coords, BasicEvent, WidgetEVO, WidgetOptions, WidgetAttr, CSS, BasicEventData, MatchState } from "./WidgetEVO";
 import { Timer } from "../../../../util/Timer"
 // import { ActionsQueue, ActionCallback } from "../../ActionsQueue";
 import { Connection, PVSioWebCallBack, SendCommandToken } from "../../../../env/Connection";
@@ -360,25 +360,30 @@ export class ButtonEVO extends WidgetEVO {
      * @instance
      */
     render (state?: string | number | {}, opt?: CSS): void {
+        opt = opt || {};
+        console.log(`[ButtonEVO] rendering state`, state);
+        // create the html element
         super.render();
-        // set style
+        // update style
+        this.updateDisplayStyle(opt);
+        // reveal the widget
+        this.reveal();
+
+        // a fixed label is rendered if any is specified
+        if (this.attr?.customLabel) {
+            this.$base.html(this.attr.customLabel);
+        }
+    }
+
+    /**
+     * Internal function, updates the display style
+     * @param opt 
+     */
+    protected updateDisplayStyle (opt?: CSS): void {
         opt = opt || {};
         this.setCSS({ ...this.css, ...opt });
-
         // set line height so text is vertically centered
         this.$base.css("line-height", `${this.lineHeight}px`);
-
-        // render content
-        state = (state === undefined || state === null) ? "" : state;
-
-        // a fixed label is shown if any is specified, otherwise the provided value is displayed
-        if (this.attr.customLabel || typeof state === "string" || typeof state === "number") {
-            const label: string = this.attr.customLabel || `${state}`;
-            this.$base.html(label);
-            this.reveal();
-        } else {
-            this.hide();
-        }
     }
 
     /**

@@ -10,7 +10,7 @@ import * as utils from '../../../utils/pvsiowebUtils';
 import * as fsUtils from '../../../utils/fsUtils';
 import { CentralViewOptions } from "./CentralView";
 
-const toolbarHeight: number = 36; //px
+const vspace: number = 36; //px
 
 export enum BuilderEvents {
     DidCreateWidget = "DidCreateWidget",
@@ -96,11 +96,16 @@ export interface PictureSize {
     width: number,
     height: number
 }
-export type PictureInfo = Picture & PictureSize;
+export type PictureData = Picture & PictureSize;
 
 export type WidgetsData = WidgetData[];
 export interface BuilderViewOptions extends CentralViewOptions {
     widgetClassMap: WidgetClassMap
+};
+
+export interface DidChangePictureEventData {
+    new: Picture,
+    old: Picture
 };
 
 export class BuilderView extends CentralView {    
@@ -238,7 +243,7 @@ export class BuilderView extends CentralView {
     resizeView (coords?: Coords): void {
         super.resizeView({
             width: parseFloat(this.$imageDiv.css("width")),
-            height: parseFloat(this.$imageDiv.css("height")) + 1.2 * parseFloat(this.$toolbar.css("height"))
+            height: parseFloat(this.$imageDiv.css("height")) + vspace
         });
     }
 
@@ -598,11 +603,11 @@ export class BuilderView extends CentralView {
     /**
      * Uses a whiteboard as prototype picture
      */
-    async createWhiteboard (): Promise<PictureInfo> {
+    async createWhiteboard (): Promise<PictureData> {
         const size: PictureSize = this.defaultPanelSize;
         return await this.loadPicture({
-            fileName: "whiteboard",
-            fileExtension: ".gif",
+            fileName: "",
+            fileExtension: "",
             fileContent: utils.transparentGif
         }, {
             ...size,
@@ -631,7 +636,7 @@ export class BuilderView extends CentralView {
      */
     getActivePictureSize (): { width: number, height: number } {
         const width: number = parseFloat($(`.prototype-screens .tab-pane.active .prototype-image`).css("width")) || window.innerWidth;
-        const height: number = parseFloat($(`.prototype-screens .tab-pane.active .prototype-image`).css("height")) || (window.innerHeight - toolbarHeight);
+        const height: number = parseFloat($(`.prototype-screens .tab-pane.active .prototype-image`).css("height")) || (window.innerHeight - vspace);
         return {
             width: Math.min(width, MIN_WIDTH),
             height: Math.min(height, MIN_HEIGHT)
@@ -642,7 +647,7 @@ export class BuilderView extends CentralView {
      * Returns the size of the central panel
      */
     getActivePanelSize (): PictureSize {
-        const margin: number = 1.5 * toolbarHeight;
+        const margin: number = 1.5 * vspace;
         const width: number = parseFloat($(`.prototype-screens`).css("width")) || window.innerWidth || MIN_WIDTH;
         const height: number = parseFloat($(`.prototype-screens .tab-pane.active`).css("height")) || window.innerHeight || MIN_HEIGHT;
         return {
@@ -656,7 +661,7 @@ export class BuilderView extends CentralView {
      * @param desc 
      * @param opt 
      */
-    async loadPicture (desc: Picture, opt?: PictureOptions): Promise<PictureInfo> {
+    async loadPicture (desc: Picture, opt?: PictureOptions): Promise<PictureData> {
         if (desc && desc.fileName && desc.fileContent && desc.fileExtension) {
             opt = opt || {};
             const $imageDiv: JQuery<HTMLElement> = opt.$el || this.$imageDiv;
@@ -684,7 +689,7 @@ export class BuilderView extends CentralView {
                         // resize view
                         this.resizeView();
                         // return the picture data
-                        const pictureData: PictureInfo = {
+                        const pictureData: PictureData = {
                             fileName: desc.fileName,
                             fileExtension: desc.fileExtension,
                             fileContent,
@@ -704,10 +709,10 @@ export class BuilderView extends CentralView {
     }
 
     /**
-     * Internal function, handles clicks on change-picture-btn
+     * Handles clicks on change-picture-btn
      * @param evt 
      */
-    protected async onChangePicture (evt: JQuery.ChangeEvent): Promise<PictureInfo> {
+    async onDidChangePicture (evt: JQuery.ChangeEvent): Promise<PictureData> {
         if (evt) {
             // close all dropdown menus
             $(".dropdown-menu").removeClass("show");
@@ -725,9 +730,10 @@ export class BuilderView extends CentralView {
                                 fileExtension: fsUtils.getFileExtension(file.name),
                                 fileContent
                             };
-                            const pictureData: PictureInfo = await this.loadPicture(newPicture);
+                            const pictureData: PictureData = await this.loadPicture(newPicture);
                             resolve(pictureData);
-                            this.connection?.trigger(BuilderEvents.DidChangePicture, { old: oldPicture, new: newPicture });
+                            const data: DidChangePictureEventData = { old: oldPicture, new: newPicture }
+                            this.trigger(BuilderEvents.DidChangePicture, data);
                         } else {
                             resolve(null);
                         }
@@ -744,12 +750,5 @@ export class BuilderView extends CentralView {
      * Internal function, install event handlers
      */
     protected installHandlers (): void {
-        $(document).find(".remove-picture-btn").on("click", async (evt: JQuery.ClickEvent) => {
-            await this.createWhiteboard();
-        });
-        $(document).find(".change-picture-btn").on("input", async (evt: JQuery.ChangeEvent) => {
-            await this.onChangePicture(evt);
-        });
-
     }
 }

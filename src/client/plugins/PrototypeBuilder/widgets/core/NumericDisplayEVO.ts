@@ -31,7 +31,7 @@
  */
 
 import { BasicDisplayEVO, DisplayAttr, DisplayOptions } from './BasicDisplayEVO';
-import { Coords, WidgetAttr, CSS, Renderable } from './WidgetEVO';
+import { Coords, WidgetAttr, CSS, Renderable, MatchState } from './WidgetEVO';
 
 const selectedFontSize = 1.076; // ratio selectedFont/normalFont for integer digits
 
@@ -64,6 +64,17 @@ export interface NumericCSS extends CSS {
 
 export interface NumericAttr extends DisplayAttr {
     cursorName: string
+};
+
+interface NumericDisplayData {
+    whole: { val: string, selected: boolean, "font-size": number }[], 
+    frac: { val: string, selected: boolean, "font-size": number }[],
+    point: boolean,
+    whole_zeropadding: { val: string, selected: boolean, "font-size": number }[], 
+    frac_zeropadding: { val: string, selected: boolean, "font-size": number }[],
+    max_integer_digits: number,
+    max_decimal_digits: number,
+    cursorPos: number      
 };
 
 export class NumericDisplayEVO extends BasicDisplayEVO {
@@ -168,138 +179,166 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
      * @instance
      */
     render (state?: Renderable, opt?: NumericCSS): void {
+        opt = opt || {};
+        console.log(`[NumericDisplay] rendering state`, state);
+        // create the html element
         super.render();
-        if (state !== null && state !== undefined) {
-            // set style
-            this.setCSS({ ...this.css, ...opt }); // opt overrides this.css
-            const matchBorder: RegExpMatchArray = opt?.css && opt.css["border"] ? /\d+px/.exec(opt.css["border"]) : null;
-            let borderWidth: number = opt["border-width"] ? parseFloat(`${opt["border-width"]}`)
-                : matchBorder ? parseFloat(matchBorder[0]) 
-                    : 0;    
-            borderWidth = isNaN(borderWidth) ? 0 : borderWidth;
+        // update style
+        const borderWidth: number = this.updateDisplayStyle(opt);
+        // reveal the widget
+        this.reveal();
+        // render the content if state is non-null
+        if (state) {
+            // check if the state contains a field named after the widget
+            if (this.matchStateFlag) {
+                if (typeof state === "string") {
 
-            // set content
-            if (typeof state === "string" || typeof state === "number") {
-                const val: string = `${state}`;
-                state = {};
-                state[this.attr.displayName] = val;
-            }
-            if (typeof state === "object" && this.evalViz(state)) {
-                const disp: string = this.evaluate(this.attr.displayName, state);
-                let parts: string[] = disp.split(".");
-
-                const desc: {
-                    whole: { val: string, selected: boolean, "font-size": number }[], 
-                    frac: { val: string, selected: boolean, "font-size": number }[],
-                    point: boolean,
-                    whole_zeropadding: { val: string, selected: boolean, "font-size": number }[], 
-                    frac_zeropadding: { val: string, selected: boolean, "font-size": number }[],
-                    max_integer_digits: number,
-                    max_decimal_digits: number,
-                    cursorPos: number      
-                } = {
-                    whole: [], 
-                    frac: [],
-                    point: (disp.indexOf(".") >= 0),
-                    whole_zeropadding: [],
-                    frac_zeropadding: [],
-                    max_integer_digits: this.maxIntegerDigits,
-                    max_decimal_digits: this.maxDecimalDigits,
-                    cursorPos: 0
-                };
-                const fontSize: number = parseFloat(`${this.css["font-size"]}`);
-                desc.whole = parts[0].split("").map((d: string, index: number) => {
-                    return { 
-                        val: d, 
-                        selected: false, 
-                        "font-size": fontSize,
-                        "margin-left": index * this.letterSpacing
+                    const data: NumericDisplayData = {
+                        whole: [], 
+                        frac: [],
+                        point: (state.indexOf(".") >= 0),
+                        whole_zeropadding: [],
+                        frac_zeropadding: [],
+                        max_integer_digits: this.maxIntegerDigits,
+                        max_decimal_digits: this.maxDecimalDigits,
+                        cursorPos: 0
                     };
-                });
-                if (parts.length > 1) {
-                    const decimalFontSize: number = parseFloat(`${this.css["decimal-font-size"]}`);
-                    desc.frac = parts[1].split("").map((d: string, index: number) => {
-                        return { 
-                            val: d, 
-                            selected: false, 
-                            "font-size": decimalFontSize,
-                            "margin-left": index * this.letterSpacing
-                        };
-                    });
-                }
-                const cursorName: string = <string> opt.cursorName || this.attr.cursorName;
-                desc.cursorPos = parseInt(this.evaluate(cursorName, state));
-                if (!isNaN(desc.cursorPos)) {
-                    if (desc.cursorPos >= 0) {
-                        if (desc.cursorPos < desc.whole.length) {
-                            desc.whole[desc.whole.length - 1 - desc.cursorPos].selected = true;
-                            desc.whole[desc.whole.length - 1 - desc.cursorPos]["font-size"] *= selectedFontSize;
-                        } else { // introduce leading zeros
-                            desc.whole_zeropadding = new Array(desc.cursorPos - (desc.whole.length - 1)).fill({
-                                val: "0", selected: false, "font-size": parseFloat(`${this.css["font-size"]}`)
-                            });
-                            desc.whole_zeropadding[0] = {
-                                val: "0", selected: true, "font-size": parseFloat(`${this.css["font-size"]}`) * selectedFontSize
-                            };
-                        }
-                    } else if (desc.cursorPos < 0) {
-                        if (-(desc.cursorPos + 1) < desc.frac.length) {
-                            desc.frac[-(desc.cursorPos + 1)].selected = true;
-                        } else { // introduce trailing zeros and the decimal point
-                            desc.frac_zeropadding = new Array(-desc.cursorPos - desc.frac.length).fill({
-                                val: "0", selected: false, "font-size": parseFloat(`${this.css["decimal-font-size"]}`)
-                            });
-                            desc.frac_zeropadding[desc.frac_zeropadding.length - 1] = {
-                                val: "0", selected: true, "font-size": parseFloat(`${this.css["decimal-font-size"]}`)
-                            };
-                            desc.point = true;
-                        }
+            
+                    const dispName: string = this.attr.displayName;
+                    const matchDisp: MatchState = this.matchState(state, dispName);
+                    if (matchDisp) {
+                        // update display data
+                        this.updateDisplayData(data, matchDisp.val);
                     }
+
+                    const cursName: string = <string> opt.cursorName || this.attr.cursorName;
+                    const matchCurs: MatchState = this.matchState(state, cursName);
+                    if (matchDisp) {
+                        // update cursor data
+                        this.updateCursorData(data, matchCurs.val);
+                    }
+
+                    // render data
+                    this.renderData(data, borderWidth);
                 }
-                //  console.log(desc);
-                const point_style = {
-                    left: ((desc.max_integer_digits) * this.letterSpacing + (this.decimalPointOffset)).toFixed(2),
-                    width: (this.letterSpacing / 2).toFixed(2),
-                    height: this.height - 2 * borderWidth,
-                    "margin-left": (-this.letterSpacing / 32).toFixed(2),
-                    "font-size": parseFloat(`${this.css["decimal-font-size"]}`).toFixed(2),
-                    viz: desc.point
+            } else {
+                // render string or number
+                this.$base.html(`${state}`);
+            }   
+        }
+    }
+
+    protected updateDisplayData (data: NumericDisplayData, val: string): void {
+        let parts: string[] = val.split(".");
+
+        const fontSize: number = parseFloat(`${this.css["font-size"]}`);
+        data.whole = parts[0].split("").map((d: string, index: number) => {
+            return { 
+                val: d, 
+                selected: false, 
+                "font-size": fontSize,
+                "margin-left": index * this.letterSpacing
+            };
+        });
+        if (parts.length > 1) {
+            const decimalFontSize: number = parseFloat(`${this.css["decimal-font-size"]}`);
+            data.frac = parts[1].split("").map((d: string, index: number) => {
+                return { 
+                    val: d, 
+                    selected: false, 
+                    "font-size": decimalFontSize,
+                    "margin-left": index * this.letterSpacing
                 };
-                const whole_style = {
-                    digits: desc.whole_zeropadding.concat(desc.whole),
-                    width: (desc.max_integer_digits) * this.letterSpacing,
-                    height: this.height - 2 * borderWidth,
-                    "margin-top": `${-borderWidth}px`,
-                    left: parseFloat(point_style.left) - parseFloat(point_style.width),
-                    "letter-spacing": this.letterSpacing.toFixed(2),
-                    color: this.css.color,
-                    "background-color": this.css["background-color"],
-                    "margin-left": ((desc.max_integer_digits - desc.whole.length - desc.whole_zeropadding.length) * this.letterSpacing).toFixed(2)
-                };
-                const frac_digits: { val: string, selected: boolean, "font-size": number }[] = desc.frac.concat(desc.frac_zeropadding);
-                const frac_style = {
-                    digits: frac_digits,
-                    width: ((desc.max_decimal_digits) * parseFloat(`${this.css["decimal-letter-spacing"]}`)).toFixed(2),
-                    height: this.height - 2 * borderWidth,
-                    "margin-top": `${-(borderWidth / 2)}px`,
-                    left: (parseFloat(point_style.left) + parseFloat(point_style.width)).toFixed(2),
-                    "letter-spacing": parseFloat(`${this.css["decimal-letter-spacing"]}`).toFixed(2),
-                    color: this.css.color,
-                    "background-color": this.css["background-color"],
-                    viz: (frac_digits.length > 0)
-                };
-                //  console.log(frac_style);
-                const dom = Handlebars.compile(digitsTemplate, { noEscape: true })({
-                    type: NumericDisplayEVO.constructorName,
-                    whole: whole_style,
-                    frac: frac_style,
-                    point: point_style
-                });
-                this.$base.empty();
-                this.$base.append(dom).css("line-height", `${this.height}px`);
+            });
+        }
+    }
+
+    protected updateCursorData (data: NumericDisplayData, val: string): void {
+        const cursorPos: number = parseInt(val);
+        if (!isNaN(cursorPos)) {
+            if (data.cursorPos >= 0) {
+                if (data.cursorPos < data.whole.length) {
+                    data.whole[data.whole.length - 1 - data.cursorPos].selected = true;
+                    data.whole[data.whole.length - 1 - data.cursorPos]["font-size"] *= selectedFontSize;
+                } else { // introduce leading zeros
+                    data.whole_zeropadding = new Array(data.cursorPos - (data.whole.length - 1)).fill({
+                        val: "0", selected: false, "font-size": parseFloat(`${this.css["font-size"]}`)
+                    });
+                    data.whole_zeropadding[0] = {
+                        val: "0", selected: true, "font-size": parseFloat(`${this.css["font-size"]}`) * selectedFontSize
+                    };
+                }
+            } else if (data.cursorPos < 0) {
+                if (-(data.cursorPos + 1) < data.frac.length) {
+                    data.frac[-(data.cursorPos + 1)].selected = true;
+                } else { // introduce trailing zeros and the decimal point
+                    data.frac_zeropadding = new Array(-data.cursorPos - data.frac.length).fill({
+                        val: "0", selected: false, "font-size": parseFloat(`${this.css["decimal-font-size"]}`)
+                    });
+                    data.frac_zeropadding[data.frac_zeropadding.length - 1] = {
+                        val: "0", selected: true, "font-size": parseFloat(`${this.css["decimal-font-size"]}`)
+                    };
+                    data.point = true;
+                }
             }
         }
-        this.reveal();
+    }
+
+    protected renderData (data: NumericDisplayData, borderWidth: number): void {
+        const point_style = {
+            left: ((data.max_integer_digits) * this.letterSpacing + (this.decimalPointOffset)).toFixed(2),
+            width: (this.letterSpacing / 2).toFixed(2),
+            height: this.height - 2 * borderWidth,
+            "margin-left": (-this.letterSpacing / 32).toFixed(2),
+            "font-size": parseFloat(`${this.css["decimal-font-size"]}`).toFixed(2),
+            viz: data.point
+        };
+        const whole_style = {
+            digits: data.whole_zeropadding.concat(data.whole),
+            width: (data.max_integer_digits) * this.letterSpacing,
+            height: this.height - 2 * borderWidth,
+            "margin-top": `${-borderWidth}px`,
+            left: parseFloat(point_style.left) - parseFloat(point_style.width),
+            "letter-spacing": this.letterSpacing.toFixed(2),
+            color: this.css.color,
+            "background-color": this.css["background-color"],
+            "margin-left": ((data.max_integer_digits - data.whole.length - data.whole_zeropadding.length) * this.letterSpacing).toFixed(2)
+        };
+        const frac_digits: { val: string, selected: boolean, "font-size": number }[] = data.frac.concat(data.frac_zeropadding);
+        const frac_style = {
+            digits: frac_digits,
+            width: ((data.max_decimal_digits) * parseFloat(`${this.css["decimal-letter-spacing"]}`)).toFixed(2),
+            height: this.height - 2 * borderWidth,
+            "margin-top": `${-(borderWidth / 2)}px`,
+            left: (parseFloat(point_style.left) + parseFloat(point_style.width)).toFixed(2),
+            "letter-spacing": parseFloat(`${this.css["decimal-letter-spacing"]}`).toFixed(2),
+            color: this.css.color,
+            "background-color": this.css["background-color"],
+            viz: (frac_digits.length > 0)
+        };
+        //  console.log(frac_style);
+        const dom = Handlebars.compile(digitsTemplate, { noEscape: true })({
+            type: NumericDisplayEVO.constructorName,
+            whole: whole_style,
+            frac: frac_style,
+            point: point_style
+        });
+        this.$base.empty();
+        this.$base.append(dom).css("line-height", `${this.height}px`);
+    }
+    /**
+     * Internal function, updates the display style
+     * @param opt 
+     * @returns The border width
+     */
+    protected updateDisplayStyle (opt?: CSS): number {
+        this.setCSS({ ...this.css, ...opt }); // opt overrides this.css
+        const matchBorder: RegExpMatchArray = opt?.css && opt.css["border"] ? /\d+px/.exec(opt.css["border"]) : null;
+        let borderWidth: number = opt["border-width"] ? parseFloat(`${opt["border-width"]}`)
+            : matchBorder ? parseFloat(matchBorder[0]) 
+                : 0;    
+        borderWidth = isNaN(borderWidth) ? 0 : borderWidth;
+        return borderWidth;
     }
 
     /**
@@ -312,7 +351,7 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
         let st = {};
         st[this.attr.displayName] = "123.4";
         st["demoCursor"] = 2;
-        this.render(st, { cursorName: "demoCursor" });
+        this.render(JSON.stringify(st), { cursorName: "demoCursor" });
     }
 
     getDescription (): string {

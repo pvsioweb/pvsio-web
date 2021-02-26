@@ -4,6 +4,10 @@ import { CentralView, WidgetsMap, CentralViewOptions } from './CentralView';
 import { Renderable } from '../widgets/core/WidgetEVO';
 import { CSS } from '../widgets/core/WidgetEVO';
 
+export enum SimulatorEvents {
+    DidRebootPrototype = "DidRebootPrototype"
+};
+
 export class SimulatorView extends CentralView {
     protected simulatorId: string = uuid();
 
@@ -11,6 +15,7 @@ export class SimulatorView extends CentralView {
 
     constructor (data: CentralViewOptions, connection: Connection) {
         super(data, connection);
+        this.installHandlers();
     }
 
     /**
@@ -32,10 +37,23 @@ export class SimulatorView extends CentralView {
         }
     }
 
+    /**
+     * Render the view
+     * @param opt 
+     */
     async renderView (opt?: CentralViewOptions): Promise<SimulatorView> {
         const content: string = "";
         await super.renderView({ ...this.viewOptions, content });
         return this;
+    }
+
+    /**
+     * Internal function, installs relevant event handlers
+     */
+    protected installHandlers (): void {
+        $(document).find(".reboot-prototype-btn").on("click", async (evt: JQuery.ClickEvent) => {
+            this.trigger(SimulatorEvents.DidRebootPrototype);
+        });
     }
 
 }

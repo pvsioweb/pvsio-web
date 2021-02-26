@@ -25,6 +25,7 @@ const toolkitInterface: string = `
 .pvsioweb-content {
     position:absolute;
     top:28px;
+    overflow-y:scroll;
 }
 </style>
 <div id="content" class="center pvsioweb-content">

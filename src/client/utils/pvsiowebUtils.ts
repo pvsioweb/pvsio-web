@@ -390,7 +390,7 @@ export interface InlineMenuData {
     style?: string
 };
 export const inlineMenuTemplate = `
-<div class="mr-2 panel-menu">
+<div class="mr-2 panel-menu dropdown">
     {{#if style}}<style>{{style}}</style>{{/if}}
     {{#each buttons}}
         {{this}}
@@ -547,11 +547,11 @@ export const colors = {
 export enum SettingsAttributes {
     version = "version",
     mainFile = "mainFile",
-    mainFunction = "mainFunction",
+    mainModule = "mainModule",
     initFunction = "initFunction",
     tickFunction = "tickFunction",
     tickFrequency = "tickFrequency",
-    jsonPrinter = "jsonPrinter",
+    outputPrinter = "outputPrinter",
     pictureFile = "pictureFile",
     pictureWidth = "pictureWidth",
     pictureHeight = "pictureHeight",
@@ -562,11 +562,11 @@ export enum SettingsAttributes {
 export declare interface PVSioWebFile {
     version: 3.0,
     mainFile?: string, // name of the main file, including extension
-    mainFunction?: string, // main function -- this is a theory in PVS
+    mainModule?: string, // main function -- this is a theory in PVS
     initFunction?: string // init function name
     tickFunction?: string, // tick function name
     tickFrequency?: string // tick frequency
-    jsonPrinter?: string, // name of print function for converting states returned by the server in json format
+    outputPrinter?: string, // name of print function for converting states returned by the server in json format
     pictureFile?: string, // file name, including extension
     pictureWidth?: number,
     pictureHeight?: number,

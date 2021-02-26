@@ -2,12 +2,12 @@ import { PVSioWebPlugin } from '../../env/PVSioWeb';
 import { BackboneConnection, Connection } from '../../env/Connection';
 
 import * as Utils from '../../utils/pvsiowebUtils';
-import { BuilderEvents, BuilderView, Picture, CreateWidgetEvent, DeleteWidgetEvent, CutWidgetEvent, SelectWidgetEvent } from './views/BuilderView';
+import { BuilderEvents, BuilderView, Picture, CreateWidgetEvent, DeleteWidgetEvent, CutWidgetEvent, SelectWidgetEvent, DidChangePictureEventData } from './views/BuilderView';
 import { WidgetsListView } from './views/WidgetsListView';
 import { SettingsEvents, SettingsView } from './views/SettingsView';
 import { CentralViewEvents, WidgetsMap } from './views/CentralView';
 import { SideView } from './views/SideView';
-import { SimulatorView } from './views/SimulatorView';
+import { SimulatorEvents, SimulatorView } from './views/SimulatorView';
 import { SettingsElem, SettingsMap } from './views/SettingsView';
 
 import * as fsUtils from "../../utils/fsUtils";
@@ -21,8 +21,12 @@ export enum PrototypeBuilderEvents {
     DidSwitchToSimulatorView = "DidSwitchToSimulatorView",
     DidSwitchToBuilderView = "DidSwitchToBuilderView",
     DidUpdateWidgets = "DidUpdateWidgets",
-    DidUpdateSettings = "DidUpdateSettings"
+    DidUpdateSettings = "DidUpdateSettings",
+    DidRebootPrototype = "DidRebootPrototype",
+    DidChangePicture = "DidChangePicture"
 };
+
+export interface DidChangePictureData extends DidChangePictureEventData, PrototypeData {};
 
 const MIN_WIDTH_LEFT: number = 10; //px
 
@@ -61,9 +65,13 @@ export const inlineBuilderMenuData: InlineMenuData = {
         .custom-file {
             width: 200px !important;
         }
+        .custom-file-input {
+            line-height:18px;
+        }
         .custom-file-label {
-            transform: scale(0.9);
-            margin-top: -4px;
+            transform: scale(0.8);
+            transform-origin:right top;
+            margin-top: 0px;
         }
     `,
     buttons : [
@@ -73,7 +81,10 @@ export const inlineBuilderMenuData: InlineMenuData = {
                 <label class="custom-file-label btn-sm">Change Picture</label>
             </form>
         </div>`,
-        `<button class="btn btn-outline-danger builder-menu btn-lg remove-picture-btn btn-sm">Remove Picture</button>`,
+        `<button class="btn btn-sm btn-secondary dropdown-toggle builder-menu" style="position:relative;z-index:2;" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+        <div class="dropdown-menu">
+            <button class="btn btn-outline-danger btn-lg remove-picture-btn btn-sm" style="width:100%; transform:scale(0.8);">Remove Picture</button>
+        </div>`,
         `<button class="btn btn-danger btn-lg simulator-menu reboot-prototype-btn btn-sm"><div class="fa fa-undo"></div> Reboot Prototype</button>`
     ]
 };
@@ -121,7 +132,7 @@ const prototypeBuilderBody: string = `
     overflow:hidden;
 }
 .central-panel-inner {
-    overflow:auto;
+    overflow:hidden;
     height:100%;
 }
 .central-panel-inner-header {
@@ -130,11 +141,14 @@ const prototypeBuilderBody: string = `
 }
 .prototype-screens {
     margin:0px;
+    width:100% !important;
+    min-height:600px;
 }
 .card-header-dropdown-menu {
     position:absolute;
     top:8px;
     border: 0px;
+    z-index:0;
 }
 .r-10 {
     right:10px !important;
@@ -156,15 +170,15 @@ const prototypeBuilderBody: string = `
         <div class="card central-panel-inner">
             <div class="card-header central-panel-inner-header">
                 <ul class="nav nav-tabs card-header-tabs d-flex flex-nowrap prototype-screen-list"></ul>
-                <ul class="nav nav-tabs card-header-dropdown-menu r-10 d-flex flex-nowrap">
-                    <div class="d-flex" style="background-color:whitesmoke;">
-                        {{#each menus}}
-                        {{this}}
-                        {{/each}}
-                    </div>
-                </ul>
             </div>
             <div class="card-body prototype-screens tab-content py-0"></div>
+            <div class="nav nav-tabs card-header-dropdown-menu r-10 d-flex flex-nowrap">
+                <div class="d-flex" style="background-color:whitesmoke;">
+                    {{#each menus}}
+                    {{this}}
+                    {{/each}}
+                </div>
+            </div>
         </div>
     </div>
 </div>`;
@@ -187,7 +201,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
     readonly id: string = Utils.removeSpaceDash(this.name);
     static readonly constructorName: string = "PrototypeBuilder";
 
-    protected mode: "simulator" | "builder" = "builder";
+    protected mode: "simulator" | "builder" | "settings" = "builder";
 
     protected activeFlag: boolean = false;
     protected parent: string = "body";
@@ -206,7 +220,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
 
     protected width: string = "0px"; // side panel width
 
-    protected collapsed: boolean = false;
+    protected sidePanelCollapsed: boolean = false;
 
     protected sideViews: SideViews;
     protected centralViews: CentralViews;
@@ -251,7 +265,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
                 settings: opt.settings
             }, this.connection),
             Builder: new BuilderView({
-                label: "Builder View",
+                label: "Builder",
                 viewId: "builder-view",
                 panelId: "builder-view",
                 el: bodyDiv,
@@ -261,7 +275,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
                 widgetClassMap: this.widgetClassManager?.getWidgetClassMap() || {}
             }, this.connection),
             Simulator: new SimulatorView({
-                label: "Simulator View",
+                label: "Simulator",
                 viewId: "simulator-view",
                 panelId: "builder-view",
                 externalPanel: true,
@@ -272,6 +286,8 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         };
         // render views
         await this.renderViews();
+        // create whiteboard
+        this.centralViews?.Builder?.createWhiteboard();
         // initialize pointer to the menu
         this.$menu = this.panel?.$content.find(".panel-menu");
         // install handlers
@@ -346,7 +362,6 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
     protected createPanelBody (desc: { parent: JQuery<HTMLElement> }): Utils.ResizableLeftPanel {
         const id: string = `${this.id}-panel`;
         // const fileMenu: string = Handlebars.compile(Utils.dropdownMenuTemplate, { noEscape: true })(fileMenuData);
-        // const editMenu: string = Handlebars.compile(Utils.dropdownMenuTemplate, { noEscape: true })(pictureMenuData);
         const inlineMenu: string = Handlebars.compile(Utils.inlineMenuTemplate, { noEscape: true })({
             ...inlineBuilderMenuData
         });
@@ -389,6 +404,22 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         this.centralViews?.Builder?.on(CentralViewEvents.DidShowView, () => {
             this.switchToBuilderView();
         });
+        this.centralViews?.Settings?.on(CentralViewEvents.DidShowView, () => {
+            this.switchToSettingsView();
+        });
+        this.centralViews?.Builder?.on(BuilderEvents.DidChangePicture, (evt: DidChangePictureEventData) => {
+            // send prototype data on the connection, so interested listeners can save the prototype if they use autosave
+            const data: PrototypeData = this.getPrototypeData();
+            // adjust view height
+            // this.centralViews?.Builder.resizeView({ height: data?.pictureHeight + 100 });
+            // send information on the current prototype, so the user can choose to save the current prototype before creating the new prototype
+            const evtData: DidChangePictureData = { ...data, ...evt };
+            console.log(`[prototype-builder] DidChangePicture`, evtData);
+            this.connection?.trigger(PrototypeBuilderEvents.DidChangePicture, evtData);
+        });
+        this.centralViews?.Simulator?.on(SimulatorEvents.DidRebootPrototype, () => {
+            this.rebootPrototype();
+        });
         this.centralViews?.Settings?.on(SettingsEvents.DidUpdateSettings, (data: SettingsMap) => {
             // trigger update on the connection
             this.connection?.trigger(PrototypeBuilderEvents.DidUpdateSettings, data);
@@ -415,6 +446,12 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
             const req: PrototypeData = this.getPrototypeData();
             console.log(`[prototype-builder] SaveAsRequest`, req);
             this.connection?.trigger(PrototypeBuilderEvents.SaveAs, req);
+        });
+        this.panel.$content.find(".remove-picture-btn").on("click", async (evt: JQuery.ClickEvent) => {
+            await this.centralViews?.Builder.createWhiteboard();
+        });
+        this.panel.$content.find(".change-picture-btn").on("input", async (evt: JQuery.ChangeEvent) => {
+            await this.centralViews?.Builder.onDidChangePicture(evt);
         });
     }
 
@@ -481,11 +518,13 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
     /**
      * Switches the builder view
      */
-    switchToBuilderView(): void {
+    switchToBuilderView (): void {
         console.log(`[prototype-builder] BuilderView`);
         this.centralViews?.Builder?.builderView();
         // this.widgetManager.stopTimers();
-        this.expandSidePanel();
+        if (this.sidePanelCollapsed) {
+            this.expandSidePanel();
+        }
         this.revealBuilderMenu();
         this.hideSimulatorMenu();
         this.mode = "builder";
@@ -495,7 +534,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
     /**
      * Switches the simulator view
      */
-    switchToSimulatorView(): void {
+    switchToSimulatorView (): void {
         console.log(`[prototype-builder] SimulatorView`);
         this.centralViews?.Builder?.simulatorView();
         this.collapseSidePanel();
@@ -504,6 +543,22 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         const widgets: WidgetsMap = this.centralViews?.Builder?.getWidgets();
         this.centralViews?.Simulator?.importWidgets(widgets);
         this.mode = "simulator";
+        // this.rebootPrototype();
+    }
+
+    /**
+     * Switch to settings view
+     */
+    switchToSettingsView (): void {
+        this.saveSidePanelWidth();
+        this.mode = "settings";
+    }
+
+
+    /**
+     * Reboot the prototype, i.e., sends the init command to the simulator
+     */
+    rebootPrototype (): void {
         const settings: SettingsMap = this.centralViews?.Settings?.getCurrentSettings();
         this.connection?.trigger(PrototypeBuilderEvents.DidSwitchToSimulatorView, settings);
     }
@@ -512,12 +567,20 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
      * Collapses side panel
      */
     collapseSidePanel (): void {
+        this.saveSidePanelWidth();
+        this.body.$left?.animate({ width: "0px" }, 500);
+        this.sidePanelCollapsed = true;
+    }
+
+    /**
+     * Utility function, saves side panel width
+     */
+    saveSidePanelWidth (): void {
         this.body.disableResize = true;
         const width: string = this.body.$left.css("width");
         if (parseFloat(width) > 2 * MIN_WIDTH_LEFT) {
             this.width = width;
         }
-        this.body.$left?.animate({ width: "0px" }, 500);
     }
 
     /**
@@ -526,6 +589,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
     expandSidePanel (): void {
         this.body.disableResize = false;
         this.body.$left?.animate({ width: this.width }, 500);
+        this.sidePanelCollapsed = false;
     }
 
     /**

@@ -26,7 +26,7 @@
 
 import { DisplayAttr, DisplayOptions } from "./BasicDisplayEVO";
 import { ButtonAttr, ButtonEVO, ButtonOptions } from "./ButtonEVO";
-import { Coords, CSS } from "./WidgetEVO";
+import { Coords, CSS, MatchState } from "./WidgetEVO";
 
 export interface TouchScreenOptions extends DisplayOptions, ButtonOptions { };
 
@@ -70,14 +70,24 @@ export class TouchScreenEVO extends ButtonEVO {
     };
 
     render (state?: string | number | {}, opt?: CSS): void {
+        // the following will render custom labels
         super.render(state, opt);
-        if (typeof state === "object" && this.attr?.displayName !== "" && this.evalViz(state)) {
-            const label: string = this.attr["customLabel"] || this.evaluate(this.attr.displayName, state);
-            this.$base.html(label);
-            this.reveal();
+        if (!this.attr.customLabel && state) {
+            // check if the state contains a field named after the widget
+            if (this.matchStateFlag) {
+                if (typeof state === "string") {
+                    const match: MatchState = this.matchState(state);
+                    if (match) {
+                        // render state attribute value
+                        this.$base.html(`${match.val}`);
+                    }
+                }
+            } else {
+                // render string or number
+                this.$base.html(`${state}`);
+            }
         }
     }
-
 
     /**
      * @function <a name="renderSample">renderSample</a>

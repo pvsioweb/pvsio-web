@@ -5,7 +5,7 @@ import { ButtonEVO } from './core/ButtonEVO';
 import { LedEVO } from './core/LedEVO';
 import { NumericDisplayEVO } from './core/NumericDisplayEVO';
 import { TouchScreenEVO } from './core/TouchScreenEVO';
-import { ToggleButtonEVO } from './core/ToggleButtonEVO';
+// import { ToggleButtonEVO } from './core/ToggleButtonEVO';
 
 export interface WidgetClassDescriptor {
     id: string,
@@ -21,11 +21,11 @@ export const coreWidgetClassMap: WidgetClassMap = {
         { id: NumericDisplayEVO.constructorName, label: "Numeric Display", cons: NumericDisplayEVO }
     ],
     "Button": [
-        { id: ButtonEVO.constructorName, label: "Standard Button", cons: ButtonEVO },
-        { id: ToggleButtonEVO.constructorName, label: "Toggle Switch", cons: ToggleButtonEVO }
+        { id: ButtonEVO.constructorName, label: "Standard Button", cons: ButtonEVO }
     ],
     "Touchscreen": [
-        { id: TouchScreenEVO.constructorName, label: "TouchScreen Element", cons: TouchScreenEVO }
+        { id: TouchScreenEVO.constructorName, label: "TouchScreen Element", cons: TouchScreenEVO },
+        // { id: ToggleButtonEVO.constructorName, label: "Toggle Switch", cons: ToggleButtonEVO }
     ],
     "LED": [
         { id: LedEVO.constructorName, label: "Multicolor LED", cons: LedEVO }

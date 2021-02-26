@@ -27,7 +27,7 @@
  *
  */
 
-import { Coords, WidgetEVO, WidgetOptions, CSS, WidgetAttr } from "./WidgetEVO";
+import { Coords, WidgetEVO, WidgetOptions, CSS, WidgetAttr, Renderable, MatchState } from "./WidgetEVO";
 
 export interface DisplayOptions extends WidgetOptions {
     displayName?: string
@@ -112,31 +112,44 @@ export class BasicDisplayEVO extends WidgetEVO {
      * @memberof module:BasicDisplayEVO
      * @instance
      */
-    render (state?: string | number | {}, opt?: CSS): void {
+    render (state?: Renderable, opt?: CSS): void {
+        opt = opt || {};
         console.log(`[BasicDisplay] rendering state`, state);
+        // create the html element
         super.render();
-        // if (!this.rendered) {
-        //     // invoke createHTMLElement to create the widget
-        //     super.createHTMLElement();
-        // }
+        // update style
+        this.updateDisplayStyle(opt);
+        // reveal the widget
+        this.reveal();
+        // render the content if state is non-null
+        if (state) {
+            // check if the state contains a field named after the widget
+            if (this.matchStateFlag) {
+                if (typeof state === "string") {
+                    const match: MatchState = this.matchState(state);
+                    if (match) {
+                        // render state attribute value
+                        this.$base.html(`${match.val}`);
+                    }
+                }
+            } else {
+                // render string or number
+                this.$base.html(`${state}`);
+            }
+        }
+    }
+
+    /**
+     * Internal function, updates the display style
+     * @param opt 
+     */
+    protected updateDisplayStyle (opt?: CSS): void {
+        opt = opt || {};
         // set style
         this.setCSS({ ...this.css, ...opt });
-
         // set line height so text is properly centered
         const lineHeight: number = parseFloat(this.css["line-height"]) || this.height;
         this.$base.css("line-height", `${lineHeight}px`);
-
-        // render content
-        state = (state === undefined || state === null)? "" : state;
-        if (typeof state === "string" || typeof state === "number") {
-            this.$base.html(`${state}`);
-            this.reveal();
-        } else if (typeof state === "object" && this.attr?.displayName !== "" && this.evalViz(state)) {
-            this.$base.html(this.evaluate(this.attr.displayName, state));
-            this.reveal();
-        } else {
-            this.hide();
-        }
     }
 
     /**

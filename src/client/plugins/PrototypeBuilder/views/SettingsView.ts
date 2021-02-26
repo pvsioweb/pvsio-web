@@ -50,16 +50,16 @@ const contentTemplate: string = `
 // keys need to be consistent with the fields declared in PVSioWebFile (see pvsioweb.d.ts)
 export const fileSettings: SettingsElem[] = [
     { id: SettingsAttributes.mainFile, label: "Main File", value: "", placeholder: "" },
-    { id: SettingsAttributes.mainFunction, label: "Main Function", value: "", placeholder: "" },
+    { id: SettingsAttributes.mainModule, label: "Main Function", value: "", placeholder: "" },
     { id: SettingsAttributes.contextFolder, label: "Context Folder", value: "", placeholder: "" }
 ];
 export const functionSettings: SettingsElem[] = [
     { id: SettingsAttributes.initFunction, label: "Init Function", value: "init", placeholder: "" },
-    { id: SettingsAttributes.tickFunction, label: "Tick Function", value: "", placeholder: "" },
+    { id: SettingsAttributes.tickFunction, label: "Tick Function (optional)", value: "", placeholder: "" },
     { id: SettingsAttributes.tickFrequency, label: "Tick Frequency", value: "1000ms", placeholder: "" }
 ];
 export const printerSettings: SettingsElem[] = [
-    { id: SettingsAttributes.jsonPrinter, label: "JSON Printer", value: "", placeholder: "" }
+    { id: SettingsAttributes.outputPrinter, label: "Output Printer (optional)", value: "", placeholder: "" }
 ];
 export const basicSettings: SettingsElem[] = fileSettings.concat(functionSettings).concat(printerSettings);
 

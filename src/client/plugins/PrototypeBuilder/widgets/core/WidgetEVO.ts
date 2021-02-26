@@ -43,7 +43,7 @@ export const img_template: string = `
 {{#if img}}<img src="{{img}}" style="position:absolute; opacity:{{opacity}}; transform-origin:{{transformOrigin}};">{{/if}}
 {{#if svg}}{{svg}}{{/if}}
 `;
-export type Renderable = string | number | {};
+export type Renderable = string | number;
 export type Coords<T = string | number> = { top?: T, left?: T, width?: T, height?: T };
 
 // keys and type
@@ -115,12 +115,10 @@ export interface WidgetOptions {
     callback?: PVSioWebCallBack,
     connection?: Connection
 };
-
 export type VizOptions =  {
     visible?: string | boolean,
     enabled?: string | boolean
 };
-
 export type BasicEvent = "click" | "dblclick" | "press" | "release";
 export type BasicEventData = {
     evt: BasicEvent,
@@ -130,7 +128,6 @@ export type WidgetEvents = { [evt in BasicEvent]?: boolean };
 export type WidgetAttr = {
     [key: string]: string
 };
-
 export interface HotspotData {
     id: string,
     coords: Coords
@@ -143,6 +140,23 @@ export interface WidgetData extends HotspotData {
     evts?: string[]
 };
 
+// regexp for quick parsing of state information
+// group 1 captures state attribute name
+// group 2 captures state attribute value
+export const stateRegex: RegExp[] = [
+    // pvs syntax
+    /(\w+)\s*:=\s*(\w+)/g, // e.g. (# disp_2 := 4, c := 2 #)
+    /(\w+)\s*:=\s*\"([^\"]+)\"/g, // e.g., (# disp4 := "asd" #)
+    // equivalent json syntax
+    /\"(\w+)\"\s*:\s*(\w+)/g, // e.g., { "disp1" : 4 }
+    /\"(\w+)\"\s*:\s*\"([^\"]+)\"/g // e.g., { "disp_3" : "asd" }
+];
+
+export interface MatchState {
+    name: string,
+    val: string
+};
+
 export abstract class WidgetEVO extends Backbone.Model {
     static readonly MAX_COORDINATES_ACCURACY: number = 0; // max 0 decimal digits for coordinates, i.e., position accuracy is 1px
     readonly widget: boolean = true; // this is used in the playback player to recognize widgets. TODO: remove this attribute.
@@ -151,6 +165,15 @@ export abstract class WidgetEVO extends Backbone.Model {
     protected kind: string = "widget"; // e.g., display, button, dial.. useful for grouping together similar widgets. This attribute will be overridden by concrete classes.
 
     id: string;
+
+    /**
+     * matchStateFlag regulates the behavior of the render function
+     * If matchStateFlag is true, then the information passed to the render function is treated as a state, 
+     * and the widget tries to find if there's a state attribute that matches the widget name
+     * if such state attributes is found, then the widget renders the corresponding value of the attribute
+     * otherwise the widget keeps the previous state
+     */
+    protected matchStateFlag: boolean = true;
 
     protected $parent: JQuery<HTMLElement>;
     protected parentSelector: string; // this is useful for debugging purposes
@@ -180,7 +203,39 @@ export abstract class WidgetEVO extends Backbone.Model {
     // the following method needs to be overridden in all descendant classes
     abstract getConstructorName (): string
 
+    /**
+     * Utility function, tries to match the widget name with state attributes
+     * If a match is found, the function returns a data structure { name: string, val: string }
+     * Otherwise, the function returns null
+     * @param state State information
+     * @param name the attribute to be matched
+     */
+    matchState (state: string, name?: string): MatchState | null {
+        if (state) {
+            name = name || this.getName();
+            if (name) {
+                for (let i = 0; i < stateRegex.length; i++) {
+                    const match: RegExpMatchArray = new RegExp(stateRegex[i]).exec(state);
+                    if (match && match.length > 2 && match[1] === name) {
+                        return {
+                            name: match[1],
+                            val: match[2]
+                        };
+                    }
+                }
+            }
+        }
+        return null;
+    }
 
+    /**
+     * Sets matchStateFlag
+     * @param flag 
+     */
+    setMatchStateFlag (flag: boolean): void {
+        this.matchStateFlag = !!flag;
+    }
+    
     /**
      * Utility function, returns a unique ID in the format wdgW1234
      */
