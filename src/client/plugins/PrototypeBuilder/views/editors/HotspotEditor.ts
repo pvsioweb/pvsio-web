@@ -82,11 +82,12 @@ export function getMouseCoords (evt: JQuery.MouseUpEvent | JQuery.MouseOverEvent
     }
 }
 
-function showCoords ($elem: JQuery<HTMLElement>, coords: Coords<number>, opt?: { showSize?: boolean }): void {
+function printCoords ($elem: JQuery<HTMLElement>, coords: Coords<number>, opt?: { showSize?: boolean }): void {
     opt = opt || {};
-    const info: string = opt.showSize ? `(top:${coords.top}, left:${coords.left}, width:${coords.width}, height:${coords.height})`
-        : `(top:${coords.top}, left:${coords.left})`;
-    $elem.html(info);
+    const info: string = //opt.showSize ? `(top:${coords.top}, left:${coords.left}, width:${coords.width}, height:${coords.height})`
+        //: 
+        `(top:${coords.top}, left:${coords.left})`;
+    $elem.text(info);
 }
 
 
@@ -204,7 +205,7 @@ abstract class HotspotHandler extends Backbone.View {
         this.$tooltip.css({ display: "none" });
     }
     showCoords (coords: Coords<number>, opt?: { showSize?: boolean }): void {
-        showCoords(this.$builderCoords, coords, opt);
+        printCoords(this.$builderCoords, coords, opt);
     }
 };
 class ResizeHandler extends HotspotHandler {
@@ -434,7 +435,7 @@ export class HotspotEditor extends Backbone.View {
         };
     }
     showCoords (coords: Coords<number>, opt?: { showSize?: boolean }): void {
-        showCoords(this.$builderCoords, coords, opt);
+        printCoords(this.$builderCoords, coords, opt);
     }
     protected mouseEventHandler (evt: JQuery.MouseDownEvent | JQuery.MouseOverEvent | JQuery.MouseMoveEvent): void {
         const mousePosition: Coords<number> = getMouseCoords(evt, this.$el);

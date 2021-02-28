@@ -143,14 +143,16 @@ export interface WidgetData extends HotspotData {
 // regexp for quick parsing of state information
 // group 1 captures state attribute name
 // group 2 captures state attribute value
-export const stateRegex: RegExp[] = [
-    // pvs syntax
-    /(\w+)\s*:=\s*(\w+)/g, // e.g. (# disp_2 := 4, c := 2 #)
-    /(\w+)\s*:=\s*\"([^\"]+)\"/g, // e.g., (# disp4 := "asd" #)
-    // equivalent json syntax
-    /\"(\w+)\"\s*:\s*(\w+)/g, // e.g., { "disp1" : 4 }
-    /\"(\w+)\"\s*:\s*\"([^\"]+)\"/g // e.g., { "disp_3" : "asd" }
-];
+export function getStateRegexSource (name: string): string[] {
+    return [
+        // pvs syntax
+        `(${name})\\s*:=\\s*(\\w+)`, // e.g. (# disp_2 := 4, c := 2 #)
+        `(${name})\\s*:=\\s*\\"([^\\"]+)\\"`, // e.g., (# disp4 := "asd" #)
+        // equivalent json syntax
+        `\\"(${name})\\"\\s*:\\s*(\\w+)`, // e.g., { "disp1" : 4 }
+        `\\"(${name})\"\\s*:\s*\\"([^\\"]+)\\"` // e.g., { "disp_3" : "asd" }
+    ];
+}
 
 export interface MatchState {
     name: string,
@@ -214,11 +216,12 @@ export abstract class WidgetEVO extends Backbone.Model {
         if (state) {
             name = name || this.getName();
             if (name) {
-                for (let i = 0; i < stateRegex.length; i++) {
-                    const match: RegExpMatchArray = new RegExp(stateRegex[i]).exec(state);
-                    if (match && match.length > 2 && match[1] === name) {
+                const regexSrc: string[] = getStateRegexSource(name);
+                for (let i = 0; i < regexSrc.length; i++) {
+                    const match: RegExpMatchArray = new RegExp(regexSrc[i], "g").exec(state);
+                    if (match && match.length > 2) {
                         return {
-                            name: match[1],
+                            name,
                             val: match[2]
                         };
                     }

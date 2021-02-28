@@ -8,7 +8,6 @@ export declare interface CentralViewOptions extends Backbone.ViewOptions {
     label: string, // label shown in the tab
     viewId: string, // unique id of the view
     panelId: string, // id of the panel linked to the view
-    externalPanel?: boolean, // flag indicating whether an external panel will be used (if true, the view will not create the body of the panel)
     headerDiv: HTMLElement,
     content?: string,
     active?: boolean,
@@ -23,27 +22,8 @@ export const CentralViewEvents = {
     DidHideView: "DidHideView"
 };
 
-const headerTemplate: string = `
-<style>
-.nav-item {
-    z-index:1;
-    position:relative;
-}
-.nav-link {
-    white-space:nowrap;
-}
-.nav-link.active {
-    border-top: 1px solid !important;
-    border-left: 1px solid !important;
-    border-right: 1px solid !important;
-}
-</style>
-<li class="nav-item">
-<button draggable="false" class="nav-link {{#if active}}active{{/if}}" id="{{tabId}}" data-toggle="tab" href="#{{controls}}" role="tab" aria-controls="{{controls}}" aria-selected="true">{{label}}</button>
-</li>`;
-
 const bodyTemplate: string = `
-<div id="{{panelId}}" class="container-fluid tab-pane show no-gutters p-0 {{#if active}}active{{/if}}" aria-labelledby="{{controlledBy}}" style="position:relative; min-height:${MIN_HEIGHT}px;">
+<div id="{{panelId}}" class="container-fluid tab-pane show no-gutters p-0">
     {{content}}
 </div>`;
 
@@ -64,6 +44,11 @@ export abstract class CentralView extends Backbone.View {
     protected viewId: string;
     protected viewOptions: CentralViewOptions;
 
+    /**
+     * Constructor
+     * @param data 
+     * @param connection 
+     */
     constructor (data: CentralViewOptions, connection: Connection) {
         super(data);
         this.viewOptions = data;
@@ -92,34 +77,24 @@ export abstract class CentralView extends Backbone.View {
      * @param opt 
      */
     async renderView (opt?: CentralViewOptions): Promise<CentralView> {
-        // append header tab
-        if (this.$headerDiv) {
-            const label: string = opt?.label || this.panelId;
-            const headerTab: string = Handlebars.compile(headerTemplate, { noEscape: true })({
-                tabId: `${this.viewId}-tab`,
-                controls: this.panelId,
-                label,
-                active: opt?.active
-            });
-            this.$headerDiv.append(headerTab);
-            this.$headerTab = this.$headerDiv.find(`#${this.viewId}-tab`);
-            // the view is active when the user clicks on the tab
-            this.$headerTab.on("click", (evt: JQuery.ClickEvent) => {
-                if (!this.$headerTab.hasClass("active")) {
-                    this.trigger(CentralViewEvents.DidShowView, { id: this.viewId });
-                }
-            });    
-        }
-        if (!opt?.externalPanel) {
-            // append body
-            const viewBody: string = Handlebars.compile(bodyTemplate, { noEscape: true })({
-                controlledBy: `${this.viewId}-tab`,
-                panelId: this.panelId,
-                content: opt?.content,
-                active: opt?.active
-            });
-            this.$el.append(viewBody);
-        }
+        // append body
+        const viewBody: string = Handlebars.compile(bodyTemplate, { noEscape: true })({
+            controlledBy: `${this.viewId}-tab`,
+            panelId: this.panelId,
+            content: opt?.content,
+            active: opt?.active
+        });
+        this.$el.append(viewBody);
         return this;
+    }
+
+    /**
+     * Makes the view visible. Only one central view is visible at each time.
+     */
+    revealView (): void {
+        // hide all central views
+        this.$el.find(`.tab-pane`).removeClass("active");
+        // make this view visible
+        this.$el.find(`#${this.panelId}`).addClass("active");
     }
 }

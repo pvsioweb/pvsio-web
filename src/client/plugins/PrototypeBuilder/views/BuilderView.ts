@@ -9,6 +9,7 @@ import { WidgetClassDescriptor, WidgetClassMap } from '../widgets/widgetClassMap
 import * as utils from '../../../utils/pvsiowebUtils';
 import * as fsUtils from '../../../utils/fsUtils';
 import { CentralViewOptions } from "./CentralView";
+import { WebFileAttribute } from "../../../utils/pvsiowebFileUtils";
 
 const vspace: number = 36; //px
 
@@ -49,17 +50,6 @@ const contentTemplate: string = `
 .builder-toolbar .btn {
     height:2.5em;
 }
-.builder-coords {
-    position:absolute;
-    color:darkslategray; 
-    top:0.6em;
-    left:45%;
-    font-size:small;
-    white-space:nowrap;
-}
-.prototype-image {
-    overflow: hidden;
-}
 .prototype-image-frame {
     position: absolute;
     cursor: crosshair;
@@ -72,9 +62,6 @@ const contentTemplate: string = `
     transform-origin: top left;
 }
 </style>
-<div class="row" style="height:36px;">
-    <div class="builder-coords"></div>
-</div>
 <div class="prototype row">
     <div class="prototype-image view-div container-fluid p-0"></div>
     <div class="prototype-image-frame view-div container-fluid p-0"></div>
@@ -204,7 +191,7 @@ export class BuilderView extends CentralView {
         this.$imageDiv = this.$el.find(".prototype-image");
         this.$imageFrame = this.$el.find(".prototype-image-frame");
         this.$imageOverlay = this.$el.find(".prototype-image-overlay");
-        this.$coords = this.$el.find(".builder-coords");
+        this.$coords = $(document).find(".builder-coords");
         this.$toolbar = this.$el.find(".builder-toolbar");
         // create whiteboard
         await this.createWhiteboard();
@@ -401,6 +388,7 @@ export class BuilderView extends CentralView {
      * Switch to builder view
      */
     builderView (): void {
+        this.revealView();
         this.revealHotspots();
         this.revealCoords();
         this.revealToolbar();
@@ -410,6 +398,7 @@ export class BuilderView extends CentralView {
      * Switch to simulator view
      */
     simulatorView (): void {
+        this.revealView();
         this.hideHotspots();
         this.hideCoords();
         this.hideToolbar();
@@ -432,7 +421,7 @@ export class BuilderView extends CentralView {
      * Returns the current picture file name
      */
     getCurrentPictureFileName (): string {
-        return <string> this.$imageDiv?.attr(utils.SettingsAttributes.pictureFile);
+        return <string> this.$imageDiv?.attr(WebFileAttribute.pictureFile);
     }
 
     /**
@@ -458,7 +447,8 @@ export class BuilderView extends CentralView {
      */
     getCurrentPictureWidth (): number {
         const img: HTMLImageElement = this.$imageFrame?.find("img")[0];
-        return img.width || 0;
+        const width: number = img.width || 0;
+        return width;
     }
 
     /**
@@ -466,7 +456,8 @@ export class BuilderView extends CentralView {
      */
     getCurrentPictureHeight (): number {
         const img: HTMLImageElement = this.$imageFrame?.find("img")[0];
-        return img.height || 0;
+        const height: number = img.height || 0;
+        return height;
     }
 
     /**
@@ -662,7 +653,7 @@ export class BuilderView extends CentralView {
      * @param opt 
      */
     async loadPicture (desc: Picture, opt?: PictureOptions): Promise<PictureData> {
-        if (desc && desc.fileName && desc.fileContent && desc.fileExtension) {
+        if (desc && desc.fileContent) {
             opt = opt || {};
             const $imageDiv: JQuery<HTMLElement> = opt.$el || this.$imageDiv;
             const $imageFrame: JQuery<HTMLElement> = this.$imageFrame;
@@ -672,7 +663,7 @@ export class BuilderView extends CentralView {
                 // const maxSize: { width: number, height: number } = this.getActivePanelSize();
                 if (opt.width) { imageElement.width = opt.width; }
                 if (opt.height) { imageElement.height = opt.height; }
-                if (opt.border) { $imageFrame.css({ border: "1px solid black" }); }   
+                if (opt.border) { $imageFrame.css({ border: "1px solid lightgray", "border-radius": "4px", "box-shadow": "10px 10px 10px" }); }   
                 
                 // load the image
                 imageElement.src = desc.fileContent;
@@ -683,7 +674,8 @@ export class BuilderView extends CentralView {
                         const fileContent: string = (<HTMLImageElement> res?.target)?.src;
                         // append image
                         $imageDiv.html(imageElement);
-                        $imageDiv.attr(utils.SettingsAttributes.pictureFile, `${desc.fileName}${desc.fileExtension}`);
+                        const fname: string = desc.fileName && desc.fileExtension ? `${desc.fileName}${desc.fileExtension}` : "";
+                        $imageDiv.attr(WebFileAttribute.pictureFile, fname);
                         // resize picture
                         this.resizePicture({ width, height });
                         // resize view

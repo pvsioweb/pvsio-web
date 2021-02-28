@@ -30,7 +30,7 @@ export class SimulatorView extends CentralView {
      * Renders all widgets with the given state
      * @param desc 
      */
-    async renderWidgets (state: Renderable, opt?: CSS): Promise<void> {
+    async renderState (state: Renderable, opt?: CSS): Promise<void> {
         console.log(`[simulator-view] renderWidgets`, this.widgets);
         for (let i in this.widgets) {
             this.widgets[i].render(state, opt);

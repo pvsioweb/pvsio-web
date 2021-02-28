@@ -28,12 +28,9 @@ export interface ResizableLeftPanel extends Panel {
     onResize (size: { width: string, height: string }): void,
     disableResize?: boolean
 };
-export interface CollapsiblePanel extends Panel {
+export interface StickyPanel extends Panel {
     $content: JQuery<HTMLDivElement>,
-    $label: JQuery<HTMLElement>,
-    $collapseBtn?: JQuery<HTMLElement>,
-    $toolbar?: JQuery<HTMLElement>
-    $dropdownMenu?: JQuery<HTMLElement>
+    $navbar: JQuery<HTMLElement>
 };
 /**
  * The dialog template creates a modal dialog with bootstrap. 
@@ -99,34 +96,46 @@ export const dialogTemplate: string = `
         </div>
     </div>
 </div>`;
-const collapsiblePanelTemplate: string = `
+const stickyPanelTemplate: string = `
 <style>
-.pvsioweb-collapsible-panel {
+.pvsioweb-sticky-panel {
     display: block;
     position: sticky;
     top: {{top}}px;
 }
-.pvsioweb-collapsible-panel span {
+.pvsioweb-sticky-panel span {
     font-size: small;
 }
+.pvsioweb-sticky-panel-content {
+    top: {{top}}px;
+    margin-top: {{margin-top}}px;
+}
+.navbar .btn {
+    font-size: small;
+}
+.navbar .btn-group {
+    border: 1px solid white;
+    border-radius: 4px;
+}
 </style>
-<div id="{{id}}-panel" class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow pvsioweb-collapsible-panel">
-    <span class="navbar navbar-brand container-fluid px-0" {{#if hideNavbar}}style="display:none"{{/if}}>
-        <span data-toggle="collapse" style="margin-left:10px;" data-target="#{{id}}-content" id="{{id}}-collapse-icon" class="icon toggle-collapse fa {{#if showContent}}fa-minus-square{{else}}fa-plus-square{{/if}}"></span>
-        <span id="{{id}}-label" class="label">{{name}}</span>
-        <span class="dropdown" style="margin-right:12px;">
-            {{#if dropdownMenu}}
-            {{dropdownMenu}}
-            {{/if}}
-        </span>
+<div id="{{id}}-panel" class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap py-0 px-1 shadow pvsioweb-sticky-panel">
+    <span class="navbar navbar-brand container-fluid px-1">
+        <div class="btn-group" role="group">
+            {{navbarLeft}}
+        </div>
+        <div class="btn-group" role="group">
+            {{navbarCentral}}
+        </div>
+        {{#if navbarRight}}
+        <div class="btn-group" role="group">
+            {{navbarRight}}
+        </div>
+        {{else}}
+        <div></div>
+        {{/if}}
     </span>
-    {{#if toolbar}}
-    <span class="toolbar">
-        {{toolbar}}
-    </span>
-    {{/if}}
 </div>
-<div id="{{id}}-content" class="content collapsible-panel {{#if showContent}}show{{/if}}"></div>
+<div id="{{id}}-content" class="content collapsible-panel pvsioweb-sticky-panel-content {{#if showContent}}show{{/if}}"></div>
 `;
 const menuTemplate: string = `
 <div id="{{menuId}}" class="fade show" style="position:absolute;width:0px;height:0px;top:{{top}}px;left:{{left}}px;">
@@ -175,61 +184,58 @@ export function closeContextMenu (): JQuery<HTMLElement> {
 export function deleteContextMenu (): JQuery<HTMLElement> {
     return $("body").find("#pvsioweb-menu").remove();
 }
-
-export function createCollapsiblePanel (owner: PVSioWebPlugin, opt?: { 
+/**
+ * Utility function, returns the height of the pvsioweb navbar
+ */
+export function getToolkitNavbarHeight (): number {
+    const isVisible: boolean = $(document).find(".toolkit-navbar").css("display") !== "none";
+    if (isVisible) {
+        const height: string = $(document).find(".toolkit-navbar").css("height");
+        const ans: number = parseFloat(height);
+        return isNaN(ans) ? 0 : ans;
+    }
+    return 0;
+}
+/**
+ * Utility function, creates a panel with a sticky navbar
+ * @param owner 
+ * @param opt 
+ */
+export function createStickyPanel (owner: PVSioWebPlugin, opt?: { 
     parent?: string, 
-    showContent?: boolean, 
-    isDemo?: boolean,
     handlers?: MouseEventHandlers,
-    headerText?: string,
-    toolbar?: string,
-    dropdownMenu?: string,
-    hideNavbar?: boolean,
+    navbarLeft?: string,
+    navbarCentral?: string,
     width?: string,
     top?: number
-}): CollapsiblePanel {
+}): StickyPanel {
     opt = opt || {};
     const parent: string = opt.parent && opt.parent !== "body" ? `#${opt.parent}` : "body";
     const pluginId: string = owner.getId() || "";
     const pluginName: string = owner.getName() || "";
     const width: string = opt.width || "100%";
-    const top: number = opt.top || 0;
+    const top: number = opt.top || getToolkitNavbarHeight() || 0;
 
     console.log(`[pvsioweb-utils] Creating panel, parent is ${parent}`);
     
-    const panel: string = Handlebars.compile(collapsiblePanelTemplate, { noEscape: true })({
-        showContent: !!opt?.showContent,
+    const panel: string = Handlebars.compile(stickyPanelTemplate, { noEscape: true })({
+        ...opt,
         width,
         top,
+        "margin-top": top,
         id: pluginId,
-        name: pluginName,
-        toolbar: opt.toolbar,
-        dropdownMenu: opt.dropdownMenu,
-        hideNavbar: opt.hideNavbar
+        name: pluginName
     });
     $(parent).append(panel);
     const $div: JQuery<HTMLDivElement> = $(`#${pluginId}-panel`);
     const $content: JQuery<HTMLDivElement> = $(`#${pluginId}-content`);
-    const $collapseBtn: JQuery<HTMLElement> = $(`#${pluginId}-collapse-icon`);
-    const $label: JQuery<HTMLElement> = $(`#${pluginId}-label`);
-    const $toolbar: JQuery<HTMLElement> = $div.find(".toolbar");
-    const $dropdownMenu: JQuery<HTMLElement> = $div.find(".navbar .dropdown");
-
-    if (!opt?.isDemo) {
-        $collapseBtn.on("click", () => {
-            if ($content.hasClass("show")) {
-                $collapseBtn.addClass("fa-plus-square").removeClass("fa-minus-square");
-            } else {
-                $collapseBtn.removeClass("fa-plus-square").addClass("fa-minus-square");
-            }
-        });
-    }
+    const $navbar: JQuery<HTMLElement> = $div.find(".navbar");
 
     $div.on("mouseover", (evt: JQuery.MouseOverEvent) => {
         $div.attr("active-panel", pluginId);
     });
 
-    return { $div, $collapseBtn, $content, $label, $toolbar, $dropdownMenu };
+    return { $div, $content, $navbar };
 };
 
 export function enableResizeLeft (desc: ResizableLeftPanel, opt?: { initialWidth?: number }): ResizableLeftPanel {
@@ -544,37 +550,46 @@ export const colors = {
 };
 
 
-export enum SettingsAttributes {
-    version = "version",
-    mainFile = "mainFile",
-    mainModule = "mainModule",
-    initFunction = "initFunction",
-    tickFunction = "tickFunction",
-    tickFrequency = "tickFrequency",
-    outputPrinter = "outputPrinter",
-    pictureFile = "pictureFile",
-    pictureWidth = "pictureWidth",
-    pictureHeight = "pictureHeight",
-    pictureData = "pictureData",
-    widgets = "widgets",
-    contextFolder = "contextFolder"
-};
-export declare interface PVSioWebFile {
-    version: 3.0,
-    mainFile?: string, // name of the main file, including extension
-    mainModule?: string, // main function -- this is a theory in PVS
-    initFunction?: string // init function name
-    tickFunction?: string, // tick function name
-    tickFrequency?: string // tick frequency
-    outputPrinter?: string, // name of print function for converting states returned by the server in json format
-    pictureFile?: string, // file name, including extension
-    pictureWidth?: number,
-    pictureHeight?: number,
-    widgets?: WidgetsData
-}
-export declare interface PrototypeData extends PVSioWebFile {
-    contextFolder: string,
-    // "main-data": string,
-    pictureData?: string
-}
+// export enum SettingsAttributes {
+//     version = "version",
 
+//     description = "description",
+
+//     mainFile = "mainFile",
+//     mainModule = "mainModule",
+//     initFunction = "initFunction",
+//     tickFunction = "tickFunction",
+//     tickInterval = "tickInterval",
+//     toStringFunction = "toStringFunction",
+//     keepCallStack = "keepCallStack",
+//     contextFolder = "contextFolder",
+
+//     pictureFile = "pictureFile",
+//     pictureWidth = "pictureWidth",
+//     pictureHeight = "pictureHeight",
+//     pictureData = "pictureData",
+//     widgets = "widgets"
+// };
+// export declare interface PVSioWebFile {
+//     version: string,
+
+//     info?: string,
+
+//     mainFile?: string, // name of the main file, including extension
+//     mainModule?: string, // main function -- this is a theory in PVS
+//     initFunction?: string // init function name
+//     tickFunction?: string, // tick function name
+//     tickInterval?: string // tick interval
+//     toStringFunction?: string, // name of print function for converting states returned by the server in json format
+//     keepCallStack?: string, // whether pvsioweb should keep the call stack -- e.g., this is useful for pvs theories that are not executable, as pvsioweb can then use print(f1(f2(init))) to print a state
+    
+//     pictureFile?: string, // file name, including extension
+//     pictureWidth?: number,
+//     pictureHeight?: number,
+//     widgets?: WidgetsData
+// }
+// export declare interface PrototypeData extends PVSioWebFile {
+//     contextFolder: string,
+//     // "main-data": string,
+//     pictureData?: string
+// }

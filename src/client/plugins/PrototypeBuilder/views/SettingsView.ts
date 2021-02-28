@@ -1,25 +1,20 @@
 import * as Backbone from 'backbone';
-import { SettingsAttributes } from '../../../utils/pvsiowebUtils';
+import { PVSioWebDataAttribute, IoData, IoFileValue, DataAttribute } from '../../../utils/pvsiowebFileUtils';
 import { Connection } from '../../../env/Connection';
 import { CentralView, CentralViewOptions, DELAYED_TRIGGER_TIMEOUT } from './CentralView';
 
-export declare type SettingsElemValue = string;
-export declare interface Settings {
-    id: SettingsAttributes,
-    value: SettingsElemValue // initial value of the setting
-}
-export declare interface SettingsElem extends Settings {
-    label?: string,
-    placeholder?: string
-}
-export declare interface SettingsMap { 
-    [key: string]: Settings
-}
-export declare interface SettingsElemMap {
-    [key:string]: SettingsElem
-}
+// export declare interface SettingsElem extends Settings {
+//     label?: string,
+//     placeholder?: string
+// }
+// export declare interface SettingsMap { 
+//     [key: string]: Settings
+// }
+// export declare interface SettingsElemMap {
+//     [key:string]: SettingsElem
+// }
 export interface SettingsViewOptions extends CentralViewOptions {
-    settings?: SettingsElem[]
+    settings?: IoData
 }
 export enum SettingsEvents {
     DidUpdateSettings = "DidUpdateSettings"
@@ -27,17 +22,22 @@ export enum SettingsEvents {
 
 const settingsTemplate: string = `
 {{#each settings}}
-<div id="{{id}}" class="input-group input-group-sm mb-3">
+<div id="{{@key}}" class="input-group input-group-sm mb-3">
     <div class="input-group-prepend">
-    <span class="input-group-text" id="{{id}}-label" style="min-width:10em;">{{#if label}}{{label}}{{else}}{{id}}{{/if}}</span>
+    <span class="input-group-text" id="{{@key}}-label" style="min-width:10em;">{{#if label}}{{label}}{{else}}{{id}}{{/if}}</span>
     </div>
-    <input id="{{id}}-input" type="text" value="{{value}}" class="form-control" placeholder="{{placeholder}}" aria-label="{{#if label}}{{label}}{{else}}{{id}}{{/if}}" aria-describedby="{{id}}-label">
+    <input id="{{@key}}-input" type="text" value="{{value}}" class="form-control" placeholder="{{placeholder}}" aria-label="{{#if label}}{{label}}{{else}}{{id}}{{/if}}" aria-describedby="{{id}}-label">
 </div>
 {{/each}}
 `;
 
 const contentTemplate: string = `
-<div class="builder-settings container-fluid" style="padding-left:0;">
+<style>
+.input-group-text {
+    font-size: small;
+}
+</style>
+<div class="builder-settings container-fluid p-2" style="padding-left:0;">
     <div class="card">
         <div class="card-header">Settings</div>
         <div class="card-body settings">
@@ -48,20 +48,24 @@ const contentTemplate: string = `
 
 
 // keys need to be consistent with the fields declared in PVSioWebFile (see pvsioweb.d.ts)
-export const fileSettings: SettingsElem[] = [
-    { id: SettingsAttributes.mainFile, label: "Main File", value: "", placeholder: "" },
-    { id: SettingsAttributes.mainModule, label: "Main Function", value: "", placeholder: "" },
-    { id: SettingsAttributes.contextFolder, label: "Context Folder", value: "", placeholder: "" }
-];
-export const functionSettings: SettingsElem[] = [
-    { id: SettingsAttributes.initFunction, label: "Init Function", value: "init", placeholder: "" },
-    { id: SettingsAttributes.tickFunction, label: "Tick Function (optional)", value: "", placeholder: "" },
-    { id: SettingsAttributes.tickFrequency, label: "Tick Frequency", value: "1000ms", placeholder: "" }
-];
-export const printerSettings: SettingsElem[] = [
-    { id: SettingsAttributes.outputPrinter, label: "Output Printer (optional)", value: "", placeholder: "" }
-];
-export const basicSettings: SettingsElem[] = fileSettings.concat(functionSettings).concat(printerSettings);
+// export const infoSettings: SettingsElem[] = [
+//     { id: IoDataAttribute.description, value: "", label: "Description" }
+// ];
+// export const fileSettings: SettingsElem[] = [
+//     { id: IoDataAttribute.mainFile, value: "", label: "Main File" },
+//     { id: IoDataAttribute.mainModule, value: "", label: "Main Function" },
+//     { id: DataAttribute.contextFolder, value: "", label: "Context Folder" }
+// ];
+// export const functionSettings: SettingsElem[] = [
+//     { id: IoDataAttribute.initFunction, value: "", label: "Init Function" },
+//     { id: IoDataAttribute.tickInterval, value: "1000ms", label: "Tick Interval" },
+//     { id: IoDataAttribute.tickFunction, value: "", label: "Tick Function (optional)" }
+// ];
+// export const printerSettings: SettingsElem[] = [
+//     { id: IoDataAttribute.toStringFunction, value: "", label: "toString Function (optional)" }
+// ];
+// export const basicSettings: SettingsElem[] = 
+//     infoSettings.concat(fileSettings).concat(functionSettings).concat(printerSettings);
 
 export class SettingsView extends CentralView {
     protected viewOptions: SettingsViewOptions;
@@ -69,7 +73,7 @@ export class SettingsView extends CentralView {
     /**
      * Settings map
      */
-    protected settings: SettingsElemMap;
+    protected settings: IoData;
 
     /**
      * Pointer to the DOM element with settings
@@ -95,15 +99,9 @@ export class SettingsView extends CentralView {
      * Internal function, updates settings
      * @param settings 
      */
-    protected updateSettings (settings: SettingsElem[]): void {
-        this.settings = {}
-        if (this.viewOptions?.settings?.length) {
-            for (let i = 0; i < this.viewOptions?.settings.length; i++) {
-                const elem: SettingsElem = this.viewOptions?.settings[i];
-                const id: string = elem.id;
-                this.settings[id] = elem;
-            }
-        }
+    updateSettings (settings: IoData): void {
+        this.settings = settings;
+        // this.renderView();
     }
 
     /**
@@ -111,7 +109,12 @@ export class SettingsView extends CentralView {
      * @param data 
      */
     async renderView (): Promise<SettingsView> {
-        const settings: SettingsElem[] = this.viewOptions?.settings || basicSettings;
+        const settings: { [key: string]: IoFileValue } = {};
+        for (let key in this.viewOptions?.settings) {
+            settings[key] = (key === DataAttribute.contextFolder) ? 
+                { id: key, value: this.viewOptions[key], label: "Context Folder" } 
+                    : this.viewOptions.settings[key]
+        }
         const content: string = Handlebars.compile(contentTemplate, { noEscape: true })({ settings });
         await super.renderView({ ...this.viewOptions, content, label: `<i class="fa fa-cogs"></i>` });
         this.$settings = this.$el.find(`.settings`);
@@ -130,7 +133,7 @@ export class SettingsView extends CentralView {
     protected delayedTrigger (evt: SettingsEvents.DidUpdateSettings): void {
         clearTimeout(this.timer);
         this.timer = setTimeout(() => {
-            const data: SettingsMap = this.getCurrentSettings();
+            const data: IoData = this.getCurrentSettings();
             this.trigger(SettingsEvents.DidUpdateSettings, data);
         }, DELAYED_TRIGGER_TIMEOUT);
     }
@@ -139,37 +142,41 @@ export class SettingsView extends CentralView {
      * Configures the list of settings shown in the panel 
      * @param settings 
      */
-    configure (data: { settings: SettingsElem[] }): void {
-        if (data) {
-            const settings: SettingsElem[] = data?.settings;
-            this.updateSettings(settings);
-            const content: string = Handlebars.compile(settingsTemplate, { noEscape: true})({ settings });
-            this.$settings.html(content);
-        }
-    }
+    // loadIoDataData (data: IoData): void {
+    //     if (data) {
+    //         for (let key in this.settings) {
+    //             const val = data[key]
+    //         }
+    //         const settings: SettingsElem[] = data?.settings;
+    //         this.updateSettings(settings);
+    //         const content: string = Handlebars.compile(settingsTemplate, { noEscape: true})({ settings });
+    //         this.$settings.html(content);
+    //     }
+    // }
 
     /**
      * Get the current value of a given setting
      * @param name 
      */
-    getValue (id: SettingsAttributes): string {
+    getValue (id: PVSioWebDataAttribute): string {
         return <string> this.$settings?.find(`#${id} input`)?.val();
     }
 
     /**
      * Get the current value of all settings
      */
-    getCurrentSettings (): SettingsMap {
-        const ans: SettingsMap = {};
-        for (let key in this.settings) {
-            const settings: Settings = this.settings[key];
-            const id: SettingsAttributes = settings.id;
-            const value: SettingsElemValue = this.getValue(id);
-            if (value !== undefined) {
-                ans[key] = { id, value };
-            }
-        }
-        return ans;
+    getCurrentSettings (): IoData {
+        // const ans: SettingsMap = {};
+        // for (let key in this.settings) {
+        //     const settings: Settings = this.settings[key];
+        //     const id: PVSioWebDataAttribute = settings.id;
+        //     const value: string = this.getValue(id);
+        //     if (value !== undefined) {
+        //         ans[key] = { id, value };
+        //     }
+        // }
+        // return ans;
+        return this.settings;
     }
     
     /**
