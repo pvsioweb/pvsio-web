@@ -1,32 +1,25 @@
 import * as Backbone from 'backbone';
-import { PVSioWebDataAttribute, IoData, IoFileValue, DataAttribute } from '../../../utils/pvsiowebFileUtils';
+import { PVSioWebDataAttribute, DataAttribute, WebFileAttribute, WebFile, IoFile, PictureSize, IoFileAttribute } from '../../../utils/builderUtils';
 import { Connection } from '../../../env/Connection';
-import { CentralView, CentralViewOptions, DELAYED_TRIGGER_TIMEOUT } from './CentralView';
+import { CentralView, CentralViewEvents, CentralViewOptions, DELAYED_TRIGGER_TIMEOUT } from './CentralView';
+import { compactDropdownButtonTemplate, editMenu } from '../PrototypeBuilder';
 
-// export declare interface SettingsElem extends Settings {
-//     label?: string,
-//     placeholder?: string
-// }
-// export declare interface SettingsMap { 
-//     [key: string]: Settings
-// }
-// export declare interface SettingsElemMap {
-//     [key:string]: SettingsElem
-// }
 export interface SettingsViewOptions extends CentralViewOptions {
-    settings?: IoData
-}
-export enum SettingsEvents {
-    DidUpdateSettings = "DidUpdateSettings"
-}
+    settings?: {
+        contextFolder?: string,
+        io?: IoFile,
+        web?: WebFile
+    }
+};
 
 const settingsTemplate: string = `
 {{#each settings}}
-<div id="{{@key}}" class="input-group input-group-sm mb-3">
+<div id="{{@key}}" class="input-group input-group-sm mb-3 settings">
     <div class="input-group-prepend">
-    <span class="input-group-text" id="{{@key}}-label" style="min-width:10em;">{{#if label}}{{label}}{{else}}{{id}}{{/if}}</span>
+        <span class="input-group-text" id="{{@key}}-label" style="min-width:10em;">{{#if label}}{{label}}{{else}}{{id}}{{/if}}</span>
     </div>
-    <input id="{{@key}}-input" type="text" value="{{value}}" class="form-control" placeholder="{{placeholder}}" aria-label="{{#if label}}{{label}}{{else}}{{id}}{{/if}}" aria-describedby="{{id}}-label">
+    <input {{#if readonly}}disabled{{/if}} id="{{@key}}-input" key="{{@key}}" type="text" value="{{value}}" class="form-control" placeholder="{{placeholder}}" aria-label="{{#if label}}{{label}}{{else}}{{id}}{{/if}}" aria-describedby="{{@key}}-label">
+    {{browse}}
 </div>
 {{/each}}
 `;
@@ -37,43 +30,32 @@ const contentTemplate: string = `
     font-size: small;
 }
 </style>
-<div class="builder-settings container-fluid p-2" style="padding-left:0;">
+<div class="settings-view container-fluid p-0">
     <div class="card">
-        <div class="card-header">Settings</div>
-        <div class="card-body settings">
+        <!--
+        <div class="card-header d-flex justify-content-between">
+            <button class="btn btn-sm btn-outline-primary save">Save</button>
+        </div>
+        -->
+        <div class="card-body">
         ${settingsTemplate}
         </div>
     </div>
 </div>`;
 
-
-// keys need to be consistent with the fields declared in PVSioWebFile (see pvsioweb.d.ts)
-// export const infoSettings: SettingsElem[] = [
-//     { id: IoDataAttribute.description, value: "", label: "Description" }
-// ];
-// export const fileSettings: SettingsElem[] = [
-//     { id: IoDataAttribute.mainFile, value: "", label: "Main File" },
-//     { id: IoDataAttribute.mainModule, value: "", label: "Main Function" },
-//     { id: DataAttribute.contextFolder, value: "", label: "Context Folder" }
-// ];
-// export const functionSettings: SettingsElem[] = [
-//     { id: IoDataAttribute.initFunction, value: "", label: "Init Function" },
-//     { id: IoDataAttribute.tickInterval, value: "1000ms", label: "Tick Interval" },
-//     { id: IoDataAttribute.tickFunction, value: "", label: "Tick Function (optional)" }
-// ];
-// export const printerSettings: SettingsElem[] = [
-//     { id: IoDataAttribute.toStringFunction, value: "", label: "toString Function (optional)" }
-// ];
-// export const basicSettings: SettingsElem[] = 
-//     infoSettings.concat(fileSettings).concat(functionSettings).concat(printerSettings);
+export enum SettingsEvents {
+    DidUpdateSettings = "DidUpdateSettings"
+}
 
 export class SettingsView extends CentralView {
     protected viewOptions: SettingsViewOptions;
 
     /**
-     * Settings map
+     * Settings editable from the panel
      */
-    protected settings: IoData;
+    protected contextFolder: string;
+    protected ioSettings: IoFile;
+    protected webSettings: WebFile;
 
     /**
      * Pointer to the DOM element with settings
@@ -99,9 +81,48 @@ export class SettingsView extends CentralView {
      * Internal function, updates settings
      * @param settings 
      */
-    updateSettings (settings: IoData): void {
-        this.settings = settings;
-        // this.renderView();
+    updateSettings (data: { io?: IoFile, web?: WebFile, contextFolder?: string }): void {
+        if (data) {
+            if (data.io) { this.ioSettings = data.io; }
+            if (data.web) { this.webSettings = data.web; }
+            if (data.contextFolder) { this.contextFolder = data.contextFolder || ""; }
+            this.refreshView();
+        }
+    }
+
+    /**
+     * Utility function, updates the picture size
+     * @param size 
+     */
+    updatePictureSize (size: PictureSize): void {
+        if (size) {
+            if (size.width) { this.webSettings.pictureWidth = size.width; }
+            if (size.height) { this.webSettings.pictureHeight = size.height; }
+            this.refreshView();
+        }
+    }
+
+    /**
+     * Internal function, refreshes the value shown in the view with the values stored in the settings
+     */
+    protected refreshView (): void {
+        for (let key in this.ioSettings) {
+            const v: string = this.ioSettings[key]?.value || "";
+            this.$el.find(`#${key}-input`).val(v);
+        }
+        for (let key in this.webSettings) {
+            let v: string = this.webSettings[key] || "";
+            if (key === WebFileAttribute.pictureHeight || key === WebFileAttribute.pictureWidth) {
+                const val: number = parseFloat(v);
+                if (!isNaN(val)) {
+                    v = `${parseFloat(v)}px`;
+                    this.$el.find(`#${key}-input`).val(v);
+                }
+            } else {
+                this.$el.find(`#${key}-input`).val(v);
+            }
+        }
+        this.$el.find(`#${DataAttribute.contextFolder}-input`).val(this.contextFolder || "");
     }
 
     /**
@@ -109,21 +130,91 @@ export class SettingsView extends CentralView {
      * @param data 
      */
     async renderView (): Promise<SettingsView> {
-        const settings: { [key: string]: IoFileValue } = {};
-        for (let key in this.viewOptions?.settings) {
-            settings[key] = (key === DataAttribute.contextFolder) ? 
-                { id: key, value: this.viewOptions[key], label: "Context Folder" } 
-                    : this.viewOptions.settings[key]
+        const settings: {
+            [key: string]: { 
+                value: string, 
+                label: string, 
+                readonly?: true | undefined,
+                browse?: string | undefined
+            }
+        } = {};
+        settings[DataAttribute.contextFolder] = {
+            value: this.contextFolder,
+            label: "Context Folder",
+            readonly: true
+        }; 
+        for (let key in this.ioSettings) {
+            settings[key] = this.ioSettings[key];
+        }
+        for (let key in this.webSettings) {
+            switch (key) {
+                case WebFileAttribute.pictureFile: {
+                    const menu: string = compactDropdownButtonTemplate + editMenu;
+                    settings[key] = {
+                        value: this.webSettings[key],
+                        label: "Picture", 
+                        readonly: true,
+                        browse: menu
+                    };
+                    break;
+                }
+                case WebFileAttribute.pictureWidth: {
+                    settings[key] = { value: `${this.webSettings[key]}px`, label: "Picture Width" };
+                    break;
+                }
+                case WebFileAttribute.pictureHeight: {
+                    settings[key] = { value: `${this.webSettings[key]}px`, label: "Picture Height" };
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
         }
         const content: string = Handlebars.compile(contentTemplate, { noEscape: true })({ settings });
         await super.renderView({ ...this.viewOptions, content, label: `<i class="fa fa-cogs"></i>` });
         this.$settings = this.$el.find(`.settings`);
+        this.installHandlers();
+        return this;
+    }
+
+    /**
+     * Internal function, installs event handlers
+     */
+    protected installHandlers (): void {
+        // trigger events when picture width/height is edited
+        this.$settings.find(`#${WebFileAttribute.pictureHeight}`).on("input", (evt: JQuery.ChangeEvent) => {
+            const val: number = parseFloat(evt.target.value);
+            if (val && !isNaN(val)) {
+                this.trigger(CentralViewEvents.DidChangePictureSize, { height: val })    
+            }
+        });
+        this.$settings.find(`#${WebFileAttribute.pictureWidth}`).on("input", (evt: JQuery.ChangeEvent) => {
+            const val: number = parseFloat(evt.target.value);
+            if (val && !isNaN(val)) {
+                this.trigger(CentralViewEvents.DidChangePictureSize, { width: val })    
+            }
+        });
         // install handlers
         this.$settings.find("input").on("input", (evt: JQuery.ChangeEvent) => {
-            // use a dealyed trigger to avoid constant write operation on the file system
-            this.delayedTrigger(SettingsEvents.DidUpdateSettings);
+            const key: string = $(evt?.target).attr("key");
+            const val: string = evt?.target?.value;
+            if (key) {
+                if (key === DataAttribute.contextFolder) {
+                    this.contextFolder = val;
+                } else if (key in WebFileAttribute) {
+                    this.webSettings[key] = val;
+                } else if (key in IoFileAttribute) {
+                    this.ioSettings[key].value = val;
+                } else {
+                    console.warn(`[settings-view] Warning, could not update setting after input`, evt);
+                    return;
+                }
+                // use a delayed trigger to report the change to interested listeners,
+                // to avoid potentially costly updates (e.g., write operation on the file system)
+                this.delayedTrigger(SettingsEvents.DidUpdateSettings);
+            }
         });
-        return this;
     }
 
     /**
@@ -133,26 +224,17 @@ export class SettingsView extends CentralView {
     protected delayedTrigger (evt: SettingsEvents.DidUpdateSettings): void {
         clearTimeout(this.timer);
         this.timer = setTimeout(() => {
-            const data: IoData = this.getCurrentSettings();
-            this.trigger(SettingsEvents.DidUpdateSettings, data);
+            this.trigger(SettingsEvents.DidUpdateSettings);
         }, DELAYED_TRIGGER_TIMEOUT);
     }
 
     /**
-     * Configures the list of settings shown in the panel 
-     * @param settings 
+     * Utility function, clears delayed triggers, used by prototype builder when switching mode
+     * (mode switching triggers events carrying all prototype data, so delayed triggers are not necessary)
      */
-    // loadIoDataData (data: IoData): void {
-    //     if (data) {
-    //         for (let key in this.settings) {
-    //             const val = data[key]
-    //         }
-    //         const settings: SettingsElem[] = data?.settings;
-    //         this.updateSettings(settings);
-    //         const content: string = Handlebars.compile(settingsTemplate, { noEscape: true})({ settings });
-    //         this.$settings.html(content);
-    //     }
-    // }
+    clearDelayedTriggers (): void {
+        clearTimeout(this.timer);
+    }
 
     /**
      * Get the current value of a given setting
@@ -163,22 +245,19 @@ export class SettingsView extends CentralView {
     }
 
     /**
-     * Get the current value of all settings
+     * Get the current value of io settings
      */
-    getCurrentSettings (): IoData {
-        // const ans: SettingsMap = {};
-        // for (let key in this.settings) {
-        //     const settings: Settings = this.settings[key];
-        //     const id: PVSioWebDataAttribute = settings.id;
-        //     const value: string = this.getValue(id);
-        //     if (value !== undefined) {
-        //         ans[key] = { id, value };
-        //     }
-        // }
-        // return ans;
-        return this.settings;
+    getCurrentIoSettings (): IoFile {
+        return this.ioSettings;
     }
     
+    /**
+     * Get the current value of io settings
+     */
+    getCurrentWebSettings (): IoFile {
+        return this.webSettings;
+    }
+
     /**
      * Returns the backbone events handled by this view 
      */

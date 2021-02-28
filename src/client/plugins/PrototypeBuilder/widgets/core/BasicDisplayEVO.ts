@@ -159,7 +159,9 @@ export class BasicDisplayEVO extends WidgetEVO {
      * @instance
      */
     renderSample (): void {
-        return this.render("ABC12");
+        let st = {};
+        st[this.attr.displayName] = "ABC12";
+        this.render(JSON.stringify(st));
     }
 
     getDescription (): string {

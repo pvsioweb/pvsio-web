@@ -21,7 +21,7 @@ export interface TopCentralPanel extends Panel {
     $top: JQuery<HTMLDivElement>,
     $central: JQuery<HTMLDivElement>
 };
-export interface ResizableLeftPanel extends Panel {
+export interface SplitPanel extends Panel {
     $left: JQuery<HTMLDivElement>,
     $central: JQuery<HTMLDivElement>,
     $resizeBar: JQuery<HTMLDivElement>,
@@ -206,6 +206,7 @@ export function createStickyPanel (owner: PVSioWebPlugin, opt?: {
     handlers?: MouseEventHandlers,
     navbarLeft?: string,
     navbarCentral?: string,
+    navbarRight?: string,
     width?: string,
     top?: number
 }): StickyPanel {
@@ -238,7 +239,7 @@ export function createStickyPanel (owner: PVSioWebPlugin, opt?: {
     return { $div, $content, $navbar };
 };
 
-export function enableResizeLeft (desc: ResizableLeftPanel, opt?: { initialWidth?: number }): ResizableLeftPanel {
+export function enableResizeLeft (desc: SplitPanel, opt?: { initialWidth?: number }): SplitPanel {
     opt = opt || {};
     if (desc) {
         const min: number = 10;
@@ -548,48 +549,3 @@ export function fontOutlineStyle (col: string): string {
 export const colors = {
     blue: "#007bff"
 };
-
-
-// export enum SettingsAttributes {
-//     version = "version",
-
-//     description = "description",
-
-//     mainFile = "mainFile",
-//     mainModule = "mainModule",
-//     initFunction = "initFunction",
-//     tickFunction = "tickFunction",
-//     tickInterval = "tickInterval",
-//     toStringFunction = "toStringFunction",
-//     keepCallStack = "keepCallStack",
-//     contextFolder = "contextFolder",
-
-//     pictureFile = "pictureFile",
-//     pictureWidth = "pictureWidth",
-//     pictureHeight = "pictureHeight",
-//     pictureData = "pictureData",
-//     widgets = "widgets"
-// };
-// export declare interface PVSioWebFile {
-//     version: string,
-
-//     info?: string,
-
-//     mainFile?: string, // name of the main file, including extension
-//     mainModule?: string, // main function -- this is a theory in PVS
-//     initFunction?: string // init function name
-//     tickFunction?: string, // tick function name
-//     tickInterval?: string // tick interval
-//     toStringFunction?: string, // name of print function for converting states returned by the server in json format
-//     keepCallStack?: string, // whether pvsioweb should keep the call stack -- e.g., this is useful for pvs theories that are not executable, as pvsioweb can then use print(f1(f2(init))) to print a state
-    
-//     pictureFile?: string, // file name, including extension
-//     pictureWidth?: number,
-//     pictureHeight?: number,
-//     widgets?: WidgetsData
-// }
-// export declare interface PrototypeData extends PVSioWebFile {
-//     contextFolder: string,
-//     // "main-data": string,
-//     pictureData?: string
-// }

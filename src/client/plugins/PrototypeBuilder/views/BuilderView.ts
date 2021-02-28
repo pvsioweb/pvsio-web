@@ -2,17 +2,19 @@ import { WidgetEVO, Coords, WidgetOptions, HotspotData, WidgetData } from "../wi
 import { Connection } from '../../../env/Connection';
 import { HotspotEditor, HotspotEditorEvents, HotspotsMap } from './editors/HotspotEditor';
 
-import { WidgetsMap, MIN_WIDTH, MIN_HEIGHT, CentralView, DELAYED_TRIGGER_TIMEOUT } from './CentralView';
+import { WidgetsMap, CentralView, DELAYED_TRIGGER_TIMEOUT, CentralViewEvents } from './CentralView';
 import { WidgetEditor, WidgetEditorEvents } from './editors/WidgetEditor';
 import { WidgetClassDescriptor, WidgetClassMap } from '../widgets/widgetClassMap';
 
 import * as utils from '../../../utils/pvsiowebUtils';
 import * as fsUtils from '../../../utils/fsUtils';
 import { CentralViewOptions } from "./CentralView";
-import { WebFileAttribute } from "../../../utils/pvsiowebFileUtils";
+import { DEFAULT_PICTURE_SIZE, DidChangePictureEventData, MIN_HEIGHT, MIN_WIDTH, Picture, PictureData, PictureSize, WebFile, WebFileAttribute, whiteboardFile } from "../../../utils/builderUtils";
 
+// vertical space used in the view to pad inner content
 const vspace: number = 36; //px
 
+// events triggered by builder view
 export enum BuilderEvents {
     DidCreateWidget = "DidCreateWidget",
     DidCutWidget = "DidCutWidget",
@@ -22,7 +24,8 @@ export enum BuilderEvents {
     WillEditWidget = "WillEditWidget",
     DidChangePicture = "DidChangePicture",
     DidUpdateSettings = "DidUpdateSettings",
-    DidUpdateWidgets = "DidUpdateWidgets"
+    DidUpdateWidgets = "DidUpdateWidgets",
+    DidLoadPicture = "DidLoadPicture"
 };
 export interface SelectWidgetEvent {
     id: string
@@ -34,7 +37,6 @@ export interface CreateWidgetEvent extends SelectWidgetEvent {
 };
 export type DeleteWidgetEvent = CreateWidgetEvent; 
 export type CutWidgetEvent = CreateWidgetEvent; 
-
 
 const contentTemplate: string = `
 <style>
@@ -68,31 +70,16 @@ const contentTemplate: string = `
     <div class="prototype-image-overlay container-fluid p-0"></div>
 </div>`;
 
-export interface Picture {
-    fileName: string,
-    fileExtension: string,
-    fileContent: string
-};
 export interface PictureOptions {
     width?: number, 
     height?: number, 
     border?: string,
     $el?: JQuery<HTMLElement>
 };
-export interface PictureSize {
-    width: number,
-    height: number
-}
-export type PictureData = Picture & PictureSize;
 
 export type WidgetsData = WidgetData[];
 export interface BuilderViewOptions extends CentralViewOptions {
     widgetClassMap: WidgetClassMap
-};
-
-export interface DidChangePictureEventData {
-    new: Picture,
-    old: Picture
 };
 
 export class BuilderView extends CentralView {    
@@ -108,7 +95,7 @@ export class BuilderView extends CentralView {
     /**
      * Default panel size
      */
-    readonly defaultPanelSize: PictureSize = { width: MIN_WIDTH, height: MIN_HEIGHT };
+    readonly defaultPanelSize: PictureSize = DEFAULT_PICTURE_SIZE;
 
     /**
      * Editor for creating hotspot areas over the picture of the prototype
@@ -209,9 +196,10 @@ export class BuilderView extends CentralView {
     /**
      * Resize picture. If size is not provided, then the current image loaded in the picture is used to refresh the panel.
      */
-    resizePicture (size?: PictureSize): void {
+    resizePicture (size?: PictureSize, opt?: { quiet?: boolean }): void {
         if (size) {
-            this.$imageDiv.find("img").attr("width", size.width).attr("height", size.height);
+            if (size.width) { this.$imageDiv.find("img").attr("width", size.width); }
+            if (size.height) { this.$imageDiv.find("img").attr("height", size.height); }
         }
         size = size || this.getCurrentPictureSize();
         if (size) {
@@ -220,6 +208,10 @@ export class BuilderView extends CentralView {
             // resize frame
             this.$imageFrame.find("img").attr("width", size.width).attr("height", size.height);
             this.$imageFrame.css({ width: `${size.width}px`, height: `${size.height}px` });
+            if (!opt?.quiet) {
+                // trigger event so interested listeners can update their views
+                this.trigger(CentralViewEvents.DidChangePictureSize, size);
+            }
         }
     }
 
@@ -244,6 +236,14 @@ export class BuilderView extends CentralView {
             const data: WidgetsData = this.getCurrentWidgetsData();
             this.trigger(BuilderEvents.DidUpdateWidgets, data);
         }, DELAYED_TRIGGER_TIMEOUT);
+    }
+
+    /**
+     * Utility function, clears delayed triggers, used by prototype builder when switching mode
+     * (mode switching triggers events carrying all prototype data, so delayed triggers are not necessary)
+     */
+    clearDelayedTriggers (): void {
+        clearTimeout(this.timer);
     }
 
     /**
@@ -597,8 +597,8 @@ export class BuilderView extends CentralView {
     async createWhiteboard (): Promise<PictureData> {
         const size: PictureSize = this.defaultPanelSize;
         return await this.loadPicture({
-            fileName: "",
-            fileExtension: "",
+            fileName: fsUtils.getFileName(whiteboardFile),
+            fileExtension: fsUtils.getFileExtension(whiteboardFile),
             fileContent: utils.transparentGif
         }, {
             ...size,
@@ -625,7 +625,7 @@ export class BuilderView extends CentralView {
     /**
      * Returns the size of the current picture loaded in builder view
      */
-    getActivePictureSize (): { width: number, height: number } {
+    getActivePictureSize (): PictureSize {
         const width: number = parseFloat($(`.prototype-screens .tab-pane.active .prototype-image`).css("width")) || window.innerWidth;
         const height: number = parseFloat($(`.prototype-screens .tab-pane.active .prototype-image`).css("height")) || (window.innerHeight - vspace);
         return {
@@ -669,15 +669,15 @@ export class BuilderView extends CentralView {
                 imageElement.src = desc.fileContent;
                 return new Promise ((resolve, reject) => {
                     imageElement.onload = (res: Event) => {
-                        const width: number = (<HTMLImageElement> res?.target)?.width;
-                        const height: number = (<HTMLImageElement> res?.target)?.height;
+                        const pictureWidth: number = (<HTMLImageElement> res?.target)?.width;
+                        const pictureHeight: number = (<HTMLImageElement> res?.target)?.height;
                         const fileContent: string = (<HTMLImageElement> res?.target)?.src;
                         // append image
                         $imageDiv.html(imageElement);
-                        const fname: string = desc.fileName && desc.fileExtension ? `${desc.fileName}${desc.fileExtension}` : "";
-                        $imageDiv.attr(WebFileAttribute.pictureFile, fname);
+                        const pictureFile: string = desc.fileName && desc.fileExtension ? `${desc.fileName}${desc.fileExtension}` : "";
+                        $imageDiv.attr(WebFileAttribute.pictureFile, pictureFile);
                         // resize picture
-                        this.resizePicture({ width, height });
+                        this.resizePicture({ width: pictureWidth, height: pictureHeight }, { quiet: true });
                         // resize view
                         this.resizeView();
                         // return the picture data
@@ -685,10 +685,17 @@ export class BuilderView extends CentralView {
                             fileName: desc.fileName,
                             fileExtension: desc.fileExtension,
                             fileContent,
-                            height,
-                            width
+                            height: pictureHeight,
+                            width: pictureWidth
                         };
                         resolve(pictureData);
+                        // trigger event so interested listeners can update their views
+                        const webFile: WebFile = {
+                            pictureFile,
+                            pictureWidth,
+                            pictureHeight
+                        };
+                        this.trigger(CentralViewEvents.DidLoadPicture, webFile);
                     }
                     imageElement.onerror = (err) => {
                         console.warn("Failed to load picture ", desc, err);

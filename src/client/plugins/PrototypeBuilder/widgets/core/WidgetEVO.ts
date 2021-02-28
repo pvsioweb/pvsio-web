@@ -146,6 +146,7 @@ export interface WidgetData extends HotspotData {
 export function getStateRegexSource (name: string): string[] {
     return [
         // pvs syntax
+        `(${name})\\s*:=\\s*(\\w+\/\\w+)`, // e.g. (# disp_2 := 4/3 #)
         `(${name})\\s*:=\\s*(\\w+)`, // e.g. (# disp_2 := 4, c := 2 #)
         `(${name})\\s*:=\\s*\\"([^\\"]+)\\"`, // e.g., (# disp4 := "asd" #)
         // equivalent json syntax

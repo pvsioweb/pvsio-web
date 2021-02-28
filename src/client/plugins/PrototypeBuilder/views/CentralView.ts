@@ -1,7 +1,6 @@
 import * as Backbone from 'backbone';
 import * as Utils from '../../../utils/pvsiowebUtils';
 import { Connection } from '../../../env/Connection';
-import { HotspotsMap } from './editors/HotspotEditor';
 import { Coords, WidgetEVO } from '../widgets/core/WidgetEVO';
 
 export declare interface CentralViewOptions extends Backbone.ViewOptions {
@@ -14,24 +13,27 @@ export declare interface CentralViewOptions extends Backbone.ViewOptions {
     parentDiv: HTMLElement
 }
 
-export const MIN_WIDTH: number = 800; //px
-export const MIN_HEIGHT: number = 480; //px
-
-export const CentralViewEvents = {
-    DidShowView: "DidShowView",
-    DidHideView: "DidHideView"
+export enum CentralViewEvents {
+    DidShowView = "DidShowView",
+    DidHideView = "DidHideView",
+    DidChangePictureSize = "DidChangePictureSize",
+    DidLoadPicture = "DidLoadPicture"
 };
 
 const bodyTemplate: string = `
-<div id="{{panelId}}" class="container-fluid tab-pane show no-gutters p-0">
+<div id="{{panelId}}" class="container-fluid tab-pane show no-gutters">
     {{content}}
 </div>`;
 
+// data structure for storing widget instances
 export type WidgetsMap = { [id: string]: WidgetEVO };
 
-export const DELAYED_TRIGGER_TIMEOUT: number = 2000; //ms
+// timeout used by central views for delayed trieggers
+export const DELAYED_TRIGGER_TIMEOUT: number = 4000; //ms
 
-
+/**
+ * Abstract class for creating central views in the prototype biulder
+ */
 export abstract class CentralView extends Backbone.View {
     protected connection: Connection;
     
