@@ -38,6 +38,12 @@ export class Stylus extends WidgetEVO {
     getConstructorName (): string {
         return Stylus.constructorName;
     }
+    getDescription (): string {
+        return "Stylus pen";
+    }
+    renderSample (): void {
+        this.render();
+    }
     
     protected initial_position: {
         top: number,
@@ -188,7 +194,7 @@ export class Stylus extends WidgetEVO {
     select (opt?: { opacity?: number, overlayColor?: string, classed?: string, "background-color"?: string }) {
         opt = opt || {};
         opt.opacity = (isNaN(+opt.opacity)) ? 1 : opt.opacity;
-        return this.setCSS(opt);
+        return this.applyCSS(opt);
     };
 
     /**

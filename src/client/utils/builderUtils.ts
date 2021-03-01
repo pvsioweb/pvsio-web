@@ -84,16 +84,27 @@ export function getWebFile (data: PrototypeData): WebFile {
  * Prototype Builder events
  */
 export enum PrototypeBuilderEvents {
+    // initial event, indicates that the plugin is ready to be used
     DidActivatePlugin = "DidActivatePlugin",
+
+    // file menu
     NewPrototype = "NewPrototype",
     SavePrototype = "SavePrototype",
     SaveAs = "SaveAs",
     OpenPrototype = "OpenPrototype",
+
+    // run menu
+    RestartSimulation = "RestartSimulation",
+    StopSimulation = "StopSimulation",
+    RebootSimulator = "RebootSimulator",
+
+    // switch events
     DidSwitchToSimulatorView = "DidSwitchToSimulatorView",
     DidSwitchToBuilderView = "DidSwitchToBuilderView",
     DidSwitchToSettingsView = "DidSwitchToSettingsView",
+
+    // change events
     DidChangePicture = "DidChangePicture",
-    RebootPrototype = "RebootPrototype",
     DidUpdateWidgets = "DidUpdateWidgets",
     DidUpdateSettings = "DidUpdateSettings",
     DidRemovePicture = "DidRemovePicture"

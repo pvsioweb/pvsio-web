@@ -47,11 +47,11 @@ export class TouchScreenEVO extends ButtonEVO {
         opt.css = opt.css || {};
 
         // override default button style
-        this.css["background-color"] = opt.css["background-color"] || "steelblue";
+        this.css["background"] = opt.css["background"] || "steelblue";
         this.css["font-color"] = opt.css["font-color"] || "white";
 
         // set widget keys
-        this.attr.displayName = opt.displayName || id;
+        this.attr.displayName = opt.displayName || opt.buttonName || this.attr?.buttonName || id;
     }
 
     // @override

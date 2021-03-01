@@ -26,7 +26,7 @@ export const widget_template: string = `
       - an inner transparent overlay layer captures user interactions with the widget -->{{/if}}
 <div id="{{id}}"
     style="position:absolute; width:{{width}}px; height:{{height}}px; top:{{top}}px; left:{{left}}px; z-index:{{css.z-index}}; overflow:{{css.overflow}};"
-    class="{{type}} noselect{{#if css.blinking}} blink{{/if}}">
+    class="{{type}} noselect {{#if css.class}}{{class}}{{/if}}">
     <div id="{{id}}_base"
         style="position:absolute; top:0; width:{{width}}px; height:{{height}}px; {{#each css}} {{@key}}:{{this}};{{/each}}"
         class="base"></div>
@@ -50,12 +50,12 @@ export type Coords<T = string | number> = { top?: T, left?: T, width?: T, height
 export const cssKeys = {
     position: [ "absolute", "relative" ],
     cursor: [ "string" ],
-    "background-color": [ "string" ],
+    "background": [ "string" ],
     "font-size": [ "string" ],
     "font-family": [ "string" ],
 
     color: [ "string" ],
-    align: [ "string" ],
+    "text-align": [ "string" ],
     border: [ "string" ],
     "border-radius": [ "string" ],
     overflow: [ "hidden", "visible" ],
@@ -69,18 +69,21 @@ export const cssKeys = {
     margin: [ "string" ], // top right bottom left
     padding: [ "string" ], // top right bottom left
 
-    halo: [ "string" ] // color
+    class: [ "string" ],
+    "box-shadow": [ "string" ]
 };
+
+export interface CSSx { key: string, value: string, hints?: string[] };
 
 export interface CSS {
     position?: "absolute" | "relative",
     cursor?: string,
-    "background-color"?: string,
+    "background"?: string,
     "font-size"?: string,
     "font-family"?: string,
 
     color?: string,
-    align?: string,
+    "text-align"?: string,
     border?: string,
     "border-radius"?: string,
     overflow?: "hidden" | "visible",
@@ -94,12 +97,15 @@ export interface CSS {
     margin?: string,
     padding?: string,
 
-    halo?: string,
+    // css class
+    class?: string,
+
+    // css box-shadow
+    "box-shadow"?: string,
 
     // animation options
     duration?: number,
     rotation?: string,
-    blinking?: string,
     transitionTimingFunction?: "ease-in" | "ease-out",
     transformOrigin?: "center"
 
@@ -286,17 +292,18 @@ export abstract class WidgetEVO extends Backbone.Model {
             ? fontSize
                 : this.height - borderWidth - this.fontPadding;
 
-        this.css = { ...opt.css };
+        // save css style
+        this.setCSS(opt.css);
+
         // set the initial value of some core style options if they are not provided
-        this.css["background-color"] = opt.css["background-color"] || "transparent";
+        this.css["background"] = opt.css["background"] || "transparent";
         this.css["font-size"] = fontSize + "px";
         this.css["font-family"] = opt.css["font-family"] || "sans-serif";
         this.css.color = opt.css.color || "white";
         this.css["text-align"] = opt.css["text-align"] || "center";
         this.css.overflow = opt.css.overflow || "visible";
         this.css["white-space"] = opt.css["white-space"] || "nowrap";
-        this.css.blinking = opt.css.blinking === "true" ? "true" : undefined;
-        this.css.halo = opt.css.halo || "yellow"; // this is the color of the halo shown around the widget when e.g., the mouse is over the button
+        this.css["box-shadow"] = opt.css["box-shadow"] || "yellow"; // this is the color of the halo shown around the widget when e.g., the mouse is over the button
         this.css["z-index"] = opt.css["z-index"] || 0;
 
         this.widget_template = opt.widget_template || widget_template;
@@ -323,7 +330,7 @@ export abstract class WidgetEVO extends Backbone.Model {
         this.$img = this.$div.find(".img");
         this.$base = this.$div.find(".base");
         this.$overlay = this.$div.find(".overlay");
-        this.setCSS(this.css);
+        this.applyCSS(this.css);
         this.rendered = true;
     }
 
@@ -352,16 +359,12 @@ export abstract class WidgetEVO extends Backbone.Model {
      * @memberof module:WidgetEVO
      * @instance
      */
-    renderSample (opt?: CSS): void {
-        this.render(null, opt);
-    }
+    abstract renderSample (opt?: CSS): void;
 
     /**
      * Returns a description of the widget, e.g., display for text and numbers, touchscreen, button, etc
      */
-    getDescription (): string {
-        return "";
-    }
+    abstract getDescription (): string;
 
     /**
      * @function <a name="reveal">reveal</a>
@@ -421,14 +424,11 @@ export abstract class WidgetEVO extends Backbone.Model {
     }
 
     /**
-     * @function <a name="resize">resize</a>
-     * @description Changes the size of the widget according to the width and height given as parameter.
-     * @param coords {Object} Width and height indicating the new size of the widget. The coordinates are given in the form { width: (number), height: (number) }
-     * @param opt {Object}
-     *         <li> duration (Number): duration in milliseconds of the move transition (default is 0, i.e., instantaneous) </li>
-     *         <li> transitionTimingFunction (String): HTML5 timing function (default is "ease-out") </li>
-     * @memberof module:WidgetEVO
-     * @instance
+     * Changes the size of the widget according to the width and height given as parameter.
+     * @param coords Width and height indicating the new size of the widget. The coordinates are given in the form { width: (number), height: (number) }
+     * @param opt Options
+     *  - duration (Number): duration in milliseconds of the move transition (default is 0, i.e., instantaneous)
+     *  - transitionTimingFunction (String): HTML5 timing function (default is "ease-out")
      */
     resize (coords: Coords, opt?: CSS): void {
         if (!this.rendered) {
@@ -448,10 +448,12 @@ export abstract class WidgetEVO extends Backbone.Model {
             : matchBorder ? parseFloat(matchBorder[0]) 
                 : 0;
         borderWidth = isNaN(borderWidth) ? 0 : borderWidth;
-        const fontSize: number = !isNaN(parseFloat(opt["font-size"])) && parseFloat(opt["font-size"]) < this.height - borderWidth - this.fontPadding ? 
-            parseFloat(opt["font-size"]) 
-                : this.height - borderWidth - this.fontPadding;
-        this.css["font-size"] = fontSize + "px";
+
+        // don't touch font-size
+        // const fontSize: number = !isNaN(parseFloat(opt["font-size"])) && parseFloat(opt["font-size"]) < this.height - borderWidth - this.fontPadding ? 
+        //     parseFloat(opt["font-size"]) 
+        //         : this.height - borderWidth - this.fontPadding;
+        // this.css["font-size"] = fontSize + "px";
 
         if (opt.duration) {
             this.$div.animate({ "height": this.height + "px", "width": this.width + "px", "transition-timing-function": opt.transitionTimingFunction }, +opt.duration);
@@ -570,27 +572,23 @@ export abstract class WidgetEVO extends Backbone.Model {
         return this.viz?.visible;
     }
 
-
     /**
-     * @function <a name="setStyle">setStyle</a>
-     * @description Sets the font color and background color.
-     * @param style {Object} Style attributes characterising the visual appearance of the widget.
-     *                      Attributes can be either standard HTML5 attributes, or the following widgets attributes:
-     *          <li>blinking (bool): whether the button is blinking (default is false, i.e., does not blink)</li>
-     *          <li>align (String): text align: "center", "right", "left", "justify" (default is "center")</li>
-     *          <li>backgroundColor (String): background display color (default is "transparent")</li>
-     *          <li>borderColor (String): border color, must be a valid HTML5 color </li>
-     *          <li>borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid", "dotted", "dashed", etc. (default is "none")</li>
-     *          <li>borderWidth (Number): border width (if option borderColor !== null then the default border is 2px, otherwise 0px, i.e., no border)</li>
-     *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
-     *          <li>fontFamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
-     *          <li>fontSize (String): font size (default is "VALpx", where VAL = (coords.height - opt.borderWidth) / 2)</li>
-     *          <li>opacity (Number): opacity of the button. Valid range is [0..1], where 0 is transparent, 1 is opaque (default is 0.9, i.e., semi-opaque)</li>
-     *          <li>zIndex (String): z-index property of the widget (default is 1)</li>
-     * @memberof module:WidgetEVO
-     * @instance
+     * Sets the basic style options.
+     * If a widget class introduces additional options, this function needs to be overridden (e.g., see NumericDisplay). 
+     * @param style 
      */
     setCSS (style: CSS): void {
+        this.css = {};
+        for(const key in cssKeys) {
+            // store style info
+            this.css[key] = style[key];
+        }
+    }
+
+    /**
+     * Internal function, applies the given style options to the html
+     */
+    protected applyCSS (style: CSS): void {
         style = style || {};
         for(const key in style) {
             // store style info
@@ -612,12 +610,14 @@ export abstract class WidgetEVO extends Backbone.Model {
                     this.$base.css(key, style[key]);
                     break;
                 }
-                case "blinking": {
-                    if (style[key] && style[key] !== "false") {
-                        this.$base.addClass(key);
-                    } else {
-                        this.$base.removeClass(key);
-                    }
+                case "class": {
+                    // replace css class for the base layer
+                    this.$base[0].className = "base"; // the empty class for the base layer is "base"
+                    this.$base.addClass(style[key]);
+                    break;
+                }
+                case "cursor": {
+                    this.$overlay.css({ cursor: style[key]});
                     break;
                 }
                 default: {
@@ -670,8 +670,8 @@ export abstract class WidgetEVO extends Backbone.Model {
      * @instance
      */
     invertColors (): void {
-        this.$base.css("background-color", this.css["font-color"]);
-        this.$base.css("color", this.css["background-color"]);
+        this.$base.css("background", this.css["font-color"]);
+        this.$base.css("color", this.css["background"]);
     }
 
     /**
@@ -695,14 +695,15 @@ export abstract class WidgetEVO extends Backbone.Model {
             this.installHandlers();
         }
         opt = opt || {};
-        const halo: string = this.css.halo || "yellow";
+        const boxShadow: string = this.css["box-shadow"] || "0px 0px 10px yellow";
         this.$base.css({
             ...this.css, 
-            "background-color": dimColor(this.css["background-color"], 8),
+            "background": dimColor(this.css["background"], 8),
             ...opt
         });
-        if (opt.classed) { this.$base.addClass(<string> opt.classed); };
-        this.$overlay.css({ "box-shadow": `0px 0px 10px ${halo}`, opacity: 1 });
+        const cssClass: string = opt.class || this.css.class; 
+        if (cssClass) { this.$base.addClass(cssClass); };
+        this.$overlay.css({ "box-shadow": boxShadow, opacity: 1 });
     }
 
     /**
@@ -716,7 +717,7 @@ export abstract class WidgetEVO extends Backbone.Model {
             this.createHTMLElement();
             this.installHandlers();
         }
-        this.setCSS(this.css);
+        this.applyCSS(this.css);
         this.$overlay.css({ opacity: 0 });
     }
 
@@ -789,7 +790,7 @@ export abstract class WidgetEVO extends Backbone.Model {
     /**
      * @param opt 
      *  - all: returns css keys even if the value is null or empty
-     *  - replace: specifies pairs key-value that need to be replaced in the CSS provided as result, this is useful e.g., for replacing the parent ID indicated in a CSS
+     *  - replace: specifies pairs key-value that need to be replaced in the CSS provided as result, this is useful e.g., for replacing attribute 'parent' included in the css style
      */
     getCSS (opt?: { all?: true, replace?: CSS }): CSS {
         opt = opt || {};
@@ -811,6 +812,33 @@ export abstract class WidgetEVO extends Backbone.Model {
         return {};
     }
 
+    /**
+     * Returns extended css information, which includes hints for values, which can be useful for auto-completion engines
+     */
+    getCSSx (): CSSx[] {
+        const keys: string[] = Object.keys({ ...this.css, ...cssKeys })?.sort((a: string, b: string): number => {
+            return a < b ? -1 : 1;
+        });
+        if (keys && keys.length) {
+            const ans: CSSx[] = [];
+            for (let i in keys) {
+                const key: string = keys[i];
+                const value: string = <string> this.css[key];
+                const hints: string[] =
+                    key === "class" ? utils.animateCssClasses 
+                    : key === "background" || key === "color" ? Object.keys(utils.cssColors) 
+                    : key === "cursor" ? utils.cssCursorClasses
+                    : undefined;
+                ans.push({ key, value, hints });
+            }
+            return ans;
+        }
+        return [];
+    }
+
+    /**
+     * Get visibility status
+     */
     getViz (): VizOptions {
         return this.viz;
     }

@@ -88,7 +88,7 @@ export class LedEVO extends WidgetEVO {
         this.radius = Math.min(width, height, maxWidth, maxHeight) / 2;
 
         // override default style options of WidgetEVO as necessary before creating the DOM element with the constructor of module WidgetEVO
-        this.css["background-color"] = opt.css["color"] || opt.css["background-color"] || COLOR.brightGreen;
+        this.css["background"] = opt.css["color"] || opt.css["background"] || COLOR.brightGreen;
         this.css.cursor = opt.css.cursor || "default";
         this.css["border-radius"] = opt.css["border-radius"] || `${this.radius}px`;
         this.css.overflow = "visible";
@@ -130,7 +130,7 @@ export class LedEVO extends WidgetEVO {
     render (state: Renderable, opt?: CSS): void {
         super.render();
         // set style
-        this.setCSS({ ...this.css, ...opt });
+        this.applyCSS({ ...this.css, ...opt });
 
         // make sure shape is round
         this.$base.css({ 
@@ -142,9 +142,9 @@ export class LedEVO extends WidgetEVO {
         // update style, if necessary
         state = (state === undefined || state === null) ? "" : state;
         if (typeof state === "string") {
-            this.setCSS({ "background-color": state });
+            this.applyCSS({ "background": state });
         } else if (typeof state === "object" && this.attr.ledName !== "" && this.evalViz(state)) {
-            this.setCSS({ "background-color": this.evaluate(this.attr.ledName, state) });
+            this.applyCSS({ "background": this.evaluate(this.attr.ledName, state) });
         }
 
         this.reveal();

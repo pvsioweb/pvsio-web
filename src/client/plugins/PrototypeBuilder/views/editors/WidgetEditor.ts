@@ -1,6 +1,6 @@
 import * as Backbone from 'backbone';
-import { createDialog, setDialogTitle, uuid } from '../../../../utils/pvsiowebUtils';
-import { Coords, CSS, WidgetEVO, WidgetAttr, BasicEventData, VizOptions, WidgetOptions, WidgetData } from '../../widgets/core/WidgetEVO';
+import { createDialog, keyCodes, setDialogTitle, uuid } from '../../../../utils/pvsiowebUtils';
+import { Coords, CSS, WidgetEVO, WidgetAttr, BasicEventData, VizOptions, WidgetOptions, WidgetData, CSSx } from '../../widgets/core/WidgetEVO';
 import { WidgetClassDescriptor, WidgetClassMap } from '../../widgets/widgetClassMap';
 
 export interface WidgetEditorData extends Backbone.ViewOptions {
@@ -20,6 +20,10 @@ const containerTemplate: string = `
 .widget-class {
     white-space:nowrap;
 }
+.widget-lib {
+    margin-left: 0px;
+    width: 100%;
+}
 .spinner-left {
     position:absolute;
     left:-160px; 
@@ -31,7 +35,7 @@ const containerTemplate: string = `
 </style>
 <div id="editorId" class="card">
     <div class="card-header spinner-left px-1">
-        <ul class="nav flex-column flex-nowrap nav-pills card-header-tabs widget-list" style="overflow-y:auto; overflow-x:hidden; max-height:408px;">
+        <ul class="nav flex-column flex-nowrap nav-pills card-header-tabs widget-lib" style="overflow-y:auto; overflow-x:hidden; max-height:408px;">
             {{#each widgets as |item kind|}}
             <li class="nav-item">
                 <a draggable="false" kind="{{kind}}" class="widget-class nav-link{{#if @first}} active{{/if}}" id="{{@key}}-tab" data-toggle="tab" href="#{{@key}}" role="tab" aria-controls="{{@key}}" aria-selected="true">{{@key}}</a>
@@ -56,6 +60,7 @@ const containerTemplate: string = `
         margin: 20px 0;
     }
     .widget-attributes {
+        margin-top:42px;
         min-width: 362px;
     }
     .widget-editor-card {
@@ -80,7 +85,7 @@ const containerTemplate: string = `
                         {{/each}}
                     </ol>
                     <div class="carousel-inner">
-                        <!-- carouse screen shows available widgets -->
+                        <!-- carousel screen shows available widgets -->
                         {{#each this}}
                         <div class="carousel-item {{#if @first}}active{{/if}}">
                             <div style="width:60%; margin-left:20%;">
@@ -149,9 +154,16 @@ const styleTemplate: string = `
 {{#each style}}
 <div class="input-group input-group-sm">
     <div class="input-group-prepend" style="min-width:40%;">
-        <span class="input-group-text" id="{{@key}}-label" style="width:100%;">{{@key}}</span>
+        <span class="input-group-text" id="{{key}}-label" style="width:100%;">{{key}}</span>
     </div>
-    <input type="text" class="form-control" name="{{@key}}" value="{{this}}" placeholder="{{this}}" aria-label="{{this}}" aria-describedby="{{@key}}-label">
+    <input type="text" {{#if hints}}list="{{key}}-hints"{{/if}} class="form-control" name="{{key}}" value="{{value}}" placeholder="" aria-label="{{value}}" aria-describedby="{{key}}-label">
+    {{#if hints}}
+    <datalist id="{{key}}-hints">
+        {{#each hints}}
+        <option value="{{this}}">
+        {{/each}}
+    </datalist>
+    {{/if}}
 </div>
 {{/each}}`;
 const vizTemplate: string = `
@@ -256,7 +268,7 @@ export class WidgetEditor extends Backbone.View {
             content: container,
             largeModal: true
         });
-        setDialogTitle("Widget Editor");
+        setDialogTitle("Edit Widget");
         // const carouselControls: JQuery<HTMLElement> = $(`.carousel-control`);
         const width: number = +parseFloat($(".widget-preview").css("width")).toFixed(0);
         const height: number = +parseFloat($(".widget-preview").css("height")).toFixed(0);
@@ -277,11 +289,12 @@ export class WidgetEditor extends Backbone.View {
                     obj.setName(this.widgetData.name);
 
                     // set css style
-                    const css: CSS = obj.getCSS({
-                        all: true
-                    });
+                    // const css: CSS = obj.getCSS({
+                    //     all: true
+                    // });
+                    const cssx: CSSx[] = obj.getCSSx();
                     const style: string = Handlebars.compile(styleTemplate)({
-                        style: css
+                        style: cssx
                     });
                     $(`#${cons}-css`).html(style);
                     $(`#${cons}-css input`).on("input", (evt: JQuery.ChangeEvent) => {
@@ -306,7 +319,7 @@ export class WidgetEditor extends Backbone.View {
 
                     // set widget attributes
                     const attr: string = Handlebars.compile(attrTemplate)({
-                        attr: obj.getAttributes({ nameReplace: this.widgetData.id, keyCode: false })
+                        attr: obj.getAttributes({ keyCode: false })
                     });
                     $(`#${cons}-attr`).html(attr);
                     $(`#${cons}-attr input`).on("input", (evt: JQuery.ChangeEvent) => {

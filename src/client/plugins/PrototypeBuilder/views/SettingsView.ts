@@ -173,7 +173,7 @@ export class SettingsView extends CentralView {
         }
         const content: string = Handlebars.compile(contentTemplate, { noEscape: true })({ settings });
         await super.renderView({ ...this.viewOptions, content, label: `<i class="fa fa-cogs"></i>` });
-        this.$settings = this.$el.find(`.settings`);
+        this.$settings = this.$el.find(`.settings-view`);
         this.installHandlers();
         return this;
     }

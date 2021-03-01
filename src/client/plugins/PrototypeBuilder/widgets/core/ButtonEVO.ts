@@ -102,11 +102,10 @@ export class ButtonEVO extends WidgetEVO {
         opt.css = opt.css || {};
 
         // override default style options of WidgetEVO as necessary before creating the DOM element with the constructor of module WidgetEVO
-        this.css["background-color"] = opt.css["background-color"] || "transparent";
+        this.css["background"] = opt.css["background"] || "transparent";
         this.css.color = opt.css.color || "white";
         this.css["cursor"] = opt.css.cursor || "pointer";
         this.css["z-index"] = opt.css["z-index"] || 1; // z-index for buttons should be at least 1, so they are placed over display widgets
-        // this.css.halo = opt.css.halo || "steelblue";
         this.lineHeight = parseFloat(opt.css["line-height"]) || this.height;
 
         this.connection = opt.connection;
@@ -282,7 +281,7 @@ export class ButtonEVO extends WidgetEVO {
     };
     protected onMouseDown (evt?: JQuery.MouseDownEvent): void {
         this.onButtonPress();
-        this.select({ "background-color": this.css["background-color"] });
+        this.select({ "background": this.css["background"] });
     };
     protected onMouseUp (evt?: JQuery.MouseUpEvent): void {
         this.onButtonRelease();
@@ -381,7 +380,7 @@ export class ButtonEVO extends WidgetEVO {
      */
     protected updateDisplayStyle (opt?: CSS): void {
         opt = opt || {};
-        this.setCSS({ ...this.css, ...opt });
+        this.applyCSS({ ...this.css, ...opt });
         // set line height so text is vertically centered
         this.$base.css("line-height", `${this.lineHeight}px`);
     }

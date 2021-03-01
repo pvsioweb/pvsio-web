@@ -55,6 +55,12 @@ export class MouseCursor extends WidgetEVO {
     getConstructorName (): string {
         return MouseCursor.constructorName;
     }
+    getDescription (): string {
+        return "Mouse pointer";
+    }
+    renderSample (): void {
+        this.render();
+    }
 
     /**
      * @function <a name="MouseCursor">MouseCursor</a>

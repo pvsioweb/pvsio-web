@@ -74,6 +74,7 @@ export interface PictureOptions {
     width?: number, 
     height?: number, 
     border?: string,
+    background?: string,
     $el?: JQuery<HTMLElement>
 };
 
@@ -208,6 +209,8 @@ export class BuilderView extends CentralView {
             // resize frame
             this.$imageFrame.find("img").attr("width", size.width).attr("height", size.height);
             this.$imageFrame.css({ width: `${size.width}px`, height: `${size.height}px` });
+            // set minimum height of panel so image does not overflow
+            this.$el.css({ "min-height": `${size.height + vspace}px` });
             if (!opt?.quiet) {
                 // trigger event so interested listeners can update their views
                 this.trigger(CentralViewEvents.DidChangePictureSize, size);
@@ -602,7 +605,8 @@ export class BuilderView extends CentralView {
             fileContent: utils.transparentGif
         }, {
             ...size,
-            border: "1px solid black"
+            border: "1px solid black",
+            background: "white"
         });
     }
 
@@ -664,6 +668,7 @@ export class BuilderView extends CentralView {
                 if (opt.width) { imageElement.width = opt.width; }
                 if (opt.height) { imageElement.height = opt.height; }
                 if (opt.border) { $imageFrame.css({ border: "1px solid lightgray", "border-radius": "4px", "box-shadow": "10px 10px 10px" }); }   
+                if (opt.background) { $(imageElement).css({ background: opt.background }); }
                 
                 // load the image
                 imageElement.src = desc.fileContent;

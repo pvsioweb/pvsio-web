@@ -70,6 +70,26 @@ export function revealDialog (): JQuery<HTMLElement> {
 export function setDialogTitle (title: string): JQuery<HTMLElement> {
     return $("body").find("#pvsioweb-modal-title").html(title);
 }
+/**
+ * Basic dialog with Yes Cancel buttons
+ * @param message 
+ */
+export type YesCancel = "yes" | "cancel";
+export async function showYesCancelDialog (message: string): Promise<YesCancel> {
+    const $dialog: JQuery<HTMLElement> = createDialog({
+        content: message
+    });
+    return new Promise ((resolve, reject) => {
+        $dialog.find(".ok-btn").on("click", (evt: JQuery.ClickEvent) => {
+            $dialog.remove();
+            resolve("yes");
+        });
+        $dialog.find(".cancel-btn").on("click", (evt: JQuery.ClickEvent) => {
+            $dialog.remove();
+            resolve("cancel");
+        });
+    });
+}
 export const DBLCLICK_TIMEOUT: number = 300; //ms -- if two consecutive clicks are registered in a time frame lower than this timeout, then it's a double click
 export const dialogTemplate: string = `
 <div class="modal fade show" id="{{dialogId}}" tabindex="-1" role="dialog" aria-labelledby="{{dialogId}}-title" aria-hidden="true" style="display:{{#if hidden}}none{{else}}block{{/if}};">
@@ -362,9 +382,6 @@ export function requiredBrowserWarning(): string {
     return "Warning: " + requiredBrowser() + " (your browser is " + getVersion() + ")";
 }
 
-
-export const whiteGif: string = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-export const blackGif: string = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
 export const transparentGif: string = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
 export function removeSpaceDash (str: string): string {
@@ -405,89 +422,46 @@ export const inlineMenuTemplate = `
 </div>
 `;
 
+/**
+ * JQuery.MouseDownEvent.button
+ */
+export const mouseButtons = { left: 0, middle: 1, right: 2 };
 
 /**
- * Key bindings
- * @author Paolo Masci
- * @date 2016/04/25
+ * JQuery.KeyDownEvent.code
  */
-export function getKey(charCode: number): string {
-    if (charCode === 8) return "backspace"; //  backspace
-    if (charCode === 9) return "tab"; //  tab
-    if (charCode === 13) return "enter"; //  enter
-    if (charCode === 16) return "shift"; //  shift
-    if (charCode === 17) return "ctrl"; //  ctrl
-    if (charCode === 18) return "alt"; //  alt
-    if (charCode === 19) return "pause/break"; //  pause/break
-    if (charCode === 20) return "caps lock"; //  caps lock
-    if (charCode === 27) return "esc"; //  esc
-    if (charCode === 32) return "space bar";
-    if (charCode === 33) return "page up"; // page up, to avoid displaying alternate character and confusing people
-    if (charCode === 34) return "page down"; // page down
-    if (charCode === 35) return "end"; // end
-    if (charCode === 36) return "home"; // home
-    if (charCode === 37) return "left arrow"; // left arrow
-    if (charCode === 38) return "up arrow"; // up arrow
-    if (charCode === 39) return "right arrow"; // right arrow
-    if (charCode === 40) return "down arrow"; // down arrow
-    if (charCode === 45) return "insert"; // insert
-    if (charCode === 46) return "delete"; // delete
-    if (charCode === 91) return "left window"; // left window
-    if (charCode === 92) return "right window"; // right window
-    if (charCode === 93) return "select key"; // select key
-    if (charCode === 96) return "numpad 0"; // numpad 0
-    if (charCode === 97) return "numpad 1"; // numpad 1
-    if (charCode === 98) return "numpad 2"; // numpad 2
-    if (charCode === 99) return "numpad 3"; // numpad 3
-    if (charCode === 100) return "numpad 4"; // numpad 4
-    if (charCode === 101) return "numpad 5"; // numpad 5
-    if (charCode === 102) return "numpad 6"; // numpad 6
-    if (charCode === 103) return "numpad 7"; // numpad 7
-    if (charCode === 104) return "numpad 8"; // numpad 8
-    if (charCode === 105) return "numpad 9"; // numpad 9
-    if (charCode === 106) return "multiply"; // multiply
-    if (charCode === 107) return "add"; // add
-    if (charCode === 109) return "subtract"; // subtract
-    if (charCode === 110) return "decimal point"; // decimal point
-    if (charCode === 111) return "divide"; // divide
-    if (charCode === 112) return "F1"; // F1
-    if (charCode === 113) return "F2"; // F2
-    if (charCode === 114) return "F3"; // F3
-    if (charCode === 115) return "F4"; // F4
-    if (charCode === 116) return "F5"; // F5
-    if (charCode === 117) return "F6"; // F6
-    if (charCode === 118) return "F7"; // F7
-    if (charCode === 119) return "F8"; // F8
-    if (charCode === 120) return "F9"; // F9
-    if (charCode === 121) return "F10"; // F10
-    if (charCode === 122) return "F11"; // F11
-    if (charCode === 123) return "F12"; // F12
-    if (charCode === 144) return "num lock"; // num lock
-    if (charCode === 145) return "scroll lock"; // scroll lock
-    if (charCode === 186) return ";"; // semi-colon
-    if (charCode === 187) return "="; // equal-sign
-    if (charCode === 188) return ","; // comma
-    if (charCode === 189) return "-"; // dash
-    if (charCode === 190) return "."; // period
-    if (charCode === 191) return "/"; // forward slash
-    if (charCode === 192) return "`"; // grave accent
-    if (charCode === 219) return "["; // open bracket
-    if (charCode === 220) return "\\"; // back slash
-    if (charCode === 221) return "]"; // close bracket
-    if (charCode === 222) return "'"; // single quote
-    return String.fromCharCode(charCode);
+export enum keyCodes {
+    Backspace = "Backspace",
+    Tab = "Tab",
+    Enter = "Enter",
+    ShiftLeft = "ShiftLeft",
+    ShiftRight = "ShiftRight",
+    ControlLeft = "ControlLeft",
+    ControlRight = "ControlRight",
+    AltLeft = "AltLeft",
+    AltRight = "AltRight",
+    MetaLeft = "MetaLeft",
+    MetaRight = "MetaRight",
+    CapsLock = "CapsLock",
+    Escape = "Escape",
+    SPACE = "Space",
+    ArrowLeft = "ArrowLeft",
+    ArrowUp = "ArrowUp",
+    ArrowRight = "ArrowRight",
+    ArrowDown = "ArrowDown",
+    Semicolon = "Semicolon",
+    Equal = "Equal",
+    Comma = "Comma",
+    Minus = "Minus",
+    Period = "Period", // '.'
+    Slash = "Slash",
+    Backslash = "Backslash", // '\'
 }
-export const mouseButtons = { left: 0, middle: 1, right: 2 };
-export function logKeyCode(event: JQuery.KeyboardEventBase): void {
-    const key: string | number = event.key || event.keyCode;
-    if (typeof key === "number") {
-        console.log(getKey(key));
-    } else {
-        console.log(key);
-    }
-}
-export function colorNameToHex(color: string): string {
-    const colors = {"aliceblue":"#f0f8ff","antiquewhite":"#faebd7","aqua":"#00ffff","aquamarine":"#7fffd4","azure":"#f0ffff",
+/**
+ * standard CSS colors
+ */
+export const cssColors = {
+    "aliceblue":"#f0f8ff","antiquewhite":"#faebd7","aqua":"#00ffff","aquamarine":"#7fffd4","azure":"#f0ffff",
     "beige":"#f5f5dc","bisque":"#ffe4c4","black":"#000000","blanchedalmond":"#ffebcd","blue":"#0000ff","blueviolet":"#8a2be2","brown":"#a52a2a","burlywood":"#deb887",
     "cadetblue":"#5f9ea0","chartreuse":"#7fff00","chocolate":"#d2691e","coral":"#ff7f50","cornflowerblue":"#6495ed","cornsilk":"#fff8dc","crimson":"#dc143c","cyan":"#00ffff",
     "darkblue":"#00008b","darkcyan":"#008b8b","darkgoldenrod":"#b8860b","darkgray":"#a9a9a9","darkgreen":"#006400","darkkhaki":"#bdb76b","darkmagenta":"#8b008b","darkolivegreen":"#556b2f",
@@ -510,10 +484,67 @@ export function colorNameToHex(color: string): string {
     "tan":"#d2b48c","teal":"#008080","thistle":"#d8bfd8","tomato":"#ff6347","turquoise":"#40e0d0",
     "violet":"#ee82ee",
     "wheat":"#f5deb3","white":"#ffffff","whitesmoke":"#f5f5f5",
-    "yellow":"#ffff00","yellowgreen":"#9acd32"};
-
-    if (colors[color.toLowerCase()]) {
-        return colors[color.toLowerCase()];
+    "yellow":"#ffff00","yellowgreen":"#9acd32"
+};
+/**
+ * Selected animate.css classes
+ */
+export const animateCssClasses: string[] = [
+    "animated flash",
+    "animated pulse",
+    "animated fadeIn",
+    "animated flip",
+    "animated zoomIn",
+];
+/**
+ * CSS cursor styles
+ */
+export const cssCursorClasses: string[] = [
+    "default",
+    "alias",
+    "all-scroll",
+    "auto",    
+    "cell",    
+    "context-menu",
+    "col-resize",
+    "copy",
+    "crosshair",    
+    "e-resize",
+    "ew-resize",
+    "grab",
+    "grabbing",    
+    "help",
+    "move",
+    "n-resize",
+    "ne-resize",
+    "nesw-resize",
+    "ns-resize",
+    "nw-resize",
+    "nwse-resize",
+    "no-drop",
+    "none",
+    "not-allowed",
+    "pointer",
+    "progress",
+    "row-resize",
+    "s-resize",
+    "se-resize",
+    "sw-resize",
+    "text",
+    "url",
+    "w-resize",
+    "wait",
+    "zoom-in",
+    "zoom-out"
+];
+/**
+ * Utility function, finds out the hex values of a given color
+ * @param color 
+ */
+export function colorNameToHex(color: string): string {
+    const name: string = color.toLowerCase();
+    if (cssColors[name]) {
+        return cssColors[name];
     }
     return color;
 }

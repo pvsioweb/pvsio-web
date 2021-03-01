@@ -23,7 +23,7 @@ export class SelectionButtonEVO extends ButtonEVO {
 
         // override default button style
         this.activeColor = opt.activeColor || "black";
-        this.inactiveColor = this.css["background-color"];
+        this.inactiveColor = this.css["background"];
     }
 
     isActive (): boolean {
@@ -52,8 +52,8 @@ export class SelectionButtonEVO extends ButtonEVO {
     // the refresh function is used to ensure the visual appearance reflects the toggle state
     protected refresh (): void {
         const backgroundColor: string = this.activeFlag ? this.activeColor : this.inactiveColor;
-        this.css["background-color"] = backgroundColor;
-        this.activeFlag || this.hoverFlag ? super.select({ "background-color": backgroundColor }) : super.deselect();
+        this.css["background"] = backgroundColor;
+        this.activeFlag || this.hoverFlag ? super.select({ "background": backgroundColor }) : super.deselect();
     }
 
     protected onMouseOver (): void {

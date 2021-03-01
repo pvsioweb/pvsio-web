@@ -13,6 +13,12 @@ export class RemoteControllerEVO extends WidgetEVO {
     getConstructorName (): string {
         return RemoteControllerEVO.constructorName;
     }
+    getDescription (): string {
+        return "";
+    }
+    renderSample (): void {
+        
+    }
 
     protected ws: WebSocket;
     protected lastData;

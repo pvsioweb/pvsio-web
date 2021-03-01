@@ -51,9 +51,6 @@ export class SimulatorView extends CentralView {
      * Internal function, installs relevant event handlers
      */
     protected installHandlers (): void {
-        $(document).find(".reboot-prototype-btn").on("click", async (evt: JQuery.ClickEvent) => {
-            this.trigger(SimulatorEvents.DidRebootPrototype);
-        });
     }
 
 }

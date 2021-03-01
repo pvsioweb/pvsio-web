@@ -4,7 +4,7 @@ const path = require('path');
 module.exports = {
     entry: [ './dist/client/builder.js' ],
     output: {
-        filename: 'builder.min.js',
+        filename: 'prototype-builder.min.js',
         path: path.resolve(__dirname, 'bundle/client'),
         libraryTarget: "var",
         library: "builder"

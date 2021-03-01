@@ -7,10 +7,12 @@ import * as Backbone from 'backbone';
 
 const toolkitInterface: string = `
 <div id="PVSio-web-logo" class="PVSio-web-logo">
-    <div class="loader">
-        <div class="version">PVSio-web {{version}}</div>
-        <div class="bar">Loading<div></div><div></div><div></div><div></div></div>
-        <div style="font-size:small;text-align:center;" id="loading-info"></div>
+    <div style="height:0; width:0;">
+        <div class="loader">
+            <div class="version">PVSio-web {{version}}</div>
+            <div class="bar">Loading<div></div><div></div><div></div><div></div></div>
+            <div style="font-size:small;text-align:center;" id="loading-info"></div>
+        </div>
     </div>
 </div>
 <div id="warnings" class="warnings" style="display:none"><button type="button" id="dismissWarnings">Dismiss</button></div>
