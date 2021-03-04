@@ -95,9 +95,9 @@ const prototypeBuilderBody: string = `
 </div>`;
 
 const navbarCentral: string = `
-<button class="btn btn-sm btn-dark builder-navbar settings">Settings</button>
+<button class="btn btn-sm btn-dark builder-navbar simulator">Simulator</button>
 <button class="btn btn-sm btn-dark builder-navbar builder">Builder</button>
-<button class="btn btn-sm btn-dark builder-navbar simulator">Simulator</button>`;
+<button class="btn btn-sm btn-dark builder-navbar settings">Settings</button>`;
 
 export const changePictureTemplate: string = `
 <form class="load-picture-form">
@@ -443,7 +443,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
      */
     protected highlightBuilderButton (): void {
         this.deselectNavbarButtons();
-        this.panel.$navbar.find(".builder-navbar .builder").removeClass("btn-dark").addClass("btn-primary");
+        this.panel.$navbar.find(".builder-navbar.builder").removeClass("btn-dark").addClass("btn-primary");
     }
 
     /**
@@ -451,7 +451,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
      */
     protected highlightSimulatorButton (): void {
         this.deselectNavbarButtons();
-        this.panel.$navbar.find(".builder-navbar .simulator").removeClass("btn-dark").addClass("btn-primary");
+        this.panel.$navbar.find(".builder-navbar.simulator").removeClass("btn-dark").addClass("btn-primary");
     }
 
     /**
@@ -459,7 +459,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
      */
     protected highlightSettingsButton (): void {
         this.deselectNavbarButtons();
-        this.panel.$navbar.find(".builder-navbar .settings").removeClass("btn-dark").addClass("btn-primary");
+        this.panel.$navbar.find(".builder-navbar.settings").removeClass("btn-dark").addClass("btn-primary");
     }
 
     /**

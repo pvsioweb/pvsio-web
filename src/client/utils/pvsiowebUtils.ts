@@ -268,7 +268,7 @@ export function enableResizeLeft (desc: SplitPanel, opt?: { initialWidth?: numbe
         // const initialMaxWidth: number = initialPanelWidth < initialWindowWidth ? 
         //         initialPanelWidth : initialWindowWidth;
         const padding: number = parseFloat(desc.$resizeBar.css("width")) * 2;
-        let leftWidth: number = opt.initialWidth || initialPanelWidth / 4;
+        let leftWidth: number = opt.initialWidth || initialPanelWidth / 3;
         const adjustPanels = (opt?: { leftWidth?: number }) => {
             opt = opt || {};
             opt.leftWidth = opt.leftWidth ||  desc.$left.width();

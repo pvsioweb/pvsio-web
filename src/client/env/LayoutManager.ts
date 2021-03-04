@@ -105,14 +105,6 @@ const toolkitInterface: string = `
                     <button class="btn btn-sm" id="btnSaveProjectAs" style="border-radius:0; margin:-8px 0 -8px; padding-right:2em; width:100%; text-align:right;">Save As...</button>
                 </div>
             </div>
-            <button type="button" class="btn btn-sm" id="btnLoadPicture" style="display:none;">Change Picture</button>
-            <div class="pull-right" style="min-width: 260px; display:none;">
-                <button id="btnReconnect" class="btn btn-sm" style="display:none;">Try to reconnect to WebServer <span class="fa fa-random"></span></button>
-                <button id="lblWebSocketStatus" class="btn btn-sm status" style="background:rgb(8, 88, 154); cursor:default;">WebServer <span class="fa fa-check"></span></button>
-                <button id="logo" class="btn btn-sm status" style="background:rgb(8, 88, 154); cursor:default;"><span>PVSio-web {{version}}</span></button>
-                <div id="autoSaver" class="pull-right"></div>
-                <button id="preferences" class="btn btn-sm"><span class="fa fa-bars"></span></button>
-            </div>
         </div>
     </div>
 </div>

@@ -20,7 +20,7 @@ export enum CentralViewEvents {
 };
 
 const bodyTemplate: string = `
-<div id="{{panelId}}" class="container-fluid tab-pane show no-gutters">
+<div id="{{panelId}}" class="container-fluid tab-pane show no-gutters fade">
     {{content}}
 </div>`;
 
