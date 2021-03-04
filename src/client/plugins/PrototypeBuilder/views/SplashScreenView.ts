@@ -2,19 +2,14 @@ import { Connection } from '../../../env/Connection';
 import { CentralView, CentralViewOptions } from './CentralView';
 
 const content: string = `
-<style>
-.splash-options {
-    max-width: 300px;
-}
-</style>
 <div class="splash-screen-view container-fluid p-0">
     <div class="card">
-        <div class="card-body animated zoomIn">
+        <div class="card-body animated zoomIn align-self-center" style="text-align:center;">
             <h5>Welcome to Prototype Builder!</h5>
             <br>
-            <div>Choose the visual appearance of your prototype.</div>
+            <div>Define the visual appearance of your prototype</div>
             <br>
-            <div class="splash-options">
+            <div>
                 <form class="load-picture-form">
                     <div class="custom-file">
                         <input class="change-picture custom-file-input" type="file" accept="image"">
