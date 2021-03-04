@@ -37,9 +37,6 @@ const toolkitInterface: string = `
     padding: 10px 15px;
     background-color: #f5f5f5;
 }
-.card-header {
-    font-size: small;
-}
 .btn {
     overflow: hidden;
     white-space: nowrap;

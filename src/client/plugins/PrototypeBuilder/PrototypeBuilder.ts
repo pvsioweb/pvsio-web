@@ -211,9 +211,10 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
     protected width: string = "0px";
 
     /**
-     * Flag indicating whether the side view is collapsed
+     * Flag indicating whether the side view is collapsed/hidden
      */
-    protected sidePanelCollapsed: boolean = false;
+    protected sidePanelIsCollapsed: boolean = false;
+    protected sidePanelIsHidden: boolean = false;
 
     /**
      * Pointers to side views and central view
@@ -600,7 +601,10 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
     switchToBuilderView (): void {
         this.centralViews?.Builder?.builderView();
         // this.widgetManager.stopTimers();
-        if (this.sidePanelCollapsed) {
+        if (this.sidePanelIsHidden) {
+            this.revealSidePanel();
+        }
+        if (this.sidePanelIsCollapsed) {
             this.expandSidePanel();
         }
         this.revealBuilderMenu();
@@ -617,7 +621,9 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
      */
     switchToSimulatorView (): void {
         this.centralViews?.Builder?.simulatorView();
-        this.collapseSidePanel();
+        if (!this.sidePanelIsHidden) {
+            this.collapseSidePanel();
+        }
         this.revealSimulatorMenu();
         this.hideBuilderMenu();
         const widgets: WidgetsMap = this.centralViews?.Builder?.getWidgets();
@@ -634,9 +640,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
      */
     switchToSettingsView (): void {
         this.centralViews?.Settings?.revealView();
-        if (this.sidePanelCollapsed) {
-            this.expandSidePanel();
-        }
+        this.hideSidePanel();
         this.hideBuilderMenu();
         this.hideSimulatorMenu();
         this.mode = "settings";
@@ -672,9 +676,10 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
      */
     collapseSidePanel (): void {
         this.saveSidePanelWidth();
+        this.body.$left?.css({ display: "block" });
         this.body.$left?.animate({ "min-width": 0, width: 0 }, 500);
         this.body.$resizeBar?.css({ display: "none" });
-        this.sidePanelCollapsed = true;
+        this.sidePanelIsCollapsed = true;
     }
 
     /**
@@ -682,9 +687,29 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
      */
     expandSidePanel (): void {
         this.body.disableResize = false;
+        this.body.$left?.css({ display: "block" });
         this.body.$left?.animate({ "min-width": `${MIN_WIDTH_LEFT}px`, width: this.width }, 500);
         this.body.$resizeBar?.css({ display: "block" });
-        this.sidePanelCollapsed = false;
+        this.sidePanelIsCollapsed = false;
+        this.sidePanelIsHidden = false;
+    }
+
+    /**
+     * Hides side panel
+     */
+    hideSidePanel (): void {
+        this.body.$left?.css({ display: "none" });
+        this.body.$resizeBar?.css({ display: "none" });
+        this.sidePanelIsHidden = true;
+    }
+
+    /**
+     * Reveals side panel
+     */
+    revealSidePanel (): void {
+        this.body.$left?.css({ display: "block" });
+        this.body.$resizeBar?.css({ display: "block" });
+        this.sidePanelIsHidden = false;
     }
 
     /**
