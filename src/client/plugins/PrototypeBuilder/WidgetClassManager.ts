@@ -41,24 +41,4 @@ export class WidgetClassManager {
         return this.widgetClassMap;
     }
 
-    /**
-     * Utility function, imports widget library
-     */
-    importWidgetLibrary (widgetLib: any): void {
-        console.log(`[pvsio-web] Importing widget library`, widgetLib);
-        if (widgetLib) {
-            const libNames = Object.keys(widgetLib);
-            for (let i = 0; i < libNames.length; i++) {
-                const name: string = libNames[i];
-                console.log(`[pvsio-web] Importing ${name}`, widgetLib[name]);
-                try {
-                    this.importWidgetClassMap(widgetLib[name]);
-                    console.log(`[pvsio-web] Library ${name} imported successfully!`);
-                } catch (error) {
-                    console.warn(`[pvsio-web] Warning: unable to load widget library`, widgetLib);
-                }
-            }
-        }
-    }
-
 }

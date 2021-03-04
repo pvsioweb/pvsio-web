@@ -190,7 +190,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
     /**
      * Widget class manager
      */
-    widgetClassManager: WidgetClassManager = new WidgetClassManager();
+    protected widgetClassManager: WidgetClassManager = new WidgetClassManager();
 
     /**
      * The connection but is public, so objects using PrototypeBuilder can set listeners and trigger events on the connection
@@ -330,6 +330,29 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         // return prototype data
         const data: PrototypeData = this.getPrototypeData();
         return data;
+    }
+
+
+    /**
+     * Utility function, imports widget library
+     */
+    importWidgetLibrary (widgetLib: any): void {
+        if (this.widgetClassManager) {
+            console.log(`[pvsio-web] Importing widget library`, widgetLib);
+            if (widgetLib) {
+                const libNames = Object.keys(widgetLib);
+                for (let i = 0; i < libNames.length; i++) {
+                    const name: string = libNames[i];
+                    console.log(`[pvsio-web] Importing ${name}`, widgetLib[name]);
+                    try {
+                        this.widgetClassManager.importWidgetClassMap(widgetLib[name]);
+                        console.log(`[pvsio-web] Library ${name} imported successfully!`);
+                    } catch (error) {
+                        console.warn(`[pvsio-web] Warning: unable to load widget library`, widgetLib);
+                    }
+                }
+            }
+        }
     }
 
     /**
