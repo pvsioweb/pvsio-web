@@ -3,12 +3,16 @@ import { BackboneConnection, Connection } from '../../env/Connection';
 
 import * as Utils from '../../utils/pvsiowebUtils';
 import { BuilderEvents, BuilderView, CreateWidgetEvent, DeleteWidgetEvent, CutWidgetEvent, SelectWidgetEvent } from './views/BuilderView';
+import * as builderView from './views/BuilderView';
 import { WidgetsListView } from './views/WidgetsListView';
 import { SettingsEvents, SettingsView } from './views/SettingsView';
 import { CentralViewEvents, WidgetsMap } from './views/CentralView';
 import { SideView } from './views/SideView';
-import { SimulatorEvents, SimulatorView } from './views/SimulatorView';
-// import { SettingsElem, SettingsMap } from './views/SettingsView';
+import { SimulatorView } from './views/SimulatorView';
+import * as Backbone from 'backbone';
+import { Renderable, WidgetData, CSS } from './widgets/core/WidgetEVO';
+import { WidgetClassManager } from './WidgetClassManager';
+import { DidChangePictureEventData, IoFile, PrototypeData, DataAttribute, WebFile, defaultIoSettings, defaultWebSettings, PictureSize, getWebFile, getIoFile, PrototypeBuilderEvents, Picture, DidRemovePictureEventData, whiteboardFile  } from '../../utils/builderUtils';
 
 import * as fsUtils from "../../utils/fsUtils";
 
@@ -43,7 +47,7 @@ const prototypeBuilderBody: string = `
     background:whitesmoke;
 }
 .central-panel-inner {
-    width:100%;
+    width:100% !important;
     min-height:600px;
 }
 .card-header-dropdown-menu {
@@ -65,6 +69,9 @@ const prototypeBuilderBody: string = `
     font-size: small;
     font-family: monospace;
     position:absolute;
+}
+.dropdown-menu .dropdown-item {
+    padding-top:4px !important;
 }
 .dropdown-item .btn {
     width:100%;
@@ -117,12 +124,12 @@ export const dropDownMenuTemplate: string = `
 /**
  * Toolbar menus
  */
-export const fileMenu: string = Handlebars.compile(dropDownMenuTemplate, { noEscape: true })({
-    items: [
-        `<div class="dropdown-item btn btn-sm save">Save Prototype</div>`
-    ]
-});
-export const editMenu: string = Handlebars.compile(dropDownMenuTemplate, { noEscape: true })({
+// export const fileMenu: string = Handlebars.compile(dropDownMenuTemplate, { noEscape: true })({
+//     items: [
+//         `<div class="dropdown-item btn btn-sm save">Save Prototype</div>`
+//     ]
+// });
+export const pictureMenu: string = Handlebars.compile(dropDownMenuTemplate, { noEscape: true })({
     items: [
         changePictureTemplate,
         { divider: true },
@@ -131,10 +138,9 @@ export const editMenu: string = Handlebars.compile(dropDownMenuTemplate, { noEsc
 });
 export const runMenu: string = Handlebars.compile(dropDownMenuTemplate, { noEscape: true })({
     items: [
-        `<div class="dropdown-item btn btn-sm restart-simulation">Restart Simulation</div>`,
-        `<div class="dropdown-item btn btn-sm stop-simulation btn-outline-danger">Stop Simulation</div>`,
-        { divider: true },
-        `<div class="reboot-simulator btn btn-sm btn-outline-danger">Reboot PVSio</div>`
+        // `<div class="btn btn-sm btn-outline-dark pause-simulation">Pause Simulation</div>`,
+        // { divider: true },
+        `<div class="reboot-simulator btn btn-sm btn-outline-danger">Reboot Simulation</div>`
     ]
 });
 
@@ -149,12 +155,8 @@ const navbarLeft: string = `
 }
 </style>
 <div class="dropdown">
-    <button class="btn btn-sm btn-dark builder-navbar dropdown-toggle" data-toggle="dropdown">File</button>
-    ${fileMenu}
-</div>
-<div class=""dropdown">
-    <button class="btn btn-sm btn-dark builder-navbar dropdown-toggle" data-toggle="dropdown">Edit</button>
-    ${editMenu}
+    <button class="btn btn-sm btn-dark builder-navbar dropdown-toggle" data-toggle="dropdown">Picture</button>
+    ${pictureMenu}
 </div>
 <div class=""dropdown">
     <button class="btn btn-sm btn-dark builder-navbar dropdown-toggle" data-toggle="dropdown">Run</button>
@@ -170,10 +172,6 @@ export interface CentralViews {
 export interface SideViews {
     Builder: SideView
 };
-import * as Backbone from 'backbone';
-import { Renderable, WidgetData, CSS } from './widgets/core/WidgetEVO';
-import { WidgetClassManager } from './WidgetClassManager';
-import { IoFile, PrototypeData, DataAttribute, WebFile, defaultIoSettings, defaultWebSettings, PictureSize, getWebFile, getIoFile, PrototypeBuilderEvents, DidChangePictureEventData, Picture, DidRemovePictureEventData, whiteboardFile  } from '../../utils/builderUtils';
 
 export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
     readonly name: string = "Prototype Builder";
@@ -305,6 +303,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         // refresh the view
         this.onResizeCentralView();
         // signal ready
+        console.log(`[prototype-builder] DidActivatePlugin`);
         this.trigger(PrototypeBuilderEvents.DidActivatePlugin);
         // switch to builder view
         this.switchToBuilderView();
@@ -371,24 +370,23 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
 
     /**
      * Remove prototype picture
-     * @param state 
-     * @param opt 
      */
     async removePicture (): Promise<void> {
-        const data: PrototypeData = this.getPrototypeData();
-        await this.centralViews.Builder.createWhiteboard();
-        if (data.pictureFile && data.pictureData !== whiteboardFile) {
-            const req: DidRemovePictureEventData = {
-                old: data.pictureFile
+        if (!this.isWhiteboard()) {
+            const old: Picture = this.centralViews.Builder.getCurrentPicture();
+            await this.centralViews.Builder.createWhiteboard();
+            const data: PrototypeData = this.getPrototypeData();
+            const evt: DidRemovePictureEventData = {
+                old, ...data
             };
-            console.log(`[prototype-builder] DidRemovePicture`, req);
-            this.connection?.trigger(PrototypeBuilderEvents.DidRemovePicture, { pictureFile: req });
+            console.log(`[prototype-builder] DidRemovePicture`, evt);
+            this.trigger(PrototypeBuilderEvents.DidRemovePicture, { pictureFile: evt });
         }
     }
 
     /**
      * Renders all widgets with the given state
-     * @param desc 
+     * @param state 
      */
     async renderState (state: Renderable, opt?: CSS): Promise<void> {
         console.log(`[pvsio-web] Render state`, state, opt);
@@ -426,6 +424,14 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
     };
 
     /**
+     * Utility function, checks if a picture is loaded in the view
+     */
+    isWhiteboard (): boolean {
+        const currentPicture: Picture = this.centralViews.Builder.getCurrentPicture();
+        return !(currentPicture?.fileName && currentPicture?.fileExtension && `${currentPicture.fileName}${currentPicture.fileExtension}` !== whiteboardFile);
+    }   
+
+    /**
      * Internal function, install event handlers
      */
     protected installHandlers (): void {
@@ -442,12 +448,12 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
             this.centralViews.Builder.resizePicture(size);
         });
         this.centralViews.Builder.on(CentralViewEvents.DidChangePictureSize, (size: PictureSize) => {
-            this.centralViews.Settings?.updatePictureSize(size); 
+            this.centralViews.Settings.updatePictureSize(size); 
         });
         this.centralViews.Builder.on(BuilderEvents.DidLoadPicture, (evt: WebFile) => {
             this.centralViews.Settings.updateSettings({ web: evt }); 
         })
-        this.centralViews.Builder.on(BuilderEvents.DidChangePicture, (evt: DidChangePictureEventData) => {
+        this.centralViews.Builder.on(BuilderEvents.DidChangePicture, (evt: builderView.DidChangePictureEventData) => {
             // send prototype data on the connection, so interested listeners can save the prototype if they use autosave
             const data: PrototypeData = this.getPrototypeData();
             // update settings view
@@ -455,14 +461,14 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
             // send information on the current prototype, so the user can choose to save the current prototype before creating the new prototype
             const evtData: DidChangePictureData = { ...data, ...evt };
             console.log(`[prototype-builder] DidChangePicture`, evtData);
-            this.connection?.trigger(PrototypeBuilderEvents.DidChangePicture, evtData);
+            this.trigger(PrototypeBuilderEvents.DidChangePicture, evtData);
         });
         this.centralViews.Settings.on(SettingsEvents.DidUpdateSettings, () => {
             // send prototype data on the connection, so interested listeners can save the prototype if they use autosave
             const req: PrototypeData = this.getPrototypeData();
             // send information on the current prototype, so the user can choose to save the current prototype before opening a new prototype
             console.log(`[prototype-builder] DidUpdateSettings`, req);
-            this.connection?.trigger(PrototypeBuilderEvents.DidUpdateSettings, req);
+            this.trigger(PrototypeBuilderEvents.DidUpdateSettings, req);
         });
 
         // left navbar handlers / file menu
@@ -470,30 +476,32 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
             const req: PrototypeData = this.getPrototypeData();
             // send information on the current prototype, so the user can choose to save the current prototype before creating the new prototype
             console.log(`[prototype-builder] NewPrototype`, req);
-            this.connection?.trigger(PrototypeBuilderEvents.NewPrototype, req);
+            this.trigger(PrototypeBuilderEvents.NewPrototype, req);
         });
         this.panel.$navbar.find(".open").on("click", (evt: JQuery.ClickEvent) => {
             const req: PrototypeData = this.getPrototypeData();
             // send information on the current prototype, so the user can choose to save the current prototype before opening a new prototype
             console.log(`[prototype-builder] OpenPrototype`, req);
-            this.connection?.trigger(PrototypeBuilderEvents.OpenPrototype, req);
+            this.trigger(PrototypeBuilderEvents.OpenPrototype, req);
         });
         this.panel.$navbar.find(".save").on("click", (evt: JQuery.ClickEvent) => {
             const req: PrototypeData = this.getPrototypeData();
             console.log(`[prototype-builder] SavePrototype`, req);
-            this.connection?.trigger(PrototypeBuilderEvents.SavePrototype, req);
+            this.trigger(PrototypeBuilderEvents.SavePrototype, req);
         });
         this.panel.$navbar.find(".save-as").on("click", (evt: JQuery.ClickEvent) => {
             const req: PrototypeData = this.getPrototypeData();
             console.log(`[prototype-builder] SaveAs`, req);
-            this.connection?.trigger(PrototypeBuilderEvents.SaveAs, req);
+            this.trigger(PrototypeBuilderEvents.SaveAs, req);
         });
 
         // edit menu items, in navbar and settings view
         $(document).find(".remove-picture").on("click", async (evt: JQuery.ClickEvent) => {
-            const ans: Utils.YesCancel = await Utils.showYesCancelDialog("Remove prototype picture?");
-            if (ans === "yes") {
-                await this.removePicture();
+            if (!this.isWhiteboard()) {
+                const ans: Utils.YesCancel = await Utils.showYesCancelDialog("Remove prototype picture?");
+                if (ans === "yes") {
+                    await this.removePicture();
+                }
             }
         });
         $(document).find(".change-picture").on("input", async (evt: JQuery.ChangeEvent) => {
@@ -501,14 +509,11 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         });
 
         // run menu items
-        $(document).find(".restart-simulation").on("click", async (evt: JQuery.ClickEvent) => {
-            this.restartSimulation();
-        });
-        $(document).find(".stop-simulation").on("click", async (evt: JQuery.ClickEvent) => {
-            this.stopSimulation();
+        $(document).find(".pause-simulation").on("click", async (evt: JQuery.ClickEvent) => {
+            this.pauseSimulation();
         });
         $(document).find(".reboot-simulator").on("click", async (evt: JQuery.ClickEvent) => {
-            this.rebootSimulator();
+            await this.rebootSimulation();
         });
 
         // central navbar handlers
@@ -547,7 +552,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
                 const data: PrototypeData = this.getPrototypeData();
                 // send information on the current prototype, so the user can choose to save the current prototype before creating the new prototype
                 console.log(`[prototype-builder] DidUpdateWidgets`, data);
-                this.connection?.trigger(PrototypeBuilderEvents.DidUpdateWidgets, data);
+                this.trigger(PrototypeBuilderEvents.DidUpdateWidgets, data);
             });
             this.centralViews[i].on(BuilderEvents.DidCreateWidget, (evt: CreateWidgetEvent) => {
                 (<WidgetsListView> this.sideViews[i])?.refresh(evt?.widgets);
@@ -603,7 +608,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         this.mode = "builder";
         // this can be used by interested listeners to save the prototype data
         const data: PrototypeData = this.getPrototypeData();
-        this.connection?.trigger(PrototypeBuilderEvents.DidSwitchToBuilderView, data);
+        this.trigger(PrototypeBuilderEvents.DidSwitchToBuilderView, data);
         console.log(`[prototype-builder] DidSwitchToBuilderView`, data);
     }
 
@@ -620,7 +625,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         this.mode = "simulator";
         // this can be used by interested listeners to save the prototype data
         const data: PrototypeData = this.getPrototypeData();
-        this.connection?.trigger(PrototypeBuilderEvents.DidSwitchToSimulatorView, data);
+        this.trigger(PrototypeBuilderEvents.DidSwitchToSimulatorView, data);
         console.log(`[prototype-builder] DidSwitchToSimulatorView`, data);
     }
 
@@ -637,35 +642,29 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         this.mode = "settings";
         // this can be used by interested listeners to save the prototype data
         const data: PrototypeData = this.getPrototypeData();
-        this.connection?.trigger(PrototypeBuilderEvents.DidSwitchToSettingsView, data);
+        this.trigger(PrototypeBuilderEvents.DidSwitchToSettingsView, data);
         console.log(`[prototype-builder] DidSwitchToSettingsView`, data);
     }
 
     /**
-     * Send a request to restart the simulation
+     * Send a request to pause the simulation
      */
-    restartSimulation (): void {
+    pauseSimulation (): void {
         const settings: IoFile = this.centralViews?.Settings?.getCurrentIoSettings();
-        this.connection?.trigger(PrototypeBuilderEvents.RestartSimulation, settings);
-        console.log(`[prototype-builder] RestartSimulation`, settings);
-    }
-
-    /**
-     * Send a request to stop the simulation
-     */
-    stopSimulation (): void {
-        const settings: IoFile = this.centralViews?.Settings?.getCurrentIoSettings();
-        this.connection?.trigger(PrototypeBuilderEvents.StopSimulation, settings);
-        console.log(`[prototype-builder] StopSimulation`, settings);
+        this.trigger(PrototypeBuilderEvents.PauseSimulation, settings);
+        console.log(`[prototype-builder] PauseSimulation`, settings);
     }
 
     /**
      * Send a request to reboot the simulation environment
      */
-    rebootSimulator (): void {
-        const settings: IoFile = this.centralViews?.Settings?.getCurrentIoSettings();
-        this.connection?.trigger(PrototypeBuilderEvents.RebootSimulator, settings);
-        console.log(`[prototype-builder] RebootSimulator`, settings);
+    async rebootSimulation (): Promise<void> {
+        const ans: Utils.YesCancel = await Utils.showYesCancelDialog("Reboot Simulation?");
+        if (ans === "yes") {
+            const settings: IoFile = this.centralViews?.Settings?.getCurrentIoSettings();
+            this.trigger(PrototypeBuilderEvents.RebootSimulation, settings);
+            console.log(`[prototype-builder] RebootSimulation`, settings);
+        }
     }
 
     /**
@@ -704,7 +703,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
      * @param data prototype data to be loaded
      * @returns true if the prototype has been loaded successfully
      */
-    async loadPrototypeData (data: PrototypeData): Promise<void> {
+    async loadPrototypeData (data: PrototypeData): Promise<PrototypeData> {
         console.log(`[pvsio-web] loading prototype data`, data);
         if (data) {
             // load picture
@@ -731,9 +730,12 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
                 web: getWebFile(data),
                 contextFolder: data.contextFolder
             });
-        } else {
-            console.warn(`[pvsio-web] Warning: prototype data is null`);   
+            // return loaded data
+            const ans: PrototypeData = this.getPrototypeData();
+            return ans;
         }
+        console.warn(`[pvsio-web] Warning: prototype data is null`);   
+        return null;
     }
 
     /**

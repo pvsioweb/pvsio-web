@@ -1,15 +1,11 @@
 import * as Backbone from 'backbone';
-import { PVSioWebDataAttribute, DataAttribute, WebFileAttribute, WebFile, IoFile, PictureSize, IoFileAttribute } from '../../../utils/builderUtils';
+import { PVSioWebDataAttribute, DataAttribute, WebFileAttribute, WebFile, IoFile, PictureSize, IoFileAttribute, SettingsOptions } from '../../../utils/builderUtils';
 import { Connection } from '../../../env/Connection';
 import { CentralView, CentralViewEvents, CentralViewOptions, DELAYED_TRIGGER_TIMEOUT } from './CentralView';
-import { compactDropdownButtonTemplate, editMenu } from '../PrototypeBuilder';
+import { compactDropdownButtonTemplate, pictureMenu } from '../PrototypeBuilder';
 
 export interface SettingsViewOptions extends CentralViewOptions {
-    settings?: {
-        contextFolder?: string,
-        io?: IoFile,
-        web?: WebFile
-    }
+    settings?: SettingsOptions
 };
 
 const settingsTemplate: string = `
@@ -42,6 +38,8 @@ const contentTemplate: string = `
         </div>
     </div>
 </div>`;
+
+export const PVSIOWEB_FILE_VERSION: string = "3.0";
 
 export enum SettingsEvents {
     DidUpdateSettings = "DidUpdateSettings"
@@ -83,8 +81,24 @@ export class SettingsView extends CentralView {
      */
     updateSettings (data: { io?: IoFile, web?: WebFile, contextFolder?: string }): void {
         if (data) {
-            if (data.io) { this.ioSettings = data.io; }
-            if (data.web) { this.webSettings = data.web; }
+            // the following is done to make sure ioSettings and webSettings are well-formed (settings may come from a malformed json file)
+            if (data.io) {
+                this.ioSettings = {};
+                for (let key in IoFileAttribute) {
+                    if (key !== "version") {
+                        // make sure the io setting is initialized to an object, otherwise the assignment below will trigger an exception
+                        this.ioSettings[key] = data.io[key] || { id: key, value: "" };
+                    } else {
+                        this.ioSettings[key] = data.io[key] || PVSIOWEB_FILE_VERSION;
+                    }
+                }
+            }
+            if (data.web) {
+                this.webSettings = {};
+                for (let key in WebFileAttribute) {
+                    this.webSettings[key] = data.web[key] || "";
+                }
+            }
             if (data.contextFolder) { this.contextFolder = data.contextFolder || ""; }
             this.refreshView();
         }
@@ -149,7 +163,7 @@ export class SettingsView extends CentralView {
         for (let key in this.webSettings) {
             switch (key) {
                 case WebFileAttribute.pictureFile: {
-                    const menu: string = compactDropdownButtonTemplate + editMenu;
+                    const menu: string = compactDropdownButtonTemplate + pictureMenu;
                     settings[key] = {
                         value: this.webSettings[key],
                         label: "Picture", 
@@ -184,13 +198,13 @@ export class SettingsView extends CentralView {
     protected installHandlers (): void {
         // trigger events when picture width/height is edited
         this.$settings.find(`#${WebFileAttribute.pictureHeight}`).on("input", (evt: JQuery.ChangeEvent) => {
-            const val: number = parseFloat(evt.target.value);
+            const val: number = parseFloat(evt?.target?.value);
             if (val && !isNaN(val)) {
                 this.trigger(CentralViewEvents.DidChangePictureSize, { height: val })    
             }
         });
         this.$settings.find(`#${WebFileAttribute.pictureWidth}`).on("input", (evt: JQuery.ChangeEvent) => {
-            const val: number = parseFloat(evt.target.value);
+            const val: number = parseFloat(evt?.target?.value);
             if (val && !isNaN(val)) {
                 this.trigger(CentralViewEvents.DidChangePictureSize, { width: val })    
             }
@@ -205,6 +219,12 @@ export class SettingsView extends CentralView {
                 } else if (key in WebFileAttribute) {
                     this.webSettings[key] = val;
                 } else if (key in IoFileAttribute) {
+                    if (key !== "version") {
+                        // make sure the io setting is initialized to an object, otherwise the assignment below will trigger an exception
+                        this.ioSettings[key] = this.ioSettings[key] || { id: key, value: "" };
+                    } else {
+                        this.ioSettings[key] = this.ioSettings[key] || PVSIOWEB_FILE_VERSION;
+                    }
                     this.ioSettings[key].value = val;
                 } else {
                     console.warn(`[settings-view] Warning, could not update setting after input`, evt);
@@ -254,7 +274,7 @@ export class SettingsView extends CentralView {
     /**
      * Get the current value of io settings
      */
-    getCurrentWebSettings (): IoFile {
+    getCurrentWebSettings (): WebFile {
         return this.webSettings;
     }
 

@@ -39,8 +39,8 @@
  *
  */
 
-import { Coords, BasicEvent, WidgetEVO, WidgetOptions, WidgetAttr, CSS, BasicEventData, MatchState } from "./WidgetEVO";
-import { Timer } from "../../../../util/Timer"
+import { Coords, BasicEvent, WidgetEVO, WidgetOptions, WidgetAttr, CSS, BasicEventData } from "./WidgetEVO";
+import { Timer } from "../../../../env/Timer"
 // import { ActionsQueue, ActionCallback } from "../../ActionsQueue";
 import { Connection, PVSioWebCallBack, SendCommandToken } from "../../../../env/Connection";
 import { mouseButtons } from "../../../../utils/pvsiowebUtils";

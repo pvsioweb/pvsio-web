@@ -10,7 +10,7 @@ import { MouseCursor } from '../../../client/plugins/PrototypeBuilder/widgets/me
 import { Stylus } from '../../../client/plugins/PrototypeBuilder/widgets/media/Stylus';
 import { ActionsQueue } from '../../../client/env/ActionsQueue';
 
-import { Player } from '../../../client/util/playback/Player';
+import { Player } from '../../../client/plugins/PrototypeBuilder/playback/Player';
 
 import { WebSocketConnection, ConnectionEvents } from '../../../client/env/Connection';
 import { StartProcessToken, SendCommandToken } from '../../../client/env/Connection';

@@ -1,5 +1,12 @@
 Changelog
 ==========
+
+3.0.0 (Mar 2021)
+---------------
+    Porting to typescript
+    Revised architecture
+    New version of prototype builder
+
 2.3.0 (Dec 2017 / Jan 2018)
 ---------------
     Added tutorials for PVSio-web APIs (see http://www.pvsioweb.org/tutorials)

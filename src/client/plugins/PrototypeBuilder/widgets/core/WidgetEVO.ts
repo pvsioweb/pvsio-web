@@ -25,7 +25,7 @@ export const widget_template: string = `
       - an inner img layer renders images
       - an inner transparent overlay layer captures user interactions with the widget -->{{/if}}
 <div id="{{id}}"
-    style="position:absolute; width:{{width}}px; height:{{height}}px; top:{{top}}px; left:{{left}}px; z-index:{{css.z-index}}; overflow:{{css.overflow}};"
+    style="user-select:none; position:absolute; width:{{width}}px; height:{{height}}px; top:{{top}}px; left:{{left}}px; z-index:{{css.z-index}}; overflow:{{css.overflow}};"
     class="{{type}} noselect {{#if css.class}}{{class}}{{/if}}">
     <div id="{{id}}_base"
         style="position:absolute; top:0; width:{{width}}px; height:{{height}}px; {{#each css}} {{@key}}:{{this}};{{/each}}"
@@ -40,7 +40,7 @@ export const widget_template: string = `
 
 export const img_template: string = `
 {{#if template_description}}<!-- Template for embedding an image in a div -->{{/if}}
-{{#if img}}<img src="{{img}}" style="position:absolute; opacity:{{opacity}}; transform-origin:{{transformOrigin}};">{{/if}}
+{{#if img}}<img src="{{img}}" style="user-select:none; position:absolute; opacity:{{opacity}}; transform-origin:{{transformOrigin}};">{{/if}}
 {{#if svg}}{{svg}}{{/if}}
 `;
 export type Renderable = string | number;
@@ -146,13 +146,26 @@ export interface WidgetData extends HotspotData {
     evts?: string[]
 };
 
+// regexp for rational number
+export const ratNumber: string = `[\\+\\-]?\\d+\/\\d+`;
+export const ratNumberMatch: string = `([\\+\\-]?\\d+)\/(\\d+)`;
+export function rat2real (rat: string): number {
+    if (rat) {
+        const match: RegExpMatchArray = new RegExp(ratNumberMatch).exec(rat);
+        if (match && match.length > 2 && !isNaN(+match[1]) && !isNaN(+match[2]) && +match[2] !== 0) {
+            return +match[1] / +match[2];
+        }
+    }
+    return NaN;
+}
+
 // regexp for quick parsing of state information
 // group 1 captures state attribute name
 // group 2 captures state attribute value
 export function getStateRegexSource (name: string): string[] {
     return [
         // pvs syntax
-        `(${name})\\s*:=\\s*(\\w+\/\\w+)`, // e.g. (# disp_2 := 4/3 #)
+        `(${name})\\s*:=\\s*(${ratNumber})`, // e.g. (# disp_2 := 4/3 #)
         `(${name})\\s*:=\\s*(\\w+)`, // e.g. (# disp_2 := 4, c := 2 #)
         `(${name})\\s*:=\\s*\\"([^\\"]+)\\"`, // e.g., (# disp4 := "asd" #)
         // equivalent json syntax

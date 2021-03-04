@@ -9,7 +9,7 @@ import { WidgetClassDescriptor, WidgetClassMap } from '../widgets/widgetClassMap
 import * as utils from '../../../utils/pvsiowebUtils';
 import * as fsUtils from '../../../utils/fsUtils';
 import { CentralViewOptions } from "./CentralView";
-import { DEFAULT_PICTURE_SIZE, DidChangePictureEventData, MIN_HEIGHT, MIN_WIDTH, Picture, PictureData, PictureSize, WebFile, WebFileAttribute, whiteboardFile } from "../../../utils/builderUtils";
+import { DEFAULT_PICTURE_SIZE, MIN_HEIGHT, MIN_WIDTH, Picture, PictureData, PictureSize, WebFile, WebFileAttribute, whiteboardFile } from "../../../utils/builderUtils";
 
 // vertical space used in the view to pad inner content
 const vspace: number = 36; //px
@@ -34,6 +34,10 @@ export interface CreateWidgetEvent extends SelectWidgetEvent {
     name: string,
     widgets: WidgetsMap,
     hotspots: HotspotsMap
+};
+export interface DidChangePictureEventData {
+    old: Picture,
+    new: Picture
 };
 export type DeleteWidgetEvent = CreateWidgetEvent; 
 export type CutWidgetEvent = CreateWidgetEvent; 
@@ -735,9 +739,9 @@ export class BuilderView extends CentralView {
                                 fileContent
                             };
                             const pictureData: PictureData = await this.loadPicture(newPicture);
-                            resolve(pictureData);
                             const data: DidChangePictureEventData = { old: oldPicture, new: newPicture }
                             this.trigger(BuilderEvents.DidChangePicture, data);
+                            resolve(pictureData);
                         } else {
                             resolve(null);
                         }

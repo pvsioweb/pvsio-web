@@ -20,7 +20,7 @@ disp.render("Hello World!"); // The display shows Hello World!
  *
  */
 
-import { Coords, WidgetEVO, WidgetOptions, CSS, WidgetAttr, Renderable, MatchState } from "./WidgetEVO";
+import { Coords, WidgetEVO, WidgetOptions, CSS, WidgetAttr, Renderable, MatchState, rat2real } from "./WidgetEVO";
 
 export interface DisplayOptions extends WidgetOptions {
     displayName?: string
@@ -91,8 +91,14 @@ export class BasicDisplayEVO extends WidgetEVO {
                 if (typeof state === "string") {
                     const match: MatchState = this.matchState(state);
                     if (match) {
-                        // render state attribute value
-                        this.$base.html(`${match.val}`);
+                        // check if this is a rational number
+                        const val: number = rat2real(match.val);
+                        if (!isNaN(val)) {
+                            this.$base.html(`${val}`);
+                        } else {
+                            // render state attribute value
+                            this.$base.html(`${match.val}`);
+                        }
                     }
                 }
             } else {
