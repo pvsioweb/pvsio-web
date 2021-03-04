@@ -102,6 +102,7 @@ export enum PrototypeBuilderEvents {
     DidSwitchToSimulatorView = "DidSwitchToSimulatorView",
     DidSwitchToBuilderView = "DidSwitchToBuilderView",
     DidSwitchToSettingsView = "DidSwitchToSettingsView",
+    DidSwitchToSplashScreenView = "DidSwitchToSplashScreenView",
 
     // change events
     DidChangePicture = "DidChangePicture",

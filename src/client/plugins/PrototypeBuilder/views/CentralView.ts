@@ -7,7 +7,6 @@ export declare interface CentralViewOptions extends Backbone.ViewOptions {
     label: string, // label shown in the tab
     viewId: string, // unique id of the view
     panelId: string, // id of the panel linked to the view
-    headerDiv: HTMLElement,
     content?: string,
     active?: boolean,
     parentDiv: HTMLElement
@@ -38,10 +37,8 @@ export abstract class CentralView extends Backbone.View {
     protected connection: Connection;
     
     protected panelId: string;
-    protected $headerDiv: JQuery<HTMLElement>;
+    // protected $headerDiv: JQuery<HTMLElement>;
     protected $parentDiv: JQuery<HTMLElement>;
-
-    protected $headerTab: JQuery<HTMLElement>;
 
     protected viewId: string;
     protected viewOptions: CentralViewOptions;
@@ -57,7 +54,6 @@ export abstract class CentralView extends Backbone.View {
         this.connection = connection;
         this.viewId = data.viewId?.replace(/[\s\.]/g, "-") || `view-${Utils.uuid()}`;
         this.panelId = data?.panelId?.replace(/[\s\.]/g, "-") || "";
-        this.$headerDiv = $(data?.headerDiv);
         this.$parentDiv = $(data?.parentDiv);
     }
 

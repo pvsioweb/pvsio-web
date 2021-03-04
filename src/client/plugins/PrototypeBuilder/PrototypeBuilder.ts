@@ -15,6 +15,7 @@ import { WidgetClassManager } from './WidgetClassManager';
 import { DidChangePictureEventData, IoFile, PrototypeData, DataAttribute, WebFile, defaultIoSettings, defaultWebSettings, PictureSize, getWebFile, getIoFile, PrototypeBuilderEvents, Picture, DidRemovePictureEventData, whiteboardFile  } from '../../utils/builderUtils';
 
 import * as fsUtils from "../../utils/fsUtils";
+import { SplashScreenView } from './views/SplashScreenView';
 
 export interface DidChangePictureData extends DidChangePictureEventData, PrototypeData {};
 
@@ -95,7 +96,7 @@ const prototypeBuilderBody: string = `
 
 const navbarCentral: string = `
 <button class="btn btn-sm btn-dark builder-navbar settings">Settings</button>
-<button class="btn btn-sm btn-primary builder-navbar builder">Builder</button>
+<button class="btn btn-sm btn-dark builder-navbar builder">Builder</button>
 <button class="btn btn-sm btn-dark builder-navbar simulator">Simulator</button>`;
 
 export const changePictureTemplate: string = `
@@ -167,7 +168,8 @@ const navbarLeft: string = `
 export interface CentralViews {
     Settings: SettingsView,
     Builder: BuilderView,
-    Simulator: SimulatorView
+    Simulator: SimulatorView,
+    Splash: SplashScreenView
 };
 export interface SideViews {
     Builder: SideView
@@ -179,7 +181,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
     static readonly constructorName: string = "PrototypeBuilder";
     static readonly version: string = "3.0";
 
-    protected mode: "simulator" | "builder" | "settings" = "builder";
+    protected mode: "simulator" | "builder" | "settings" | "splash" = "splash";
 
     protected activeFlag: boolean = false;
     protected parent: string = "body";
@@ -254,7 +256,6 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         
         // create central view and side view
         const bodyDiv: HTMLElement = this.panel.$content.find(`.central-panel-inner`)[0];
-        const headerDiv: HTMLElement = this.panel.$content.find(`.central-panel-header`)[0];
         this.sideViews = {
             Builder: new WidgetsListView({
                 el: this.panel.$content.find(".widget-list")[0]
@@ -266,7 +267,6 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
                 viewId: "settings-view",
                 panelId: "settings-view",
                 el: bodyDiv,
-                headerDiv,
                 parentDiv: this.body.$central[0],
                 settings: {
                     io: opt.settings?.io || defaultIoSettings,
@@ -279,8 +279,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
                 viewId: "builder-view",
                 panelId: "builder-view",
                 el: bodyDiv,
-                headerDiv,
-                active: true,
+                // active: true,
                 parentDiv: this.body.$central[0],
                 widgetClassMap: this.widgetClassManager?.getWidgetClassMap() || {}
             }, this.connection),
@@ -289,7 +288,14 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
                 viewId: "simulator-view",
                 panelId: "builder-view",
                 el: bodyDiv,
-                headerDiv,
+                parentDiv: this.body.$central[0],
+            }, this.connection),
+            Splash: new SplashScreenView({
+                label: "",
+                viewId: "splash-screeen-view",
+                panelId: "splash-screen-view",
+                active: true,
+                el: bodyDiv,
                 parentDiv: this.body.$central[0],
             }, this.connection)
         };
@@ -298,7 +304,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         // create whiteboard
         this.centralViews?.Builder?.createWhiteboard();
         // initialize pointer to the menu
-        this.$menu = this.panel?.$content.find(".panel-menu");
+        this.$menu = this.panel?.$navbar;
         // install handlers
         this.installHandlers();
         // refresh the view
@@ -307,7 +313,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         console.log(`[prototype-builder] DidActivatePlugin`);
         this.trigger(PrototypeBuilderEvents.DidActivatePlugin);
         // switch to builder view
-        this.switchToBuilderView();
+        this.switchToSplashScreenView();
         // update active flag
         this.activeFlag = true;
         return this.activeFlag;
@@ -430,12 +436,44 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
     isWhiteboard (): boolean {
         const currentPicture: Picture = this.centralViews.Builder.getCurrentPicture();
         return !(currentPicture?.fileName && currentPicture?.fileExtension && `${currentPicture.fileName}${currentPicture.fileExtension}` !== whiteboardFile);
-    }   
+    }
+
+    /**
+     * Internal function, highlights builder view button
+     */
+    protected highlightBuilderButton (): void {
+        this.deselectNavbarButtons();
+        this.panel.$navbar.find(".builder-navbar .builder").removeClass("btn-dark").addClass("btn-primary");
+    }
+
+    /**
+     * Internal function, highlights simulator view button
+     */
+    protected highlightSimulatorButton (): void {
+        this.deselectNavbarButtons();
+        this.panel.$navbar.find(".builder-navbar .simulator").removeClass("btn-dark").addClass("btn-primary");
+    }
+
+    /**
+     * Internal function, highlights settings view button
+     */
+    protected highlightSettingsButton (): void {
+        this.deselectNavbarButtons();
+        this.panel.$navbar.find(".builder-navbar .settings").removeClass("btn-dark").addClass("btn-primary");
+    }
+
+    /**
+     * Internal function, deselects all navbar buttons
+     */
+    protected deselectNavbarButtons (): void {
+        this.panel.$navbar.find(".builder-navbar").removeClass("btn-primary").addClass("btn-dark");
+    }
 
     /**
      * Internal function, install event handlers
      */
     protected installHandlers (): void {
+        // buttons for the three main views (no button is provided for splash screen)
         this.centralViews.Simulator.on(CentralViewEvents.DidShowView, () => {
             this.switchToSimulatorView();
         });
@@ -445,9 +483,8 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         this.centralViews.Settings.on(CentralViewEvents.DidShowView, () => {
             this.switchToSettingsView();
         });
-        this.centralViews.Settings.on(CentralViewEvents.DidChangePictureSize, (size: PictureSize) => {
-            this.centralViews.Builder.resizePicture(size);
-        });
+
+        // more builder events
         this.centralViews.Builder.on(CentralViewEvents.DidChangePictureSize, (size: PictureSize) => {
             this.centralViews.Settings.updatePictureSize(size); 
         });
@@ -463,6 +500,11 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
             const evtData: DidChangePictureData = { ...data, ...evt };
             console.log(`[prototype-builder] DidChangePicture`, evtData);
             this.trigger(PrototypeBuilderEvents.DidChangePicture, evtData);
+        });
+
+        // settings events
+        this.centralViews.Settings.on(CentralViewEvents.DidChangePictureSize, (size: PictureSize) => {
+            this.centralViews.Builder.resizePicture(size);
         });
         this.centralViews.Settings.on(SettingsEvents.DidUpdateSettings, () => {
             // send prototype data on the connection, so interested listeners can save the prototype if they use autosave
@@ -504,9 +546,15 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
                     await this.removePicture();
                 }
             }
+            if (this.mode === "splash") {
+                this.switchToBuilderView();
+            }
         });
         $(document).find(".change-picture").on("input", async (evt: JQuery.ChangeEvent) => {
             await this.centralViews.Builder.onDidChangePicture(evt);
+            if (this.mode === "splash") {
+                this.switchToBuilderView();
+            }
         });
 
         // run menu items
@@ -599,8 +647,9 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
      * Switches the builder view
      */
     switchToBuilderView (): void {
+        this.$menu
         this.centralViews?.Builder?.builderView();
-        // this.widgetManager.stopTimers();
+        this.highlightBuilderButton();
         if (this.sidePanelIsHidden) {
             this.revealSidePanel();
         }
@@ -610,7 +659,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         this.revealBuilderMenu();
         this.hideSimulatorMenu();
         this.mode = "builder";
-        // this can be used by interested listeners to save the prototype data
+        // the following event can be used by interested listeners to save the prototype data
         const data: PrototypeData = this.getPrototypeData();
         this.trigger(PrototypeBuilderEvents.DidSwitchToBuilderView, data);
         console.log(`[prototype-builder] DidSwitchToBuilderView`, data);
@@ -621,6 +670,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
      */
     switchToSimulatorView (): void {
         this.centralViews?.Builder?.simulatorView();
+        this.highlightSimulatorButton();
         if (!this.sidePanelIsHidden) {
             this.collapseSidePanel();
         }
@@ -629,7 +679,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         const widgets: WidgetsMap = this.centralViews?.Builder?.getWidgets();
         this.centralViews?.Simulator?.importWidgets(widgets);
         this.mode = "simulator";
-        // this can be used by interested listeners to save the prototype data
+        // the following event can be used by interested listeners to save the prototype data
         const data: PrototypeData = this.getPrototypeData();
         this.trigger(PrototypeBuilderEvents.DidSwitchToSimulatorView, data);
         console.log(`[prototype-builder] DidSwitchToSimulatorView`, data);
@@ -640,14 +690,29 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
      */
     switchToSettingsView (): void {
         this.centralViews?.Settings?.revealView();
+        this.highlightSettingsButton();
         this.hideSidePanel();
         this.hideBuilderMenu();
         this.hideSimulatorMenu();
         this.mode = "settings";
-        // this can be used by interested listeners to save the prototype data
+        // the following event can be used by interested listeners to save the prototype data
         const data: PrototypeData = this.getPrototypeData();
         this.trigger(PrototypeBuilderEvents.DidSwitchToSettingsView, data);
         console.log(`[prototype-builder] DidSwitchToSettingsView`, data);
+    }
+
+    /**
+     * Shows splash screen
+     */
+    switchToSplashScreenView (): void {
+        this.centralViews?.Splash?.revealView();
+        this.deselectNavbarButtons();
+        this.hideSidePanel();
+        this.mode = "splash";
+        // this can be used by interested listeners to save the prototype data
+        const data: PrototypeData = this.getPrototypeData();
+        this.trigger(PrototypeBuilderEvents.DidSwitchToSplashScreenView, data);
+        console.log(`[prototype-builder] DidSwitchToSplashScreenView`, data);
     }
 
     /**
@@ -731,6 +796,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
     async loadPrototypeData (data: PrototypeData): Promise<PrototypeData> {
         console.log(`[pvsio-web] loading prototype data`, data);
         if (data) {
+            let loaded: boolean = false;
             // load picture
             if (data.pictureFile && data.pictureData) {
                 const fname: string = data.pictureFile;
@@ -740,6 +806,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
                     fileContent: data.pictureData
                 }
                 await this.centralViews?.Builder?.loadPicture(picture);
+                loaded = true;
             }
             // load widgets
             if (data.widgets) {
@@ -748,6 +815,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
                     await this.centralViews?.Builder?.loadWidget(wdata);
                     this.centralViews?.Builder?.createHotspot(wdata);
                 }
+                loaded = data.widgets.length > 0;
             }
             // load settings
             this.centralViews?.Settings?.updateSettings({
@@ -755,6 +823,10 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
                 web: getWebFile(data),
                 contextFolder: data.contextFolder
             });
+            // show builder view if anything has been loaded
+            if (loaded) {
+                this.switchToBuilderView();
+            }
             // return loaded data
             const ans: PrototypeData = this.getPrototypeData();
             return ans;

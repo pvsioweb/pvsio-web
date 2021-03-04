@@ -42,8 +42,7 @@ export class SimulatorView extends CentralView {
      * @param opt 
      */
     async renderView (opt?: CentralViewOptions): Promise<SimulatorView> {
-        const content: string = "";
-        await super.renderView({ ...this.viewOptions, content });
+        // no need to render -- we are using the panel from builder-view
         return this;
     }
 
