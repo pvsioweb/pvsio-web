@@ -26,9 +26,11 @@ export enum zIndex {
     FRONT = 102
 };
 export enum opacity {
+    TRANSPARENT = 0,
     LOW = 0.4,
     NORMAL = 0.6,
-    HIGH = 0.9
+    HIGH = 0.9,
+    OPAQUE = 1
 };
 const tooltipDistance: number = 20; // px
 
@@ -51,15 +53,15 @@ const markerOverlayTemplate: string = `
 // the marker has only one active corner for resize (tl), as this makes everything much easier to implement and bring little or no usability issue.
 const markerTemplate: string = `
 <div class="marker" coords=${JSON.stringify({ top: 0, left: 0, width: 0, height: 0 })} id="{{id}}" style="z-index:100; top:{{top}}px; left:{{left}}px; width:{{width}}px; height:{{height}}px; position:absolute;">
-    <div class="shader" style="z-index:100; width:100%; height:100%; opacity:${opacity.LOW}; background:steelblue; position:absolute; border: 1px solid blue; cursor:pointer;"></div>
-    <div class="tl corner" style="z-index:100; width:10px; height:10px; top:0px; left:0px; position:absolute; cursor:nwse-resize; margin-left:-7px; margin-top:-7px; border: 1px solid blue; opacity:${opacity.HIGH};"></div>
-    <div class="bl corner" style="z-index:100; width:10px; height:10px; top:100%; left:0px; position:absolute; cursor:nesw-resize; margin-left:-7px; margin-top:-3px; border: 1px solid blue; opacity:${opacity.HIGH};"></div>
-    <div class="br corner" style="z-index:100; width:10px; height:10px; top:100%; left:100%; position:absolute; cursor:nwse-resize; margin-left:-3px; margin-top:-3px; border: 1px solid blue; opacity:${opacity.HIGH};"></div>
-    <div class="tr corner" style="z-index:100; width:10px; height:10px; top:0px; left:100%; position:absolute; cursor:nesw-resize; margin-left:-3px; margin-top:-7px; border: 1px solid blue; opacity:${opacity.HIGH};"></div>
-    <div class="l corner" style="z-index:100; width:10px; height:10px; top:50%; left:0px; position:absolute; cursor:ew-resize; margin-left:-7px; margin-top:-5px; border: 1px solid blue; opacity:${opacity.HIGH};"></div>
-    <div class="r corner" style="z-index:100; width:10px; height:10px; top:50%; left:100%; position:absolute; cursor:ew-resize; margin-left:-3px; margin-top:-5px; border: 1px solid blue; opacity:${opacity.HIGH};"></div>
-    <div class="b corner" style="z-index:100; width:10px; height:10px; top:100%; left:50%; position:absolute; cursor:ns-resize; margin-left:-5px; margin-top:-2px; border: 1px solid blue; opacity:${opacity.HIGH};"></div>
-    <div class="t corner" style="z-index:100; width:10px; height:10px; top:0%; left:50%; position:absolute; cursor:ns-resize; margin-left:-5px; margin-top:-7px; border: 1px solid blue; opacity:${opacity.HIGH};"></div>
+    <div class="shader" style="z-index:100; width:100%; height:100%; opacity:${opacity.LOW}; background:steelblue; position:absolute; border: 1px solid blue; cursor:crosshair;"></div>
+    <div class="l corner" style="z-index:100; width:10px; height:100%; top:5px; left:0px; position:absolute; cursor:ew-resize; margin-left:-7px; margin-top:-5px; border: 1px solid blue; opacity:${opacity.TRANSPARENT};"></div>
+    <div class="r corner" style="z-index:100; width:10px; height:100%; top:5px; left:100%; position:absolute; cursor:ew-resize; margin-left:-3px; margin-top:-5px; border: 1px solid blue; opacity:${opacity.TRANSPARENT};"></div>
+    <div class="b corner" style="z-index:100; width:100%; height:10px; top:100%; left:5px; position:absolute; cursor:ns-resize; margin-left:-5px; margin-top:-2px; border: 1px solid blue; opacity:${opacity.TRANSPARENT};"></div>
+    <div class="t corner" style="z-index:100; width:100%; height:10px; top:0px; left:5px; position:absolute; cursor:ns-resize; margin-left:-5px; margin-top:-7px; border: 1px solid blue; opacity:${opacity.TRANSPARENT};"></div>
+    <div class="tl corner" style="z-index:100; width:10px; height:10px; top:0px; left:0px; position:absolute; cursor:nwse-resize; margin-left:-7px; margin-top:-7px; border: 1px solid blue; opacity:${opacity.TRANSPARENT};"></div>
+    <div class="bl corner" style="z-index:100; width:10px; height:10px; top:100%; left:0px; position:absolute; cursor:nesw-resize; margin-left:-7px; margin-top:-3px; border: 1px solid blue; opacity:${opacity.TRANSPARENT};"></div>
+    <div class="br corner" style="z-index:100; width:10px; height:10px; top:100%; left:100%; position:absolute; cursor:nwse-resize; margin-left:-3px; margin-top:-3px; border: 1px solid blue; opacity:${opacity.TRANSPARENT};"></div>
+    <div class="tr corner" style="z-index:100; width:10px; height:10px; top:0px; left:100%; position:absolute; cursor:nesw-resize; margin-left:-3px; margin-top:-7px; border: 1px solid blue; opacity:${opacity.TRANSPARENT};"></div>
 </div>
 `;
 
@@ -240,7 +242,7 @@ class ResizeHandler extends HotspotHandler {
             this.dragStartCoords = null;
 
             this.$marker.attr("coords", JSON.stringify(coords));
-            this.$marker.find(".shader").css({ cursor: "pointer" });
+            this.$marker.find(".shader").css({ cursor: "default" });
 
             const id: string = this.$marker.attr("id");
             const data: HotspotData = { id, coords };
@@ -294,7 +296,7 @@ class MoveHandler extends HotspotHandler {
             this.dragStartCoords = null;
 
             const id: string = this.$marker.attr("id");
-            this.$marker.find(".shader").css({ cursor: "pointer" });
+            this.$marker.find(".shader").css({ cursor: "default" });
             this.$marker.css({
                 left: this.initialMarkerCoords.left + offset.left,
                 top: this.initialMarkerCoords.top + offset.top
@@ -512,6 +514,7 @@ export class HotspotEditor extends Backbone.View {
                 }
                 this.mode = null;
                 this.showCorners();
+                this.enableShaderPointer();
                 break;
             }
             // case "c":
@@ -535,15 +538,33 @@ export class HotspotEditor extends Backbone.View {
             }
         }
     }
+    /**
+     * Shows the hotspot corners used for resize operations
+     */
     showCorners (): void {
         this.$overlay?.find(".corner").css({
             display: "block"
         });
     }
+    /**
+     * Hides the hotspot corners used for resize operations
+     */
     hideCorners (): void {
         this.$overlay?.find(".corner").css({
             display: "none"
         });
+    }
+    /**
+     * Forces the use of crosshair pointer on .shader
+     */
+    disableShaderPointer (): void {
+        this.$overlay?.find(".shader").css({ cursor: "crosshair" });
+    }
+    /**
+     * Mouse pointer restored on .shader
+     */
+    enableShaderPointer (): void {
+        this.$overlay?.find(".shader").css({ cursor: "default" });
     }
     protected onScroll (evt: JQuery.ScrollEvent): void {
         evt.preventDefault();
@@ -731,6 +752,7 @@ export class HotspotEditor extends Backbone.View {
                 }
             }
         }).on("mouseup", (evt: JQuery.MouseUpEvent) => {
+            this.enableShaderPointer();
             // check if this is a double click
             if (this.isDoubleClick()) {
                 // trigger edit event
@@ -847,6 +869,7 @@ export class HotspotEditor extends Backbone.View {
             }
             case "create":
             default: {
+                this.showCorners();
                 if (this.$marker) {
                     const width: number = parseFloat(this.$marker.css("width"));
                     const height: number = parseFloat(this.$marker.css("height"));
@@ -875,6 +898,9 @@ export class HotspotEditor extends Backbone.View {
             this.mode = null; // end current mode
         }
     }
+    /**
+     * THis handler is triggered when the user starts to create a new hotspot 
+     */
     protected onMouseDown (evt: JQuery.MouseDownEvent): void {
         this.closeContextMenu();
         switch (this.mode) {
@@ -891,6 +917,8 @@ export class HotspotEditor extends Backbone.View {
                 if (key === Utils.mouseButtons.right) {
                     // show context menu
                 } else {
+                    this.hideCorners();
+                    this.disableShaderPointer();
                     this.mouseEventHandler(evt);
                 }
             }
@@ -923,6 +951,9 @@ export class HotspotEditor extends Backbone.View {
             }
         }
     }
+    /**
+     * Selects a given hotspot
+     */
     selectHotspot (data: { id: string }): void {
         if (data?.id) {
             this.clearSelection();
@@ -931,6 +962,9 @@ export class HotspotEditor extends Backbone.View {
             this.highlightHotspot(data);
         }
     }
+    /**
+     * Deselects a give hotspot
+     */
     deselectHotspot (data: { id: string }): void {
         if (data?.id) {
             const $el: JQuery<HTMLElement> = this.$overlay.find(`#${data.id}`);
@@ -938,15 +972,21 @@ export class HotspotEditor extends Backbone.View {
             this.highlightHotspot(data);
         }
     }
+    /**
+     * Deselects all hotspots
+     */
     clearSelection (): void {
         this.clearHighlight();
         this.$overlay.find(`.marker`).removeClass("selected");
         this.trigger(HotspotEditorEvents.DidClearSelection);
     }
+    /**
+     * Highlights a hotspot
+     */
     highlightHotspot (data: { id: string }): void {
         if (data?.id) {
             const $el: JQuery<HTMLElement> = this.$overlay.find(`#${data.id}`);
-            const color: string = $el.hasClass("selected") ? "yellow" : "gray";
+            const color: string = $el.hasClass("selected") ? "yellow" : Utils.colors.blue;
             // put marker under the cursor on top of the other markers
             this.clearHighlight();
             $el.css("z-index", zIndex.FRONT);
@@ -956,6 +996,9 @@ export class HotspotEditor extends Backbone.View {
             $el.css({ "box-shadow": `${color} 0px 0px 8px` });
         }
     }
+    /**
+     * Removes highlight from all hotspots
+     */
     clearHighlight (): void {
         $(".marker").css({ "z-index": zIndex.NORMAL });
         this.$overlay.find(".shader").css({ border: `1px solid gray`});
@@ -965,21 +1008,32 @@ export class HotspotEditor extends Backbone.View {
         this.$overlay.find(".marker.selected .corner").css({ border: `1px solid ${Utils.colors.blue}`});
         this.$overlay.find(`.marker.selected`).css({ "box-shadow": `${Utils.colors.blue} 0px 0px 8px` });
     }
-
+    /**
+     * Copies a given hotspot to the clipboard
+     */
     copyHotspot (hotspotData: HotspotData): void {
         if (hotspotData) {
             this.clipboard = hotspotData;
         }
     }
+    /**
+     * Copies a given hotspot to the clipboard and deletes the hotspot
+     */
     cutHotspot (hotspotData: HotspotData): void {
         if (hotspotData) {
             this.clipboard = hotspotData;
             this.deleteHotspot(hotspotData);
         }
     }
+    /**
+     * Creates a new hotspot using the clipboard as model
+     */
     pasteHotspot (hotspotData: HotspotData): HotspotData {
         return this.createHotspot(hotspotData, { useFreshId: true });
     }
+    /**
+     * Deletes a given hotspot
+     */
     deleteHotspot (data: { id: string }): void {
         if (data?.id) {
             const $el: JQuery<HTMLElement> = this.$overlay.find(`#${data.id}`);
