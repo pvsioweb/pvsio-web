@@ -52,8 +52,8 @@ export class SettingsView extends CentralView {
      * Settings editable from the panel
      */
     protected contextFolder: string;
-    protected ioSettings: IoFile;
-    protected webSettings: WebFile;
+    protected ioSettings: IoFile = {};
+    protected webSettings: WebFile = {};
 
     /**
      * Pointer to the DOM element with settings
@@ -120,11 +120,11 @@ export class SettingsView extends CentralView {
      * Internal function, refreshes the value shown in the view with the values stored in the settings
      */
     protected refreshView (): void {
-        for (let key in this.ioSettings) {
+        for (let key in IoFileAttribute) {
             const v: string = this.ioSettings[key]?.value || "";
             this.$el.find(`#${key}-input`).val(v);
         }
-        for (let key in this.webSettings) {
+        for (let key in WebFileAttribute) {
             let v: string = this.webSettings[key] || "";
             if (key === WebFileAttribute.pictureHeight || key === WebFileAttribute.pictureWidth) {
                 const val: number = parseFloat(v);
@@ -157,10 +157,10 @@ export class SettingsView extends CentralView {
             label: "Context Folder",
             readonly: true
         }; 
-        for (let key in this.ioSettings) {
+        for (let key in IoFileAttribute) {
             settings[key] = this.ioSettings[key];
         }
-        for (let key in this.webSettings) {
+        for (let key in WebFileAttribute) {
             switch (key) {
                 case WebFileAttribute.pictureFile: {
                     const menu: string = compactDropdownButtonTemplate + pictureMenu;
