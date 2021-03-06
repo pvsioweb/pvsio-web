@@ -1,6 +1,6 @@
 import * as Backbone from 'backbone';
 import { createDialog, keyCodes, setDialogTitle, uuid } from '../../../../utils/pvsiowebUtils';
-import { Coords, CSS, WidgetEVO, WidgetAttr, BasicEventData, VizOptions, WidgetOptions, WidgetData, CSSx } from '../../widgets/core/WidgetEVO';
+import { Coords, CSS, WidgetEVO, WidgetAttr, WidgetEventData, VizOptions, WidgetOptions, WidgetData, CSSx, WidgetEvent } from '../../widgets/core/WidgetEVO';
 import { WidgetClassDescriptor, WidgetClassMap } from '../../widgets/widgetClassMap';
 
 export interface WidgetEditorData extends Backbone.ViewOptions {
@@ -305,7 +305,7 @@ export class WidgetEditor extends Backbone.View {
                             // re-render sample
                             const style: CSS = {};
                             style[key] = value;
-                            obj.setCSS(style);
+                            obj.updateCSS(style);
                             obj.renderSample();
                         }
                     });
@@ -338,11 +338,11 @@ export class WidgetEditor extends Backbone.View {
                         // console.log(key, value);
                     });
 
-                    // set widget events
+                    // listen to all possible widget events
                     const evts: string[] = obj.getEvents();
-                    for (let i = 0; i < evts?.length; i++) {
+                    for (let i in WidgetEvent) {
                         const evt: string = evts[i];
-                        this.listenTo(obj, evt, (data: BasicEventData) => {
+                        this.listenTo(obj, evt, (data: WidgetEventData) => {
                             const fun: string = data?.fun.replace(previewId, this.widgetData.id);
                             // console.log(fun);
                             $(`#${cons}-evts`).append(`<div><i class="fa fa-bolt"></i> ${fun}</div>`);

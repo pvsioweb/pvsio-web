@@ -121,14 +121,4 @@ export class BasicDisplayEVO extends WidgetEVO {
         this.$base.css("line-height", `${lineHeight}px`);
     }
 
-    // /**
-    //  */
-    // renderGlyphicon (icon, opt) {
-    //     this.setCSS(opt);
-    //     if (icon) {
-    //         this.$base.addClass("blink glyphicon " + icon).css("font-family", "");
-    //     }
-    //     this.reveal();
-    //     return this;
-    // }
 }

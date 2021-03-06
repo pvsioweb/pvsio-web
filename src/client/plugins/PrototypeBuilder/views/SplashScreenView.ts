@@ -4,7 +4,7 @@ import { CentralView, CentralViewOptions } from './CentralView';
 const content: string = `
 <div class="splash-screen-view container-fluid p-0">
     <div class="card" style="height:100%;">
-        <div class="card-body animated zoomIn align-self-center" style="text-align:center; padding-left:120px; margin-left:-6px;">
+        <div class="card-body animated fadeIn align-self-center" style="text-align:center; padding-left:120px; margin-left:-6px;">
             <h5>Welcome to Prototype Builder!</h5>
             <br>
             <div>Define the visual appearance of your prototype</div>

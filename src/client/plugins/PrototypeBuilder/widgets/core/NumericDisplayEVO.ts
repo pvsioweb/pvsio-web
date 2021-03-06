@@ -31,9 +31,10 @@
  */
 
 import { BasicDisplayEVO, DisplayAttr, DisplayOptions } from './BasicDisplayEVO';
-import { Coords, WidgetAttr, CSS, Renderable, MatchState } from './WidgetEVO';
+import { Coords, WidgetAttr, CSS, Renderable, MatchState, rat2real } from './WidgetEVO';
 
-const selectedFontSize = 1.076; // ratio selectedFont/normalFont for integer digits
+// typical height/width ratio for non-monospace font
+const hwratio = 1.076;
 
 export const digitsTemplate: string = `
 {{#if template_description}}<!-- Template defining the visual appearance of integer and fractional part of a numeric display widget -->{{/if}}
@@ -54,12 +55,11 @@ export interface NumericDisplayOptions extends DisplayOptions {
     maxDecimalDigits?: number,
     maxIntegerDigits?: number,
     decimalPointOffset?: number,
-    decimalFontRatio?: number
+    decimalFontScale?: number
 };
 
 export interface NumericCSS extends CSS {
-    "decimal-font-size"?: string,
-    "decimal-letter-spacing"?: string
+    "decimal-font-scale"?: string
 };
 
 export interface NumericAttr extends DisplayAttr {
@@ -77,6 +77,8 @@ interface NumericDisplayData {
     cursorPos: number      
 };
 
+export const defaultDecimalFontScale: number = 0.7;
+
 export class NumericDisplayEVO extends BasicDisplayEVO {
     static readonly constructorName: string = "NumericDisplayEVO";
     getConstructorName (): string {
@@ -92,40 +94,7 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
     protected letterSpacing: number;
 
     /**
-     * @function <a name="NumericDisplayEVO">NumericDisplayEVO</a>
-     * @description Constructor.
-     * @param id {String} The ID of the touchscreen button.
-     * @param coords {Object} The four coordinates (top, left, width, height) of the display, specifying
-     *        the left, top corner, and the width and height of the (rectangular) widget area.
-     *        Default is { top: 0, left: 0, width: 32, height: 20 }.
-     * @param opt {Object} Style options defining the visual appearance of the widget.
-     *                     Options can be given either as standard html style attributes or using the following widget attributes:
-     *          <li>align (String): text align: "center", "right", "left", "justify" (default is "center")</li>
-     *          <li>backgroundColor (String): background display color (default is black, "transparent")</li>
-     *          <li>blinking (bool): whether the button is blinking (default is false, i.e., does not blink)</li>
-     *          <li>borderColor (String): border color, must be a valid HTML5 color (default is "steelblue")</li>
-     *          <li>borderRadius (Number|String): border radius, must be a number or a valid HTML5 border radius, e.g., 2, "2px", etc. (default is 0, i.e., square border)</li>
-     *          <li>borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid", "dotted", "dashed", etc. (default is "none")</li>
-     *          <li>borderWidth (Number): border width (if option borderColor !== null then the default border is 2px, otherwise 0px, i.e., no border)</li>
-     *          <li>cursorName (String): name of the state attribute defining the cursor position. Default is empty string, i.e., cursor is disabled.</li>
-     *          <li>decimalPointOffset (Number): offset for the decimal point position (default is 0, i.e., the decimal point is placed at the center of the display)</li>
-     *          <li>decimalFontSize (Number): decimal font size (default is opt.fontSize * 0.8)</li>
-     *          <li>decimalLetterSpacing (Number): fixed letter spacing for decimal digits (default: opt.decimalFontSize * 0.8).</li>
-     *          <li>displayName (String): name of the state attribute defining the display content. Default is the ID of the widget.</li>
-     *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
-     *          <li>fontFamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
-     *          <li>fontSize (Number): font size (default is (coords.height - opt.borderWidth) / 2 )</li>
-     *          <li>letterSpacing (Number): fixed letter spacing (default: opt.fontSize * 0.8).</li>
-     *          <li>maxIntegerDigits (Number): max digits of the whole part of the display (default is Math.floor(0.75 * coords.width / opt.letterSpacing)).</li>
-     *          <li>maxDecimalDigits (Number): max digits of the fractional part of the display (default is Math.floor(0.25 * coords.width / opt.decimalLetterSpacing)).</li>
-     *          <li>opacity (Number): opacity of the button. Valid range is [0..1], where 0 is transparent, 1 is opaque (default is opaque)</li>
-     *          <li>parent (String): the HTML element where the display will be appended (default is "body")</li>
-     *          <li>position (String): standard HTML position attribute indicating the position of the widget with respect to the parent, e.g., "relative", "absolute" (default is "absolute")</li>
-     *          <li>visibleWhen (String): boolean expression indicating when the display is visible. The expression can use only simple comparison operators (=, !=) and boolean constants (true, false). Default is true (i.e., always visible).</li>
-     *          <li>zIndex (String): z-index property of the widget (default is 1)</li>
-     *                  The following additional attribute links the display widget to a specific state attribute of a model:
-     * @memberof module:NumericDisplayEVO
-     * @instance
+     * Constructor
      */
     constructor (id: string, coords: Coords, opt?: NumericDisplayOptions) {
         super(id, coords, opt);
@@ -141,10 +110,10 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
         
         // add widget-specific style attributes
         this.letterSpacing = parseFloat(this.css["font-size"]) || 1;
-        const decimalFontRatio: number = opt.decimalFontRatio || 0.7;
-        this.css["decimal-font-size"] = opt.css["decimal-font-size"] || `${parseFloat(this.css["font-size"]) * decimalFontRatio}px`;
-        const decimalLetterSpacing: number = parseFloat(this.css["decimal-font-size"]) * 0.8;
-        this.css["decimal-letter-spacing"] = opt.css["decimal-letter-spacing"] || `${decimalLetterSpacing}px`;
+        const decimalFontScale: number = opt.decimalFontScale || 0.7;
+
+        this.css["decimal-font-scale"] = opt.css["decimal-font-scale"] || decimalFontScale;
+        const decimalLetterSpacing: number = this.getDecimalFontSpacing();
 
         this.maxDecimalDigits = isNaN(parseInt(`${opt.maxDecimalDigits}`)) ? 2 : parseInt(`${opt.maxDecimalDigits}`);
         this.maxIntegerDigits = isNaN(parseInt(`${opt.maxIntegerDigits}`)) ? 
@@ -182,21 +151,32 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
                         frac_zeropadding: [],
                         max_integer_digits: this.maxIntegerDigits,
                         max_decimal_digits: this.maxDecimalDigits,
-                        cursorPos: 0
+                        cursorPos: NaN
                     };
             
                     const dispName: string = this.attr.displayName;
                     const matchDisp: MatchState = this.matchState(state, dispName);
                     if (matchDisp) {
-                        // update display data
-                        this.updateDisplayData(data, matchDisp.val);
+                        // check if this is a rational number
+                        const val: number = rat2real(matchDisp.val);
+                        if (!isNaN(val)) {
+                            data.point = `${val}`.indexOf(".") >= 0;
+                            this.updateDisplayData(data, `${val}`);
+                        } else {
+                            // render state attribute value
+                            this.updateDisplayData(data, matchDisp.val);
+                        }                        
                     }
 
-                    const cursName: string = <string> opt.cursorName || this.attr.cursorName;
-                    const matchCurs: MatchState = this.matchState(state, cursName);
-                    if (matchDisp) {
-                        // update cursor data
-                        this.updateCursorData(data, matchCurs.val);
+                    if (this.attr.cursorName) {
+                        const cursName: string = <string> opt.cursorName || this.attr.cursorName;
+                        const matchCurs: MatchState = this.matchState(state, cursName);
+                        if (matchDisp) {
+                            // update cursor data
+                            this.updateCursorData(data, matchCurs.val);
+                        }
+                    } else {
+                        data.cursorPos = NaN;
                     }
 
                     // render data
@@ -209,10 +189,31 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
         }
     }
 
-    setCSS (style: NumericCSS): void {
+    /**
+     * Internal function, sets the basic style options.
+     * Overrides the standard function provided by widget, because 'decimal-font-scale' needs to be added to the css
+     */
+    protected setCSS (style: NumericCSS): void {
         super.setCSS(style);
-        this.css["decimal-font-size"] = style["decimal-font-size"];
-        this.css["decimal-letter-spacing"] = style["decimal-letter-spacing"];
+        this.css["decimal-font-scale"] = style["decimal-font-scale"];
+    }
+
+    /**
+     * Internal function, computes the decimal font size
+     * @returns 
+     */
+    protected getDecimalFontSize (): number {
+        const fontSize: number = parseFloat(`${this.css["font-size"]}`);
+        let decimalFontScale: number = parseFloat(`${this.css["decimal-font-scale"]}`);
+        decimalFontScale = isNaN(decimalFontScale) ? defaultDecimalFontScale : decimalFontScale;
+        const decimalFontSize: number = fontSize * decimalFontScale;
+        return decimalFontSize;
+    }
+    /**
+     * Internal function, computes font spacing for decimal digits
+     */
+    protected getDecimalFontSpacing (): number {
+        return hwratio * this.getDecimalFontSize();
     }
 
     protected updateDisplayData (data: NumericDisplayData, val: string): void {
@@ -228,7 +229,7 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
             };
         });
         if (parts.length > 1) {
-            const decimalFontSize: number = parseFloat(`${this.css["decimal-font-size"]}`);
+            const decimalFontSize: number = this.getDecimalFontSize();
             data.frac = parts[1].split("").map((d: string, index: number) => {
                 return { 
                     val: d, 
@@ -246,24 +247,25 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
             if (data.cursorPos >= 0) {
                 if (data.cursorPos < data.whole.length) {
                     data.whole[data.whole.length - 1 - data.cursorPos].selected = true;
-                    data.whole[data.whole.length - 1 - data.cursorPos]["font-size"] *= selectedFontSize;
+                    data.whole[data.whole.length - 1 - data.cursorPos]["font-size"] *= hwratio;
                 } else { // introduce leading zeros
                     data.whole_zeropadding = new Array(data.cursorPos - (data.whole.length - 1)).fill({
                         val: "0", selected: false, "font-size": parseFloat(`${this.css["font-size"]}`)
                     });
                     data.whole_zeropadding[0] = {
-                        val: "0", selected: true, "font-size": parseFloat(`${this.css["font-size"]}`) * selectedFontSize
+                        val: "0", selected: true, "font-size": parseFloat(`${this.css["font-size"]}`) * hwratio
                     };
                 }
             } else if (data.cursorPos < 0) {
                 if (-(data.cursorPos + 1) < data.frac.length) {
                     data.frac[-(data.cursorPos + 1)].selected = true;
                 } else { // introduce trailing zeros and the decimal point
+                    const decimalFontSize: number = this.getDecimalFontSize();
                     data.frac_zeropadding = new Array(-data.cursorPos - data.frac.length).fill({
-                        val: "0", selected: false, "font-size": parseFloat(`${this.css["decimal-font-size"]}`)
+                        val: "0", selected: false, "font-size": decimalFontSize
                     });
                     data.frac_zeropadding[data.frac_zeropadding.length - 1] = {
-                        val: "0", selected: true, "font-size": parseFloat(`${this.css["decimal-font-size"]}`)
+                        val: "0", selected: true, "font-size": decimalFontSize
                     };
                     data.point = true;
                 }
@@ -277,7 +279,7 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
             width: (this.letterSpacing / 2).toFixed(2),
             height: this.height - 2 * borderWidth,
             "margin-left": (-this.letterSpacing / 32).toFixed(2),
-            "font-size": parseFloat(`${this.css["decimal-font-size"]}`).toFixed(2),
+            "font-size": this.getDecimalFontSize().toFixed(2),
             viz: data.point
         };
         const whole_style = {
@@ -294,11 +296,11 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
         const frac_digits: { val: string, selected: boolean, "font-size": number }[] = data.frac.concat(data.frac_zeropadding);
         const frac_style = {
             digits: frac_digits,
-            width: ((data.max_decimal_digits) * parseFloat(`${this.css["decimal-letter-spacing"]}`)).toFixed(2),
+            width: ((data.max_decimal_digits) * this.getDecimalFontSpacing()).toFixed(2),
             height: this.height - 2 * borderWidth,
             "margin-top": `${-(borderWidth / 2)}px`,
             left: (parseFloat(point_style.left) + parseFloat(point_style.width)).toFixed(2),
-            "letter-spacing": parseFloat(`${this.css["decimal-letter-spacing"]}`).toFixed(2),
+            "letter-spacing": this.getDecimalFontSpacing().toFixed(2),
             color: this.css.color,
             "background": this.css["background"],
             viz: (frac_digits.length > 0)

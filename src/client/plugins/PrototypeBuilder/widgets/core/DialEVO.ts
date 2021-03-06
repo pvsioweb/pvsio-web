@@ -1,15 +1,14 @@
 // import { ActionCallback, ActionsQueue } from "../../ActionsQueue";
 import { SendCommandToken, PVSioWebCallBack } from "../../../../env/Connection";
 import { ButtonEVO, ButtonOptions } from "./ButtonEVO";
-import { Coords, img_template, CSS, BasicEvent } from "./WidgetEVO";
+import { Coords, img_template, CSS, WidgetEvent } from "./WidgetEVO";
 
-export type DialEvent = BasicEvent | "rotate";
 export type DialStyle = "modern" | "multimeter";
 export interface DialOptions extends ButtonOptions {
     svg?: (size: number) => string
 }
 export type DialEventData = {
-    evt: DialEvent,
+    evt: WidgetEvent,
     val: number, // current dial rotation, in deg
     fun: string // name of the prototype function to be invoked when a given event is triggered
 };
@@ -106,11 +105,11 @@ export class DialEVO extends ButtonEVO {
 
             // trigger rotate event
             const data: DialEventData = {
-                evt: "rotate",
+                evt: WidgetEvent.rotate,
                 fun: action,
                 val: this.rotation
             };
-            this.trigger("rotate", data);
+            this.trigger(WidgetEvent.rotate, data);
         }
     };
 

@@ -39,9 +39,7 @@
  *
  */
 
-import { Coords, BasicEvent, WidgetEVO, WidgetOptions, WidgetAttr, CSS, BasicEventData } from "./WidgetEVO";
-import { Timer } from "../../../../env/Timer"
-// import { ActionsQueue, ActionCallback } from "../../ActionsQueue";
+import { Coords, WidgetEvent, WidgetEVO, WidgetOptions, WidgetAttr, CSS, WidgetEventData } from "./WidgetEVO";
 import { Connection, PVSioWebCallBack, SendCommandToken } from "../../../../env/Connection";
 import { mouseButtons } from "../../../../utils/pvsiowebUtils";
 
@@ -52,8 +50,9 @@ const DBLCLICK_TIMEOUT = 350; // 350 milliseconds, default (and minimum) timeout
 export interface ButtonOptions extends WidgetOptions {
     customLabel?: string,
     readBack?: string,
-    keyCodes?: string, // comma-separated list of keycodes. first keycode is key down, second is key up
-    evts?: BasicEvent | BasicEvent[],
+    keyCodes?: string, // space-separated list of keycodes. first keycode is key down, second is key up
+    evts?: WidgetEvent | WidgetEvent[],
+    actions?: string, // space-separated list of actions, this is an alternative way to specify evts. NOTE: actions overwrites events, specify only one of the two fields.
     buttonName?: string,
     customFunction?: string,
     rate?: number,
@@ -77,10 +76,10 @@ export class ButtonEVO extends WidgetEVO {
 
     protected lineHeight: number;
 
-    protected rate: number;
+    protected interval: number;
     protected dblclick_timeout: number;
     protected dblclick_timer: NodeJS.Timer;
-    protected _timer: Timer;
+    protected _timer: NodeJS.Timer;
     protected callback: PVSioWebCallBack;
     protected _tick_listener: () => void;
     protected _tick: () => void;
@@ -88,6 +87,7 @@ export class ButtonEVO extends WidgetEVO {
     // flags
     protected hoverFlag: boolean = false;
     protected mouseDownFlag: boolean = false;
+    protected wasDownFlag: boolean = false;
 
     protected dragStart: { top: number, left: number };
     protected touchStart: { top: number, left: number };
@@ -114,28 +114,28 @@ export class ButtonEVO extends WidgetEVO {
         // super.createHTMLElement();
 
         // add button-specific functionalities
-        this.rate = (isNaN(opt.rate)) ? CLICK_RATE : Math.max(CLICK_RATE, opt.rate);
+        this.interval = (isNaN(opt.rate)) ? CLICK_RATE : Math.max(CLICK_RATE, opt.rate);
         this.dblclick_timeout = (isNaN(opt.dblclick_timeout)) ? DBLCLICK_TIMEOUT : Math.max(DBLCLICK_TIMEOUT, opt.rate);
 
         // associate relevant actions to the button
-        opt.evts = opt.evts || "click";
-        if (typeof opt.evts === "object" && opt.evts?.length > 0) {
-            this.evts = {};
-            this.evts.click = (opt.evts.filter(function (evt) { return evt === "click"; }).length > 0);
-            this.evts.dblclick = (opt.evts.filter(function (evt) { return evt === "dblclick"; }).length > 0);
-            this.evts.press = (opt.evts.filter(function (evt) { return evt === "press"; }).length > 0);
-            this.evts.release = (opt.evts.filter(function (evt) { return evt === "release"; }).length > 0);
-        } else {
-            this.evts = {
-                press: (opt.evts === "press"),
-                release: (opt.evts === "release"),
-                click: (opt.evts === "click"),
-                dblclick: (opt.evts === "dblclick")
-            };
+        opt.evts = opt.evts || WidgetEvent.click;
+        this.evts = {};
+        if (opt.actions && opt.actions) {
+            this.setActions(opt.actions);
+        } else if (opt.evts) {
+            if (typeof opt.evts === "object" && opt.evts?.length > 0) {
+                for (let i in WidgetEvent) {
+                    this.evts[i] = (opt.evts.filter((evt) => { return evt === i; }).length > 0);
+                }
+            } else {
+                for (let i in WidgetEvent) {
+                    this.evts[i] = (opt.evts === i);
+                }
+            }
         }
 
         // prepare timers necessary for executing press & hold actions
-        this._timer = new Timer(this.rate);
+        this._timer = null;
         this.callback = opt.callback || ((err, res) => { console.warn("[button-widget] Warning: " + this.id + " does not have a callback :/"); });
 
         this._tick_listener = () => {
@@ -150,11 +150,40 @@ export class ButtonEVO extends WidgetEVO {
         this.attr.customLabel = opt.customLabel || "";
         // this.attr.readBack = opt.readBack;
         this.attr.keyCodes = opt.keyCodes;
+        this.attr.actions = this.getActions();
 
         // install action handlers
         // this.installHandlers();
     }
 
+    /**
+     * Returns the space-separated list of actions this widget listens to
+     */
+    getActions (): string {
+        const ans: string[] = [];
+        for (let i in WidgetEvent) {
+            if (this.evts[i]) {
+                ans.push(i);
+            }
+        }
+        return ans.join(" ");
+    }
+
+    /**
+     * Stores a new set of actions
+     */
+    setActions (actions: string): void {
+        if (actions) {
+            const acts: string[] = actions.split(" ");
+            for (let i in WidgetEvent) {
+                this.evts[i] = acts.includes(i);
+            }
+        }
+    }
+
+    /**
+     * Internal function, installs relevant event handlers
+     */
     protected installHandlers() {
         // bind mouse events
         this.$overlay.on("mouseover", (evt: JQuery.MouseOverEvent) => {
@@ -165,6 +194,7 @@ export class ButtonEVO extends WidgetEVO {
             this.onMouseOut(evt);
         }).on("mousedown", (evt: JQuery.MouseDownEvent) => {
             this.mouseDownFlag = true;
+            this.wasDownFlag = true;
             if (evt.button === mouseButtons.left) {
                 this.onMouseDown(evt);
                 // add mousemove event listener so we can handle drag events
@@ -194,7 +224,7 @@ export class ButtonEVO extends WidgetEVO {
             this.onBlur(evt);
         });
 
-        // add touch events, so the button is mobile device friendly
+        // add touch events, so the widget is mobile-device friendly
         $(document).on("touchstart", (evt: JQuery.TouchStartEvent) => {
             if (this.hoverFlag) {
                 console.log("touchstart");
@@ -217,7 +247,7 @@ export class ButtonEVO extends WidgetEVO {
 
         // bind key events
         if (this.attr.keyCodes) {
-            const codes: string[] = this.attr?.keyCodes?.split(",").map((key: string) => {
+            const codes: string[] = this.attr?.keyCodes?.split(" ").map((key: string) => {
                 return key.trim();
             }).filter((key:string) => {
                 return key !== "";
@@ -244,11 +274,12 @@ export class ButtonEVO extends WidgetEVO {
     protected onKeyDown (evt?: JQuery.KeyDownEvent): void {
         this.onMouseDown();
     }
-
     protected onKeyUp (evt?: JQuery.KeyUpEvent): void {
         this.onMouseUp();
     }
-
+    /**
+     * Internal function, handles button press events
+     */
     protected onButtonPress (): void {
         if (this.evts.press) {
             this.pressAndHold();
@@ -257,8 +288,12 @@ export class ButtonEVO extends WidgetEVO {
         }
     };
     protected onButtonRelease (): void {
+        this.wasDownFlag = false;
         if (this.evts.release) {
             this.release();
+        }
+        if (this.evts.click && this.evts.press) {
+            this.click();  // if press event is active, then the click event should be emitted when the button is released
         }
     };
     protected onButtonDoubleClick (): void {
@@ -277,11 +312,18 @@ export class ButtonEVO extends WidgetEVO {
     };
     protected onMouseOut (evt?: JQuery.MouseOutEvent): void {
         this.deselect();
-        if (this._tick) { this.onButtonRelease(); }
+        if (this.wasDownFlag && this._tick) {
+            this.onButtonRelease();
+        } else {
+            this.clearTimer();
+        }
     };
     protected onMouseDown (evt?: JQuery.MouseDownEvent): void {
-        this.onButtonPress();
-        this.select({ "background": this.css["background"] });
+        // the handlers is enabled as long as the mouse is over the button
+        if (this.hoverFlag) {
+            this.onButtonPress();
+            this.select({ "background": this.css["background"] });
+        }
     };
     protected onMouseUp (evt?: JQuery.MouseUpEvent): void {
         this.onButtonRelease();
@@ -306,7 +348,7 @@ export class ButtonEVO extends WidgetEVO {
         if (this._tick) { this.onButtonRelease(); }
     };
 
-    protected btn_action(evt: BasicEvent, opt?: { buttonName?: string, customFunction?: string, callback?: PVSioWebCallBack }) {
+    protected btn_action(evt: WidgetEvent, opt?: { buttonName?: string, customFunction?: string, callback?: PVSioWebCallBack }) {
         opt = opt || {};
 
         const action: string = opt.customFunction || this.attr.customFunction || (evt + "_" + this.attr.buttonName);
@@ -325,9 +367,9 @@ export class ButtonEVO extends WidgetEVO {
         }
         // ActionsQueue.queueGUIAction(fun, this.id, this.connection, callback);
         
-        const data: BasicEventData = { evt, fun: action };
+        const data: WidgetEventData = { evt, fun: action };
         this.trigger(evt, data);
-        console.log(action);
+        console.log(data);
     }
     
     // @override
@@ -386,6 +428,22 @@ export class ButtonEVO extends WidgetEVO {
     }
 
     /**
+     * Set a new value for a given attribute.
+     * @overrides the default widget function, to take into account updated actions
+     */
+    setAttr (attr: WidgetAttr): void {
+        attr = attr || {};
+        for (const key in attr) {
+            if (key === "actions") {
+                this.setActions(attr[key])
+            } else {
+                // store style info
+                this.attr[key] = attr[key];
+            }
+        }
+    }
+
+    /**
      * @function <a name="renderSample">renderSample</a>
      * @description Version of the render function that demonstrates the functionalities of the widget.
      * @memberof module:ButtonEVO
@@ -408,7 +466,7 @@ export class ButtonEVO extends WidgetEVO {
      * @instance
      */
     click (opt?: ButtonOptions): void {
-        this.btn_action("click", opt);
+        this.btn_action(WidgetEvent.click, opt);
     }
 
     /**
@@ -418,7 +476,7 @@ export class ButtonEVO extends WidgetEVO {
      * @instance
      */
     dblclick (opt?: ButtonOptions): void {
-        this.btn_action("dblclick", opt);
+        this.btn_action(WidgetEvent.dblclick, opt);
     }
 
     /**
@@ -428,7 +486,7 @@ export class ButtonEVO extends WidgetEVO {
      * @instance
      */
     press (opt?: ButtonOptions): void {
-        this.btn_action("press", opt);
+        this.btn_action(WidgetEvent.press, opt);
     }
 
     /**
@@ -441,9 +499,23 @@ export class ButtonEVO extends WidgetEVO {
         this._tick = () => {
             this.press(opt);
         };
-        this._timer.addListener("TimerTicked", this._tick_listener);
+        this.clearTimer();
+        this._timer = setInterval(() => {
+            if (this.hoverFlag && this.mouseDownFlag) {
+                this._tick_listener();
+            } else {
+                this.clearTimer();
+            }
+        }, this.interval);
         this.press(opt);
-        this._timer.interval(this.rate).start();
+    }
+
+    /**
+     * Internal function, resets this._timer
+     */
+    protected clearTimer (): void {
+        clearInterval(this._timer);
+        this._timer = null;
     }
 
     /**
@@ -453,10 +525,8 @@ export class ButtonEVO extends WidgetEVO {
      * @instance
      */
     release (opt?: ButtonOptions): void {
-        this.btn_action("release", opt);
-        this._tick = null;
-        this._timer.reset();
-        this._timer.removeListener("TimerTicked", this._tick_listener);
+        this.btn_action(WidgetEvent.release, opt);
+        this.clearTimer();
     }
 
 }

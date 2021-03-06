@@ -125,12 +125,20 @@ export type VizOptions =  {
     visible?: string | boolean,
     enabled?: string | boolean
 };
-export type BasicEvent = "click" | "dblclick" | "press" | "release";
-export type BasicEventData = {
-    evt: BasicEvent,
+// widget events
+export enum WidgetEvent {
+    press = "press",
+    release = "release",
+    click = "click",
+    dblclick = "dblclick",
+    rotate = "rotate",
+    move = "move"
+};
+export type WidgetEventData = {
+    evt: WidgetEvent,
     fun: string // name of the prototype function to be invoked when a given event is triggered
 };
-export type WidgetEvents = { [evt in BasicEvent]?: boolean };
+export type WidgetEventsMap = { [evt in WidgetEvent]?: boolean };
 export type WidgetAttr = {
     [key: string]: string
 };
@@ -216,7 +224,7 @@ export abstract class WidgetEVO extends Backbone.Model {
     protected $overlay: JQuery<HTMLElement>;
     protected marker: JQuery<HTMLElement>;
 
-    protected evts: WidgetEvents = null;
+    protected evts: WidgetEventsMap = null;
     readonly fontPadding: number = 6;
     protected rendered?: boolean = false;
 
@@ -586,15 +594,29 @@ export abstract class WidgetEVO extends Backbone.Model {
     }
 
     /**
-     * Sets the basic style options.
+     * Internal function, sets the basic style options.
+     * This function is typically used in the constructor.
      * If a widget class introduces additional options, this function needs to be overridden (e.g., see NumericDisplay). 
-     * @param style 
      */
-    setCSS (style: CSS): void {
+    protected setCSS (style: CSS): void {
         this.css = {};
         for(const key in cssKeys) {
             // store style info
             this.css[key] = style[key];
+        }
+    }
+
+    /**
+     * Updates the style options.
+     */
+     updateCSS (style: CSS): void {
+        if (style) {
+            for(let key in style) {
+                if (style[key] !== undefined) {
+                    // store style info
+                    this.css[key] = style[key];
+                }
+            }
         }
     }
 
@@ -642,9 +664,13 @@ export abstract class WidgetEVO extends Backbone.Model {
         this.$base.css("position", "absolute"); // position of the base should always be absolute
     }
 
+    /**
+     * Sets a new value for a given attribute
+     * @param attr 
+     */
     setAttr (attr: WidgetAttr): void {
         attr = attr || {};
-        for(const key in attr) {
+        for (const key in attr) {
             // store style info
             this.attr[key] = attr[key];
         }

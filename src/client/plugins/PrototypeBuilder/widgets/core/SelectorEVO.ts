@@ -1,7 +1,7 @@
 import { Connection, PVSioWebCallBack, SendCommandToken } from "../../../../env/Connection";
 import { ButtonOptions } from "./ButtonEVO";
 import { DialEventData, DialEVO, DialOptions } from "./DialEVO";
-import { Coords, CSS } from "./WidgetEVO";
+import { Coords, CSS, WidgetEvent } from "./WidgetEVO";
 
 export interface SelectorOptions extends DialOptions {
     turns?: number[] // angles (deg) identifying selector rotations. First value is treated as initial rotation value.
@@ -80,11 +80,11 @@ export class SelectorEVO extends DialEVO {
             // ActionsQueue.queueGUIAction(fun, this.id, this.connection, callback);
             // trigger rotate event
             const data: DialEventData = {
-                evt: "rotate",
+                evt: WidgetEvent.rotate,
                 fun: action,
                 val: this.rotation
             };
-            this.trigger("rotate", data);            
+            this.trigger(WidgetEvent.rotate, data);            
         }
     }
 
