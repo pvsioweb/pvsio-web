@@ -822,6 +822,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
             let loaded: boolean = false;
             // load picture
             if (data.pictureFile && data.pictureData) {
+                console.log(`[pvsio-web] loading picture`, data.pictureFile);
                 const fname: string = data.pictureFile;
                 const picture: Picture = {
                     fileName: fsUtils.getFileName(fname),
@@ -833,6 +834,7 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
             }
             // load widgets
             if (data.widgets) {
+                console.log(`[pvsio-web] loading widgets`, data.widgets);
                 for (let i = 0; i < data.widgets.length; i++) {
                     const wdata: WidgetData = data.widgets[i];
                     await this.centralViews?.Builder?.loadWidget(wdata);
@@ -841,11 +843,13 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
                 loaded = data.widgets.length > 0;
             }
             // load settings
-            this.centralViews?.Settings?.updateSettings({
+            const settingsData = {
                 io: getIoFile(data),
                 web: getWebFile(data),
                 contextFolder: data.contextFolder
-            });
+            };
+            console.log(`[pvsio-web] loading settings`, settingsData);
+            this.centralViews?.Settings?.updateSettings(settingsData);
             // show builder view if anything has been loaded
             if (loaded) {
                 this.switchToBuilderView();
