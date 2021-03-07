@@ -138,7 +138,7 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
         // reveal the widget
         this.reveal();
         // render the content if state is non-null
-        if (state) {
+        if (state !== undefined && state !== null) {
             // check if the state contains a field named after the widget
             if (this.matchStateFlag) {
                 if (typeof state === "string") {

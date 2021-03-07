@@ -77,7 +77,6 @@ export class BasicDisplayEVO extends WidgetEVO {
      */
     render (state?: Renderable, opt?: CSS): void {
         opt = opt || {};
-        console.log(`[BasicDisplay] rendering state`, state);
         // create the html element
         super.render();
         // update style
@@ -85,7 +84,7 @@ export class BasicDisplayEVO extends WidgetEVO {
         // reveal the widget
         this.reveal();
         // render the content if state is non-null
-        if (state) {
+        if (state !== undefined && state !== null) {
             // check if the state contains a field named after the widget
             if (this.matchStateFlag) {
                 if (typeof state === "string") {
@@ -93,12 +92,10 @@ export class BasicDisplayEVO extends WidgetEVO {
                     if (match) {
                         // check if this is a rational number
                         const val: number = rat2real(match.val);
-                        if (!isNaN(val)) {
-                            this.$base.html(`${val}`);
-                        } else {
-                            // render state attribute value
-                            this.$base.html(`${match.val}`);
-                        }
+                        const disp: string = isNaN(val) ? `${match.val}` : `${val}`;
+                        this.$base.html(disp);
+                        const name: string = this.getName();
+                        console.log(`[BasicDisplay] ${name} render`, state);
                     }
                 }
             } else {

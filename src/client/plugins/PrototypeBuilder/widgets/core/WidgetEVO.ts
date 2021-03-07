@@ -175,10 +175,10 @@ export function getStateRegexSource (name: string): string[] {
         // pvs syntax
         `(${name})\\s*:=\\s*(${ratNumber})`, // e.g. (# disp_2 := 4/3 #)
         `(${name})\\s*:=\\s*(\\w+)`, // e.g. (# disp_2 := 4, c := 2 #)
-        `(${name})\\s*:=\\s*\\"([^\\"]+)\\"`, // e.g., (# disp4 := "asd" #)
+        `(${name})\\s*:=\\s*\\"([^\\"]*)\\"`, // e.g., (# disp4 := "asd" #)
         // equivalent json syntax
         `\\"(${name})\\"\\s*:\\s*(\\w+)`, // e.g., { "disp1" : 4 }
-        `\\"(${name})\"\\s*:\s*\\"([^\\"]+)\\"` // e.g., { "disp_3" : "asd" }
+        `\\"(${name})\"\\s*:\s*\\"([^\\"]*)\\"` // e.g., { "disp_3" : "asd" }
     ];
 }
 
