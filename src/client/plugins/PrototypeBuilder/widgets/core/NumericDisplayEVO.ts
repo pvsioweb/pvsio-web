@@ -39,14 +39,14 @@ const hwratio = 1.076;
 export const digitsTemplate: string = `
 {{#if template_description}}<!-- Template defining the visual appearance of integer and fractional part of a numeric display widget -->{{/if}}
 <div class="{{type}}_whole_part" style="position:absolute; left:0px; margin-left:{{whole.margin-left}}px; width:{{whole.width}}px; height:{{whole.height}}px; {{#if whole.margin-top}}margin-top:{{whole.margin-top}};{{/if}} text-align:right; display:inline-flex;">{{#each whole.digits}}
-    <div style="position:absolute; border-radius:2px;text-align:center; width:{{../whole.letter-spacing}}px; min-width:{{../whole.letter-spacing}}px; max-width:{{../whole.letter-spacing}}px; margin-left:{{margin-left}}px; font-size:{{font-size}}px;{{#if selected}} color:{{../whole.background}}; background:{{../whole.color}}; transform:scale(0.94);{{else}} color:{{../whole.color}}; background:{{../whole.background}};{{/if}}">{{val}}</div>{{/each}}
+    <div style="position:absolute; border-radius:2px;text-align:center; width:{{../whole.letter-spacing}}px; min-width:{{../whole.letter-spacing}}px; max-width:{{../whole.letter-spacing}}px; margin-left:{{margin-left}}px; font-size:{{font-size}}px;{{#if selected}} color:{{../whole.sel-color}}; background:{{../whole.sel-background}}; transform:scale(0.94);{{else}} color:{{../whole.color}}; background:{{../whole.background}};{{/if}}">{{val}}</div>{{/each}}
 </div>
 
 {{#if point.viz}}<div class="{{type}}_decimal_point" style="position:absolute; text-align:center; margin-left:{{point.margin-left}}px; left:{{point.left}}px; width:{{point.width}}px; min-width:{{point.width}}px; max-width:{{point.width}}px; height:{{point.height}}px; text-align:center; font-size:{{point.font-size}}px;">
 &bull;</div>{{/if}}
 
 {{#if frac.viz}}<div class="{{type}}_frac_part" style="position:absolute; left:{{frac.left}}px; width:{{frac.width}}px; height:{{frac.height}}px; {{#if frac.margin-top}}margin-top:{{frac.margin-top}};{{/if}} text-align:left; display:inline-flex;">{{#each frac.digits}}
-    <div style="position:absolute; border-radius:2px; text-align:center; width:{{../frac.letter-spacing}}px; min-width:{{../frac.letter-spacing}}px; max-width:{{../frac.letter-spacing}}px; margin-left:{{margin-left}}px; font-size:{{font-size}}px;{{#if selected}} color:{{../frac.background}}; background:{{../frac.color}}{{else}} color:{{../frac.color}}; background:{{../frac.background}}{{/if}}">{{val}}</div>{{/each}}
+    <div style="position:absolute; border-radius:2px; text-align:center; width:{{../frac.letter-spacing}}px; min-width:{{../frac.letter-spacing}}px; max-width:{{../frac.letter-spacing}}px; margin-left:{{margin-left}}px; font-size:{{font-size}}px;{{#if selected}} color:{{../frac.sel-color}}; background:{{../frac.sel-background}}{{else}} color:{{../frac.color}}; background:{{../frac.background}}{{/if}}">{{val}}</div>{{/each}}
 </div>{{/if}}`;
 
 export interface NumericDisplayOptions extends DisplayOptions {
@@ -101,9 +101,6 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
 
         opt = opt || {};
         opt.css = opt.css || {};
-
-        // override options
-        this.css["background"] = (opt.css["background"] && opt.css["background"] !== "transparent") ? opt.css["background"] : "black";
 
         // invoke BasicDisplayEVO constructor to create the widget
         // super.createHTMLElement();
@@ -291,7 +288,9 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
             "letter-spacing": this.letterSpacing.toFixed(2),
             color: this.css.color,
             "background": this.css["background"],
-            "margin-left": ((data.max_integer_digits - data.whole.length - data.whole_zeropadding.length) * this.letterSpacing).toFixed(2)
+            "margin-left": ((data.max_integer_digits - data.whole.length - data.whole_zeropadding.length) * this.letterSpacing).toFixed(2),
+            "sel-color": this.css.background == "transparent" ? "black" : this.css.background,
+            "sel-background": this.css.color == "transparent" ? "white" : this.css.color
         };
         const frac_digits: { val: string, selected: boolean, "font-size": number }[] = data.frac.concat(data.frac_zeropadding);
         const frac_style = {
@@ -303,7 +302,9 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
             "letter-spacing": this.getDecimalFontSpacing().toFixed(2),
             color: this.css.color,
             "background": this.css["background"],
-            viz: (frac_digits.length > 0)
+            viz: (frac_digits.length > 0),
+            "sel-color": this.css.background == "transparent" ? "black" : this.css.background,
+            "sel-background": this.css.color == "transparent" ? "white" : this.css.color
         };
         //  console.log(frac_style);
         const dom = Handlebars.compile(digitsTemplate, { noEscape: true })({

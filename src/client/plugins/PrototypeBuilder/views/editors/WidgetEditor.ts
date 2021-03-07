@@ -436,7 +436,7 @@ export class WidgetEditor extends Backbone.View {
      * Internal function for reading information from the edit dialog
      */
     protected getDialogElement<T> (elem: string): T {
-        const elems: JQuery<HTMLElement> = this.$dialog.find(`.active .widget-${elem} input`);
+        const elems: JQuery<HTMLElement> = this.$dialog.find(`.active :visible .widget-${elem} input`);
         let res = {};
         for (let i = 0; i < elems.length; i++) {
             const name: string = elems[i].getAttribute("name");
