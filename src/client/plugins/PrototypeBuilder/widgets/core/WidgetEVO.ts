@@ -309,9 +309,7 @@ export abstract class WidgetEVO extends Backbone.Model {
                 : 0;
         borderWidth = isNaN(borderWidth) ? 0 : borderWidth;    
         let fontSize: number = parseFloat(`${opt.css["font-size"]}`);
-        fontSize = !isNaN(fontSize) && fontSize < this.height - borderWidth - this.fontPadding && fontSize > 0 
-            ? fontSize
-                : this.height - borderWidth - this.fontPadding;
+        fontSize = !isNaN(fontSize) ? fontSize : this.height - borderWidth - this.fontPadding;
 
         // save css style
         this.setCSS(opt.css);

@@ -509,8 +509,8 @@ export class BuilderView extends CentralView {
                     };
                     console.log(`[builder] Loading widget constructor`);
                     const widget: WidgetEVO = new desc.cons(widgetData.id, widgetData.coords, options);
-                    // this is useful to increase widget visibility on the prototype, e.g., the display will have some text instead of being empty
-                    widget.renderSample();
+                    // render widget
+                    widget.render();
                     // console.log(widget);
                     this.widgetsMap[widgetData.id] = widget;
                     const evt: CreateWidgetEvent = {
