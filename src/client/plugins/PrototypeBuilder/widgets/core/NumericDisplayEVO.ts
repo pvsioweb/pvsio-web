@@ -39,7 +39,10 @@ const hwratio = 1.076;
 export const digitsTemplate: string = `
 {{#if template_description}}<!-- Template defining the visual appearance of integer and fractional part of a numeric display widget -->{{/if}}
 <div class="{{type}}_whole_part" style="position:absolute; left:0px; margin-left:{{whole.margin-left}}px; width:{{whole.width}}px; height:{{whole.height}}px; {{#if whole.margin-top}}margin-top:{{whole.margin-top}};{{/if}} text-align:right; display:inline-flex;">{{#each whole.digits}}
-    <div style="position:absolute; border-radius:2px;text-align:center; width:{{../whole.letter-spacing}}px; min-width:{{../whole.letter-spacing}}px; max-width:{{../whole.letter-spacing}}px; margin-left:{{margin-left}}px; font-size:{{font-size}}px;{{#if selected}} color:{{../whole.sel-color}}; background:{{../whole.sel-background}}; transform:scale(0.94);{{else}} color:{{../whole.color}}; background:{{../whole.background}};{{/if}}">{{val}}</div>{{/each}}
+    <div style="position:absolute; border-radius:2px;text-align:center; width:{{../whole.letter-spacing}}px; min-width:{{../whole.letter-spacing}}px; max-width:{{../whole.letter-spacing}}px; margin-left:{{margin-left}}px; font-size:{{font-size}}px;
+    {{#if selected}} color:{{../whole.sel-color}}; background:{{../whole.sel-background}}; transform:scale(0.94);
+    {{else}} color:{{../whole.color}}; background:{{../whole.background}};
+    {{/if}}">{{val}}</div>{{/each}}
 </div>
 
 {{#if point.viz}}<div class="{{type}}_decimal_point" style="position:absolute; text-align:center; margin-left:{{point.margin-left}}px; left:{{point.left}}px; width:{{point.width}}px; min-width:{{point.width}}px; max-width:{{point.width}}px; height:{{point.height}}px; text-align:center; font-size:{{point.font-size}}px;">
@@ -67,17 +70,18 @@ export interface NumericAttr extends DisplayAttr {
 };
 
 interface NumericDisplayData {
-    whole: { val: string, selected: boolean, "font-size": number }[], 
-    frac: { val: string, selected: boolean, "font-size": number }[],
+    whole: { val: string, selected: boolean, "font-size": number, "margin-left": number }[], 
+    frac: { val: string, selected: boolean, "font-size": number, "margin-left": number }[],
     point: boolean,
-    whole_zeropadding: { val: string, selected: boolean, "font-size": number }[], 
-    frac_zeropadding: { val: string, selected: boolean, "font-size": number }[],
+    whole_zeropadding: { val: string, selected: boolean, "font-size": number, "margin-left": number }[], 
+    frac_zeropadding: { val: string, selected: boolean, "font-size": number, "margin-left": number }[],
     max_integer_digits: number,
     max_decimal_digits: number,
     cursorPos: number      
 };
 
 export const defaultDecimalFontScale: number = 0.7;
+export const defaultDecimalAccuracy: number = 2;
 
 export class NumericDisplayEVO extends BasicDisplayEVO {
     static readonly constructorName: string = "NumericDisplayEVO";
@@ -112,9 +116,9 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
         this.css["decimal-font-scale"] = opt.css["decimal-font-scale"] || decimalFontScale;
         const decimalLetterSpacing: number = this.getDecimalFontSpacing();
 
-        this.maxDecimalDigits = isNaN(parseInt(`${opt.maxDecimalDigits}`)) ? 2 : parseInt(`${opt.maxDecimalDigits}`);
+        this.maxDecimalDigits = isNaN(parseInt(`${opt.maxDecimalDigits}`)) ? defaultDecimalAccuracy : parseInt(`${opt.maxDecimalDigits}`);
         this.maxIntegerDigits = isNaN(parseInt(`${opt.maxIntegerDigits}`)) ? 
-            Math.floor((this.width - this.maxDecimalDigits * decimalLetterSpacing) / this.letterSpacing)
+            Math.floor((this.width - (this.maxDecimalDigits + 1) * decimalLetterSpacing) / this.letterSpacing)
                 : parseInt(`${opt.maxIntegerDigits}`);
         this.decimalPointOffset = opt.decimalPointOffset || 0;
 
@@ -140,17 +144,23 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
             if (this.matchStateFlag) {
                 if (typeof state === "string") {
 
+                    // identify cursor
+                    const cursName: string = <string> opt.cursorName || this.attr.cursorName;
+                    const matchCurs: MatchState = cursName ? this.matchState(state, cursName) : null;
+
+                    // setup data structure for rendering
                     const data: NumericDisplayData = {
                         whole: [], 
                         frac: [],
-                        point: (state.indexOf(".") >= 0),
+                        point: false,
                         whole_zeropadding: [],
                         frac_zeropadding: [],
                         max_integer_digits: this.maxIntegerDigits,
                         max_decimal_digits: this.maxDecimalDigits,
-                        cursorPos: NaN
+                        cursorPos: matchCurs ? +matchCurs.val : NaN
                     };
-            
+                    
+                    // identify display value
                     const dispName: string = this.attr.displayName;
                     const matchDisp: MatchState = this.matchState(state, dispName);
                     if (matchDisp) {
@@ -163,17 +173,6 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
                             // render state attribute value
                             this.updateDisplayData(data, matchDisp.val);
                         }                        
-                    }
-
-                    if (this.attr.cursorName) {
-                        const cursName: string = <string> opt.cursorName || this.attr.cursorName;
-                        const matchCurs: MatchState = this.matchState(state, cursName);
-                        if (matchDisp) {
-                            // update cursor data
-                            this.updateCursorData(data, matchCurs.val);
-                        }
-                    } else {
-                        data.cursorPos = NaN;
                     }
 
                     // render data
@@ -213,60 +212,63 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
         return hwratio * this.getDecimalFontSize();
     }
 
+    /**
+     * Internal function, creates the data structure necessary for rendering the display
+     */
     protected updateDisplayData (data: NumericDisplayData, val: string): void {
         let parts: string[] = val.split(".");
-
         const fontSize: number = parseFloat(`${this.css["font-size"]}`);
-        data.whole = parts[0].split("").map((d: string, index: number) => {
+
+        const integerDigits: string[] = parts[0].split("");
+        // introduce leading spaces if cursor exceeds the left-most digit position
+        if (data.cursorPos > (integerDigits.length - 1)) {
+            const pad: number = data.cursorPos - (integerDigits.length - 1);
+            data.whole_zeropadding = [];
+            for (let i = 0; i < pad; i++) {
+                data.whole_zeropadding.push({
+                    val: "0",
+                    selected: i === 0, 
+                    "font-size": fontSize,
+                    "margin-left": i * this.letterSpacing
+                });
+            }
+        }
+        data.whole = integerDigits.map((d: string, index: number) => {
             return { 
                 val: d, 
-                selected: false, 
+                selected: data.whole_zeropadding.length ? false : ((data.whole_zeropadding.length + integerDigits.length) - 1 - index) === data.cursorPos, 
                 "font-size": fontSize,
-                "margin-left": index * this.letterSpacing
+                "margin-left": (index + data.whole_zeropadding.length) * this.letterSpacing
             };
         });
-        if (parts.length > 1) {
+
+        if (parts.length > 1 || data.cursorPos < 0) {
+            data.point = true;
+            const decimalFontScale: number = parseFloat(`${this.css["decimal-font-scale"]}`);
+            const decimalDigits: string[] = parts.length > 1 ? parts[1].split("") : [];
             const decimalFontSize: number = this.getDecimalFontSize();
-            data.frac = parts[1].split("").map((d: string, index: number) => {
+            data.frac = decimalDigits.map((d: string, index: number) => {
+                const selected: boolean = index === (-data.cursorPos - 1);
                 return { 
                     val: d, 
-                    selected: false, 
+                    selected, 
                     "font-size": decimalFontSize,
-                    "margin-left": index * this.letterSpacing
+                    "margin-left": index * this.letterSpacing * decimalFontScale
                 };
             });
-        }
-    }
-
-    protected updateCursorData (data: NumericDisplayData, val: string): void {
-        const cursorPos: number = parseInt(val);
-        if (!isNaN(cursorPos)) {
-            if (data.cursorPos >= 0) {
-                if (data.cursorPos < data.whole.length) {
-                    data.whole[data.whole.length - 1 - data.cursorPos].selected = true;
-                    data.whole[data.whole.length - 1 - data.cursorPos]["font-size"] *= hwratio;
-                } else { // introduce leading zeros
-                    data.whole_zeropadding = new Array(data.cursorPos - (data.whole.length - 1)).fill({
-                        val: "0", selected: false, "font-size": parseFloat(`${this.css["font-size"]}`)
+            if (-data.cursorPos > decimalDigits.length) {
+                const pad: number = -data.cursorPos - decimalDigits.length;
+                data.frac_zeropadding = [];
+                for (let i = 0; i < pad; i++) {
+                    const selected: boolean = (i + data.frac.length) === (-data.cursorPos - 1);
+                    data.frac_zeropadding.push({
+                        val: "0",
+                        selected, 
+                        "font-size": decimalFontSize,
+                        "margin-left": (i + data.frac.length) * this.letterSpacing * decimalFontScale
                     });
-                    data.whole_zeropadding[0] = {
-                        val: "0", selected: true, "font-size": parseFloat(`${this.css["font-size"]}`) * hwratio
-                    };
                 }
-            } else if (data.cursorPos < 0) {
-                if (-(data.cursorPos + 1) < data.frac.length) {
-                    data.frac[-(data.cursorPos + 1)].selected = true;
-                } else { // introduce trailing zeros and the decimal point
-                    const decimalFontSize: number = this.getDecimalFontSize();
-                    data.frac_zeropadding = new Array(-data.cursorPos - data.frac.length).fill({
-                        val: "0", selected: false, "font-size": decimalFontSize
-                    });
-                    data.frac_zeropadding[data.frac_zeropadding.length - 1] = {
-                        val: "0", selected: true, "font-size": decimalFontSize
-                    };
-                    data.point = true;
-                }
-            }
+            }    
         }
     }
 
@@ -332,16 +334,14 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
     }
 
     /**
-     * @function <a name="renderSample">renderSample</a>
-     * @description Version of the render function that demonstrates the functionalities of the widget.
-     * @memberof module:NumericDisplayEVO
-     * @instance
+     * Renders an example numeric display
      */
     renderSample (): void {
         let st = {};
-        st[this.attr.displayName] = "123.4";
-        st["demoCursor"] = 2;
-        this.render(JSON.stringify(st), { cursorName: "demoCursor" });
+        st[this.attr.displayName] = 123;
+        this.attr.cursorName = this.attr.cursorName || "demoCursor";
+        st[this.attr.cursorName] = -1;
+        this.render(JSON.stringify(st));
     }
 
     getDescription (): string {

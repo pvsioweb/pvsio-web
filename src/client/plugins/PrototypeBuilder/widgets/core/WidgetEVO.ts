@@ -158,11 +158,12 @@ export interface WidgetData extends HotspotData {
 export const ratNumber: string = `[\\+\\-]?\\d+\/\\d+`;
 export const ratNumberMatch: string = `([\\+\\-]?\\d+)\/(\\d+)`;
 export function rat2real (rat: string): number {
-    if (rat) {
+    if (rat !== undefined && rat !== null) {
         const match: RegExpMatchArray = new RegExp(ratNumberMatch).exec(rat);
         if (match && match.length > 2 && !isNaN(+match[1]) && !isNaN(+match[2]) && +match[2] !== 0) {
             return +match[1] / +match[2];
         }
+        return +rat;
     }
     return NaN;
 }
@@ -174,10 +175,10 @@ export function getStateRegexSource (name: string): string[] {
     return [
         // pvs syntax
         `(${name})\\s*:=\\s*(${ratNumber})`, // e.g. (# disp_2 := 4/3 #)
-        `(${name})\\s*:=\\s*(\\w+)`, // e.g. (# disp_2 := 4, c := 2 #)
+        `(${name})\\s*:=\\s*([\\-\\+\\w\\.]+)`, // e.g. (# disp_2 := 4.1, c := -2 #)
         `(${name})\\s*:=\\s*\\"([^\\"]*)\\"`, // e.g., (# disp4 := "asd" #)
         // equivalent json syntax
-        `\\"(${name})\\"\\s*:\\s*(\\w+)`, // e.g., { "disp1" : 4 }
+        `\\"(${name})\\"\\s*:\\s*([\\-\\+\\w\\.]+)`, // e.g., { "disp1" : 4.1 }
         `\\"(${name})\"\\s*:\s*\\"([^\\"]*)\\"` // e.g., { "disp_3" : "asd" }
     ];
 }
