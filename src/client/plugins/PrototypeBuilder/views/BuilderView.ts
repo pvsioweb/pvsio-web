@@ -563,8 +563,8 @@ export class BuilderView extends CentralView {
                     editor.renderView();
                     editor.on(WidgetEditorEvents.ok, (widgetData: WidgetData) => {
                         const widget: WidgetEVO = this.createWidget(widgetData);
+                        this.trigger(BuilderEvents.DidUpdateWidgets);
                         resolve(widget);
-                        this.delayedTrigger(BuilderEvents.DidUpdateWidgets);
                     });
                     editor.on(WidgetEditorEvents.cancel, (data: WidgetData) => {
                         resolve(null);

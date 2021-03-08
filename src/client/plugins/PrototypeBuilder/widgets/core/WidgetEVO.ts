@@ -177,9 +177,9 @@ export function rat2real (rat: string): number {
 export function getStateRegexSource (name: string): string[] {
     return [
         // pvs syntax
-        `(${name})\\s*:=\\s*(${ratNumber})`, // e.g. (# disp_2 := 4/3 #)
-        `(${name})\\s*:=\\s*([\\-\\+\\w\\.]+)`, // e.g. (# disp_2 := 4.1, c := -2 #)
-        `(${name})\\s*:=\\s*\\"([^\\"]*)\\"`, // e.g., (# disp4 := "asd" #)
+        `\\b(${name})\\s*:=\\s*(${ratNumber})`, // e.g. (# disp_2 := 4/3 #)
+        `\\b(${name})\\s*:=\\s*([\\-\\+\\w\\.]+)`, // e.g. (# disp_2 := 4.1, c := -2 #)
+        `\\b(${name})\\s*:=\\s*\\"([^\\"]*)\\"`, // e.g., (# disp4 := "asd" #)
         // equivalent json syntax
         `\\"(${name})\\"\\s*:\\s*([\\-\\+\\w\\.]+)`, // e.g., { "disp1" : 4.1 }
         `\\"(${name})\"\\s*:\s*\\"([^\\"]*)\\"` // e.g., { "disp_3" : "asd" }
