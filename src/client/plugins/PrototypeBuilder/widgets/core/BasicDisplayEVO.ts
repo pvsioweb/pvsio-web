@@ -20,7 +20,7 @@ disp.render("Hello World!"); // The display shows Hello World!
  *
  */
 
-import { Coords, WidgetEVO, WidgetOptions, CSS, WidgetAttr, Renderable, MatchState, rat2real } from "./WidgetEVO";
+import { Coords, WidgetEVO, WidgetOptions, CSS, WidgetAttr, Renderable, MatchState, rat2real, ratNumberMatch } from "./WidgetEVO";
 
 export interface DisplayOptions extends WidgetOptions {
     displayName?: string
@@ -91,11 +91,19 @@ export class BasicDisplayEVO extends WidgetEVO {
                 if (typeof state === "string") {
                     const match: MatchState = this.matchState(state);
                     if (match) {
-                        // check if this is a rational number
-                        const val: number = rat2real(match.val);
-                        const disp: string = isNaN(val) ? `${match.val}` : `${val}`;
-                        this.$base.html(disp);
-                        const name: string = this.getName();
+                        // check if this is a rational number -- don't use directly rat2real 
+                        // because the state may be a string that resembles a number, e.g., "2.", 
+                        // and rat2real would translate it into number 2 (i.e., the '.' gets removed, 
+                        // which is not what we want for non-numeric displays)
+                        const matchRat: RegExpMatchArray = new RegExp(ratNumberMatch).exec(match.val);
+                        if (matchRat) {
+                            const val: number = rat2real(match.val);
+                            const disp: string = isNaN(val) ? `${match.val}` : `${val}`;
+                            this.$base.html(disp);
+                        } else {
+                            this.$base.html(match.val);
+                        }
+                        // const name: string = this.getName();
                         // console.log(`[BasicDisplay] ${name} render`, state);
                     }
                 }
