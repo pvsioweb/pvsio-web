@@ -129,13 +129,13 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
     /**
      * Renders the widget
      */
-    render (state?: Renderable, opt?: NumericCSS): void {
+    render (state?: Renderable, opt?: NumericDisplayOptions): void {
         opt = opt || {};
         console.log(`[NumericDisplay] rendering ${this.getName()}`, state);
         // create the html element
         super.render();
         // update style
-        const borderWidth: number = this.updateDisplayStyle(opt);
+        this.updateDisplayStyle(opt.css);
         // reveal the widget
         this.reveal();
         // render the content if state is non-null
@@ -145,7 +145,7 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
                 if (typeof state === "string") {
 
                     // identify cursor
-                    const cursName: string = <string> opt.cursorName || this.attr.cursorName;
+                    const cursName: string = opt.cursorName || this.attr.cursorName;
                     const matchCurs: MatchState = cursName ? this.matchState(state, cursName) : null;
 
                     // setup data structure for rendering
@@ -176,6 +176,7 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
                     }
 
                     // render data
+                    const borderWidth: number = this.getBorderWidth(opt.css);
                     this.renderData(data, borderWidth);
                 }
             } else {
@@ -319,14 +320,21 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
         this.$base.append(dom).css("line-height", `${this.height}px`);
     }
     /**
-     * Internal function, updates the display style
-     * @param opt 
-     * @returns The border width
+     * Internal function, updates the display style.
      */
-    protected updateDisplayStyle (opt?: CSS): number {
-        this.applyCSS({ ...this.css, ...opt }); // opt overrides this.css
-        const matchBorder: RegExpMatchArray = opt?.css && opt.css["border"] ? /\d+px/.exec(opt.css["border"]) : null;
-        let borderWidth: number = opt["border-width"] ? parseFloat(`${opt["border-width"]}`)
+    protected updateDisplayStyle (css?: CSS): void {
+        css = css || {};
+        this.applyCSS({ ...this.css, ...css }); // opt overrides this.css
+    }
+
+    /**
+     * Internal function, returns the border width indicated in a given css
+     */
+    protected getBorderWidth (css?: CSS): number {
+        css = css || {};
+        const border: string = css.border !== undefined ? css.border : this.css.border;
+        const matchBorder: RegExpMatchArray = border ? /\d+px/.exec(border) : null;
+        let borderWidth: number = css["border-width"] !== undefined ? parseFloat(`${css["border-width"]}`)
             : matchBorder ? parseFloat(matchBorder[0]) 
                 : 0;    
         borderWidth = isNaN(borderWidth) ? 0 : borderWidth;
@@ -339,9 +347,9 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
     renderSample (): void {
         let st = {};
         st[this.attr.displayName] = 123;
-        this.attr.cursorName = this.attr.cursorName || "demoCursor";
-        st[this.attr.cursorName] = -1;
-        this.render(JSON.stringify(st));
+        const cursorName = this.attr.cursorName || "demoCursor";
+        st[cursorName] = -1;
+        this.render(JSON.stringify(st), { cursorName });
     }
 
     getDescription (): string {
@@ -349,7 +357,7 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
     }
 
     // @override
-    getAttributes (opt?: { nameReplace?: string, keyCode?: boolean, optionals?: string[] }): WidgetAttr {
+    getAttributes (opt?: { keyCode?: boolean, optionals?: string[] }): WidgetAttr {
         opt = opt || {};
         opt.optionals = opt.optionals || [];
         opt.optionals = opt.optionals.concat([ "cursorName" ]);

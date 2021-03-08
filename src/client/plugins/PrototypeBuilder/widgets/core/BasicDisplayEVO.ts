@@ -75,13 +75,13 @@ export class BasicDisplayEVO extends WidgetEVO {
     /**
      * Renders the widget
      */
-    render (state?: Renderable, opt?: CSS): void {
+    render (state?: Renderable, opt?: DisplayOptions): void {
         opt = opt || {};
         console.log(`[NumericDisplay] rendering ${this.getName()}`, state);
         // create the html element
         super.render();
         // update style
-        this.updateDisplayStyle(opt);
+        this.updateDisplayStyle(opt.css);
         // reveal the widget
         this.reveal();
         // render the content if state is non-null

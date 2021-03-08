@@ -26,7 +26,7 @@
 
 import { DisplayAttr, DisplayOptions } from "./BasicDisplayEVO";
 import { ButtonAttr, ButtonEVO, ButtonOptions } from "./ButtonEVO";
-import { Coords, CSS, MatchState } from "./WidgetEVO";
+import { Coords, CSS, MatchState, Renderable } from "./WidgetEVO";
 
 export interface TouchScreenOptions extends DisplayOptions, ButtonOptions { };
 
@@ -69,7 +69,7 @@ export class TouchScreenEVO extends ButtonEVO {
         }
     };
 
-    render (state?: string | number | {}, opt?: CSS): void {
+    render (state?: Renderable, opt?: TouchScreenOptions): void {
         // the following will render custom labels
         super.render(state, opt);
         if (!this.attr.customLabel && state) {

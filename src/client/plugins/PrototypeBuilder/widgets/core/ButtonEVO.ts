@@ -1,45 +1,9 @@
 /**
- * @module ButtonEVO
- * @version 1.0
- * @description Renders a customisable button.
- *              The button has two layers: one layer renders the visual appearance, the other layer captures user interactions with the widget.
- *              This module provide APIs for setting up the visual appearance of the button and the user interactions captured by the button.
- *              Note that the button can also be transparent and without label: this is useful for creating
- *              interactive areas over pictures of a user interface.
+ * Renders a customisable button.
  * @author Paolo Masci
- * @date Dec 11, 2017
- *
- * @example <caption>Example use of the widget.</caption>
- // Example pvsio-web demo that uses ButtonEVO
- // The following configuration assumes the pvsio-web demo is stored in a folder within pvsio-web/examples/demo/
- require.config({
-     baseUrl: "../../client/app",
-     paths: {
-         d3: "../lib/d3",
-         lib: "../lib",
-         text: "../lib/text",
-         stateParser: "./util/PVSioStateParser"
-     }
- });
- require(["widgets/core/ButtonEVO"], function (ButtonEVO) {
-      "use strict";
-      let device = {};
-      device.btnOk = new ButtonEVO("btnOk", {
-        top: 200, left: 120, height: 24, width: 120
-      }, {
-        label: "Ok",
-        fontColor: "black",
-        backgroundColor: "blue",
-        fontsize: 16,
-        callback: function (err, data) { console.log("Ok button clicked"); console.log(data); }
-      });
-     device.btnOk.render(); // The button is rendered.
-     device.btnOk.click();  // Actions can be triggered programmatically. Clicking the button has the effect of sending a command "click_btnOk(<current state>)" to the PVSio-web back-end
- });
- *
  */
 
-import { Coords, WidgetEvent, WidgetEVO, WidgetOptions, WidgetAttr, CSS, WidgetEventData } from "./WidgetEVO";
+import { Coords, WidgetEvent, WidgetEVO, WidgetOptions, WidgetAttr, CSS, WidgetEventData, Renderable, WidgetAttrX } from "./WidgetEVO";
 import { Connection, PVSioWebCallBack, SendCommandToken } from "../../../../env/Connection";
 import { mouseButtons } from "../../../../utils/pvsiowebUtils";
 
@@ -58,6 +22,13 @@ export interface ButtonOptions extends WidgetOptions {
     rate?: number,
     dblclick_timeout?: number
 };
+
+export const buttonEvents: WidgetEvent[] = [
+    WidgetEvent.click,
+    WidgetEvent.dblclick,
+    WidgetEvent.press,
+    WidgetEvent.release
+];
 
 export interface ButtonAttr extends WidgetAttr {
     buttonName: string,
@@ -373,7 +344,7 @@ export class ButtonEVO extends WidgetEVO {
     }
     
     // @override
-    getAttributes (opt?: { nameReplace?: string, keyCode?: boolean, optionals?: string[] }): WidgetAttr {
+    getAttributes (opt?: { keyCode?: boolean, optionals?: string[] }): WidgetAttr {
         opt = opt || {};
         opt.optionals = opt.optionals || [];
         opt.optionals = opt.optionals.concat([ "customFunction", "customLabel", "keyCode" ]);
@@ -381,32 +352,15 @@ export class ButtonEVO extends WidgetEVO {
     }
 
     /**
-     * @function <a name="render">render</a>
-     * @description Rendering function for button widgets.
-     * @param state {Object|String} Information to be rendered
-     * @param opt {Object} Style options overriding the style attributes used when the widget was created.
-     *                     The override style options are temporary, i.e., they are applied only for the present invocation of the render method.
-     *                     Available options are either html style attributes or the following widget attributes:
-     *          <li>align (String): text align: "center", "right", "left", "justify" (default is "center")</li>
-     *          <li>backgroundColor (String): background display color (default is black, "transparent")</li>
-     *          <li>borderColor (String): border color, must be a valid HTML5 color (default is "steelblue")</li>
-     *          <li>borderStyle (String): border style, must be a valid HTML5 border style, e.g., "solid", "dotted", "dashed", etc. (default is "none")</li>
-     *          <li>borderWidth (Number): border width (if option borderColor !== null then the default border is 2px, otherwise 0px, i.e., no border)</li>
-     *          <li>fontColor (String): font color, must be a valid HTML5 color (default is "white", i.e., "#fff")</li>
-     *          <li>fontFamily (String): font family, must be a valid HTML5 font name (default is "sans-serif")</li>
-     *          <li>fontSize (Number): font size (default is (coords.height - opt.borderWidth) / 2 )</li>
-     *          <li>opacity (Number): opacity of the button. Valid range is [0..1], where 0 is transparent, 1 is opaque (default is opaque)</li>
-     *          <li>zIndex (String): z-index property of the widget (default is 1)</li>
-     * @memberof module:ButtonEVO
-     * @instance
+     * Render the button
      */
-    render (state?: string | number | {}, opt?: CSS): void {
+    render (state?: Renderable, opt?: ButtonOptions): void {
         opt = opt || {};
         console.log(`[ButtonEVO] rendering state`, state);
         // create the html element
         super.render();
         // update style
-        this.updateDisplayStyle(opt);
+        this.updateDisplayStyle(opt.css);
         // reveal the widget
         this.reveal();
 
@@ -418,13 +372,26 @@ export class ButtonEVO extends WidgetEVO {
 
     /**
      * Internal function, updates the display style
-     * @param opt 
      */
     protected updateDisplayStyle (opt?: CSS): void {
         opt = opt || {};
         this.applyCSS({ ...this.css, ...opt });
         // set line height so text is vertically centered
         this.$base.css("line-height", `${this.lineHeight}px`);
+    }
+
+    /**
+     * Overrides the default widget function, to add hints for "actions"
+     */
+    getAttrX (): WidgetAttrX {
+        const attrx: WidgetAttrX = super.getAttrX();
+        if (attrx) {
+            attrx.actions = {
+                val: attrx.actions.val,
+                hints: buttonEvents
+            };
+        }
+        return attrx;
     }
 
     /**

@@ -1,7 +1,7 @@
 import { uuid } from '../../../utils/pvsiowebUtils';
 import { Connection } from '../../../env/Connection';
 import { CentralView, WidgetsMap, CentralViewOptions } from './CentralView';
-import { Renderable } from '../widgets/core/WidgetEVO';
+import { Renderable, WidgetOptions } from '../widgets/core/WidgetEVO';
 import { CSS } from '../widgets/core/WidgetEVO';
 
 export enum SimulatorEvents {
@@ -30,7 +30,7 @@ export class SimulatorView extends CentralView {
      * Renders all widgets with the given state
      * @param desc 
      */
-    async renderState (state: Renderable, opt?: CSS): Promise<void> {
+    async renderState (state: Renderable, opt?: WidgetOptions): Promise<void> {
         console.log(`[simulator-view] renderWidgets`, this.widgets);
         for (let i in this.widgets) {
             this.widgets[i].render(state, opt);

@@ -127,10 +127,11 @@ export class LedEVO extends WidgetEVO {
      * @memberof module:LedEVO
      * @instance
      */
-    render (state: Renderable, opt?: CSS): void {
+    render (state: Renderable, opt?: LedOptions): void {
         super.render();
         // set style
-        this.applyCSS({ ...this.css, ...opt });
+        opt = opt || {};
+        this.applyCSS({ ...this.css, ...opt.css });
 
         // make sure shape is round
         this.$base.css({ 

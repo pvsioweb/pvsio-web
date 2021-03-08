@@ -10,7 +10,7 @@ import { CentralViewEvents, WidgetsMap } from './views/CentralView';
 import { SideView } from './views/SideView';
 import { SimulatorView } from './views/SimulatorView';
 import * as Backbone from 'backbone';
-import { Renderable, WidgetData, CSS } from './widgets/core/WidgetEVO';
+import { Renderable, WidgetData, CSS, WidgetOptions } from './widgets/core/WidgetEVO';
 import { WidgetClassManager } from './WidgetClassManager';
 import { DidChangePictureEventData, IoFile, PrototypeData, DataAttribute, WebFile, defaultIoSettings, defaultWebSettings, PictureSize, getWebFile, getIoFile, PrototypeBuilderEvents, Picture, DidRemovePictureEventData, whiteboardFile  } from '../../utils/builderUtils';
 
@@ -415,10 +415,10 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
     }
 
     /**
-     * Renders all widgets with the given state
+     * Renders all widgets
      * @param state 
      */
-    async renderState (state: Renderable, opt?: CSS): Promise<void> {
+    async renderState (state: Renderable, opt?: WidgetOptions): Promise<void> {
         console.log(`[pvsio-web] Render state`, state, opt);
         return await this.centralViews?.Simulator?.renderState(state, opt);
     }

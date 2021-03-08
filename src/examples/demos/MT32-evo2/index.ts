@@ -3107,12 +3107,12 @@ class MT32Demo {
                 || res.mt32.mode === "RESULTS" || res.mt32.mode === "DOWNLOADING_UPDATES" || res.mt32.mode === "SENDING_RESULTS"
                 || res.mt32.mode === "TERMINATE_OPERATING_MODE" || res.mt32.mode === "ACKNOWLEDGE_TERMINATION") {
             this.viz("#leftPanel");
-            this.mt32.umts.render(true);
-            this.mt32.wireless.render(true);
-            this.mt32.bluetooth.render(true);
-            this.mt32.battery.render(true);
+            this.mt32.umts.render();
+            this.mt32.wireless.render();
+            this.mt32.bluetooth.render();
+            this.mt32.battery.render();
             if (res.mt32.mode !== "HOME" && res.mt32.mode !== "RESULTS") {
-                this.mt32.leftpanel_back.render(true);
+                this.mt32.leftpanel_back.render();
             }
             if (res.mt32.umts === "UMTS_OFF") {
                 this.viz("#umts_off");
