@@ -77,7 +77,7 @@ export class BasicDisplayEVO extends WidgetEVO {
      */
     render (state?: Renderable, opt?: DisplayOptions): void {
         opt = opt || {};
-        console.log(`[NumericDisplay] rendering ${this.getName()}`, state);
+        // console.log(`[NumericDisplay] rendering ${this.getName()}`, state);
         // create the html element
         super.render();
         // update style
@@ -96,7 +96,7 @@ export class BasicDisplayEVO extends WidgetEVO {
                         const disp: string = isNaN(val) ? `${match.val}` : `${val}`;
                         this.$base.html(disp);
                         const name: string = this.getName();
-                        console.log(`[BasicDisplay] ${name} render`, state);
+                        // console.log(`[BasicDisplay] ${name} render`, state);
                     }
                 }
             } else {

@@ -31,7 +31,7 @@
  */
 
 import { BasicDisplayEVO, DisplayAttr, DisplayOptions } from './BasicDisplayEVO';
-import { Coords, WidgetAttr, CSS, Renderable, MatchState, rat2real } from './WidgetEVO';
+import { Coords, WidgetAttr, CSS, Renderable, MatchState, rat2real, WidgetAttrX } from './WidgetEVO';
 
 // typical height/width ratio for non-monospace font
 const hwratio = 1.076;
@@ -131,7 +131,7 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
      */
     render (state?: Renderable, opt?: NumericDisplayOptions): void {
         opt = opt || {};
-        console.log(`[NumericDisplay] rendering ${this.getName()}`, state);
+        // console.log(`[NumericDisplay] rendering ${this.getName()}`, state);
         // create the html element
         super.render();
         // update style
@@ -292,7 +292,9 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
             color: this.css.color,
             "background": this.css["background"],
             "margin-left": ((data.max_integer_digits - data.whole.length - data.whole_zeropadding.length) * this.letterSpacing).toFixed(2),
-            "sel-color": this.css.background == "transparent" ? "black" : this.css.background,
+            "sel-color": this.css.background == "transparent" ?
+                this.css.color === "black" ? "white" : "black"
+                    : this.css.background,
             "sel-background": this.css.color == "transparent" ? "white" : this.css.color
         };
         const frac_digits: { val: string, selected: boolean, "font-size": number }[] = data.frac.concat(data.frac_zeropadding);
@@ -346,9 +348,9 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
      */
     renderSample (): void {
         let st = {};
-        st[this.attr.displayName] = 123;
+        st[this.attr.displayName] = 123.4;
         const cursorName = this.attr.cursorName || "demoCursor";
-        st[cursorName] = -1;
+        st[cursorName] = 0;
         this.render(JSON.stringify(st), { cursorName });
     }
 
@@ -362,6 +364,14 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
         opt.optionals = opt.optionals || [];
         opt.optionals = opt.optionals.concat([ "cursorName" ]);
         return super.getAttributes(opt);
+    }
+
+    // @override
+    getAttrX (opt?: { keyCode?: boolean, optionals?: string[] }): WidgetAttrX {
+        opt = opt || {};
+        opt.optionals = opt.optionals || [];
+        opt.optionals = opt.optionals.concat([ "cursorName" ]);
+        return super.getAttrX(opt);
     }
 
 }

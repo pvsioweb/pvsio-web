@@ -352,11 +352,28 @@ export class ButtonEVO extends WidgetEVO {
     }
 
     /**
+     * Overrides the default widget function, to add hints for "actions"
+     */
+     getAttrX (opt?: { keyCode?: boolean, optionals?: string[] }): WidgetAttrX {
+        opt = opt || {};
+        opt.optionals = opt.optionals || [];
+        opt.optionals = opt.optionals.concat([ "customFunction", "customLabel", "keyCode" ]);
+        const attrx: WidgetAttrX = super.getAttrX(opt);
+        if (attrx) {
+            attrx.actions = {
+                val: attrx.actions.val,
+                hints: buttonEvents
+            };
+        }
+        return attrx;
+    }
+
+    /**
      * Render the button
      */
     render (state?: Renderable, opt?: ButtonOptions): void {
         opt = opt || {};
-        console.log(`[ButtonEVO] rendering state`, state);
+        // console.log(`[ButtonEVO] rendering state`, state);
         // create the html element
         super.render();
         // update style
@@ -378,20 +395,6 @@ export class ButtonEVO extends WidgetEVO {
         this.applyCSS({ ...this.css, ...opt });
         // set line height so text is vertically centered
         this.$base.css("line-height", `${this.lineHeight}px`);
-    }
-
-    /**
-     * Overrides the default widget function, to add hints for "actions"
-     */
-    getAttrX (): WidgetAttrX {
-        const attrx: WidgetAttrX = super.getAttrX();
-        if (attrx) {
-            attrx.actions = {
-                val: attrx.actions.val,
-                hints: buttonEvents
-            };
-        }
-        return attrx;
     }
 
     /**
