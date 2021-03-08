@@ -530,34 +530,33 @@ export abstract class WidgetEVO extends Backbone.Model {
     }
 
     /**
-     * @function <a name="evalViz">evalViz</a>
-     * @description Evaluates the visibility of the widget based on the state attrbutes (passed as function parameter) and the expression stored in this.visibleWhen
-     * @param state {Object} JSON object with the current value of the state attributes of the modelled system
-     * @return {bool} true if the state attributes indicate widget visible, otherwise false.
-     * @memberof module:WidgetEVO
+     * Evaluates the visibility of the widget based 
+     * on the state attrbutes (passed as function parameter) and the expression stored in this.visibleWhen
      * @instance
      */
-    evalViz (state: string | {}): boolean {
-        let vizAttribute: boolean = true;
-        if (state && typeof state === "object") {
-            vizAttribute = false;
-            const expr: { res: parserUtils.SimpleExpression, err?: string } = parserUtils.simpleExpressionParser(this.viz?.visible);
-            if (expr && expr.res) {
-                if (expr.res.type === "constexpr" && expr.res.constant === "true") {
-                    vizAttribute = true;
-                } else if (expr.res.type === "boolexpr" && expr.res.binop) {
-                    let str: string = parserUtils.resolveAttribute (state, expr.res.attr);
+    evalViz (state: Renderable): boolean {
+        const expr: { res: parserUtils.SimpleExpression, err?: string } = parserUtils.simpleExpressionParser(this.viz?.visible);
+        if (expr && expr.res && expr.res.type === "constexpr") {
+            const ans: boolean = expr.res.constant === "true"
+            return ans;
+        }
+        if (typeof state === "string") {
+            if (expr && expr.res && expr.res.type === "boolexpr" && expr.res.binop) {
+                const match: MatchState = this.matchState(state, expr.res.attr);
+                if (match) {
+                    let str: string = match.val;
                     if (str) {
-                        str = parserUtils.evaluate(str);
-                        if ((expr.res.binop === "=" && str === expr.res.constant) ||
-                            (expr.res.binop === "!=" && str !== expr.res.constant)) {
-                                vizAttribute = true;
+                        str = parserUtils.evaluate(str);                        
+                        if ((expr.res.binop === "=" && str === expr.res.constant)
+                                || (expr.res.binop === "!=" && str !== expr.res.constant)) {
+                            return true;
                         }
                     }
                 }
             }
+            return false;
         }
-        return vizAttribute;
+        return true;
     }
 
     /**

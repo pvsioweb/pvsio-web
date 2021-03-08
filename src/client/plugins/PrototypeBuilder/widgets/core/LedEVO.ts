@@ -143,9 +143,10 @@ export class LedEVO extends WidgetEVO {
         state = (state === undefined || state === null) ? "" : state;
         if (typeof state === "string") {
             this.applyCSS({ "background": state });
-        } else if (typeof state === "object" && this.attr.ledName !== "" && this.evalViz(state)) {
-            this.applyCSS({ "background": this.evaluate(this.attr.ledName, state) });
-        }
+        } 
+        // else if (typeof state === "object" && this.attr.ledName !== "" && this.evalViz(state)) {
+        //     this.applyCSS({ "background": this.evaluate(this.attr.ledName, state) });
+        // }
 
         this.reveal();
     }

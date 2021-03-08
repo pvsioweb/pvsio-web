@@ -131,7 +131,7 @@ export class NumericDisplayEVO extends BasicDisplayEVO {
      */
     render (state?: Renderable, opt?: NumericCSS): void {
         opt = opt || {};
-        console.log(`[NumericDisplay] rendering state`, state);
+        console.log(`[NumericDisplay] rendering ${this.getName()}`, state);
         // create the html element
         super.render();
         // update style

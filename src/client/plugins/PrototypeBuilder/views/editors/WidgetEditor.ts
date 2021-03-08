@@ -140,7 +140,7 @@ const containerTemplate: string = `
                         {{/each}}
                     </div>
                     <br>
-                    <div id="{{cons.constructorName}}-viz" class="widget-viz"></div>
+                    <div id="{{cons.constructorName}}-viz" style="display:none;" class="widget-viz"></div>
                     <br>
                     <div id="{{cons.constructorName}}-css" class="widget-css"></div>
                 </div>
@@ -316,6 +316,13 @@ export class WidgetEditor extends Backbone.View {
                         viz: vizOp
                     });
                     $(`#${cons}-viz`).html(viz);
+                    $(`#${cons}-viz input`).on("input", (evt: JQuery.ChangeEvent) => {
+                        const key: string = evt.currentTarget?.name;
+                        if (key) {
+                            const value: string = evt.currentTarget?.value;
+                            this.updateInput(key, value);
+                        }
+                    });
 
                     // set widget attributes
                     const attr: string = Handlebars.compile(attrTemplate)({

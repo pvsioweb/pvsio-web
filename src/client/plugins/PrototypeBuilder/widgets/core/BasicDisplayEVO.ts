@@ -77,6 +77,7 @@ export class BasicDisplayEVO extends WidgetEVO {
      */
     render (state?: Renderable, opt?: CSS): void {
         opt = opt || {};
+        console.log(`[NumericDisplay] rendering ${this.getName()}`, state);
         // create the html element
         super.render();
         // update style
