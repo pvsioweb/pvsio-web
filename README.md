@@ -5,6 +5,13 @@ PVSio-web is a new graphical tool to prototype and analyse user interface softwa
 
 Simulations created with PVSio-web can be watched in this youtube video https://www.youtube.com/watch?v=T0QmUe0bwL8
 
+News
+------------
+(April 2021) A new version of PVSio-web is under development that introduces an improved architecture and new features such as dynamic loading of widget libraries. The new version will be integrated in [VSCode-PVS](https://github.com/nasa/vscode-pvs), a modern development environment for the PVS verification systems. Stay tuned for updates!
+
+<img src="https://github.com/nasa/vscode-pvs/raw/master/vscode-pvs/screenshots/vscode-pvs-rapid-prototyping.gif" width="600"> <br>
+
+
 Live version
 ------------
 
