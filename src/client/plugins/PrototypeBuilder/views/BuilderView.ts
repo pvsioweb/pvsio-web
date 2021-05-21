@@ -203,16 +203,26 @@ export class BuilderView extends CentralView {
      */
     resizePicture (size?: PictureSize, opt?: { quiet?: boolean }): void {
         if (size) {
-            if (size.width) { this.$imageDiv.find("img").attr("width", size.width); }
-            if (size.height) { this.$imageDiv.find("img").attr("height", size.height); }
+            if (size.width) { this.$imageDiv.find("img").attr("width", size.width).attr("min-width", size.width); }
+            if (size.height) { this.$imageDiv.find("img").attr("height", size.height).attr("min-height", size.height); }
         }
         size = size || this.getCurrentPictureSize();
         if (size) {
             // resize image div
-            this.$imageDiv.css({ width: `${size.width}px`, height: `${size.height}px` });
+            this.$imageDiv.css({
+                width: `${size.width}px`, 
+                height: `${size.height}px`,
+                "min-width": `${size.width}px`, 
+                "min-height": `${size.height}px`
+            });
             // resize frame
             this.$imageFrame.find("img").attr("width", size.width).attr("height", size.height);
-            this.$imageFrame.css({ width: `${size.width}px`, height: `${size.height}px` });
+            this.$imageFrame.css({
+                width: `${size.width}px`, 
+                height: `${size.height}px`,
+                "min-width": `${size.width}px`, 
+                "min-height": `${size.height}px`
+            });
             // set minimum height of panel so image does not overflow
             this.$el.css({ "min-height": `${size.height + vspace}px` });
             if (!opt?.quiet) {
