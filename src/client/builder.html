@@ -19,18 +19,18 @@
         <link href="app/plugins/graphbuilder/graph.css" rel="stylesheet"> -->
     </head>
 <body>
-    <div id="pvsio-web" class="container-fluid p-0" style="position:absolute; top:0; left:0;"></div>
     <script src="node_modules/jquery/dist/jquery.min.js"></script>
     <script src="node_modules/handlebars/dist/handlebars.min.js"></script>
     <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="node_modules/underscore/underscore-min.js"></script>
     <script src="node_modules/backbone/backbone-min.js"></script>
 
+    <div id="pvsio-web" class="container-fluid p-0" style="position:absolute; top:0; left:0;"></div>    
     <script src="prototype-builder.min.js"></script> <!-- this file is in folder bundle, the server takes care of serving it -->
 
     <script src="widgetLibDials.min.js"></script>
     <script>
-        builder.activate({ parent: "pvsio-web" });
+        builder.activate({ parent: "#pvsio-web" });
         // the following line demonstrates how to import external widget libraries at run-time
         builder.importWidgetLibrary(widgetLibDials);
     </script>

@@ -44,7 +44,7 @@ export class PluginsManager extends Backbone.Model {
         for (let name in this.pluginsMap) {
             const success: boolean = await this.pluginsMap[name].activate({
                 connection: this.connection,
-                parent: "toolkit-body",
+                parent: "#toolkit-body",
                 top: 28
             });
             const msg: string = success ? 

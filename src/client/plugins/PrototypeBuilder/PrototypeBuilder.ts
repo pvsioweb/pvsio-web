@@ -77,6 +77,9 @@ const prototypeBuilderBody: string = `
 .dropdown-item .btn {
     width:100%;
 }
+.btn-sm {
+    white-space:nowrap;
+}
 </style>
 <div id="{{id}}" class="builder-content row d-flex p-0">
     <div id="{{id}}-left" class="left-panel container-fluid no-gutters p-0">
@@ -243,6 +246,10 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
 
         // use connection indicated in the options of the constructor, or use a basic backbone connection
         this.connection = opt.connection || new BackboneConnection();
+
+        console.log(`Browser version: ${Utils.getVersion()}`);
+        // @ts-ignore
+        console.log(`Bootstrap version`, $?.fn?.tooltip?.Constructor?.VERSION);
 
         // create panel, toolbar, and body
         this.panel = Utils.createStickyPanel(this, {

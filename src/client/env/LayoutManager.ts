@@ -143,12 +143,14 @@ export class LayoutManager extends Backbone.Model {
     activate (opt?: { version?: string, parent?: string }): boolean {
         this.version = opt?.version || "3.0";
         this.parent = opt?.parent || "body";
-        console.log(`Browser version: ${Utils.getVersion()}`);
         console.log(`Toolkit version: PVSio-web ${this.version}`);
-        // console.log(`[layout-manager] Parent is ${this.parent}`);
+
+        console.log(`[layout-manager] Parent is ${this.parent}`);
         this.createHtmlElements();
         this.installHandlers();
         this.hideSplash({ fade: true });
+        console.log(`[layout-manager] Done with layout!`);
+
         return true;
     }
 
@@ -169,6 +171,7 @@ export class LayoutManager extends Backbone.Model {
     }
     
     protected installHandlers (): void {
+        console.log(`[layout-manager] Installing handlers...`);
         // Forward key events to the active panel. By using this instead of registering their own global key listeners,
         // panels avoid breaking the functionality of other panels or causing behaviour that is confusing for the user.
         $("body").on("keydown.global", (evt: JQuery.Event) => {

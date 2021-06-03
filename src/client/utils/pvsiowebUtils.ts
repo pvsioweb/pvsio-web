@@ -96,8 +96,8 @@ export const dialogTemplate: string = `
     <div class="modal-dialog-shadow" style="width:100%; height:100%; position:fixed; background: black; opacity: 0.8;"></div>
     <div class="modal-dialog modal-dialog-centered{{#if largeModal}} modal-lg{{/if}}" role="document">
         <div class="modal-content" style="transform:scale(0.8); transform-origin:top;">
-            <div class="modal-header">
-                <h5 class="modal-title tile" id="{{dialogId}}-title">{{title}}</h5>
+            <div class="modal-header py-0">
+                <h6 class="modal-title tile" style="display:none;" id="{{dialogId}}-title">{{title}}</h6>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true" class="cancel-btn">&times;</span>
                 </button>
@@ -105,7 +105,7 @@ export const dialogTemplate: string = `
             <div class="modal-body">
                 {{content}}
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer py-1">
                 {{#if buttons}}
                 {{buttons}}
                 {{else}}
@@ -231,7 +231,7 @@ export function createStickyPanel (owner: PVSioWebPlugin, opt?: {
     top?: number
 }): StickyPanel {
     opt = opt || {};
-    const parent: string = opt.parent && opt.parent !== "body" ? `#${opt.parent}` : "body";
+    const parent: string = opt.parent || "body";
     const pluginId: string = owner.getId() || "";
     const pluginName: string = owner.getName() || "";
     const width: string = opt.width || "100%";

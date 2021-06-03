@@ -9,33 +9,25 @@
   "description": "A formal methods toolkit for model-based development of human-machine interfaces",
   "version": "3.0.0-beta",
   "dependencies": {
-    "animate.css": "^3.7.0",
+    "animate.css": "^4.1.1",
     "backbone": "1.4.0",
-    "body-parser": "^1.18.3",
-    "bootstrap": "^4.3.1",
-    "codemirror": "^5.61.1",
-    "common-js": "^0.3.8",
-    "d3": "5.15.0",
-    "express": "^4.16.4",
+    "bootstrap": "^4.6.0",
     "font-awesome": "^4.7.0",
-    "handlebars": "^4.7.3",
-    "jquery": "^3.3.29",
-    "jquery-toggles": "4.0.0",
+    "handlebars": "^4.7.7",
+    "jquery": "^3.6.0",
     "node": "^12.16.1",
-    "open": "^7.0.3",
     "requirejs": "^2.3.6",
-    "tracer": "0.7.1",
     "underscore": "^1.13.1",
-    "uuid": "^7.0.2",
-    "ws": "3.3.2"
+    "uuid": "^8.3.2",
+    "ws": "^7.4.6"
   },
   "devDependencies": {
-    "@types/backbone": "^1.4.0",
-    "@types/express": "^4.16.1",
-    "@types/jasmine": "^3.5.0",
-    "@types/jquery": "^3.3.29",
+    "@types/backbone": "^1.4.10",
+    "@types/express": "^4.17.12",
+    "@types/jasmine": "^3.7.6",
+    "@types/jquery": "^3.5.5",
     "@types/node": "^13.9.0",
-    "@types/ws": "^6.0.1"
+    "@types/ws": "^7.4.4"
   },
   "scripts": {
     "start": "node dist/server/PVSioWebServer.js"

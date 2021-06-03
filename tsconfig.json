@@ -13,7 +13,7 @@
 			"*": [ "node_modules/*", "node_modules/@types/*", "client/node_modules/*" ]
 		},
 		"types": [
-			"handlebars", "jquery", "node", "express", "ws", "connect", "body-parser", "jasmine"
+			"handlebars", "jquery", "node", "express", "ws", "connect", "body-parser"
 		],
 		"typeRoots": [
             "node_modules/@types"
