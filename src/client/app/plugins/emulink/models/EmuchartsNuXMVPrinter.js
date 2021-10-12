@@ -255,8 +255,8 @@ define(function (require, exports, module) {
                 }
             });
             return {
-                name: (t.res.val.identifier) ? t.res.val.identifier.val : "tick",
-                current_state: (trans.source) ? trans.source.name : null,
+                name: (t?.res?.val?.identifier) ? t.res.val.identifier.val : "tick",
+                current_state: (trans?.source) ? trans.source.name : null,
                 cond: cond.join(" "),
                 action: actions,
                 keep: keep
