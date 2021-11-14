@@ -1,7 +1,8 @@
 // import { ActionCallback, ActionsQueue } from "../../ActionsQueue";
-import { SendCommandToken, PVSioWebCallBack } from "../../../../env/Connection";
+import { PVSioWebCallBack, SendCommandToken } from "../../../../common/interfaces/Connection";
+import { Coords, CSS } from "../../../../common/interfaces/Widgets";
 import { ButtonEVO, ButtonOptions } from "./ButtonEVO";
-import { Coords, img_template, CSS, WidgetEvent } from "./WidgetEVO";
+import { img_template, WidgetEvent } from "./WidgetEVO";
 
 export type DialStyle = "modern" | "multimeter";
 export interface DialOptions extends ButtonOptions {

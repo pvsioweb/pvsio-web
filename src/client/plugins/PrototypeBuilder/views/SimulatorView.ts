@@ -1,8 +1,7 @@
-import { uuid } from '../../../utils/pvsiowebUtils';
-import { Connection } from '../../../env/Connection';
+import { uuid } from '../../../common/utils/uuidUtils';
+import { Connection } from '../../../common/interfaces/Connection';
 import { CentralView, WidgetsMap, CentralViewOptions } from './CentralView';
-import { Renderable, WidgetOptions } from '../widgets/core/WidgetEVO';
-import { CSS } from '../widgets/core/WidgetEVO';
+import { Renderable, WidgetOptions, CSS } from '../../../common/interfaces/Widgets';
 
 export enum SimulatorEvents {
     DidRebootPrototype = "DidRebootPrototype"

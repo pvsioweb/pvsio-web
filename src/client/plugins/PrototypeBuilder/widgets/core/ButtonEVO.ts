@@ -3,9 +3,10 @@
  * @author Paolo Masci
  */
 
-import { Coords, WidgetEvent, WidgetEVO, WidgetOptions, WidgetAttr, CSS, WidgetEventData, Renderable, WidgetAttrX } from "./WidgetEVO";
-import { Connection, PVSioWebCallBack, SendCommandToken } from "../../../../env/Connection";
-import { mouseButtons } from "../../../../utils/pvsiowebUtils";
+import { WidgetEvent, WidgetEVO, WidgetAttr, WidgetEventData, WidgetAttrX, MatchState, rat2real, ratNumberMatch } from "./WidgetEVO";
+import { Connection, PVSioWebCallBack, SendCommandToken } from "../../../../common/interfaces/Connection";
+import { mouseButtons } from "../../../../common/utils/pvsiowebUtils";
+import { Coords, WidgetOptions, CSS, Renderable } from "../../../../common/interfaces/Widgets";
 
 const CLICK_RATE = 250; // 250 milliseconds, default interval for repeating button clicks when the button is pressed and held down
                             // going below 250ms may cause multiple unintended activations when pressing the button
@@ -73,7 +74,7 @@ export class ButtonEVO extends WidgetEVO {
         opt.css = opt.css || {};
 
         // override default style options of WidgetEVO as necessary before creating the DOM element with the constructor of module WidgetEVO
-        this.css["background"] = opt.css["background"] || "transparent";
+        this.css["background"] = opt.css.background || opt.css["background-color"] || "transparent";
         this.css.color = opt.css.color || "white";
         this.css["cursor"] = opt.css.cursor || "pointer";
         this.css["z-index"] = opt.css["z-index"] || 1; // z-index for buttons should be at least 1, so they are placed over display widgets
@@ -384,6 +385,33 @@ export class ButtonEVO extends WidgetEVO {
         // a fixed label is rendered if any is specified
         if (this.attr?.customLabel) {
             this.$base.html(this.attr.customLabel);
+        } else if (state !== undefined && state !== null) {
+            // check if the state contains a field named after the widget
+            if (this.matchStateFlag) {
+                const name: string = this.getName();
+                const match: MatchState = (typeof state === "string") ?
+                    this.matchState(state, name)
+                        : { name, val: state[name] };
+                if (match) {
+                    // check if this is a rational number -- don't use directly rat2real 
+                    // because the state may be a string that resembles a number, e.g., "2.", 
+                    // and rat2real would translate it into number 2 (i.e., the '.' gets removed, 
+                    // which is not what we want for non-numeric displays)
+                    const matchRat: RegExpMatchArray = new RegExp(ratNumberMatch).exec(match.val);
+                    if (matchRat) {
+                        const val: number = rat2real(match.val);
+                        const disp: string = isNaN(val) ? `${match.val}` : `${val}`;
+                        this.$base.html(disp);
+                    } else {
+                        this.$base.html(match.val);
+                    }
+                    // const name: string = this.getName();
+                    // console.log(`[BasicDisplay] ${name} render`, state);
+                }
+            } else {
+                // render string or number
+                this.$base.html(`${state}`);
+            }
         }
     }
 

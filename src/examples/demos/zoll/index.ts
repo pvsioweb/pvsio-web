@@ -3,11 +3,11 @@
  * @author Paolo Masci
  * @date 2020/12/16
  */
-import { LoopbackConnection as Connection } from '../../../client/env/Connection';
+import { LoopbackConnection as Connection } from '../../../client/core/ConnectionImpl';
 
 import { BasicDisplayEVO } from '../../../client/plugins/PrototypeBuilder/widgets/core/BasicDisplayEVO';
 import { SelectorEVO } from '../../../client/plugins/PrototypeBuilder/widgets/core/SelectorEVO';
-import { fontOutlineStyle } from '../../../client/utils/pvsiowebUtils';
+import { fontOutlineStyle } from '../../../client/common/utils/pvsiowebUtils';
 
 function kg2lb (kg: number): number {
     return Math.floor(kg * 2.205);
@@ -150,94 +150,124 @@ class Zoll {
             },
             ventSetupScreen: {
                 hr: new BasicDisplayEVO("hr", { top: -1, left: 0, width: 86, height: 42 }, {
-                    parent: "ventSetupScreen",
+                    parent: "#ventSetupScreen",
                     css: {
-                        "background-color": "transparent"
-                    }
+                        "background-color": "transparent",
+                        color: "black"
+                    },
+                    renderMode: "string"
                 }),
                 spo2: new BasicDisplayEVO("spo2", { top: 40, left: 0, width: 86, height: 42 }, {
-                    parent: "ventSetupScreen",
+                    parent: "#ventSetupScreen",
                     css: {
-                        "background-color": "transparent"
-                    }
+                        "background-color": "transparent",
+                        color: "black"
+                    },
+                    renderMode: "string"
                 }),
                 fio2: new BasicDisplayEVO("fio2", { top: 83, left: 0, width: 86, height: 42 }, {
-                    parent: "ventSetupScreen",
+                    parent: "#ventSetupScreen",
                     css: {
-                        "background-color": "transparent"
-                    }
+                        "background-color": "transparent",
+                        color: "black"
+                    },
+                    renderMode: "string"
                 }),
                 pip: new BasicDisplayEVO("pip", { top: 124, left: 0, width: 86, height: 42 }, {
-                    parent: "ventSetupScreen",
+                    parent: "#ventSetupScreen",
                     css: {
-                        "background-color": "transparent"
-                    }
+                        "background-color": "transparent",
+                        color: "black"
+                    },
+                    renderMode: "string"
                 }),
                 vt: new BasicDisplayEVO("vt", { top: 165, left: 0, width: 86, height: 42 }, {
-                    parent: "ventSetupScreen",
+                    parent: "#ventSetupScreen",
                     css: {
-                        "background-color": "transparent"
-                    }
+                        "background-color": "transparent",
+                        color: "black"
+                    },
+                    renderMode: "string"
                 }),
                 bpm: new BasicDisplayEVO("bpm", { top: 206, left: 0, width: 86, height: 42 }, {
-                    parent: "ventSetupScreen",
+                    parent: "#ventSetupScreen",
                     css: {
-                        "background-color": "transparent"
-                    }
+                        "background-color": "transparent",
+                        color: "black"
+                    },
+                    renderMode: "string"
                 }), 
                 mode: new BasicDisplayEVO("mode", { top: 247, left: 0, width: 86, height: 42 }, {
-                    parent: "ventSetupScreen",
+                    parent: "#ventSetupScreen",
                     css: {
-                        "background-color": "transparent"
-                    }
+                        "background-color": "transparent",
+                        color: "black"
+                    },
+                    renderMode: "string"
                 }),
                 vmin: new BasicDisplayEVO("vmin", { top: 247, left: -132, width: 33, height: 21 }, {
-                    parent: "ventSetupScreen",
+                    parent: "#ventSetupScreen",
                     css: {
-                        "background-color": "transparent"
-                    }
+                        "background-color": "transparent",
+                        color: "black"
+                    },
+                    renderMode: "string"
                 }),
                 ct: new BasicDisplayEVO("ct", { top: 247, left: -99, width: 33, height: 21 }, {
-                    parent: "ventSetupScreen",
+                    parent: "#ventSetupScreen",
                     css: {
-                        "background-color": "transparent"
-                    }
+                        "background-color": "transparent",
+                        color: "black"
+                    },
+                    renderMode: "string"
                 }),
                 map: new BasicDisplayEVO("map", { top: 247, left: -66, width: 33, height: 21 }, {
-                    parent: "ventSetupScreen",
+                    parent: "#ventSetupScreen",
                     css: {
-                        "background-color": "transparent"
-                    }
+                        "background-color": "transparent",
+                        color: "black"
+                    },
+                    renderMode: "string"
                 }),
                 ti: new BasicDisplayEVO("ti", { top: 247, left: -33, width: 33, height: 21 }, {
-                    parent: "ventSetupScreen",
+                    parent: "#ventSetupScreen",
                     css: {
-                        "background-color": "transparent"
-                    }
+                        "background-color": "transparent",
+                        color: "black"
+                    },
+                    renderMode: "string"
                 }),
                 spacer1: new BasicDisplayEVO("spacer1", { top: 267, left: -132, width: 33, height: 21 }, {
-                    parent: "ventSetupScreen",
+                    parent: "#ventSetupScreen",
                     css: {
-                        "background-color": "transparent"
-                    }
+                        "background-color": "transparent",
+                        color: "black"
+                    },
+                    renderMode: "string"
                 }),
                 spacer2: new BasicDisplayEVO("spacer2", { top: 267, left: -99, width: 33, height: 21 }, {
-                    parent: "ventSetupScreen",
+                    parent: "#ventSetupScreen",
                     css: {
-                        "background-color": "transparent"
-                    }
+                        "background-color": "transparent",
+                        color: "black"
+                    },
+                    renderMode: "string"
                 }),
                 spacer3: new BasicDisplayEVO("spacer3", { top: 267, left: -66, width: 33, height: 21 }, {
-                    parent: "ventSetupScreen",
+                    parent: "#ventSetupScreen",
                     css: {
-                        "background-color": "transparent"
-                    }
+                        "background-color": "transparent",
+                        color: "black"
+                    },
+                    renderMode: "string"
                 }),
                 trigger: new BasicDisplayEVO("trigger", { top: 267, left: -33, width: 33, height: 21 }, {
-                    parent: "ventSetupScreen",
+                    parent: "#ventSetupScreen",
                     css: {
-                        "background-color": "transparent"
-                    }
+                        "background-color": "transparent",
+                        color: "black"
+                    },
+                    renderMode: "string"
                 })
             },
             selector: new SelectorEVO("selector", { top: 606, left: 488, width: 112, height: 112 }, {
@@ -260,10 +290,12 @@ class Zoll {
         switch (this.state.screen) {
             case "off": {
                 $("#screen").css("display", "none");
+                $("#led_shader").css("display", "block");
                 break;
             }
             case "on": {
                 $("#screen").css("display", "block");
+                $("#led_shader").css("display", "none");
                 break;
             }
             default: {

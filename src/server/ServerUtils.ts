@@ -3,9 +3,10 @@
  * @author Patrick Oladimeji, Paolo Masci
  * @date 6/26/14 11:29:07 AM
  */
-import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
+import { execSync } from 'child_process';
+import { ProjectDescriptor, NodeJSFileDescriptor } from './common/interfaces/FileSystem';
 
 const imageExts: string[] = [".jpg", ".jpeg", ".png"];
 const baseProjectDir: string = path.join(__dirname, "../../examples/projects/");
@@ -74,17 +75,7 @@ export function isImage(fullPath: string): boolean {
     return false;
 }
 
-export declare type NodeJSFileDescriptor = {
-    path: string,
-    name?: string,
-    content?: string,
-    encoding?: "base64" | "utf8",
-    isDirectory?: boolean,
-    size?: number,
-    modified?: Date,
-    created?: Date,
-    err?: NodeJS.ErrnoException 
-};
+
 
 export function fileExists (fullPath: string): boolean {
     if (fs.existsSync(fullPath)) {
@@ -211,7 +202,6 @@ export async function getFolderTree(fullPath: string, filter?: string[]): Promis
     }
 }
 
-export type ProjectDescriptor = { name: string, descriptors?: NodeJSFileDescriptor[], image?: string }
 
 /**
  * open a project with the specified projectName

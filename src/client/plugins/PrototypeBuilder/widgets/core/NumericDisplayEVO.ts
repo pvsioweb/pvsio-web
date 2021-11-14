@@ -9,29 +9,12 @@
  * @author Paolo Masci
  * @date Dec 11, 2017
  *
- * @example <caption>Example use of the widget.</caption>
- // Example pvsio-web demo that uses NumericDisplayEVO
- // The following configuration assumes the pvsio-web demo is stored in a folder within pvsio-web/examples/demo/
- require.config({
-     baseUrl: "../../client/app",
-     paths: { d3: "../lib/d3", text: "../lib/text" }
- });
- require(["widgets/core/NumericDisplayEVO"], function (NumericDisplayEVO) {
-      "use strict";
-      var disp = new NumericDisplayEVO("disp", {
-        top: 200, left: 120, height: 24, width: 120
-      }, {
-        fontColor: "black",
-        fontsize: 16,
-        backgroundColor: "blue"
-      });
-     disp.render("BN-32.5"); // The display shows BN-32.5
- });
  *
  */
 
 import { BasicDisplayEVO, DisplayAttr, DisplayOptions } from './BasicDisplayEVO';
-import { Coords, WidgetAttr, CSS, Renderable, MatchState, rat2real, WidgetAttrX } from './WidgetEVO';
+import { WidgetAttr, MatchState, rat2real, WidgetAttrX } from './WidgetEVO';
+import { Coords, CSS, Renderable } from "../../../../common/interfaces/Widgets";
 
 // typical height/width ratio for non-monospace font
 const hwratio = 1.076;

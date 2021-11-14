@@ -6,31 +6,11 @@
  * @author Paolo Masci
  * @date Dec 23, 2017
  *
- * @example <caption>Example use of the widget.</caption>
- // Example pvsio-web demo that uses MouseCursor
- // The following configuration assumes the pvsio-web demo is stored in a folder within pvsio-web/examples/demo/
- require.config({
-     baseUrl: "../../client/app",
-     paths: {
-         d3: "../lib/d3",
-         lib: "../lib",
-         text: "../lib/text",
-         stateParser: "./util/PVSioStateParser"
-     }
- });
- require(["widgets/core/MouseCursor"], function (MouseCursor) {
-      "use strict";
-      var device = {};
-      device.cursor = new MouseCursor("cursor", {
-        top: 200, left: 120, height: 24, width: 120
-      });
-     device.cursor.render(); // The cursor is rendered.
-     device.cursor.move( { top: 100, left: 300 }, { duration: 1000 }); // The cursor is moved to position (100,300), and the animation duration is 1 second.
- });
  *
  */
 
-import { Coords, WidgetEVO, img_template, WidgetOptions } from "../core/WidgetEVO";
+import { Coords, WidgetOptions } from "../../../../common/interfaces/Widgets";
+import { WidgetEVO, img_template } from "../core/WidgetEVO";
 
 export const mouse_template: string = `
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>

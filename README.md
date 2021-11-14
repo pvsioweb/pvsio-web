@@ -5,8 +5,9 @@ PVSio-web is a new graphical tool to prototype and analyse user interface softwa
 
 Simulations created with PVSio-web can be watched in this youtube video https://www.youtube.com/watch?v=T0QmUe0bwL8
 
-Live version
-------------
+<br>
+
+## Live version
 
 Realistic prototypes created using PVSio-web can be found at the following links:
 * http://www.pvsioweb.org/demos/Radical7 (FDA's Generic Infusion Pump prototype - full model)
@@ -19,9 +20,9 @@ The full PVSio-web tool with limited features is also available at http://www.pv
 
 ![Screenshot](screenshot.png?raw=true)
 
+<br>
 
-Installation
-------------
+## Installation
 To install PVSio-web, first you need to install PVS and NodeJS, and then clone the PVSio-web github repository. This can be done as follows.
 
 #### Step 1: Install PVS and add PVS executables to your PATH
@@ -48,8 +49,9 @@ Create a directory where you would like to install PVSio-web on your local compu
 
 PVSio-web is now installed on your local computer!
 
-Running pvsio-web
------------------
+<br>
+
+## Running PVSio-Web
 To run pvsio-web, a backend and a frontend need to be started.
 
 To start the backend: open a Terminal window in the pvsio-web directory, and use the following command (and leave the Terminal window open):
@@ -60,57 +62,52 @@ To start the frontend: open a browser (Firefox 21 or greater, or Chrome), and ty
 
     http://localhost:8082/
 
-Updating pvsio-web
-------------------
+<br>
+
+## Updating PVSio-Web
 To update pvsio-web to the latest version, open a Terminal window, and execute the following command from the pvsio-web directory:
 
     git pull
 
+<br>
 
-Examples
---------
+## Examples
 Realistic simulations created with PVSio-web can be watched in this youtube video:
 * https://www.youtube.com/watch?v=T0QmUe0bwL8
 
 All simulation examples demonstrated in the youtube video are included in the PVSio-web distribution in examples/projects. To open these examples, start pvsio-web and click the "Open Projects" button of the pvsio-web frontend and select one of the examples from the list.
 
+<br>
 
-Directory structure
--------------------
-This project has the following setup:
+## Structure
+```
+.
+├── src/                         // PVSio-Web source files
+│   ├── client/                  // PVSio-Web client
+│   │   ├── common/              // Utility functions
+│   │   ├── core/                // Core services (Connection, LayoutManager, PluginsManager, etc.)
+│   │   ├── plugins/             // Plugins folder
+│   │   ├── devel.html           // Client entry-point (developer view)
+│   │   └── index.html           // Client entry-point
+│   │
+│   ├── server                   // PVSio-Web server
+│   │   ├── common/              // Utility functions
+│   │   ├── lib/                 // External libraries (co-simulation engine)
+│   │   ├── PVSioWebServer       // Server entry-point
+│   │   └── PVSioWebServer       // Server entry-point
+│   │
+│   └── examples/                // PVSio-Web example prototypes
+│       └── helloworld/          // Helloworld example, demonstrates how to use the PVSio-Web APIs
+│
+├── dist/                        // folder created after running 'make', contains the PVSio-Web distribution
+├── bundle/                      // folder created after running 'make', contains a webpack version of PVSio-Web
+│
+├── package.json                 // The extension manifest
+├── Makefile                     // Makefile for building PVSio-Web
+└── LICENSE                      // Open Source License Agreement
+```
 
-* start.sh - the script used to initiate the server.
-* examples/ - this directory contains projects and demos
-* src/ - this directory contains the pvsio-web source code
-    * client/ - this directory contains the source code for the pvsio-web client. This code is executed in the user's browser
-    * server/ - this directory contains the source code for the pvsio-web server. This code is executed in the node.JS environment, and manages communication between pvs/pvsio and the client code.
+<br>
 
-
-Nightly builds
---------------
-To obtain the latest development versions of pvsio-web, you can clone our alpha branch on the github repository.
-
-To clone the alpha branch, create a new directory (for example, pvsioweb-alpha), open a Terminal window, and execute the following commands from the created directory:
-
-    git clone https://github.com/thehogfather/pvsio-web.git -b alpha
-    cd pvsio-web
-    npm install
-
-
-Testing the installation
-------------------------
-To test the client, start the pvsio-web backend by running the following command in a Terminal window (and leave the Terminal window open):
-    ./start.sh
-
-and type the following address in a browser window:
-
-    http://localhost:8082/tests
-
-To test the server, run the following command in a Terminal window
-
-    npm test
-
-
-Uninstallation :(
---------------
+## Uninstallation :(
 To uninstall, delete the pvsio-web folder from your computer.

@@ -1,21 +1,23 @@
-import { PVSioWebPlugin } from '../../env/PVSioWeb';
-import { BackboneConnection, Connection } from '../../env/Connection';
 
-import * as Utils from '../../utils/pvsiowebUtils';
-import { BuilderEvents, BuilderView, CreateWidgetEvent, DeleteWidgetEvent, CutWidgetEvent, SelectWidgetEvent } from './views/BuilderView';
+import * as Backbone from 'backbone';
+
+import * as Utils from '../../common/utils/pvsiowebUtils';
+import * as fsUtils from "../../common/utils/fsUtils";
+import { Renderable, WidgetData, WidgetOptions } from '../../common/interfaces/Widgets';
+import { PVSioWebPlugin } from '../../common/interfaces/Plugins';
+import { Connection } from '../../common/interfaces/Connection';
+
 import * as builderView from './views/BuilderView';
+import { BuilderEvents, BuilderView, CreateWidgetEvent, DeleteWidgetEvent, CutWidgetEvent, SelectWidgetEvent } from './views/BuilderView';
 import { WidgetsListView } from './views/WidgetsListView';
 import { SettingsEvents, SettingsView } from './views/SettingsView';
 import { CentralViewEvents, WidgetsMap } from './views/CentralView';
 import { SideView } from './views/SideView';
 import { SimulatorView } from './views/SimulatorView';
-import * as Backbone from 'backbone';
-import { Renderable, WidgetData, CSS, WidgetOptions } from './widgets/core/WidgetEVO';
 import { WidgetClassManager } from './WidgetClassManager';
-import { DidChangePictureEventData, IoFile, PrototypeData, DataAttribute, WebFile, defaultIoSettings, defaultWebSettings, PictureSize, getWebFile, getIoFile, PrototypeBuilderEvents, Picture, DidRemovePictureEventData, whiteboardFile  } from '../../utils/builderUtils';
-
-import * as fsUtils from "../../utils/fsUtils";
+import { DidChangePictureEventData, IoFile, PrototypeData, DataAttribute, WebFile, defaultIoSettings, defaultWebSettings, PictureSize, getWebFile, getIoFile, PrototypeBuilderEvents, Picture, DidRemovePictureEventData, whiteboardFile  } from './BuilderUtils';
 import { SplashScreenView } from './views/SplashScreenView';
+import { BackboneConnection } from '../../core/ConnectionImpl';
 
 export interface DidChangePictureData extends DidChangePictureEventData, PrototypeData {};
 

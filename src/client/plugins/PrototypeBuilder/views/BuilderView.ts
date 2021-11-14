@@ -1,15 +1,20 @@
-import { WidgetEVO, Coords, WidgetOptions, HotspotData, WidgetData } from "../widgets/core/WidgetEVO";
-import { Connection } from '../../../env/Connection';
 import { HotspotEditor, HotspotEditorEvents, HotspotsMap } from './editors/HotspotEditor';
 
 import { WidgetsMap, CentralView, DELAYED_TRIGGER_TIMEOUT, CentralViewEvents } from './CentralView';
 import { WidgetEditor, WidgetEditorEvents } from './editors/WidgetEditor';
 import { WidgetClassDescriptor, WidgetClassMap } from '../widgets/widgetClassMap';
+import { Connection } from '../../../common/interfaces/Connection';
+import { Widget, Coords, WidgetOptions, HotspotData, WidgetData, WidgetsData } from "../../../common/interfaces/Widgets";
 
-import * as utils from '../../../utils/pvsiowebUtils';
-import * as fsUtils from '../../../utils/fsUtils';
+import * as utils from '../../../common/utils/pvsiowebUtils';
+import * as fsUtils from '../../../common/utils/fsUtils';
+
+import { widgetUUID } from "../../../common/utils/uuidUtils";
 import { CentralViewOptions } from "./CentralView";
-import { DEFAULT_PICTURE_SIZE, MIN_HEIGHT, MIN_WIDTH, Picture, PictureData, PictureSize, WebFile, WebFileAttribute, whiteboardFile } from "../../../utils/builderUtils";
+import { 
+    DEFAULT_PICTURE_SIZE, MIN_HEIGHT, MIN_WIDTH, Picture, PictureData, 
+    PictureSize, WebFile, WebFileAttribute, whiteboardFile
+} from "../BuilderUtils";
 
 // vertical space used in the view to pad inner content
 const vspace: number = 36; //px
@@ -82,7 +87,6 @@ export interface PictureOptions {
     $el?: JQuery<HTMLElement>
 };
 
-export type WidgetsData = WidgetData[];
 export interface BuilderViewOptions extends CentralViewOptions {
     widgetClassMap: WidgetClassMap
 };
@@ -120,7 +124,7 @@ export class BuilderView extends CentralView {
     /**
      * Clipboard, stored information for copy/paste operations in builder view
      */
-    protected clipboard: WidgetEVO;
+    protected clipboard: Widget;
 
     /**
      * Internal timer, used for delayed triggers
@@ -277,7 +281,7 @@ export class BuilderView extends CentralView {
         // install handlers for hotspot events
         this.hotspotEditor.on(HotspotEditorEvents.DidCreateHotspot, async (data: HotspotData) => {
             // automatically open widget editor
-            const widget: WidgetEVO = await this.editWidget(data);
+            const widget: Widget = await this.editWidget(data);
             if (!widget) {
                 // the user has pressed 'Cancel', delete the hotspot
                 this.hotspotEditor.deleteHotspot(data);
@@ -325,7 +329,7 @@ export class BuilderView extends CentralView {
         this.hotspotEditor.on(HotspotEditorEvents.DidPasteHotspot, async (data: { origin: HotspotData, clone: HotspotData }) => {
             if (data) {
                 const id: string = data.origin.id;
-                const widget: WidgetEVO = this.widgetsMap[id] || this.clipboard;
+                const widget: Widget = this.widgetsMap[id] || this.clipboard;
                 if (widget) {
                     const widgetData: WidgetData = {
                         ...data.clone,
@@ -497,7 +501,7 @@ export class BuilderView extends CentralView {
      * Create a widget
      * @param widgetData 
      */
-    createWidget (widgetData: WidgetData): WidgetEVO {
+    createWidget (widgetData: WidgetData): Widget {
         console.log(`[builder] Creating widget`);
         if (widgetData) {
             // console.log(widgetData);
@@ -518,7 +522,7 @@ export class BuilderView extends CentralView {
                         connection: this.connection
                     };
                     console.log(`[builder] Loading widget constructor`);
-                    const widget: WidgetEVO = new desc.cons(widgetData.id, widgetData.coords, options);
+                    const widget: Widget = new desc.cons(widgetData.id, widgetData.coords, options);
                     // render widget
                     widget.render();
                     // console.log(widget);
@@ -551,7 +555,7 @@ export class BuilderView extends CentralView {
      * Edit a widget
      * @param widgetData 
      */
-    async editWidget (data: { id: string, coords?: Coords }): Promise<WidgetEVO | null> {
+    async editWidget (data: { id: string, coords?: Coords }): Promise<Widget | null> {
         if (data?.id) {
             const id: string = data.id;
             const coords: Coords = data?.coords || this.hotspotEditor.getCoords(id);
@@ -560,7 +564,7 @@ export class BuilderView extends CentralView {
                     const widgetDataObject: WidgetData = {
                         id,
                         coords,
-                        name: this.widgetsMap[id]?.getName() || WidgetEVO.uuid(),
+                        name: this.widgetsMap[id]?.getName() || widgetUUID(),
                         kind: this.widgetsMap[id]?.getKind(),
                         opt: this.widgetsMap[id]?.getOptions(),
                         cons: this.widgetsMap[id]?.getConstructorName()
@@ -572,7 +576,7 @@ export class BuilderView extends CentralView {
                     });
                     editor.renderView();
                     editor.on(WidgetEditorEvents.ok, (widgetData: WidgetData) => {
-                        const widget: WidgetEVO = this.createWidget(widgetData);
+                        const widget: Widget = this.createWidget(widgetData);
                         this.trigger(BuilderEvents.DidUpdateWidgets);
                         resolve(widget);
                     });
@@ -590,10 +594,10 @@ export class BuilderView extends CentralView {
      * Load a widget programmatically
      * @param data 
      */
-    async loadWidget (data: WidgetData): Promise<WidgetEVO | null> {
+    async loadWidget (data: WidgetData): Promise<Widget | null> {
         console.log(`[builder] Loading widget`, data);
         if (data?.id && data.coords) {
-            const widget: WidgetEVO = this.createWidget(data);
+            const widget: Widget = this.createWidget(data);
             return widget;
         }
         console.warn(`[builder] Warning: unable to load widget`, data);

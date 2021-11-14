@@ -1,7 +1,7 @@
 import * as Backbone from 'backbone';
-import * as Utils from '../../../utils/pvsiowebUtils';
-import { Connection } from '../../../env/Connection';
-import { Coords, WidgetEVO } from '../widgets/core/WidgetEVO';
+import * as Utils from '../../../common/utils/uuidUtils';
+import { Connection } from '../../../common/interfaces/Connection';
+import { Coords, Widget} from '../../../common/interfaces/Widgets';
 
 export declare interface CentralViewOptions extends Backbone.ViewOptions {
     label: string, // label shown in the tab
@@ -25,7 +25,7 @@ const bodyTemplate: string = `
 </div>`;
 
 // data structure for storing widget instances
-export type WidgetsMap = { [id: string]: WidgetEVO };
+export type WidgetsMap = { [id: string]: Widget };
 
 // timeout used by central views for delayed trieggers
 export const DELAYED_TRIGGER_TIMEOUT: number = 4000; //ms

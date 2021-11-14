@@ -1,7 +1,9 @@
 import * as Backbone from 'backbone';
-import { createDialog, keyCodes, setDialogTitle, uuid } from '../../../../utils/pvsiowebUtils';
-import { Coords, CSS, WidgetEVO, WidgetAttr, WidgetEventData, VizOptions, WidgetOptions, WidgetData, CSSx, WidgetEvent } from '../../widgets/core/WidgetEVO';
+import { WidgetEVO, WidgetAttr, WidgetEventData, CSSx, WidgetEvent } from '../../widgets/core/WidgetEVO';
 import { WidgetClassDescriptor, WidgetClassMap } from '../../widgets/widgetClassMap';
+import { createDialog, setDialogTitle } from '../../../../common/utils/pvsiowebUtils';
+import { VizOptions, WidgetOptions, WidgetData, Coords, CSS } from "../../../../common/interfaces/Widgets";
+import { widgetUUID } from '../../../../common/utils/uuidUtils';
 
 export interface WidgetEditorData extends Backbone.ViewOptions {
     widgetData: WidgetData,
@@ -197,7 +199,7 @@ export class WidgetEditor extends Backbone.View {
     protected mode: "create" | "edit"; // dialog modes
     protected widgetData: WidgetData;
     protected widgetClassMap: WidgetClassMap;
-    protected editorId: string = uuid();
+    protected editorId: string = widgetUUID();
 
     /**
      * Pointer to the editor dialog
@@ -290,7 +292,7 @@ export class WidgetEditor extends Backbone.View {
                     // create widget preview
                     const cons: string = widgetsDesc[i].cons.constructorName;
                     const coords: Coords = { width, height };
-                    const previewId: string = WidgetEVO.uuid();
+                    const previewId: string = widgetUUID();
                     const options: WidgetOptions = {
                         ...this.widgetData?.opt,
                         parent: `${cons}-preview`

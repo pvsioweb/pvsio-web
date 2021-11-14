@@ -6,21 +6,10 @@
  * @author Paolo Masci
  * @date Dec 11, 2017
  *
- * @example <caption>Example use of the widget.</caption>
- // Example pvsio-web demo that uses BasicDisplayEVO
-import { BasicDisplayEVO } from './BasicDisplayEVO';
-const disp: BasicDisplayEVO = new BasicDisplayEVO("disp", {
-    top: 200, left: 120, height: 24, width: 120
-}, {
-    fontColor: "black",
-    fontsize: 16,
-    backgroundColor: "blue"
-});
-disp.render("Hello World!"); // The display shows Hello World!
- *
  */
 
-import { Coords, WidgetEVO, WidgetOptions, CSS, WidgetAttr, Renderable, MatchState, rat2real, ratNumberMatch } from "./WidgetEVO";
+import { WidgetEVO, WidgetAttr, MatchState, rat2real, ratNumberMatch } from "./WidgetEVO";
+import { Coords, WidgetOptions, CSS, Renderable } from "../../../../common/interfaces/Widgets";
 
 export interface DisplayOptions extends WidgetOptions {
     displayName?: string
@@ -63,7 +52,7 @@ export class BasicDisplayEVO extends WidgetEVO {
         opt.css = opt.css || {};
 
         // override default style options of WidgetEVO as necessary before creating the DOM element with the constructor of module WidgetEVO
-        this.css["background"] = opt.css["background"] || "black";
+        this.css["background"] = opt.css.background || opt.css["background-color"] || "black";
         this.css.color = opt.css.color || "white";
         this.css.cursor = opt.css.cursor || "default";
         this.css.overflow = opt.css.overflow || "hidden";
@@ -88,24 +77,25 @@ export class BasicDisplayEVO extends WidgetEVO {
         if (state !== undefined && state !== null) {
             // check if the state contains a field named after the widget
             if (this.matchStateFlag) {
-                if (typeof state === "string") {
-                    const match: MatchState = this.matchState(state);
-                    if (match) {
-                        // check if this is a rational number -- don't use directly rat2real 
-                        // because the state may be a string that resembles a number, e.g., "2.", 
-                        // and rat2real would translate it into number 2 (i.e., the '.' gets removed, 
-                        // which is not what we want for non-numeric displays)
-                        const matchRat: RegExpMatchArray = new RegExp(ratNumberMatch).exec(match.val);
-                        if (matchRat) {
-                            const val: number = rat2real(match.val);
-                            const disp: string = isNaN(val) ? `${match.val}` : `${val}`;
-                            this.$base.html(disp);
-                        } else {
-                            this.$base.html(match.val);
-                        }
-                        // const name: string = this.getName();
-                        // console.log(`[BasicDisplay] ${name} render`, state);
+                const name: string = this.getName();
+                const match: MatchState = (typeof state === "string") ?
+                    this.matchState(state, name)
+                        : { name, val: state[name] };
+                if (match) {
+                    // check if this is a rational number -- don't use directly rat2real 
+                    // because the state may be a string that resembles a number, e.g., "2.", 
+                    // and rat2real would translate it into number 2 (i.e., the '.' gets removed, 
+                    // which is not what we want for non-numeric displays)
+                    const matchRat: RegExpMatchArray = new RegExp(ratNumberMatch).exec(match.val);
+                    if (matchRat) {
+                        const val: number = rat2real(match.val);
+                        const disp: string = isNaN(val) ? `${match.val}` : `${val}`;
+                        this.$base.html(disp);
+                    } else {
+                        this.$base.html(match.val);
                     }
+                    // const name: string = this.getName();
+                    // console.log(`[BasicDisplay] ${name} render`, state);
                 }
             } else {
                 // render string or number

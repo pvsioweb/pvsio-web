@@ -1,6 +1,7 @@
 import * as Backbone from 'backbone';
-import * as Utils from '../../../../utils/pvsiowebUtils';
-import { Coords, HotspotData } from "../../widgets/core/WidgetEVO";
+import * as Utils from '../../../../common/utils/pvsiowebUtils';
+import { Coords, HotspotData } from "../../../../common/interfaces/Widgets";
+import { widgetUUID } from '../../../../common/utils/uuidUtils';
 
 export const HotspotEditorEvents = {
     DidCreateHotspot: "DidCreateHotspot",
@@ -444,7 +445,7 @@ export class HotspotEditor extends Backbone.View {
         const width: number = Math.abs(this.anchorCoords?.left - mousePosition?.left);
         const height: number = Math.abs(this.anchorCoords?.top - mousePosition?.top);
         if (!this.$marker) {
-            const id: string = `${hotspotNamePrefix}${Utils.uuid()}`;
+            const id: string = `${hotspotNamePrefix}${widgetUUID()}`;
             const marker: string = Handlebars.compile(markerTemplate)({
                 id,
                 top: mousePosition.top,//pageY,
@@ -677,7 +678,7 @@ export class HotspotEditor extends Backbone.View {
      * @param opt 
      */
     createHotspot (data: HotspotData, opt?: { useFreshId?: boolean }): HotspotData {
-        const id: string = opt?.useFreshId ? `${hotspotNamePrefix}${Utils.uuid()}` : data?.id;
+        const id: string = opt?.useFreshId ? `${hotspotNamePrefix}${widgetUUID()}` : data?.id;
         const hotspotData: HotspotData = {
             ...data, id
         };

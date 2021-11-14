@@ -5,23 +5,10 @@
  * @author Paolo Masci
  * @date Jul 16, 2018
  *
- * @example <caption>Example use of the widget.</caption>
- // Example pvsio-web demo that uses LedEVO
- // The following configuration assumes the pvsio-web demo is stored in a folder within pvsio-web/examples/demo/
- require.config({
-     baseUrl: "../../client/app",
-     paths: { d3: "../lib/d3", text: "../lib/text" }
- });
- require(["widgets/core/LedEVO"], function (LedEVO) {
-      "use strict";
-      var led = new LedEVO("disp", {
-        top: 200, left: 120, height: 24, width: 120
-      });
-      led.render(); // The LED is on
- });
  *
  */
-import { WidgetOptions, Coords, WidgetEVO, CSS, Renderable, WidgetAttr } from "./WidgetEVO";
+import { WidgetEVO, WidgetAttr } from "./WidgetEVO";
+import { Coords, Renderable, WidgetOptions } from "../../../../common/interfaces/Widgets";
 
 export interface LedOptions extends WidgetOptions {
     ledName?: string

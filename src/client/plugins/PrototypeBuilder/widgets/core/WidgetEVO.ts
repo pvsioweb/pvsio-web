@@ -7,11 +7,13 @@
  *
  */
 
-import * as parserUtils from '../../../../utils/parserUtils';
-import * as utils from '../../../../utils/pvsiowebUtils';
-import { dimColor } from "../../../../utils/pvsiowebUtils";
-import { Connection, PVSioWebCallBack } from "../../../../env/Connection";
 import * as Backbone from 'backbone';
+import * as parserUtils from '../../../../common/utils/parserUtils';
+import * as utils from '../../../../common/utils/pvsiowebUtils';
+import { dimColor } from "../../../../common/utils/pvsiowebUtils";
+import { 
+    Coords, VizOptions, WidgetOptions, CSS, Renderable, WidgetData, Widget
+} from '../../../../common/interfaces/Widgets';
 
 /**
  * Note: the css of all divs in the templates must indicate "position:absolute" otherwise z-index is not used by the browser, and coordinates are automatically re-arranged by the browser
@@ -43,14 +45,12 @@ export const img_template: string = `
 {{#if img}}<img src="{{img}}" style="user-select:none; position:absolute; opacity:{{opacity}}; transform-origin:{{transformOrigin}};">{{/if}}
 {{#if svg}}{{svg}}{{/if}}
 `;
-export type Renderable = string | number;
-export type Coords<T = string | number> = { top?: T, left?: T, width?: T, height?: T };
 
 // keys and type
 export const cssKeys = {
     position: [ "absolute", "relative" ],
     cursor: [ "string" ],
-    "background": [ "string" ],
+    background: [ "string" ],
     "font-size": [ "string" ],
     "font-family": [ "string" ],
 
@@ -75,56 +75,6 @@ export const cssKeys = {
 
 export interface CSSx { key: string, value: string, hints?: string[] };
 
-export interface CSS {
-    position?: "absolute" | "relative",
-    cursor?: string,
-    "background"?: string,
-    "font-size"?: string,
-    "font-family"?: string,
-
-    color?: string,
-    "text-align"?: string,
-    border?: string,
-    "border-radius"?: string,
-    overflow?: "hidden" | "visible",
-    opacity?: number,
-
-    "z-index"?: number,
-    "letter-spacing"?: string,
-    "white-space"?: "normal" | "nowrap",
-    "line-height"?: string,
-
-    margin?: string,
-    padding?: string,
-
-    // css class
-    class?: string,
-
-    // css box-shadow
-    "box-shadow"?: string,
-
-    // animation options
-    duration?: number,
-    rotation?: string,
-    transitionTimingFunction?: "ease-in" | "ease-out",
-    transformOrigin?: "center"
-
-    // the following allows to add more keys
-    [key: string]: string | number,
-}
-export interface WidgetOptions {
-    parent?: "body" | string | JQuery<HTMLElement>,
-    css?: CSS,
-    viz?: VizOptions,
-    type?: string, // widget type, e.g., "Button", "Display"
-    widget_template?: string, // HTML template for rendering the widget
-    callback?: PVSioWebCallBack,
-    connection?: Connection
-};
-export type VizOptions =  {
-    visible?: string | boolean,
-    enabled?: string | boolean
-};
 // widget events
 export enum WidgetEvent {
     press = "press",
@@ -144,17 +94,6 @@ export interface WidgetAttr {
 };
 export interface WidgetAttrX {
     [key: string]: { val: string, hints: string[] }
-};
-export interface HotspotData {
-    id: string,
-    coords: Coords
-};
-export interface WidgetData extends HotspotData {
-    name: string,
-    kind: string,
-    cons?: string, // constructor name
-    opt?: WidgetOptions,
-    evts?: string[]
 };
 
 // regexp for rational number
@@ -191,13 +130,15 @@ export interface MatchState {
     val: string
 };
 
-export abstract class WidgetEVO extends Backbone.Model {
+export abstract class WidgetEVO extends Backbone.Model implements Widget {
     static readonly MAX_COORDINATES_ACCURACY: number = 0; // max 0 decimal digits for coordinates, i.e., position accuracy is 1px
     readonly widget: boolean = true; // this is used in the playback player to recognize widgets. TODO: remove this attribute.
 
+    // widget attributes and kind
     protected attr: WidgetAttr = {};
     protected kind: string = "widget"; // e.g., display, button, dial.. useful for grouping together similar widgets. This attribute will be overridden by concrete classes.
 
+    // unique identifier of a widget instance
     id: string;
 
     /**
@@ -264,18 +205,24 @@ export abstract class WidgetEVO extends Backbone.Model {
     }
 
     /**
-     * Sets matchStateFlag
-     * @param flag 
+     * Internal function, sets matchStateFlag
      */
-    setMatchStateFlag (flag: boolean): void {
+    protected setMatchStateFlag (flag: boolean): void {
         this.matchStateFlag = !!flag;
+    }
+
+    /**
+     * The render function will treat the argument as a string and won't try to extract state information
+     */
+    stringRenderer (): void {
+        this.setMatchStateFlag(false);
     }
     
     /**
-     * Utility function, returns a unique ID in the format wdgW1234
+     * The render function will treat the argument as a JSON object and will try to extract state information
      */
-    static uuid (): string {
-        return "wdg" + utils.uuid("Wxxxx");
+    stateRenderer (): void {
+        this.setMatchStateFlag(true);
     }
 
     /**
@@ -285,7 +232,7 @@ export abstract class WidgetEVO extends Backbone.Model {
      * All derived class should use createHTMLElement to create additional DOM elements and installHandlers to install handlers.
      * The render function in all derived classes should start with an invocation of the render function from WidgetEVO, otherwise $div $img $base $overlay are not initialized.
      */
-    constructor (id: string, coords: Coords, opt?: WidgetOptions) {
+    constructor (id: string, coords?: Coords, opt?: WidgetOptions) {
         super();
         opt = opt || {};
         opt.parent = opt.parent || "body";
@@ -306,6 +253,8 @@ export abstract class WidgetEVO extends Backbone.Model {
             enabled: opt.viz?.enabled || "true"
         };
 
+        opt.renderMode === "string" ? this.stringRenderer() : this.stateRenderer();
+
         // visual style
         const matchBorder: RegExpMatchArray = /\d+px/.exec(opt.css?.border);
         let borderWidth: number = opt["border-width"] ? parseFloat(`${opt["border-width"]}`)
@@ -319,19 +268,22 @@ export abstract class WidgetEVO extends Backbone.Model {
         this.setCSS(opt.css);
 
         // set the initial value of some core style options if they are not provided
-        this.css["background"] = opt.css["background"] || "transparent";
+        this.css["background"] = opt.css.background || opt.css["background-color"] || "transparent";
         this.css["font-size"] = fontSize + "px";
         this.css["font-family"] = opt.css["font-family"] || "sans-serif";
         this.css.color = opt.css.color || "white";
         this.css["text-align"] = opt.css["text-align"] || "center";
         this.css.overflow = opt.css.overflow || "visible";
         this.css["white-space"] = opt.css["white-space"] || "nowrap";
-        this.css["box-shadow"] = opt.css["box-shadow"] || "yellow"; // this is the color of the halo shown around the widget when e.g., the mouse is over the button
+        this.css["box-shadow"] = opt.css["box-shadow"] || "0px 0px 10px white"; // this is used to realize a backlight color effect on the button
         this.css["z-index"] = opt.css["z-index"] || 0;
 
         this.widget_template = opt.widget_template || widget_template;
     }
 
+    /**
+     * Internal function, performs a sanity check on the selector and adjusts the value as needed
+     */
     protected sel2jquery (sel: string | JQuery<HTMLElement>): JQuery<HTMLElement> {
         return (typeof sel === "string") ? 
             (sel === "body" || sel.startsWith("#") || sel.startsWith(".")) ? $(sel) 
@@ -364,7 +316,7 @@ export abstract class WidgetEVO extends Backbone.Model {
 
     /**
      * @function <a name="render">render</a>
-     * @description Basic rendering function (reveals the widget). Widgets need to override this function when rendering involves additional/different logic.
+     * @description Basic rendering function. Classes that inherit WidgetEVO typically need to override this function.
      * @memberof module:WidgetEVO
      * @instance
      */
@@ -603,14 +555,14 @@ export abstract class WidgetEVO extends Backbone.Model {
         this.css = {};
         for(const key in cssKeys) {
             // store style info
-            this.css[key] = style[key];
+            this.css[key] = (key === "background") ? style[key] || style["background-color"] : style[key];
         }
     }
 
     /**
      * Updates the style options.
      */
-     updateCSS (style: CSS): void {
+    updateCSS (style: CSS): void {
         if (style) {
             for(let key in style) {
                 if (style[key] !== undefined) {
@@ -735,13 +687,12 @@ export abstract class WidgetEVO extends Backbone.Model {
             this.installHandlers();
         }
         opt = opt || {};
-        const boxShadow: string = this.css["box-shadow"] || "0px 0px 10px yellow";
+        const boxShadow: string = opt["box-shadow"] || "0px 0px 10px yellow";
         this.$base.css({
-            ...this.css, 
-            "background": dimColor(this.css["background"], 8),
+            ...this.css,
             ...opt
         });
-        const cssClass: string = opt.class || this.css.class; 
+        const cssClass: string = opt.class || this.css.class;
         if (cssClass) { this.$base.addClass(cssClass); };
         this.$overlay.css({ "box-shadow": boxShadow, opacity: 1 });
     }
@@ -882,7 +833,9 @@ export abstract class WidgetEVO extends Backbone.Model {
     getViz (): VizOptions {
         return this.viz;
     }
-
+    /**
+     * Returns the widget options
+     */
     getOptions (): WidgetOptions {
         return {
             css: this.getCSS(),
@@ -890,7 +843,9 @@ export abstract class WidgetEVO extends Backbone.Model {
             ...this.getAttributes()
         };
     }
-
+    /**
+     * Returns position and size of the widget
+     */
     getCoordinates (): Coords {
         return {
             top: +(this.top).toFixed(WidgetEVO.MAX_COORDINATES_ACCURACY),
@@ -899,7 +854,6 @@ export abstract class WidgetEVO extends Backbone.Model {
             height: +(this.height).toFixed(WidgetEVO.MAX_COORDINATES_ACCURACY)
         };
     }
-
     /**
      * Get widget attributes
      * @param opt 

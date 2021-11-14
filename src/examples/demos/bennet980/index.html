@@ -7,14 +7,7 @@
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width">
         <link href="../../node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link href="../../node_modules/jquery-toggles/css/toggles.css" rel="stylesheet">
-        <link href="../../node_modules/jquery-toggles/css/themes/toggles-modern.css" rel="stylesheet">
-        <link href="../../node_modules/codemirror/lib/codemirror.css" rel="stylesheet">
-        <link href="../../node_modules/codemirror/addon/fold/foldgutter.css" rel="stylesheet">
-        <link href="../../node_modules/codemirror/addon/hint/show-hint.css" rel="stylesheet">
-        <link href="../../node_modules/codemirror/addon/dialog/dialog.css" rel="stylesheet">
         <link href="../../node_modules/font-awesome/css/font-awesome.min.css" rel="stylesheet">
-        <link href="../../css/style.css" rel="stylesheet">
     </head>
     <body class="noselect" style="background:#dedfdd";>
         <script src="../../node_modules/jquery/dist/jquery.min.js"></script>
@@ -22,12 +15,14 @@
         <script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
         <script src="../../node_modules/underscore/underscore-min.js"></script>
         <script src="../../node_modules/backbone/backbone.js"></script>
-        <script src="../../node_modules/jquery-toggles/toggles.min.js"></script>
         <script src="../../node_modules/requirejs/require.js" data-main="index.js"></script>
 
+        <!-- visual appearance of the prototype -->
         <div id="bennet980" class="content" style="display:block; left:100px; position:absolute;">
+            <!-- picture of the device -->
             <img draggable="false" src="bennet980.png">
 
+            <!-- device screens -->
             <div id="mainScreen" class="screen" style="display:block; top:150px; left:88px; position:absolute;">
                 <img draggable="false" src="mainScreen.png">
                 <div style="position:absolute; top:10px; left:200px; height:54px; width:400px; font-size:18px; padding:0; opacity:0.8;; text-align:center; font-weight:bold;">
@@ -62,10 +57,10 @@
                     gender to continue
                 </div>
             </div>
-            <div id="ventSetup" class="content" style="display:none; top:230px; left:329px; position:absolute;">
+            <div id="ventSetup" class="screen" style="display:none; top:230px; left:329px; position:absolute;">
                 <img draggable="false" src="ventSetup.png">
             </div>
-            <div id="connectPatientScreen" class="content" style="display:none; top:150px; left:88px; position:absolute;">
+            <div id="connectPatientScreen" class="screen" style="display:none; top:150px; left:88px; position:absolute;">
                 <img draggable="false" src="connectPatientScreen.png">
                 <div style="position:absolute; top:10px; left:200px; height:54px; width:400px; font-size:18px; padding:0; opacity:0.8;; text-align:center; font-weight:bold;">
                     <span style="color:#a7e0fa; font-size:16px;">Waiting for patient connect</span><br>
@@ -84,9 +79,9 @@
                     start ventilation.
                 </div>
             </div>
-
         </div>
         
+        <!-- body of the device -->
         <div id="bennet-body" class="content" style="display:block; left:-220px; top:986px; position:absolute;">
             <img draggable="false" src="bennet980-body.png" draggable="false" style="width:1600px;">
         </div>

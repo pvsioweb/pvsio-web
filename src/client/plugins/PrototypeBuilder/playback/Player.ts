@@ -32,10 +32,8 @@ function console_log(msg) {
     console.log(msg);
 }
 
-import { Coords, WidgetEVO } from "../widgets/core/WidgetEVO";
-import { ButtonEVO } from "../widgets/core/ButtonEVO";
+import { WidgetEVO } from "../widgets/core/WidgetEVO";
 import { MouseCursor } from "../widgets/media/MouseCursor";
-import { Stylus } from "../widgets/media/Stylus";
 
 export type Action = {
     timeStamp: number,

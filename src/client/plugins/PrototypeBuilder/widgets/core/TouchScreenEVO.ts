@@ -5,28 +5,13 @@
  * @author Paolo Masci
  * @date Jul 25, 2018
  *
- * @example <caption>Example use of the widget.</caption>
- // Example pvsio-web demo that uses TouchScreenEVO
- // The following configuration assumes the pvsio-web demo is stored in a folder within pvsio-web/examples/demo/
- require.config({
-     baseUrl: "../../client/app",
-     paths: { d3: "../lib/d3", text: "../lib/text" }
- });
- require(["widgets/core/TouchScreenEVO"], function (TouchScreenEVO) {
-      "use strict";
-      var disp = new TouchScreenEVO("touch", {
-        top: 200, left: 120, height: 24, width: 120
-      }, {
-        callback: function (err, data) { console.log("Ok button clicked"); console.log(data); }
-      });
-     disp.render("touch me!"); // The display shows touch me!
- });
  *
  */
 
+import { Coords, Renderable } from "../../../../common/interfaces/Widgets";
 import { DisplayAttr, DisplayOptions } from "./BasicDisplayEVO";
 import { ButtonAttr, ButtonEVO, ButtonOptions } from "./ButtonEVO";
-import { Coords, CSS, MatchState, Renderable } from "./WidgetEVO";
+import { MatchState } from "./WidgetEVO";
 
 export interface TouchScreenOptions extends DisplayOptions, ButtonOptions { };
 
@@ -37,9 +22,11 @@ export class TouchScreenEVO extends ButtonEVO {
     getConstructorName (): string {
         return TouchScreenEVO.constructorName;
     }
-
     protected attr: TouchScreenAttr;
     
+    /**
+     * Constructor
+     */
     constructor (id: string, coords: Coords, opt?: TouchScreenOptions) {
         super(id, coords, opt);
         this.kind = "Touchscreen";

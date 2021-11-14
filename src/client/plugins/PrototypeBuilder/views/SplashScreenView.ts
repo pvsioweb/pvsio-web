@@ -1,4 +1,4 @@
-import { Connection } from '../../../env/Connection';
+import { Connection } from '../../../common/interfaces/Connection';
 import { CentralView, CentralViewOptions } from './CentralView';
 
 const content: string = `

@@ -1,4 +1,4 @@
-import { Constructable } from '../../../env/PVSioWeb';
+import { Constructable } from '../../../common/interfaces/Plugins';
 import { WidgetEVO } from './core/WidgetEVO';
 import { BasicDisplayEVO } from './core/BasicDisplayEVO';
 import { ButtonEVO } from './core/ButtonEVO';

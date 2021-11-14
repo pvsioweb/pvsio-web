@@ -1,6 +1,6 @@
 import * as Backbone from 'backbone';
-import { PVSioWebDataAttribute, DataAttribute, WebFileAttribute, WebFile, IoFile, PictureSize, IoFileAttribute, SettingsOptions } from '../../../utils/builderUtils';
-import { Connection } from '../../../env/Connection';
+import { PVSioWebDataAttribute, DataAttribute, WebFileAttribute, WebFile, IoFile, PictureSize, IoFileAttribute, SettingsOptions } from '../BuilderUtils';
+import { Connection } from '../../../common/interfaces/Connection';
 import { CentralView, CentralViewEvents, CentralViewOptions, DELAYED_TRIGGER_TIMEOUT } from './CentralView';
 import { compactDropdownButtonTemplate, pictureMenu } from '../PrototypeBuilder';
 

@@ -1,4 +1,4 @@
-import { PVSioWebPluginDescriptor } from "../env/PVSioWeb";
+import { PVSioWebPluginDescriptor } from "../common/interfaces/Plugins";
 import { PrototypeBuilder } from './PrototypeBuilder/PrototypeBuilder';
 
 /**

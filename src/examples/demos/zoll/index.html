@@ -7,28 +7,28 @@
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width">
         <link href="../../node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link href="../../node_modules/jquery-toggles/css/toggles.css" rel="stylesheet">
-        <link href="../../node_modules/jquery-toggles/css/themes/toggles-modern.css" rel="stylesheet">
-        <link href="../../node_modules/codemirror/lib/codemirror.css" rel="stylesheet">
-        <link href="../../node_modules/codemirror/addon/fold/foldgutter.css" rel="stylesheet">
-        <link href="../../node_modules/codemirror/addon/hint/show-hint.css" rel="stylesheet">
-        <link href="../../node_modules/codemirror/addon/dialog/dialog.css" rel="stylesheet">
         <link href="../../node_modules/font-awesome/css/font-awesome.min.css" rel="stylesheet">
-        <link href="../../css/style.css" rel="stylesheet">
     </head>
-    <body class="noselect" style="background:#dedfdd";>
+    <body class="noselect" style="background:#999999";>
         <script src="../../node_modules/jquery/dist/jquery.min.js"></script>
         <script src="../../node_modules/handlebars/dist/handlebars.min.js"></script>
         <script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
         <script src="../../node_modules/underscore/underscore-min.js"></script>
         <script src="../../node_modules/backbone/backbone.js"></script>
-        <script src="../../node_modules/jquery-toggles/toggles.min.js"></script>
         <script src="../../node_modules/requirejs/require.js" data-main="index.js"></script>
 
-        <div id="bennet980" class="content" style="display:block; left:100px; position:absolute;">
+        <!-- background -->
+        <div id="background" style="display:block; left:0px; top:0px; position:absolute;">
+            <img draggable="false" src="../backgrounds/healthcare/hospital-blurred.jpeg" style="height:900px;">
+        </div>
+
+        <!-- visual appearance of the prototype -->
+        <div id="zoll" class="content" style="display:block; left:100px; top:0px; position:absolute;">
+            <!-- picture of the device -->
             <img draggable="false" src="zoll.png">
 
-            <div id="screen" style="position:absolute; display:none; overflow:hidden; top:194px; left:156px; width:220px; height:288px; border-radius:2px; opacity:0.9; background-color:#77bd49;">
+            <!-- device screens -->
+            <div id="screen" style="position:absolute; display:none; overflow:hidden; top:194px; left:156px; width:220px; height:288px; border-radius:2px; opacity:0.9; background-color:rgb(103 240 83);">
                 <div id="mainScreen" class="screen" style="position:absolute; top:0px; left:0px; height:100%; width:133px; border-right:1px solid black; opacity:0.9;">
                     <div class="top" style="position:absolute; width:132px; top:0px; height:82px; border-bottom:1px solid black; opacity:0.9;"></div>
                     <div class="bottom" style="position:absolute; width:132px; top:83px; height:124px; overflow:hidden; border-top:1px solid black; opacity:0.6;">
@@ -46,6 +46,10 @@
                 </div>
             </div>
 
+            <!-- top LED -->
+            <div id="led_shader" style="position:absolute; display:block; top:53px; left:188px">
+                <img draggable="false" src="zoll-top-led-off.png">
+            </div>
         </div>
         
     </body>

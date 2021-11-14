@@ -6,7 +6,9 @@
  * @date Nov 12, 2018
  *
  */
-import { Coords, WidgetEVO } from "./WidgetEVO";
+
+import { WidgetEVO } from "./WidgetEVO";
+import { Coords } from "../../../../common/interfaces/Widgets";
 
 export class RemoteControllerEVO extends WidgetEVO {
     static readonly constructorName: string = "RemoteControllerEVO";

@@ -35,38 +35,68 @@ import { exec, ExecException } from 'child_process';
 import { PvsioResponse, PvsProxy } from './PVSioProxy';
 import WebSocket = require ('ws');
 import { AddressInfo } from 'net';
-import * as Connection from '../client/env/Connection';
+import * as Connection from './common/interfaces/Connection';
+import { NodeJSFileDescriptor, ProjectDescriptor } from './common/interfaces/FileSystem';
 
+/**
+ * Useful constants
+ */
+/**
+ * Useful constants
+ */
 const clientDir: string = path.join(__dirname, "../client");
 const examplesDir: string = path.join(__dirname, "../examples");
+const commonDir: string = path.join(clientDir, "common");
+const backgroundsDir: string = path.join(clientDir, "plugins", "PrototypeBuilder", "backgrounds");
 const projectsDir: string = path.join(examplesDir, "projects");
 const demosDir: string = path.join(examplesDir, "demos");
 const tutorialsDir: string = path.join(examplesDir, "tutorials");
 const bundleDir: string = path.join(__dirname, "../../bundle");
 
+/**
+ * Help message displayed by the server
+ */
 const helpMsg: string = `
     Usage: node PVSioWebServer.js [options]
     Options:
       -pvs <path>          (Specifies location of pvs executables)
       -port <port number>  (Specifies the server port where clients connect)
 `;
-  
+
+/**
+ * PVSio-Web Server
+ */
 class PvsiowebServer {
+    // server port
     protected port: number = +process.env.PORT || 8082;
+    // pvs path
     protected pvsPath: string = process.env.pvsdir || "";
-    protected pvsioProcessMap: { [key: string]: PvsProxy } = {}; //each client should get its own process
+    // pvsio processes
+    protected pvsioProcessMap: { [key: string]: PvsProxy } = {}; //each client will get its own pvsio process
+    // http server
     protected httpServer: http.Server;
+    // websocket server
     protected wsServer: ws.Server;
+    // ID generator for clients
     protected clientid: number = 0;
+    // file system watcher
     protected fsWatchers: { [folder: string]: fs.FSWatcher } = {};
+    // open socket connections
     protected socketRegistry = {};
+    // functions provided by the server
     protected functionMaps: Map<Connection.RequestType, (token: Connection.Token, socket: WebSocket, socketid: number) => Promise<void>> = new Map();
 
+    /**
+     * Constructor
+     */
     constructor () {
         // create pvs process wrapper
         this.createClientFunctionMaps();
     }
 
+    /**
+     * Utility function, gets the server address
+     */
     getAddress (): string {
         const addressInfo: AddressInfo | string = this.httpServer.address();
         const address: string = (addressInfo) ? 
@@ -75,31 +105,31 @@ class PvsiowebServer {
         return address;
     }
 
-    testConfiguration (): boolean {
+    /**
+     * Utility function, prints a banner indicating the pvsioweb version and mode
+     */
+    printBanner (): boolean {
         // test if the pvs executable are actually there
         const pvsio: string = path.join(this.pvsPath, "pvsio");
         const success: boolean = serverUtils.fileExists(pvsio);
-        if (success) {
-            console.log(`[pvsioweb-server] PVSio executable found at ${pvsio}`);
-            return true;
-        }
-        const msg: string = `
+        const msg: string = success ?
+`
 ================================================================
+====   PVSio-Web 3.0.0-preview    (PVSio Mode)              ====
 ================================================================
-====   Warning: Failed to locate PVS executables            ====
+`
+: `
 ================================================================
-====   Please indicate the correct path to the PVS folder   ====
-====   when launching the server, using the -pvs option     ====
-====   Alternatively place the PVS executable files on      ====
-====   your PATH (see README.md for installation details).  ====
+====   PVSio-Web 3.0.0-preview    (JavaScript Mode)         ====
 ================================================================
-================================================================
-
 `;
         console.warn(msg);
-        return false;
+        return success;
     }
 
+    /**
+     * Internal function, parses CLI arguments
+     */
     protected parseCliArgs (args: string[]): void {
         if (args) {
             for (let i = 0; i < args.length; i++) {
@@ -134,14 +164,17 @@ class PvsiowebServer {
         }
     }
 
+    /**
+     * Activates the server functionalities
+     */
     activate () {
         // parse command line arguments, if any
-        const args: string[] = process.argv.slice(2);
+        const args: string[] = process.argv?.slice(2) || [];
         console.log("args: ", args);
         this.parseCliArgs(args);
 
         // test the configuration -- this will print warnings if, e.g., pvs is not installed
-        this.testConfiguration();
+        this.printBanner();
 
         // create websocket server
         const webserver = express();
@@ -155,6 +188,7 @@ class PvsiowebServer {
         });        
         // create the express static server serve contents in the client directory and the demos directory
         webserver.use(express.static(clientDir));
+        webserver.use("/common", express.static(commonDir));
         webserver.use("/demos", express.static(demosDir));
         // console.log(`[pvsioweb-server] Serving ${demosDir}`);
         webserver.use("/tutorials", express.static(tutorialsDir));
@@ -163,6 +197,10 @@ class PvsiowebServer {
         // console.log(`[pvsioweb-server] Serving ${projectsDir}`);
         // create a pathname prefix for client so that demo css and scripts can be loaded from the client dir
         webserver.use("/client", express.static(clientDir));
+        // express path to backgrounds
+        console.log(`serving ${backgroundsDir}`);
+        webserver.use("/backgrounds", express.static(backgroundsDir));
+
 
         // routing necessary for backbone
         webserver.use(/(\/demos\/[^\/]+)?\/backbone\.js/, express.static(path.join(clientDir, `node_modules/backbone/backbone.js`)));
@@ -176,7 +214,7 @@ class PvsiowebServer {
 
         this.wsServer = new ws.Server({ server: this.httpServer });
         this.wsServer.on("connection", (socket: WebSocket) => {
-            const socketid: number =  this.clientid++;
+            const socketid: number = this.clientid++;
             this.socketRegistry[socketid] = socket;
             
             console.info("opening websocket client " + socketid);
@@ -241,10 +279,13 @@ class PvsiowebServer {
             console.log("----------------------------------------------");
         });
 
+        const address: string = this.getAddress();
         console.log("----------------------------------------------");
-        console.log(`Starting up PVSio-web server on ${this.getAddress()}...`);
+        console.log(`Starting up PVSio-web server on ${address}...`);
         this.httpServer.listen(this.port, () => {
             console.log("PVSio-web server ready!");
+            console.log("----------------------------------------------");
+            console.log(`To launch the front-end, open the Web browser at ${address}`);
             console.log("----------------------------------------------");
         });
     }
@@ -269,7 +310,7 @@ class PvsiowebServer {
                 token.path = token.path.replace(projectsDir, "");
             }
             if (token.files) {
-                token.files.forEach((file: serverUtils.NodeJSFileDescriptor) => {
+                token.files.forEach((file: NodeJSFileDescriptor) => {
                     if (file && file.path && file.path.indexOf(projectsDir) === 0) {
                         file.path = file.path.replace(projectsDir, "");
                     }
@@ -293,6 +334,9 @@ class PvsiowebServer {
             console.error("[pvsioweb-server] Error: process callback triggered an exception " + JSON.stringify(processCallbackError));
         }
     }
+    /**
+     * Internal function, broadcasts a message to all connected clients
+     */
     protected broadcast(token: Connection.Token): void {
         const keys: string[] = Object.keys(this.socketRegistry);
         for(let k in keys) {
@@ -398,9 +442,9 @@ class PvsiowebServer {
     /**
      * Creates a function that updates the path of the parameter object such that it is relative to the specified basePath
      */
-    toRelativePath(basePath: string): (d: serverUtils.NodeJSFileDescriptor) => serverUtils.NodeJSFileDescriptor {
+    toRelativePath(basePath: string): (d: NodeJSFileDescriptor) => NodeJSFileDescriptor {
         basePath = basePath || projectsDir;
-        return (desc: serverUtils.NodeJSFileDescriptor) => {
+        return (desc: NodeJSFileDescriptor) => {
             if (desc?.path?.indexOf(basePath) === 0) {
                 desc.path = desc.path.replace(basePath, "");
             }
@@ -420,12 +464,12 @@ class PvsiowebServer {
      * @returns {Promise} a promise that resolves with a list of objects representing the files in the directory
      * each object contains {name: <String>, path: <String>, isDirectory: <boolean>}
      */
-    async readDirectory(folderPath: string): Promise<serverUtils.NodeJSFileDescriptor[]> {
+    async readDirectory(folderPath: string): Promise<NodeJSFileDescriptor[]> {
         return new Promise((resolve, reject) => {
             fs.readdir(folderPath, async (err: NodeJS.ErrnoException, files: string[]) => {
                 if (!err) {
                     //get stat attributes for all the files using an async call
-                    const promises: Promise<serverUtils.NodeJSFileDescriptor>[] = files.map((name: string) => {
+                    const promises: Promise<NodeJSFileDescriptor>[] = files.map((name: string) => {
                         return new Promise((resolve, reject) => {
                             const fullPath: string = path.join(folderPath, name);
                             fs.stat(fullPath, (err: NodeJS.ErrnoException, res) => {
@@ -445,8 +489,8 @@ class PvsiowebServer {
                         });
                     });
 
-                    const res: serverUtils.NodeJSFileDescriptor[] = await Promise.all(promises);
-                    const result: serverUtils.NodeJSFileDescriptor[] = res.map((d, i) => {
+                    const res: NodeJSFileDescriptor[] = await Promise.all(promises);
+                    const result: NodeJSFileDescriptor[] = res.map((d, i) => {
                         return {
                             name: d.name,
                             path: d.path,
@@ -551,13 +595,13 @@ class PvsiowebServer {
         try {
             this.fsWatchers[folderPath] = this.watch(folderPath, socket);
             // watch the sub-directories too
-            const data: serverUtils.NodeJSFileDescriptor[] = await serverUtils.getFolderTree(folderPath);
+            const data: NodeJSFileDescriptor[] = await serverUtils.getFolderTree(folderPath);
             const subFolders = data?.filter(function (f) {
                 return f.isDirectory;
             }) || [];
             // watch all subfolders
             for (let i = 0; i < subFolders.length; i++) {
-                const subFolder: serverUtils.NodeJSFileDescriptor = subFolders[i];
+                const subFolder: NodeJSFileDescriptor = subFolders[i];
                 if (subFolder) {
                     if (!this.fsWatchers[subFolder.path]) {
                         this.fsWatchers[subFolder.path] = this.watch(subFolder.path, socket);
@@ -579,11 +623,11 @@ class PvsiowebServer {
             isDirectory: true,
             time: { server: {} }
         };
-        const data: serverUtils.NodeJSFileDescriptor[] = await serverUtils.getFolderTree(folderPath);
-        res.subFiles = data?.filter((f: serverUtils.NodeJSFileDescriptor) => {
+        const data: NodeJSFileDescriptor[] = await serverUtils.getFolderTree(folderPath);
+        res.subFiles = data?.filter((f: NodeJSFileDescriptor) => {
             return (!f.isDirectory) && FileFilters.filesFilter?.indexOf(path.extname(f.path).toLowerCase()) > -1;
         }).map(this.toRelativePath(folderPath));
-        res.subFolders = data?.filter((f: serverUtils.NodeJSFileDescriptor) => {
+        res.subFolders = data?.filter((f: NodeJSFileDescriptor) => {
             return f.isDirectory;
         }).map(this.toRelativePath(folderPath));
         this.processCallback(res, socket);
@@ -642,7 +686,7 @@ class PvsiowebServer {
     protected async listProjectsHandler (token: Connection.ListProjectsToken, socket: WebSocket, socketid: number): Promise<void> {
         this.initProcessMap(socketid);
         token.socketId = socketid;
-        const projects: serverUtils.ProjectDescriptor[] = await serverUtils.listProjects();
+        const projects: ProjectDescriptor[] = await serverUtils.listProjects();
         const res: Connection.ListProjectsToken = {
             type: token.type,
             id: token.id,
@@ -800,7 +844,7 @@ class PvsiowebServer {
             token.path = path.join(projectsDir, token.path);
         }
         console.log("writing file " + token.path);
-        const desc: serverUtils.NodeJSFileDescriptor = await serverUtils.writeFile(token.path, token.content, token.encoding, token.opt);
+        const desc: NodeJSFileDescriptor = await serverUtils.writeFile(token.path, token.content, token.encoding, token.opt);
         if (!desc || desc.err) {
             token.err = (desc) ? desc.err : { message: `Unhandled error code` };
         }

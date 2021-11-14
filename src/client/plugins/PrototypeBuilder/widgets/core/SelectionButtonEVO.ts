@@ -1,5 +1,5 @@
 import { ButtonEVO, ButtonOptions } from "./ButtonEVO";
-import { Coords } from "./WidgetEVO";
+import { Coords } from "../../../../common/interfaces/Widgets";
 
 export interface PushButtonOptions extends ButtonOptions {
     activeColor?: string
@@ -11,8 +11,10 @@ export class SelectionButtonEVO extends ButtonEVO {
         return SelectionButtonEVO.constructorName;
     }
 
-    protected activeFlag: boolean = false; // false means disabled, true means enabled
+    // button state (active/inactive)
+    protected activeFlag: boolean = false;
 
+    // background color for active and inactive states
     protected activeColor: string = "black";
     protected inactiveColor: string;
 
