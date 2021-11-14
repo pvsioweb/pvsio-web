@@ -31,7 +31,7 @@ To install PVSio-web, clone the source code from the repository (branch `typescr
 Examples use of PVSio-Web are provided in the `src/examples` folder.
 - `helloworld`: this simple prototype demonstrates how to use the PVSio-Web widgets library. To open this prototype, launch the PVSio-Web back-end and then open the browser at http://localhost:8082/demos/helloworld/
 - `zoll`: this prototype introduces the use of background images and animated display elements. To open this prototype, launch the PVSio-Web back-end and then open the browser at http://localhost:8082/demos/zoll/
-- `bennet`: this prototype shows how to create multi-screen displays and touchscreen buttons. To open this prototype, launch the PVSio-Web back-end and then open the browser at http://localhost:8082/demos/bennet/
+- `bennet980`: this prototype shows how to create multi-screen displays and touchscreen buttons. To open this prototype, launch the PVSio-Web back-end and then open the browser at http://localhost:8082/demos/bennet980/
 
 <br>
 
