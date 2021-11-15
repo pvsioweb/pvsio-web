@@ -47,10 +47,9 @@ Examples use of PVSio-Web are provided in the `src/examples` folder.
 │   │   ├── devel.html           // Client entry-point (developer view)
 │   │   └── index.html           // Client entry-point
 │   │
-│   ├── server                   // PVSio-Web server
+│   ├── server/                  // PVSio-Web server
 │   │   ├── common/              // Utility functions
 │   │   ├── lib/                 // External libraries (co-simulation engine)
-│   │   ├── PVSioWebServer       // Server entry-point
 │   │   └── PVSioWebServer       // Server entry-point
 │   │
 │   └── examples/                // PVSio-Web example prototypes
