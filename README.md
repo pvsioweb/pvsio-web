@@ -40,6 +40,7 @@ Examples use of PVSio-Web are provided in the `src/examples` folder.
 ```
 .
 ├── src/                         // PVSio-Web source files
+│   │
 │   ├── client/                  // PVSio-Web client
 │   │   ├── common/              // Utility functions
 │   │   ├── core/                // Core services (Connection, LayoutManager, PluginsManager, etc.)
@@ -55,8 +56,8 @@ Examples use of PVSio-Web are provided in the `src/examples` folder.
 │   └── examples/                // PVSio-Web example prototypes
 │       └── helloworld/          // Helloworld example, demonstrates how to use the PVSio-Web APIs
 │
-├── dist/                        // folder created after running 'make', contains the PVSio-Web distribution
-├── bundle/                      // folder created after running 'make', contains a webpack version of PVSio-Web
+├── dist/                        // JavaScript files (folder created by the Makefile script)
+├── bundle/                      // Webpack bundle (folder created by the Makefile script)
 │
 ├── package.json                 // The extension manifest
 ├── Makefile                     // Makefile for building PVSio-Web
