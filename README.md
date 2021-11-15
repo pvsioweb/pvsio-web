@@ -50,7 +50,7 @@ Examples use of PVSio-Web are provided in the `src/examples` folder.
 │   ├── server/                  // PVSio-Web server
 │   │   ├── common/              // Utility functions
 │   │   ├── lib/                 // External libraries (co-simulation engine)
-│   │   └── PVSioWebServer       // Server entry-point
+│   │   └── PVSioWebServer.ts    // Server entry-point
 │   │
 │   └── examples/                // PVSio-Web example prototypes
 │       └── helloworld/          // Helloworld example, demonstrates how to use the PVSio-Web APIs
