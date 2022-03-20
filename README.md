@@ -1,18 +1,20 @@
 PVSio-web [![Build Status](https://travis-ci.org/thehogfather/pvsio-web.svg?branch=alpha)](https://travis-ci.org/thehogfather/pvsio-web) [![NPM Downloads](https://img.shields.io/npm/dt/pvsio-web.svg?style=flat-square)](https://www.npmjs.com/package/pvsio-web)
 =========
 
-PVSio-web is a new graphical tool to prototype and analyse user interface software. It provides the typical functionalities of an animation environment that allows designers to load and simulate realistic user interfaces. Underneath, it uses SRI's state-of-the-art theorem prover PVS for analysis, and the pvsio component as a basis for simulation.
+PVSio-web is a graphical toolkit based on Web technologies for rapid prototyping and analysis of human-machine interfaces. A library of widgets is provided to support the development of realistic user interfaces. Underneath, the toolkit uses the PVS theorem proving system for analysis, and the PVS-io component for simulation.
 
-Simulations created with PVSio-web can be watched in this youtube video https://www.youtube.com/watch?v=T0QmUe0bwL8
+PVSio-web has been applied successfully to the analysis of medical devices, to identify latent design anomalies that could lead to use errors. Watch this YouTube video for additional info: https://www.youtube.com/watch?v=T0QmUe0bwL8
+
 
 News
 ------------
-(April 2021) A new version of PVSio-web is under development that introduces an improved architecture and new features such as dynamic loading of widget libraries. The new version will be integrated in [VSCode-PVS](https://github.com/nasa/vscode-pvs), a modern development environment for the PVS verification systems. Stay tuned for updates!
+(March 2022) The rapid prototyping capabilities of PVSio-web are now integrated in in [VSCode-PVS](https://github.com/nasa/vscode-pvs), a modern development environment for the PVS verification systems.
 
 <img src="https://github.com/nasa/vscode-pvs/raw/master/vscode-pvs/screenshots/vscode-pvs-rapid-prototyping.gif" width="600"> <br>
 
 
-Live version
+
+Examples
 ------------
 
 Realistic prototypes created using PVSio-web can be found at the following links:
@@ -21,103 +23,32 @@ Realistic prototypes created using PVSio-web can be found at the following links
 * http://www.pvsioweb.org/demos/AlarisGP (Commercial infusion pump prototype - full model)
 * http://www.pvsioweb.org/demos/BBraun   (Commercial infusion pump prototype - data entry system only)
 
-The full PVSio-web tool with limited features is also available at http://www.pvsioweb.org
-(please note that the web server has limited processing power so its response time might not be optimal; also, note that the file system is read-only, so you will not be able to save new prototypes or compile new models using this live version).
+A live version of the PVSio-web toolkit is available at http://www.pvsioweb.org
+(the version has limited capabilities, in particular the file system is read-only, so you will not be able to save any change).
 
-![Screenshot](screenshot.png?raw=true)
 
 
 Installation
 ------------
-To install PVSio-web, first you need to install PVS and NodeJS, and then clone the PVSio-web github repository. This can be done as follows.
-
-#### Step 1: Install PVS and add PVS executables to your PATH
-PVS is required to run PVSio-web. The tool can be downloaded from http://pvs.csl.sri.com/download.shtml Installation instructions are on the aforementioned website.
-
-Once PVS is installed, please add the following PVS executable files to your PATH: pvs, pvsio and proveit. A simple way to do this is to create symbolic links to those files, and place the symbolic links in /usr/bin. For instance, if PVS is installed in /opt/PVS/pvs, the following commands executed in a Terminal window create the required symbolic links:
-
-    sudo ln -s /opt/PVS/pvs /usr/bin/pvs
-    sudo ln -s /opt/PVS/pvsio /usr/bin/pvsio
-    sudo ln -s /opt/PVS/proveit /usr/bin/proveit
-
-Please note that the ln command requires a full path.
-
-#### Step 2: Install NodeJS
-NodeJS is required to run PVSio-web. Please download and install NodeJS from http://nodejs.org
-Installation instructions are on the aforementioned website.
-
-#### Step 3: Clone the PVSio-web repository
-Create a directory where you would like to install PVSio-web on your local computer. Open a Terminal window in the created directory, and use 'git' to clone the PVSio-web repository:
-
-    git clone https://github.com/thehogfather/pvsio-web.git
-    cd pvsio-web
-    npm install
-
-PVSio-web is now installed on your local computer!
-
-Running pvsio-web
------------------
-To run pvsio-web, a backend and a frontend need to be started.
-
-To start the backend: open a Terminal window in the pvsio-web directory, and use the following command (and leave the Terminal window open):
-
-    ./start.sh
-
-To start the frontend: open a browser (Firefox 21 or greater, or Chrome), and type the following address in the address bar:
-
-    http://localhost:8082/
-
-Updating pvsio-web
-------------------
-To update pvsio-web to the latest version, open a Terminal window, and execute the following command from the pvsio-web directory:
-
-    git pull
+The latest version of PVSio-web is integrated in [VSCode-PVS](https://github.com/nasa/vscode-pvs), which can be downloaded from the [Visual Studio Code marketplace](https://marketplace.visualstudio.com/items?itemName=paolomasci.vscode-pvs).
 
 
-Examples
---------
-Realistic simulations created with PVSio-web can be watched in this youtube video:
-* https://www.youtube.com/watch?v=T0QmUe0bwL8
+Widgets Library
+-----------
+If you want to use the widget library of PVSio-web, please please clone the [typescript branch](https://github.com/pvsioweb/pvsio-web/tree/typescript) and check the [README.md](https://github.com/pvsioweb/pvsio-web/blob/typescript/README.md) file. 
 
-All simulation examples demonstrated in the youtube video are included in the PVSio-web distribution in examples/projects. To open these examples, start pvsio-web and click the "Open Projects" button of the pvsio-web frontend and select one of the examples from the list.
-
-
-Directory structure
--------------------
-This project has the following setup:
-
-* start.sh - the script used to initiate the server.
-* examples/ - this directory contains projects and demos
-* src/ - this directory contains the pvsio-web source code
-    * client/ - this directory contains the source code for the pvsio-web client. This code is executed in the user's browser
-    * server/ - this directory contains the source code for the pvsio-web server. This code is executed in the node.JS environment, and manages communication between pvs/pvsio and the client code.
+Examples demonstrating how to use PVSio-web as a library can be found in the [src/examples](https://github.com/pvsioweb/pvsio-web/tree/typescript/src/examples/demos) folder. Use those examples as a reference to learn how to import the widgets and instantiate them.
 
 
-Nightly builds
---------------
-To obtain the latest development versions of pvsio-web, you can clone our alpha branch on the github repository.
+> Note: PVS v7.1 is needed to execute some of the PVSio-web prototypes. The tool can be downloaded with [VSCode-PVS](https://github.com/nasa/vscode-pvs).
 
-To clone the alpha branch, create a new directory (for example, pvsioweb-alpha), open a Terminal window, and execute the following commands from the created directory:
+> When using PVSio-web as a library, you will need to add the `pvs`, `pvsio` and `proveit` scripts of the PVS distribution to your PATH environment variable. A simple way to do this is to create symbolic links to those files, and place the symbolic links in /usr/bin. For instance, if PVS is installed in /opt/PVS/pvs, the following commands executed in a Terminal window create the required symbolic links:
 
-    git clone https://github.com/thehogfather/pvsio-web.git -b alpha
-    cd pvsio-web
-    npm install
+>    `sudo ln -s /opt/PVS/pvs /usr/bin/pvs`
 
+>    `sudo ln -s /opt/PVS/pvsio /usr/bin/pvsio`
 
-Testing the installation
-------------------------
-To test the client, start the pvsio-web backend by running the following command in a Terminal window (and leave the Terminal window open):
-    ./start.sh
+>    `sudo ln -s /opt/PVS/proveit /usr/bin/proveit`
 
-and type the following address in a browser window:
-
-    http://localhost:8082/tests
-
-To test the server, run the following command in a Terminal window
-
-    npm test
-
-
-Uninstallation :(
---------------
-To uninstall, delete the pvsio-web folder from your computer.
+>
+> Please note that the `ln` command requires a full path.
