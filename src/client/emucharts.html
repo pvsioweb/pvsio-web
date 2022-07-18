@@ -1,0 +1,26 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>PVSio-Web Emucharts</title>
+        <link type="image/x-icon" rel="icon" href="pvsioweb.ico">
+        <link type="image/x-icon" rel="shortcut icon" href="pvsioweb.ico">
+        <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="node_modules/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+        <link href="node_modules/animate.css/animate.min.css" rel="stylesheet">
+    </head>
+<body>
+    <script src="node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="node_modules/handlebars/dist/handlebars.min.js"></script>
+    <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="node_modules/underscore/underscore-min.js"></script>
+    <script src="node_modules/backbone/backbone-min.js"></script>
+
+    <div id="pvsio-web" class="container-fluid p-0" style="position:absolute; top:0; left:0;"></div>
+    <script src="emucharts.min.js"></script> <!-- this file is in folder bundle, the server takes care of serving it -->
+
+    <script>
+        builder.activate({ parent: "#pvsio-web" });
+    </script>
+</body>
+</html>

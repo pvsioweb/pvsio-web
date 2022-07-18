@@ -5,6 +5,18 @@ export function widgetUUID (): string {
     return "wdg" + uuid("Wxxxx");
 };
 /**
+ * Utility function, returns a unique ID in the format node-N1234-5678-9
+ */
+export function nodeUUID (): string {
+    return "node-" + uuid("Nxxxx-xxxx-x");
+};
+/**
+ * Utility function, returns a unique ID in the format edge-N1234-5678-9
+ */
+export function edgeUUID (): string {
+    return "edge-" + uuid("Nxxxx-xxxx-x");
+};
+/**
  * universal user id generator
  * @author Patrick Oladimeji
  * @date 6/4/13 15:35:54 PM

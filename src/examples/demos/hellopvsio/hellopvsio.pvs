@@ -1,0 +1,29 @@
+%%
+% @theory: hellopvsio, example pvs theory that can be executed with pvsio-web
+%          the functionalities provided in this theory are equivalent to those implemented in javascript for the helloworld example
+% @author: paolo
+% @date: Fri, 15 Jul 2022 20:18:22 GMT
+%%
+hellopvsio: THEORY
+  BEGIN
+    % system state
+    State: TYPE = [#
+        powered_on: boolean
+    #]
+
+    % init function
+    init: State = (# powered_on := false #)
+
+    % click on function, turns on the device
+    click_on (st: State): State = st WITH [ powered_on := true ]
+
+    % click off function, turns off the device
+    click_off (st: State): State = st WITH [ powered_on := false ]
+
+    % switch function, toggles the on/off status
+    click_switch (st: State): State = st WITH [ powered_on := NOT st`powered_on ]
+
+    % rotate switch function, toggles the on/off status
+    rotate_switch (st: State): State = click_switch(st)
+
+  END hellopvsio

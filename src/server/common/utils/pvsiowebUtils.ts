@@ -1,4 +1,5 @@
 import { PVSioWebPlugin, MouseEventHandlers } from "../interfaces/Plugins";
+import { Coords } from "../interfaces/Widgets";
 
 /**
  * Creates a collapsible panel on the client app
@@ -258,6 +259,22 @@ export function createStickyPanel (owner: PVSioWebPlugin, opt?: {
     return { $div, $content, $navbar };
 };
 
+/**
+ * Utility function, gets the mouse position
+ */
+export function getMouseCoords (evt: JQuery.MouseUpEvent | JQuery.MouseOverEvent | JQuery.MouseMoveEvent | JQuery.MouseDownEvent | JQuery.ContextMenuEvent | JQuery.ClickEvent, $el: JQuery<HTMLElement> | JQuery<SVGElement>): Coords<number> {
+    const offset: JQuery.Coordinates = $el.offset()
+    const top: number = +(evt?.pageY - offset?.top).toFixed(0);
+    const left: number = +(evt?.pageX - offset?.left).toFixed(0);
+    return {
+        top: top < 0 ? 0 : top, 
+        left: left < 0 ? 0 : left
+    }
+}
+
+/**
+ * Utility function, installs a resize handler on a split panel
+ */
 export function enableResizeLeft (desc: SplitPanel, opt?: { initialWidth?: number }): SplitPanel {
     opt = opt || {};
     if (desc) {
@@ -274,10 +291,10 @@ export function enableResizeLeft (desc: SplitPanel, opt?: { initialWidth?: numbe
             const windowWidth: number = $(window).width();
             const panelWidth: number = desc.$div.width();
             const maxWidth: number = panelWidth < windowWidth ? panelWidth : windowWidth;
-            const rightWidth: number = maxWidth - leftWidth - 2 * padding;
             leftWidth = opt.leftWidth < min ? min 
                 : opt.leftWidth > maxWidth ? maxWidth
                 : opt.leftWidth;
+            const rightWidth: number = maxWidth - leftWidth - 2 * padding;
             desc.$left.css("width", leftWidth);
             desc.$central.css({
                 "width": rightWidth
@@ -285,14 +302,23 @@ export function enableResizeLeft (desc: SplitPanel, opt?: { initialWidth?: numbe
         }
         desc.$left.css("width", leftWidth);
         // make side panel resizeable
+        let timer: NodeJS.Timer = null;
         desc.$resizeBar.on("mousedown", (evt: JQuery.MouseDownEvent) => {
             evt.preventDefault();
-            $('html').css({ cursor: "col-resize" });
+            evt.stopPropagation();
+            const $html: JQuery<HTMLElement> = $('html');
+            $html.css({ cursor: "col-resize" });
             const onMouseMove = (evt: JQuery.MouseMoveEvent) => {
                 evt.preventDefault();
+                evt.stopPropagation();
                 adjustPanels({ leftWidth: evt.pageX });
+                $html.css({ cursor: "col-resize" });
                 if (desc?.onResize) {
-                    desc.onResize({ width: desc.$central.css("width"), height: desc.$central.css("height") });
+                    // delayed resize, to avoid too many calls to the handler
+                    clearTimeout(timer);
+                    timer = setTimeout(() => {
+                        desc.onResize({ width: desc.$central.css("width"), height: desc.$central.css("height") });                        
+                    }, 250);
                 }
             };
             const onMouseUp = (evt: JQuery.MouseUpEvent | JQuery.KeyDownEvent) => {

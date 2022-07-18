@@ -59,7 +59,7 @@ const bundleDir: string = path.join(__dirname, "../../bundle");
 const helpMsg: string = `
     Usage: node PVSioWebServer.js [options]
     Options:
-      -pvs <path>          (Specifies location of pvs executables)
+      -pvs <path>          (Specifies the PVS path, i.e., where the pvs/pvsio executables are located)
       -port <port number>  (Specifies the server port where clients connect)
 `;
 
@@ -110,13 +110,18 @@ class PvsiowebServer {
      */
     printBanner (): boolean {
         // test if the pvs executable are actually there
-        const pvsio: string = path.join(this.pvsPath, "pvsio");
+        const pvsio: string = this.pvsPath ? path.join(this.pvsPath, "pvsio") : "pvsio";
         const success: boolean = serverUtils.fileExists(pvsio);
         const msg: string = success ?
 `
 ================================================================
 ====   PVSio-Web 3.0.0-preview    (PVSio Mode)              ====
 ================================================================
+
+----------------------------------------------------------------
+ - PVS path: ${this.pvsPath}
+ - PVSio executable: ${pvsio}
+----------------------------------------------------------------
 `
 : `
 ================================================================
@@ -198,17 +203,26 @@ class PvsiowebServer {
         // create a pathname prefix for client so that demo css and scripts can be loaded from the client dir
         webserver.use("/client", express.static(clientDir));
         // express path to backgrounds
-        console.log(`serving ${backgroundsDir}`);
+        // console.log(`Serving ${backgroundsDir}`);
         webserver.use("/backgrounds", express.static(backgroundsDir));
 
-
-        // routing necessary for backbone
+        // routing necessary for backbone and other libraries
         webserver.use(/(\/demos\/[^\/]+)?\/backbone\.js/, express.static(path.join(clientDir, `node_modules/backbone/backbone.js`)));
         webserver.use(/(\/demos\/[^\/]+)?\/underscore\.js/, express.static(path.join(clientDir, `node_modules/underscore/underscore-min.js`)));
         webserver.use(/(\/demos\/[^\/]+)?\/jquery\.js/, express.static(path.join(clientDir, `node_modules/jquery/dist/jquery.min.js`)));
+        webserver.use(/(\/demos\/[^\/]+)?\/handlebars\.js/, express.static(path.join(clientDir, `node_modules/handlebars/dist/handlebars.min.js`)));
+        webserver.use(/(\/demos\/[^\/]+)?\/bootstrap\.js/, express.static(path.join(clientDir, `node_modules/bootstrap/dist/js/bootstrap.bundle.min.js`)));
+        webserver.use(/(\/demos\/[^\/]+)?\/d3-path\.js/, express.static(path.join(clientDir, `node_modules/d3-path/dist/d3-path.min.js`)));
+        webserver.use(/(\/demos\/[^\/]+)?\/d3-shape\.js/, express.static(path.join(clientDir, `node_modules/d3-shape/dist/d3-shape.min.js`)));
+
+        webserver.use(/(\/demos\/[^\/]+)?\/bootstrap\.css/, express.static(path.join(clientDir, `node_modules/bootstrap/dist/css/bootstrap.min.css`)));
+        webserver.use(/(\/demos\/[^\/]+)?\/font-awesome\.css/, express.static(path.join(clientDir, `node_modules/font-awesome/css/font-awesome.min.css`)));
+        webserver.use(/(\/demos\/[^\/]+)?\/fonts/, express.static(path.join(clientDir, `node_modules/font-awesome/fonts`)));
+        webserver.use(/(\/demos\/[^\/]+)?\/animate\.css/, express.static(path.join(clientDir, `node_modules/animate.css/animate.min.css`)));
 
         webserver.use(/(\/demos\/[^\/]+)?\/builder\.min\.js/, express.static(path.join(bundleDir, `client/builder.min.js`)));
         webserver.use(/(\/demos\/[^\/]+)?\/prototype-builder\.min\.js/, express.static(path.join(bundleDir, `client/prototype-builder.min.js`)));
+        webserver.use(/(\/demos\/[^\/]+)?\/emucharts\.min\.js/, express.static(path.join(bundleDir, `client/emucharts.min.js`)));
         webserver.use(/(\/demos\/[^\/]+)?\/pvsioweb\.min\.js/, express.static(path.join(bundleDir, `client/pvsioweb.min.js`)));
         webserver.use(/(\/demos\/[^\/]+)?\/widgetLibDials\.min\.js/, express.static(path.join(bundleDir, `client/widgetLibDials.min.js`)));
 
@@ -221,14 +235,13 @@ class PvsiowebServer {
             socket.on("message", async (m: string) => {
                 try {
                     const token: Connection.Token = JSON.parse(m);
-                    console.log(`[pvsioweb-server] Request`, m);
+                    console.log(`[pvsioweb-server] Received request`, m);
                     token.time = token.time || {};
                     token.time.server = { received: new Date().getTime() };
                     // const type: string = token?.type.split(" ")[0];
                     const f: (token: Connection.Token, socket: WebSocket, socketid: number) => Promise<void> = this.functionMaps.get(token.type);
                     if (f && typeof f === 'function') {
-                        console.log(`[pvsioweb-server] received request '${token.type}' from client...`);
-                        console.dir(token);        
+                        // console.dir(token);        
                         // call the function with token and socket as parameter
                         try {
                             await f(token, socket, socketid);
@@ -276,17 +289,17 @@ class PvsiowebServer {
             } else {
                 console.error(JSON.stringify(err));
             }
-            console.log("----------------------------------------------");
+            console.log("----------------------------------------------------------------");
         });
 
         const address: string = this.getAddress();
-        console.log("----------------------------------------------");
+        console.log("----------------------------------------------------------------");
         console.log(`Starting up PVSio-web server on ${address}...`);
         this.httpServer.listen(this.port, () => {
-            console.log("PVSio-web server ready!");
-            console.log("----------------------------------------------");
-            console.log(`To launch the front-end, open the Web browser at ${address}`);
-            console.log("----------------------------------------------");
+        console.log("PVSio-web server ready!");
+        console.log("----------------------------------------------------------------");
+        console.log(`To launch the front-end, open the Web browser at ${address}`);
+        console.log("----------------------------------------------------------------");
         });
     }
 
@@ -325,10 +338,9 @@ class PvsiowebServer {
                 }
             }
             if (socket && socket.readyState === 1) {
-                console.log("[pvsioweb-server] sending data back to client...");
-                console.dir({ type: token.type, data: token.data }, { depth: null });
+                // console.log("[pvsioweb-server] sending data back to client...", token);
                 socket.send(JSON.stringify(token));
-                console.log("[pvsioweb-server] data sent!\n");
+                // console.log("[pvsioweb-server] data sent!\n");
             }
         } catch (processCallbackError) {
             console.error("[pvsioweb-server] Error: process callback triggered an exception " + JSON.stringify(processCallbackError));
@@ -374,7 +386,9 @@ class PvsiowebServer {
         }
     }
 
-
+    /**
+     * Utility function, typechecks a pvs file
+     */
     async typeCheck(file: string, cb: (error: ExecException, stdout: string, stderr: string) => void): Promise<void> {
         console.log("[pvsioweb-server] typechecking file " + file + " ...");
         if (process.env.PORT) { // this is for the PVSio-web version installed on the heroku cloud
@@ -506,6 +520,9 @@ class PvsiowebServer {
         });
     }
 
+    /**
+     * Utility function, de-registers the file watcher for a given folder
+     */
     unregisterFolderWatcher(folderPath: string): void {
         const watcher = this.fsWatchers[folderPath];
         if (watcher) {
@@ -515,6 +532,9 @@ class PvsiowebServer {
         }
     }
 
+    /**
+     * Utility function, de-registers all file watchers
+     */
     unregisterFolderWatchers(): void {
         Object.keys(this.fsWatchers).forEach((path) => {
             this.unregisterFolderWatcher(path);
@@ -522,6 +542,9 @@ class PvsiowebServer {
         this.fsWatchers = {};
     }
 
+    /**
+     * Internal function, file watcher
+     */
     protected watch (folder: string, socket: WebSocket): fs.FSWatcher {
         const notificationDelay: number = 200;
         if (folder.indexOf("pvsbin") > -1) { return; }
@@ -634,8 +657,13 @@ class PvsiowebServer {
         return res;
     }
 
+    /**
+     * Internal function, installs the handlers necessary to handle service requests received by the server on a given socked ID
+     * @param socketid 
+     */
     protected initProcessMap (socketid: number): void {
         if (!this.pvsioProcessMap[socketid]) {
+            console.log("[pvsioweb-server] initProcessMap", { socketid, pvsPath: this.pvsPath });
             this.pvsioProcessMap[socketid] = new PvsProxy({ pvsPath: this.pvsPath });
         }
         // console.debug(socketid);
@@ -733,13 +761,15 @@ class PvsiowebServer {
      * @param socketid 
      */
     protected async sendCommandHandler (token: Connection.SendCommandToken, socket: WebSocket, socketid: number): Promise<void> {
-        // console.log("received command: ", token);
+        // console.log("[pvsioweb-server] Send Command Handler", { token });
         this.initProcessMap(socketid);
         token.socketId = socketid;
-        
         const res: PvsioResponse = await this.pvsioProcessMap[socketid]?.sendCommand(token.command, { useLastState: true });
         if (res) {
             let extras: {} = {};
+            console.log("\n-- Server response ----");
+            console.dir(res);
+            console.log("-----------------------\n");
             if (res?.jsonOut) {
                 try {
                     extras = JSON.parse(res?.jsonOut);
@@ -793,7 +823,7 @@ class PvsiowebServer {
                 delete this.pvsioProcessMap[socketid];
             }
             // recreate the pvsio process
-            this.pvsioProcessMap[socketid] = new PvsProxy();
+            this.pvsioProcessMap[socketid] = new PvsProxy({ pvsPath: this.pvsPath });
             // set the workspace dir and start the pvs process with a callback for processing process ready and exit
             // messages from the process
             const res: boolean = await this.pvsioProcessMap[socketid].start({ contextFolder: root, fileName: token.data.fileName, fileExtension: ".pvs" });

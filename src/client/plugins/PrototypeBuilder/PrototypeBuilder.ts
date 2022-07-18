@@ -447,7 +447,15 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
         const $central: JQuery<HTMLDivElement> = $(`#${id}-central`);
         const $resizeBar: JQuery<HTMLDivElement> = $(`#${id}-resize-bar`);
 
-        const body: Utils.SplitPanel = Utils.enableResizeLeft({ $div, $left, $central, $resizeBar, onResize: this.onResizeCentralView });
+        const body: Utils.SplitPanel = Utils.enableResizeLeft({
+            $div, 
+            $left, 
+            $central,
+            $resizeBar, 
+            onResize: (desc?: { width: string, height: string }) => {
+                this.onResizeCentralView(desc);
+            }
+        });
         return body;
     }
 
@@ -679,7 +687,6 @@ export class PrototypeBuilder extends Backbone.Model implements PVSioWebPlugin {
      * Switches the builder view
      */
     switchToBuilderView (): void {
-        this.$menu
         this.centralViews?.Builder?.builderView();
         this.highlightBuilderButton();
         if (this.sidePanelIsHidden) {

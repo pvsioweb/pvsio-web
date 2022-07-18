@@ -39,6 +39,7 @@ export abstract class CentralView extends Backbone.View {
     protected panelId: string;
     // protected $headerDiv: JQuery<HTMLElement>;
     protected $parentDiv: JQuery<HTMLElement>;
+    protected $panelDiv: JQuery<HTMLElement>;
 
     protected viewId: string;
     protected viewOptions: CentralViewOptions;
@@ -83,6 +84,7 @@ export abstract class CentralView extends Backbone.View {
             active: opt?.active
         });
         this.$el.append(viewBody);
+        this.$panelDiv = this.$el.find(`#${this.panelId}`)
         return this;
     }
 
@@ -93,6 +95,6 @@ export abstract class CentralView extends Backbone.View {
         // hide all central views
         this.$el.find(`.tab-pane`).removeClass("active");
         // make this view visible
-        this.$el.find(`#${this.panelId}`).addClass("active");
+        this.$panelDiv.addClass("active");
     }
 }

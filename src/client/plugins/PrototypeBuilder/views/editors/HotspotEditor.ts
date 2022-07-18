@@ -2,7 +2,11 @@ import * as Backbone from 'backbone';
 import * as Utils from '../../../../common/utils/pvsiowebUtils';
 import { Coords, HotspotData } from "../../../../common/interfaces/Widgets";
 import { widgetUUID } from '../../../../common/utils/uuidUtils';
+import { getMouseCoords } from '../../../../common/utils/pvsiowebUtils';
 
+/**
+ * Events fired by the editor
+ */
 export const HotspotEditorEvents = {
     DidCreateHotspot: "DidCreateHotspot",
     DidSelectHotspot: "DidSelectHotspot",
@@ -15,7 +19,10 @@ export const HotspotEditorEvents = {
     DidDeleteHotspot: "DidDeleteHotspot",
     DidClearSelection: "DidClearSelection"
 };
-export interface HotspotEditorData extends Backbone.ViewOptions {
+/**
+ * DOM elements used by the editor
+ */
+export interface HotspotEditorElements extends Backbone.ViewOptions {
     overlay: HTMLElement,
     builderCoords: HTMLElement
 };
@@ -66,7 +73,7 @@ const markerTemplate: string = `
 </div>
 `;
 
-// utility functions
+// utility function, returns the coordinates of a given element
 export function getCoords (elem: JQuery<HTMLElement>): Coords<number> {
     return {
         top: +parseFloat(elem.css("top")).toFixed(0),
@@ -75,16 +82,9 @@ export function getCoords (elem: JQuery<HTMLElement>): Coords<number> {
         height: +parseFloat(elem.css("height")).toFixed(0),
     };
 }
-export function getMouseCoords (evt: JQuery.MouseUpEvent | JQuery.MouseOverEvent | JQuery.MouseMoveEvent | JQuery.MouseDownEvent | JQuery.ContextMenuEvent | JQuery.ClickEvent, $el: JQuery<HTMLElement>): Coords<number> {
-    const offset: JQuery.Coordinates = $el.offset()
-    const top: number = +(evt?.pageY - offset?.top).toFixed(0);
-    const left: number = +(evt?.pageX - offset?.left).toFixed(0);
-    return {
-        top: top < 0 ? 0 : top, 
-        left: left < 0 ? 0 : left
-    }
-}
-
+/**
+ * Prints the given coordinates, in formatted form, in the given rendering element
+ */
 function printCoords ($elem: JQuery<HTMLElement>, coords: Coords<number>, opt?: { showSize?: boolean }): void {
     opt = opt || {};
     const info: string = opt.showSize ? `(top:${coords.top}, left:${coords.left}, width:${coords.width}, height:${coords.height})`
@@ -93,7 +93,7 @@ function printCoords ($elem: JQuery<HTMLElement>, coords: Coords<number>, opt?: 
 }
 
 
-// Utility classes
+// Utility classes for mouse handlers
 abstract class HotspotHandler extends Backbone.View {
     protected triggerEnabled: boolean = true;
     protected triggerTimer: NodeJS.Timer;
@@ -103,6 +103,10 @@ abstract class HotspotHandler extends Backbone.View {
     protected $corner?: JQuery<HTMLElement>;
     protected $tooltip?: JQuery<HTMLElement>;
     protected $builderCoords?: JQuery<HTMLElement>;
+
+    /**
+     * Constructor
+     */
     constructor ($el: JQuery<HTMLElement>, opt?: { $tooltip?: JQuery<HTMLElement>, $builderCoords: JQuery<HTMLElement> }) {
         super({ el: $el[0] });
         this.$tooltip = opt?.$tooltip;
@@ -111,27 +115,45 @@ abstract class HotspotHandler extends Backbone.View {
             this.triggerEnabled = true;
         }, 1000);
     }
+    /**
+     * Activates the handler
+     */
     activate (desc: {
         $activeMarker: JQuery<HTMLElement>, 
         $activeCorner?: JQuery<HTMLElement>, 
         initialMarkerCoords?: Coords<number>, 
         draftStartCoords?: Coords<number>
     }): boolean {
-        this.$marker = desc.$activeMarker;
-        this.$corner = desc.$activeCorner;
-        this.initialMarkerCoords = desc.initialMarkerCoords;
-        this.dragStartCoords = desc.draftStartCoords;
+        this.$marker = desc?.$activeMarker;
+        this.$corner = desc?.$activeCorner;
+        this.initialMarkerCoords = desc?.initialMarkerCoords;
+        this.dragStartCoords = desc?.draftStartCoords;
         return true 
     };
-    deactivate () {
+    /**
+     * Deactivates the handler
+     */
+    deactivate (): void {
         this.$marker = null;
         this.$corner = null;
         this.initialMarkerCoords = null;
         this.dragStartCoords = null;
     }
+    /**
+     * Internal function, mouse down handler
+     */
     protected onMouseDown (evt: JQuery.MouseDownEvent): void {}
-    protected onMouseMove (evt: JQuery.MouseMoveEvent): boolean { return false; }
+    /**
+     * Internal function, mouse up handler
+     */
     protected onMouseUp (evt: JQuery.MouseUpEvent): void {}
+    /**
+     * Internal function, mouse move handler
+     */
+    protected onMouseMove (evt: JQuery.MouseMoveEvent): boolean { return false; }
+    /**
+     * Internal function, resize hotspot handler
+     */
     protected onResizeHotspot (evt: JQuery.MouseMoveEvent | JQuery.MouseUpEvent): Coords<number> {
         const mousePosition: Coords<number> = getMouseCoords(evt, this.$el);
         const offset: Coords<number> = {
@@ -188,6 +210,9 @@ abstract class HotspotHandler extends Backbone.View {
         this.resizeHotspot(coords);
         return coords;
     }
+    /**
+     * Programmatically resize the active hotspot
+     */
     resizeHotspot (coords: Coords, opt?: { $activeMarker?: JQuery<HTMLElement> }): void {
         if (coords) {
             const data: Coords = {};
@@ -203,9 +228,15 @@ abstract class HotspotHandler extends Backbone.View {
     //     this.$tooltip.css({ display: "block", top: `${coords.top + tooltipDistance}px`, left: `${coords.left + tooltipDistance}px`, background: "black", color: "white" });
     //     this.$tooltip.find(".marker-tooltip-label").html(info);
     // }
+    /**
+     * Hide tooltip of the active hotspot
+     */
     hideTooltip (): void {
         this.$tooltip.css({ display: "none" });
     }
+    /**
+     * Show coordinates of the active hotspot
+     */
     showCoords (coords: Coords<number>, opt?: { showSize?: boolean }): void {
         printCoords(this.$builderCoords, coords, opt);
     }
@@ -321,47 +352,86 @@ class MoveHandler extends HotspotHandler {
     }
 }
 
+// list of hotspots
 export type HotspotsMap = { [id: string]: {
     $marker: JQuery<HTMLElement>
 }};
 
-// main class
+/**
+ * Hotspot Editor (main class)
+ */
 export class HotspotEditor extends Backbone.View {
 
     static readonly MIN_WIDTH: number = 10;
     static readonly MIN_HEIGHT: number = 10;
 
+    /**
+     * Editor modes
+     */
     protected mode: "create" | "move" | "resize" | null = null;
 
+    /**
+     * Editor clipboard
+     */
     protected clipboard: HotspotData;
 
+    /**
+     * Coordinates of the anchor node of the hotspot (i.e., first corner of the hotspot, create when starting mouse drag)
+     */
     protected anchorCoords: Coords<number>;
 
+    /**
+     * Internal variables, used for the detection of double clicks
+     */
     protected dblClick: number = 0;
 
+    /**
+     * DOM element for rendering mouse coordinates
+     */
     protected $builderCoords: JQuery<HTMLElement>;
 
+    /**
+     * DOM element for rendering overlay, markers, and tooltips
+     * - overlay layer is used for rendering the contours of the hotspot
+     * - markers layer is used for the corners of the hotspot
+     * - tooltips layers is used for tooltips
+     */
     protected $overlay: JQuery<HTMLElement>;
     protected $marker: JQuery<HTMLElement>;
     protected $tooltip: JQuery<HTMLElement>;
 
+    /**
+     * Mouse handlers
+     */
     protected moveHandler: MoveHandler;
     protected resizeHandler: ResizeHandler;
 
+    /**
+     * Hotspots created in the view
+     */
     protected hotspots: HotspotsMap = {};
 
-    protected data: HotspotEditorData;
+    /**
+     * DOM elements used for overlay and coordinates
+     */
+    protected elems: HotspotEditorElements;
     
-    constructor (data: HotspotEditorData) {
-        super(data);
-        this.data = data;
+    /**
+     * Constructor
+     */
+    constructor (elems: HotspotEditorElements) {
+        super(elems);
+        this.elems = elems;
     }
 
+    /**
+     * Renders the editor
+     */
     renderView (): void {
-        this.$overlay = $(this.data.overlay);
-        this.createHtmlContent(this.data);
+        this.$overlay = $(this.elems.overlay);
+        this.createHtmlContent(this.elems);
         this.$tooltip = this.$overlay.find(".marker-tooltip");
-        this.$builderCoords = $(this.data.builderCoords);
+        this.$builderCoords = $(this.elems.builderCoords);
 
         this.moveHandler = new MoveHandler(this.$el, { $tooltip: this.$tooltip, $builderCoords: this.$builderCoords });
         this.resizeHandler = new ResizeHandler(this.$el, { $tooltip: this.$tooltip, $builderCoords: this.$builderCoords });
@@ -384,24 +454,39 @@ export class HotspotEditor extends Backbone.View {
             this.onKeyDown(evt);
         });
     }
+    /**
+     * Returns the hotspots
+     */
     getHotspots (): HotspotsMap {
         return this.hotspots;
     }
+    /**
+     * Returns a specific hotspot
+     */
     getHotspot (id: string): JQuery<HTMLElement> {
         return this.hotspots[id]?.$marker;
     }
+    /**
+     * Returns the selected hotspots
+     */
     getSelectedHotspot (): JQuery<HTMLElement> {
         const id: string = this.$overlay.find(".marker.selected").attr("id");
         return this.getHotspot(id);
     }
+    /**
+     * Returns the coordinates of a specific hotspot
+     */
     getCoords (id: string): Coords {
         const coords: string = this.hotspots[id]?.$marker.attr("coords") || null;
         return JSON.parse(coords);
     }
-    protected createHtmlContent (data?: HotspotEditorData): HotspotEditor {
-        data = data || this.data;
+    /**
+     * Internal function, creates the html elements of the editor
+     */
+    protected createHtmlContent (elems?: HotspotEditorElements): HotspotEditor {
+        elems = elems || this.elems;
         const content: string = Handlebars.compile(markerOverlayTemplate)({});
-        const parent: HTMLElement = data?.overlay || $("body")[0];
+        const parent: HTMLElement = elems?.overlay || $("body")[0];
         $(parent).append(content);
         this.$el.attr("draggable", "false");
         // this.$el.css("cursor", "crosshair");
@@ -423,9 +508,15 @@ export class HotspotEditor extends Backbone.View {
         });
         return this;
     }
+    /**
+     * Returns the markers layer, which is used to render the corners of the hotspot
+     */
     getMarkersLayer (): JQuery<HTMLElement> {
         return this.$overlay.find(".marker-areas");
     }
+    /**
+     * Returns the list of event handlers implemented in the editor
+     */
     events (): Backbone.EventsHash {
         return {
             mouseover: "onMouseOver",
@@ -436,9 +527,15 @@ export class HotspotEditor extends Backbone.View {
             scroll: "onScroll"
         };
     }
+    /**
+     * Renders the mouse coordinates (in the DOM element for rendering the coordinates)
+     */
     showCoords (coords: Coords<number>, opt?: { showSize?: boolean }): void {
         printCoords(this.$builderCoords, coords, opt);
     }
+    /**
+     * Internal function, handles mouse events
+     */
     protected mouseEventHandler (evt: JQuery.MouseDownEvent | JQuery.MouseOverEvent | JQuery.MouseMoveEvent): void {
         const mousePosition: Coords<number> = getMouseCoords(evt, this.$el);
         this.anchorCoords = this.anchorCoords || mousePosition;
@@ -483,15 +580,25 @@ export class HotspotEditor extends Backbone.View {
             height: +height.toFixed(0)
         }, { showSize: true });
     }
+    /**
+     * Show tooltips
+     */
     showTooltip (coords: Coords<number>, info: string): void {
         this.$tooltip.css({ display: "block", top: `${coords.top + tooltipDistance}px`, left: `${coords.left + tooltipDistance}px`, background: "black", color: "white" });
         this.$tooltip.find(".marker-tooltip-label").html(info);
     }
+    /**
+     * Hides tooltips
+     */
     hideTooltip (): void {
         this.$tooltip.css({ display: "none" });
     }
+    /**
+     * Internal function, handles key down events
+     */
     protected onKeyDown (evt: JQuery.KeyDownEvent): void {
         switch (evt.key) {
+            // escape cancels the current operation
             case "Escape": {
                 this.closeContextMenu();
                 switch (this.mode) {
@@ -567,15 +674,24 @@ export class HotspotEditor extends Backbone.View {
     enableShaderPointer (): void {
         this.$overlay?.find(".shader").css({ cursor: "default" });
     }
+    /**
+     * Internal function, handles scroll events
+     */
     protected onScroll (evt: JQuery.ScrollEvent): void {
         evt.preventDefault();
         // this.$tooltip.html("");
     }
+    /**
+     * Internal function, handles mouse out events
+     */
     protected onMouseOut (evt: JQuery.MouseOverEvent): void {
         evt.preventDefault();
         this.hideTooltip();
         // this.$tooltip.find(".marker-tooltip-label").html("");
     }
+    /**
+     * Internal function, handles mouse over events
+     */
     protected onMouseOver (evt: JQuery.MouseOverEvent): void {
         switch (this.mode) {
             case "move":
@@ -603,9 +719,15 @@ export class HotspotEditor extends Backbone.View {
         }, Utils.DBLCLICK_TIMEOUT);
         return this.dblClick > 1;
     }
+    /**
+     * Closes (i.e., deletes from the view) the context menu
+     */
     closeContextMenu (): void {
         Utils.deleteContextMenu();
     }
+    /**
+     * Open context menu
+     */
     openContextMenu (menuCoords: Coords, hotspotData: HotspotData, opt?: {
         edit?: boolean, cut?: boolean, copy?: boolean, paste?: boolean, delete?: boolean,
         atCursorPosition?: boolean
@@ -673,9 +795,7 @@ export class HotspotEditor extends Backbone.View {
     }
 
     /**
-     * Create a hotspot programmatically
-     * @param data 
-     * @param opt 
+     * Create a hotspot programmatically, based on the hotspot data passed to the function
      */
     createHotspot (data: HotspotData, opt?: { useFreshId?: boolean }): HotspotData {
         const id: string = opt?.useFreshId ? `${hotspotNamePrefix}${widgetUUID()}` : data?.id;
@@ -858,6 +978,9 @@ export class HotspotEditor extends Backbone.View {
         return hotspotData;
     }
 
+    /**
+     * Internal function, handles mouse up events
+     */
     protected onMouseUp (evt: JQuery.MouseUpEvent): void {
         switch (this.mode) {
             case "move": {
@@ -900,7 +1023,8 @@ export class HotspotEditor extends Backbone.View {
         }
     }
     /**
-     * THis handler is triggered when the user starts to create a new hotspot 
+     * Internal function, handles mouse down events
+     * This handler is triggered when the user starts to create a new hotspot 
      */
     protected onMouseDown (evt: JQuery.MouseDownEvent): void {
         this.closeContextMenu();
@@ -925,6 +1049,9 @@ export class HotspotEditor extends Backbone.View {
             }
         }
     }
+    /**
+     * Handles mouse move events
+     */
     onMouseMove (evt: JQuery.MouseMoveEvent): void {
         evt.preventDefault();
         switch (this.mode) {

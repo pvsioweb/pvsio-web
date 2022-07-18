@@ -1,24 +1,28 @@
 all:
-	npm install
+	#npm install
 	make build
-	make webpack
+	#make webpack
 	make devel
 
 audit:
 	-npm audit fix
+	cd src/client && npm audit fix
+	cd src/server && npm audit fix
 
-pvsioweb: build
-
-compile:
-	npm run build
+pvsioweb: compile
 
 build:
-	make compile
+	npm run build
+
+compile:
+	make build
 	make copy
 	make webpack
+	make devel
 
 webpack:
 	npm run webpack-builder
+	npm run webpack-emucharts
 	npm run webpack-pvsioweb
 
 widgetLibDials:
