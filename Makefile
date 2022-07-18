@@ -1,7 +1,7 @@
 all:
-	#npm install
+	npm install
 	make build
-	#make webpack
+	make webpack
 	make devel
 
 audit:
