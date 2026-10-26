@@ -1,0 +1,991 @@
+% Michael Harrison (Newcastle University) and Paolo Masci (US National Institute of Aerospace)
+% July 2020
+% Patients
+
+patient_th[maxrate: posnat, 
+           maxinfuse: posnat, 
+           maxtime: {maxtime: posnat | maxinfuse <= maxtime}]%, 
+     %      node_limit, max_index, d_limit, p_limit: posnat]
+	   : THEORY 
+BEGIN
+ASSUMING
+    maxinfuseLEQmaxtime: ASSUMPTION maxinfuse <= maxtime
+ENDASSUMING
+  IMPORTING infusion_pumps_th[maxrate, maxinfuse, maxtime]%, 
+                              %node_limit, max_index, d_limit]
+  IMPORTING vital_signs_th[maxrate, maxinfuse, maxtime]
+ 
+  patient: TYPE = upto(nlimit)
+  patients_type: TYPE = setof[patient]
+   
+  p_null: patient = plimit
+  p_bot: patient = 0
+  
+  null_pid: patient = plimit
+  patient_location: TYPE+
+  null_loc: patient_location
+  devices_type: TYPE = [device -> device_type]
+  
+  dpanel_type: TYPE = [device -> panel]
+  p_dstates: TYPE = [device -> d_state]
+ 
+p_disp_top_type: TYPE =
+ [# sel_device: devs_type,
+    devs: devices_type,
+    disp_enum_params: main_enum_par,
+    disp_num_params: main_num_par,
+    menu_visible: menu_set,
+    ent_device: devs_type,
+    ent_par: par,
+	  ent_rel: rel_op_type,
+	  ent_act: action_id,
+	  ent_enum: enum
+	  
+ #]	  
+
+p_disp_main_type: TYPE =
+ [# disp_enum_params: main_enum_par,
+	  disp_num_params: main_num_par,
+	  p_actions: main_act
+ #]
+
+rule_setup_type: TYPE =
+[#      current_production_index: cindex,
+        current_production: production_type,
+        select_par: par,
+	      select_act: action_id,
+	      select_rel: rel_op_type,
+	      select_num: nonneg_real,
+	      select_enum: enum
+ #]
+ rules_display_type: TYPE =
+     [# rule_setup: rule_setup_type,
+        select_pars: parset,
+	      select_acts: action_ids,
+	      current_rule_index: cindex,
+	      current_lim_rule_index: cindex,
+	      rule_set: patient_constraint_type          
+     #]
+
+  p_state: TYPE = 
+ [# id: patient,
+    nde: node,
+	  pmode: patient_mode_type,
+	  emode: patient_edit_type,
+	  name_buffer: nindex,
+	  num_buffer: nonneg_real,
+	  disp_focus: disp_focus_type,
+	  
+	  prev_menu_entry: menu,
+    prev_menu_visible: menu_set,
+    
+	 % enum_visible: enumset,
+	  p_disp_top: p_disp_top_type,
+	  p_disp_main: p_disp_main_type,
+	  p_disp_device: panel,
+	  % shows the detail needed to edit parameters and rules
+	  p_rules_display: rules_display_type,	  
+	  patient_panels: dpanel_type,
+    vital_signs: v_state,
+    ip_state: p_dstates   #] % need to sort out how generic devices can be
+
+%empty_device_state: device_state
+
+init_disp_top: p_disp_top_type =
+     (# sel_device := undef_device,
+			  devs :=  LAMBDA (d: device): no_device,
+			  disp_enum_params :=
+	          LAMBDA (d: device):empty_enum_parameter,
+	       disp_num_params :=
+      LAMBDA (d: device):empty_num_parameter,
+         menu_visible := emptyset,
+			   ent_device := undef_device,
+			   ent_par := er,
+		     ent_rel := no_rel,
+			   ent_act :=  nil_action,
+	       ent_enum := xnilval
+	    #)
+
+init_disp_main: p_disp_main_type =
+        (#  disp_enum_params :=
+			    LAMBDA (d: device):empty_enum_parameter,
+			  disp_num_params :=
+			    LAMBDA (d: device):empty_num_parameter,
+			  p_actions := LAMBDA (d: device): emptyset
+	      #)
+
+null_nc: num_constraint_type = (# d := d_bot, p := er, r := eq, v := 0 #)
+null_ec: enum_constraint_type = (# d := d_bot, p := er, r := eq, v := xnilval #)
+
+init_constraint: constraint_type = (# vt := empty, nc := null_nc, ec := null_ec  #)
+
+init_const: rule_type =
+             (# rule := LAMBDA (c: cindex): init_constraint,
+	        action :=  (# dev := d_bot, act := nil_action  #)  #)
+
+init_rule: patient_constraint_type =
+                     LAMBDA (c: cindex): init_const
+
+init_rule_setup: rule_setup_type =
+       (#  current_production_index := 0,
+           current_production := LAMBDA (c: cindex): init_constraint,
+           select_par := er,
+	   select_act := nil_action,
+	   select_rel := no_rel,
+	   select_num := null_value,
+	   select_enum := xnilval
+	#)
+
+init_rules_display: rules_display_type =
+         (# %constraint_completed := FALSE,
+	    rule_setup := init_rule_setup,
+	    select_pars := emptyset,
+	    select_acts := emptyset,
+	    current_rule_index := 0,
+	    current_lim_rule_index := 0,
+	    rule_set := init_rule			  
+	  #)
+
+init_p_state: p_state = 
+(#
+        id := null_pid,
+        nde := no_node,
+        pmode := error,
+			  emode := edit_none,
+  		  name_buffer := null_value,
+	      num_buffer := null_value,
+			  disp_focus := no_focus,
+			  prev_menu_entry := no_action,
+        prev_menu_visible := emptyset,
+			  p_disp_top := init_disp_top,
+			  p_disp_main := init_disp_main,
+			  p_disp_device := empty_panel,
+        p_rules_display := init_rules_display,
+			  patient_panels := LAMBDA (d: device): empty_panel,
+        vital_signs := init_vs,
+        ip_state := LAMBDA (d: device): init_d_state
+                        #) 
+edit_none_menu: menu_set =
+      LAMBDA (m: menu): %(m = connect) OR 
+                        (m = select) OR (m = edit) OR
+                        (m = cursor_down) OR (m = cursor_up) OR 
+                        (m = enter) OR (m = escape)
+enter_options_menu: menu_set =
+      LAMBDA (m: menu): (m = device) OR (m = escape)
+device_entry_options_menu: menu_set =
+      LAMBDA (m: menu): (m = pump) OR (m = vs_device)
+edit_constraint_menu: menu_set =
+      LAMBDA (m: menu): (m = select) OR 
+                        %(m = ok) OR (m = quit) OR 
+                        (m = escape)
+edit_rule_menu: menu_set = 
+      LAMBDA (m: menu): (m = select) OR 
+                         %(m = ok) OR (m = quit) OR 
+                         (m= cursor_up) OR
+                        (m = cursor_down) OR (m = delete)
+edit_menu: menu_set = 
+       LAMBDA (m: menu): %(m = ok) OR 
+                         (m = select) OR %(m = quit) OR
+                         (m = escape)
+edit_options_menu: menu_set =
+       LAMBDA (m: menu): (m = top) OR (m = main) OR (m = device) OR (m = region) OR
+                         (m = constraint) OR (m = rule) OR (m = escape)
+enter_value_options: menu_set = 
+       LAMBDA (m: menu): (m = enum_value) OR (m = num_value) OR
+                         (m = escape)
+
+change_ps_menu(ms: menu_set, ps: p_state): p_state =
+ps WITH
+      [ prev_menu_visible := (ps`p_disp_top)`menu_visible,
+        p_disp_top :=
+         ps`p_disp_top WITH
+             [menu_visible := ms]]
+
+p_escape(ps: p_state): p_state =
+change_ps_menu(ps`prev_menu_visible, ps) 
+
+p_ent_new_device(d: device, tp: device_type, ps: p_state): p_state =
+IF (ps`p_disp_top)`devs(d) = no_device 
+ THEN ps WITH [
+      p_disp_top := 
+      ps`p_disp_top WITH 
+      [ent_device := (# dv := d, dt := tp #)]]
+ELSE ps ENDIF
+
+p_enter_name(n: nindex, ps: p_state): p_state =
+%IF ps`name_entry_enabled THEN
+ps WITH [%name_entry_enabled := FALSE,
+         name_buffer := n]
+%ELSE ps ENDIF
+
+%p_enter_num(n: nonneg_real, ps: p_state): p_state =
+%IF ps`num_entry_enabled THEN
+%ps WITH [num_entry_enabled := FALSE,
+%         num_buffer := n]
+%ELSE ps ENDIF
+
+p_up_display(ps: p_state): p_state =
+ps WITH [
+      p_disp_top := 
+        ps`p_disp_top WITH
+          [menu_visible := ps`prev_menu_visible],
+      disp_focus := COND
+              ps`disp_focus = no_focus -> no_focus,
+              ps`disp_focus = top_focus -> no_focus,
+			        ps`disp_focus = patient_focus -> top_focus,
+			        ps`disp_focus = device_focus -> patient_focus
+		                ENDCOND ]
+
+p_down_display(ps:p_state): p_state =
+ps WITH [
+       p_disp_top:=
+        ps`p_disp_top WITH
+          [ menu_visible := ps`prev_menu_visible],
+       disp_focus := COND
+          ps`disp_focus = no_focus -> top_focus,
+          ps`disp_focus = top_focus -> patient_focus,
+			    ps`disp_focus = patient_focus -> device_focus,
+			    ps`disp_focus = device_focus -> no_focus
+		       ENDCOND ]
+
+
+add_nde_patient_device(nd: node, d: device, dt: device_type,
+                       ps: p_state): p_state =
+
+COND
+   dt = infusion_pump ->
+      LET ds = ps`ip_state(d) IN
+    ps WITH
+   [ p_disp_top :=
+       ps`p_disp_top WITH
+         [devs := LAMBDA (d1: device): 
+             IF d1 = d THEN dt 
+               ELSE (ps`p_disp_top)`devs(d1) ENDIF],
+     patient_panels := LAMBDA (d1: device):
+                         IF d1 = d THEN
+			      ds`pan ELSE ps`patient_panels(d1) ENDIF,
+     ip_state := IF dt = infusion_pump THEN
+                     LAMBDA (d1: device): 
+                     IF d = d1 THEN ds WITH [dev := d, nde := nd] 
+                     ELSE ps`ip_state(d1) ENDIF
+		     ELSE ps`ip_state ENDIF],
+  dt = vital_signs_device ->
+      LET vs = ps`vital_signs IN
+    ps WITH
+    [ p_disp_top
+       := ps`p_disp_top
+         WITH [devs := 
+            LAMBDA (d1: device): IF d1 = d 
+            THEN dt ELSE (ps`p_disp_top)`devs(d1) ENDIF],
+      patient_panels := LAMBDA (d1: device):
+                         IF d1 = d THEN
+			      vs`pan ELSE ps`patient_panels(d1) ENDIF,
+     vital_signs :=  ps`vital_signs WITH [dev := d, nde := nd] ],
+      ELSE -> ps
+ ENDCOND
+	  
+update_top_panel(d: device, pa: panel, ps: p_state): p_state =
+  LET ps = change_ps_menu(edit_none_menu, ps) IN ps WITH
+      [pmode := d_mode,
+       emode := edit_none,
+       p_disp_top :=
+         p_disp_top(ps) WITH
+          [ disp_enum_params :=
+              LAMBDA (d1: device):
+	         IF d1 = d THEN pa`enum_disp
+		 ELSE p_disp_top(ps)`disp_enum_params(d1) ENDIF,
+             disp_num_params :=
+              LAMBDA (d1: device):
+	         IF d1 = d THEN pa`num_disp
+     ELSE p_disp_top(ps)`disp_num_params(d1) ENDIF],
+       p_disp_device := 
+         ps`patient_panels(((ps`p_disp_top)`sel_device)`dv),
+       p_rules_display :=
+          ps`p_rules_display WITH
+	     [ select_pars := emptyset,
+               select_acts := emptyset]
+        
+     ]
+
+update_main_panel(d: device, pa: panel, ps: p_state): p_state =
+ LET ps = change_ps_menu(edit_none_menu, ps) IN ps WITH
+      [pmode := d_mode,
+       emode := edit_none,
+      p_disp_main :=
+      p_disp_main(ps) WITH
+      [ disp_enum_params :=
+              LAMBDA (d1: device):
+	         IF d1 = d THEN pa`enum_disp
+		 ELSE p_disp_main(ps)`disp_enum_params(d1) ENDIF,
+        disp_num_params :=
+              LAMBDA (d1: device):
+	         IF d1 = d THEN pa`num_disp
+		 ELSE p_disp_main(ps)`disp_num_params(d1) ENDIF,
+        p_actions := LAMBDA (d1: device):
+                 IF d1 = d THEN pa`cmds
+		 ELSE p_disp_main(ps)`p_actions(d1) ENDIF ],
+       p_disp_device := ps`patient_panels(((ps`p_disp_top)`sel_device)`dv),
+       p_rules_display :=
+            ps`p_rules_display
+	    WITH [select_pars := emptyset,
+                  select_acts := emptyset]
+        
+     ]
+
+
+
+update_device_panel(d: device, pa: panel, ps: p_state): p_state =
+LET pp = LAMBDA (d1: device):
+            IF d1 = d THEN pa ELSE ps`patient_panels(d1) ENDIF IN
+   LET ps = change_ps_menu(edit_none_menu, ps) 
+   IN ps WITH
+   [ pmode := d_mode,
+     emode := edit_none,
+     patient_panels := pp,
+     p_disp_device := 
+        pp(((ps`p_disp_top)`sel_device)`dv),
+     p_rules_display :=
+       ps`p_rules_display WITH
+          [ select_pars := emptyset,
+            select_acts := emptyset
+	  ]
+     ]
+
+p_quit_patient(ps: p_state): p_state =
+   IF (ps`emode = edit_top) OR (ps`emode = edit_device)
+      OR (ps`emode = edit_patient)
+   THEN change_ps_menu(edit_none_menu, ps) WITH
+   [ emode := edit_none,
+     p_disp_device := 
+     ps`patient_panels(((ps`p_disp_top)`sel_device)`dv),
+     p_rules_display :=
+       ps`p_rules_display WITH
+          [ select_pars := emptyset,
+            select_acts := emptyset
+	  ]
+     ]
+   ELSE ps ENDIF
+
+% the following needs to check the type of the device
+% note that at this point this function only works for infusion pumps
+
+dev_ex(d: device, a: action_id, ps: p_state): p_state =
+COND
+  (ps`p_disp_top)`devs(d) = infusion_pump ->
+   ps WITH
+     [ip_state := LAMBDA(d1: device):
+                   IF d = d1 THEN execute_ip(a, ps`ip_state(d)) ELSE ps`ip_state(d1) ENDIF
+     ],
+  (ps`p_disp_top)`devs(d) = vital_signs_device ->
+   ps WITH
+      [vital_signs := execute_vs(a, ps`vital_signs)],
+  ELSE -> ps
+ENDCOND
+
+ p_select_top(ps: p_state): p_state =
+   ps WITH
+    [ pmode := top,
+      p_disp_device := empty_panel]
+
+per_d_select(ps: p_state): boolean =
+         (ps`pmode = top) OR (ps`pmode = d_mode)
+
+
+% Changes
+p_select_d_mode(ps: p_state): p_state =
+   IF per_d_select(ps) THEN
+    ps WITH [pmode := d_mode,
+            p_disp_top :=
+              ps`p_disp_top WITH
+                [sel_device := 
+                  (ps`p_disp_top)`ent_device],
+      p_disp_device := 
+         ps`patient_panels(((ps`p_disp_top)`ent_device)`dv)
+	    ] ELSE ps ENDIF
+
+
+
+
+p_select_display_mode(ps: p_state): p_state =
+LET ps1 = p_select_d_mode(ps) IN
+ change_ps_menu(edit_none_menu, ps1)
+
+% need to check that device panel already updated
+per_p_edit(ps: p_state): boolean = (ps`pmode = d_mode) AND (ps`emode = edit_none)
+
+p_edit_top(ps: p_state): p_state =
+   IF per_p_edit(ps)
+   THEN 
+   LET ps = change_ps_menu(edit_none_menu, ps) IN ps WITH 
+        [emode := edit_top,
+        p_rules_display :=
+            ps`p_rules_display WITH
+                [ select_pars := emptyset,
+                  select_acts := emptyset
+	                ]] ELSE ps ENDIF
+
+
+p_edit_main(ps: p_state): p_state =
+   IF per_p_edit(ps)
+   THEN LET ps = change_ps_menu(edit_none_menu, ps) 
+      IN ps WITH [emode := edit_patient,
+                 p_rules_display :=
+                   ps`p_rules_display WITH
+                     [ select_pars := emptyset,
+                       select_acts := emptyset
+	             ]
+		  ] ELSE ps ENDIF
+
+
+p_edit_device(ps: p_state): p_state =
+   IF per_p_edit(ps)
+   THEN LET ps = change_ps_menu(edit_none_menu, ps) IN ps WITH 
+      [emode := edit_device,
+      p_rules_display :=
+          ps`p_rules_display WITH
+            [ select_pars := emptyset,
+              select_acts := emptyset
+	               ]
+		  ] ELSE ps ENDIF
+
+p_edit_region(ps: p_state): p_state =
+  IF per_p_edit(ps)
+  THEN
+   COND ps`disp_focus = top_focus -> p_edit_top(ps),
+        ps`disp_focus = patient_focus -> p_edit_main(ps),
+	ps`disp_focus = device_focus -> p_edit_device(ps),
+	ELSE -> ps
+   ENDCOND
+  ELSE ps ENDIF
+
+p_edit_constraint(ps: p_state): p_state =
+   IF (ps`pmode = d_mode) AND ((ps`emode = edit_none) OR (ps`emode = edit_rule))
+   THEN LET ps = change_ps_menu(edit_constraint_menu, ps)
+     IN ps WITH 
+   [
+    emode := edit_constraint
+		  ] ELSE ps ENDIF
+
+%p_edit_rule(ps: p_state): p_state =
+%   IF ps`emode = edit_constraint 
+%   THEN ps WITH 
+%   [
+%    emode := edit_rule,
+%		menu_visible :=
+%		  LAMBDA (m: menu): (m = select) OR (m = ok) OR (m = quit) OR
+                       % (m = enter) OR 
+%                        (m = escape) OR
+%				    (m = delete)] ELSE ps ENDIF
+
+p_select_disp_m(ps: p_state): p_state =
+   COND (ps`disp_focus = top_focus) OR
+         (ps`disp_focus = patient_focus) -> p_select_top(ps),
+        ps`disp_focus = device_focus -> p_select_d_mode(ps),
+	ELSE -> ps
+   ENDCOND
+
+per_p_select(ps: p_state): boolean =
+         (ps`emode = edit_top) OR (ps`emode = edit_device) OR
+	 (ps`emode = edit_patient)
+
+per_e_select(ps: p_state): boolean =
+         (ps`emode = edit_constraint) 
+% in the case of constraints assumes only one parameter for each relation
+% checks that the parameter is defined for the device - note not necessarily a subset of the
+% the next level down
+p_select_par(ps: p_state): p_state =
+IF ((ps`p_disp_top)`ent_par /= er) THEN
+   COND
+      per_p_select(ps) ->
+          LET ps = change_ps_menu(edit_menu,ps) IN 
+          ps WITH [p_rules_display :=
+	      ps`p_rules_display WITH
+           [select_pars := 
+           add((ps`p_disp_top)`ent_par , 
+              (ps`p_rules_display)`select_pars)]],
+      per_e_select(ps) ->
+          LET ps = change_ps_menu(edit_constraint_menu, ps) IN ps
+      WITH [p_rules_display :=  ps`p_rules_display
+	       WITH [rule_setup := (ps`p_rules_display)`rule_setup
+             WITH [select_par := 
+                (ps`p_disp_top)`ent_par]]],
+      ELSE -> ps
+    ENDCOND
+ ELSE ps ENDIF
+
+
+
+p_select_relation(ps: p_state): p_state =
+IF (ps`emode = edit_constraint) AND ((ps`p_disp_top)`ent_rel /= no_rel) THEN
+LET r = (ps`p_disp_top)`ent_rel IN
+ LET ps = change_ps_menu(edit_constraint_menu, ps) 
+  IN ps WITH
+   [ p_rules_display := ps`p_rules_display WITH
+   [ rule_setup := (ps`p_rules_display)`rule_setup WITH
+          [ select_rel := r]],
+     p_disp_top :=
+       (ps`p_disp_top) WITH
+         [ent_rel := no_rel]
+  ]
+
+ELSE ps ENDIF
+
+p_enter_num_value(ps: p_state): p_state =
+IF (ps`emode = edit_constraint) THEN
+  LET ps = change_ps_menu(edit_constraint_menu, ps) IN ps WITH
+ [p_rules_display := ps`p_rules_display WITH
+   [ rule_setup := (ps`p_rules_display)`rule_setup WITH
+          [ select_num := ps`num_buffer] ],
+  num_buffer := null_value
+		  ]
+
+ELSE ps ENDIF
+
+p_clear_num_value(ps: p_state): p_state =
+IF (ps`emode = edit_constraint) THEN
+ LET ps = change_ps_menu(edit_constraint_menu, ps) IN ps WITH
+    [ p_rules_display := ps`p_rules_display WITH
+   [ rule_setup := (ps`p_rules_display)`rule_setup WITH
+          [ select_num := null_value ] ]
+		  ]
+
+ELSE ps ENDIF
+
+p_enter_enum_value(ps: p_state): p_state =
+IF (ps`emode = edit_constraint)  THEN
+LET e = (ps`p_disp_top)`ent_enum IN
+ LET ps = change_ps_menu(edit_constraint_menu, ps) 
+IN ps WITH
+ [ p_rules_display := ps`p_rules_display WITH
+   [ rule_setup := (ps`p_rules_display)`rule_setup WITH
+          [ select_enum := e ] ],
+     p_disp_top :=
+       ps`p_disp_top
+         WITH [ent_enum := xnilval]]
+
+ELSE ps ENDIF
+
+p_clear_enum_value(ps: p_state): p_state =
+IF (ps`emode = edit_constraint) THEN
+ LET ps = change_ps_menu(edit_constraint_menu, ps) IN ps WITH
+  [p_rules_display := ps`p_rules_display
+  WITH
+   [ rule_setup := (ps`p_rules_display)`rule_setup WITH
+          [ select_enum := xnilval ] ] ]
+
+ELSE ps ENDIF
+
+p_enum_value(ps: p_state): p_state =
+COND
+  ps`prev_menu_entry = select -> p_enter_enum_value(ps),
+  ps`prev_menu_entry = clear -> p_clear_enum_value(ps),
+  ELSE -> ps
+ENDCOND
+
+p_num_value(ps: p_state): p_state =
+COND
+  ps`prev_menu_entry = select -> p_enter_num_value(ps),
+  ps`prev_menu_entry = clear -> p_clear_num_value(ps),
+  ELSE -> ps
+ENDCOND
+
+
+
+per_a_d_r_select(ps: p_state): boolean =
+         (ps`emode = edit_patient) OR (ps`emode = edit_device)
+
+per_a_rule_select(ps: p_state): boolean =
+         (ps`emode = edit_rule)
+p_select_a(ps: p_state): p_state = %Change
+  LET a = (ps`p_disp_top)`ent_act IN
+   IF TRUE THEN %IF (ps`p_disp_device)`cmds(a) THEN
+   COND
+     per_a_d_r_select(ps) ->
+        LET ps = change_ps_menu(edit_menu, ps) IN ps WITH
+	  [ p_rules_display :=
+	     ps`p_rules_display WITH
+	      [select_acts := add(a, (ps`p_rules_display)`select_acts)]],
+     per_a_rule_select(ps) ->
+        LET ps = change_ps_menu(edit_rule_menu, ps) 
+    IN ps WITH
+	 [p_rules_display := ps`p_rules_display
+	     WITH [rule_setup := (ps`p_rules_display)`rule_setup WITH
+	               [select_act := a]]],
+   ELSE -> ps
+   ENDCOND
+   ELSE ps ENDIF
+
+p_update_constraint(dev: device, rs:rule_setup_type): rule_setup_type =
+IF NOT ((rs`select_enum /= xnilval) AND (rs`select_num /= null_value)) THEN
+LET valuetyp = COND
+                 rs`select_enum /= xnilval -> enumerated,
+		 rs`select_num /= null_value -> numeral,
+		 ELSE -> empty
+		ENDCOND,
+    select_nc = IF valuetyp = numeral THEN
+                   (# d := dev, p := rs`select_par,
+		      r := rs`select_rel,
+		      v := rs`select_num #) ELSE null_nc ENDIF,
+    select_ec = IF valuetyp = enumerated THEN
+                   (# d := dev, p := rs`select_par, r := rs`select_rel,
+		      v := rs`select_enum #) ELSE null_ec ENDIF,
+    constraint = (# vt := valuetyp, nc := select_nc,
+                    ec := select_ec #)
+IN rs WITH
+  [ current_production_index := IF rs`current_production_index < climit
+                                THEN rs`current_production_index + 1 ELSE 0 ENDIF,
+    current_production := LAMBDA (c: cindex):
+                             IF c = rs`current_production_index
+			     THEN constraint
+			     ELSE rs`current_production(c) ENDIF,
+    select_par := er,
+    select_act := nil_action,
+    select_rel := no_rel,
+    select_num := null_value,
+    select_enum := xnilval
+
+]
+
+ELSE rs ENDIF
+    
+  % change
+p_ok_constraint(ps: p_state): p_state =
+IF (ps`emode = edit_constraint) THEN
+LET rs = (ps`p_rules_display)`rule_setup IN
+IF ((rs`select_par = er) OR (rs`select_act /= nil_action) OR
+    (rs`select_rel = no_rel) OR
+    ((rs`select_num = null_value) AND (rs`select_enum = xnilval)))
+    THEN ps
+ ELSE LET ps = change_ps_menu(edit_rule_menu, ps) IN ps
+  WITH
+    [emode := edit_rule,
+    p_rules_display := ps`p_rules_display WITH
+     [rule_setup := p_update_constraint(((ps`p_disp_top)`sel_device)`dv, rs)]] ENDIF
+ ELSE ps ENDIF
+
+p_quit_constraint(ps: p_state): p_state =
+IF (ps`emode = edit_constraint) THEN
+LET rs = (ps`p_rules_display)`rule_setup IN
+ LET ps = change_ps_menu(edit_rule_menu, ps) 
+    IN ps WITH
+    [ emode := edit_rule,
+     p_rules_display := ps`p_rules_display WITH
+     [rule_setup :=
+          rs WITH
+	     [select_par := er,
+          %   select_act := nil_action,
+              select_rel := no_rel,
+              select_num := null_value,
+	      select_enum := xnilval]
+      ]]
+      
+ ELSE ps ENDIF
+
+%change
+p_ok_rule(ps: p_state): p_state =
+IF (ps`emode = edit_rule) THEN
+LET rs = (ps`p_rules_display)`rule_setup IN
+IF ((rs`select_par = er) AND
+    (rs`select_num = null_value) AND (rs`select_enum = xnilval) AND
+    (rs`select_act /= nil_action))
+    THEN  LET ps = change_ps_menu(edit_none_menu, ps) IN ps WITH
+     [emode := edit_none,
+      p_rules_display := ps`p_rules_display
+        WITH
+	  [rule_setup := rs WITH [current_production_index := 0,
+                            current_production := LAMBDA (c: cindex): init_constraint,%here
+                             select_act := nil_action],
+      rule_set := LAMBDA (c: cindex):
+                    IF c = (ps`p_rules_display)`current_rule_index THEN
+		    (# rule := rs`current_production,
+                       action := 
+                       (# dev := ((ps`p_disp_top)`sel_device)`dv,
+		                    act := rs`select_act #) #)
+		     ELSE (ps`p_rules_display)`rule_set(c) ENDIF,
+       current_lim_rule_index :=
+           IF ((ps`p_rules_display)`current_rule_index =
+	       (ps`p_rules_display)`current_lim_rule_index)
+	   THEN IF ((ps`p_rules_display)`current_lim_rule_index < climit)
+                THEN (ps`p_rules_display)`current_lim_rule_index + 1 ELSE 0 ENDIF
+           ELSE (ps`p_rules_display)`current_lim_rule_index ENDIF]] 
+           ELSE ps ENDIF
+ ELSE ps ENDIF
+
+p_quit_rule(ps: p_state): p_state =
+IF (ps`emode = edit_rule) THEN
+ LET ps = change_ps_menu(edit_none_menu, ps) IN ps WITH
+     [emode := edit_none,
+      p_rules_display :=
+      ps`p_rules_display WITH
+         [
+	  rule_setup := init_rule_setup,
+	  select_pars := emptyset,
+	  select_acts := emptyset,
+	  current_lim_rule_index := 0
+      ] ]
+
+ELSE ps ENDIF
+
+act_patient_quit(ps: p_state): p_state =
+IF (((ps`p_disp_top)`sel_device)`dv /= nil_device) THEN
+COND
+  (ps`emode = edit_top) OR (ps`emode = edit_device) OR
+  (ps`emode = edit_patient) ->
+       p_quit_patient(ps),
+  (ps`emode = edit_constraint)  ->
+        p_quit_constraint(ps),
+  (ps`emode = edit_rule)  ->
+        p_quit_rule(ps),
+  ELSE -> ps
+ENDCOND  
+ELSE ps ENDIF
+
+
+
+p_delete_rule(ps: p_state): p_state =
+IF (ps`emode = edit_rule) THEN
+LET rs = (ps`p_rules_display)`rule_setup IN
+ ps WITH
+     [emode := edit_none,
+      p_rules_display :=
+        ps`p_rules_display WITH
+	  [rule_setup := init_rule_setup,
+           rule_set := LAMBDA (c: cindex):
+                    COND
+		      c <  (ps`p_rules_display)`current_rule_index ->
+		              (ps`p_rules_display)`rule_set(c),
+		      (c >= (ps`p_rules_display)`current_rule_index) AND
+		      (c < (ps`p_rules_display)`current_lim_rule_index - 1) ->
+		             (ps`p_rules_display)`rule_set(c + 1),
+		      c = (ps`p_rules_display)`current_lim_rule_index - 1 -> init_const,
+		     ELSE -> (ps`p_rules_display)`rule_set(c)
+		     ENDCOND,
+          current_lim_rule_index :=
+          IF (((ps`p_rules_display)`current_lim_rule_index > 0) AND
+	       ((ps`p_rules_display)`current_lim_rule_index - 1 <= climit))
+                THEN (ps`p_rules_display)`current_lim_rule_index - 1 ELSE climit ENDIF
+           ] ]
+ ELSE ps ENDIF
+
+p_scroll_up_rule(ps: p_state): p_state =
+IF (ps`emode = edit_rule) THEN
+ LET ps = change_ps_menu(
+   ps`prev_menu_visible, ps) IN ps 
+   WITH [p_rules_display :=
+           ps`p_rules_display WITH
+	   [current_rule_index :=
+             IF (ps`p_rules_display)`current_rule_index <
+	        (ps`p_rules_display)`current_lim_rule_index
+	     THEN (ps`p_rules_display)`current_rule_index + 1
+        ELSE (ps`p_rules_display)`current_rule_index ENDIF]]
+ELSE change_ps_menu(ps`prev_menu_visible, ps) 
+ENDIF
+
+p_scroll_down_rule(ps: p_state): p_state =
+IF (ps`emode = edit_rule) THEN
+ LET ps = change_ps_menu(ps`prev_menu_visible, ps) IN ps
+ WITH [p_rules_display := ps`p_rules_display WITH
+         [current_rule_index :=
+             IF (ps`p_rules_display)`current_rule_index > 0
+	     THEN (ps`p_rules_display)`current_rule_index - 1
+       ELSE (ps`p_rules_display)`current_rule_index ENDIF]]
+ELSE change_ps_menu(ps`prev_menu_visible, ps)
+ENDIF
+
+relate_n(v: nonneg_real, r: rel_op_type, n: nonneg_real): boolean =
+ 
+COND
+   r = lt -> v < n,
+   r = le -> v <= n,
+   r = gt -> v > n,
+   r = ge -> v >= n,
+   r = eq -> v = n,
+   r = neq -> v /= n,
+   ELSE -> FALSE
+ENDCOND
+
+relate_e(v: enum, r: rel_op_type, n: enum): boolean =
+ 
+COND
+   r = eq -> v = n,
+   r = neq -> v /= n,
+   ELSE -> FALSE
+ENDCOND
+  
+
+p_check_constraint(dp: dpanel_type, ct: constraint_type): boolean =
+COND
+  ct`vt = numeral ->
+       LET pan = dp((ct`nc)`d)
+       IN relate_n((pan`num_disp)((ct`nc)`p), (ct`nc)`r, (ct`nc)`v),
+  ct`vt = enumerated ->
+       LET pan = dp((ct`ec)`d)
+       IN relate_e((pan`enum_disp)((ct`ec)`p), (ct`ec)`r, (ct`ec)`v),
+  ct`vt = empty -> TRUE,
+  ELSE -> FALSE
+ENDCOND
+
+
+
+p_check_rule_broken(c: cindex, ps: p_state): boolean =
+ LET rles = (ps`p_rules_display)`rule_set, ctrnt = rles(c)`rule IN
+ IF (rles(c)`action)`dev /= d_bot
+ THEN
+    p_check_constraint(ps`patient_panels, ctrnt(0)) AND
+    p_check_constraint(ps`patient_panels, ctrnt(1)) AND
+    p_check_constraint(ps`patient_panels, ctrnt(2)) AND
+    p_check_constraint(ps`patient_panels, ctrnt(3)) AND
+    p_check_constraint(ps`patient_panels, ctrnt(4)) AND
+    p_check_constraint(ps`patient_panels, ctrnt(5))
+ ELSE FALSE
+ ENDIF
+
+p_edit(ps: p_state): p_state =
+COND per_p_edit(ps) ->
+      LET ps = ps WITH 
+        [prev_menu_visible := (ps`p_disp_top)`menu_visible]
+        IN change_ps_menu(edit_options_menu, ps),
+      (ps`pmode = d_mode) AND (ps`emode = edit_rule) ->
+       LET ps = ps
+        WITH [prev_menu_visible := (ps`p_disp_top)`menu_visible]
+        IN change_ps_menu(
+         LAMBDA (m: menu):
+               (m = constraint) OR (m = escape),
+               ps),
+      ELSE -> p_escape(ps) ENDCOND   % have I dealt with all possible edits?
+
+p_select(ps: p_state): p_state =
+COND
+ ps`emode = edit_none ->
+     change_ps_menu(LAMBDA (m: menu):
+                        (m = device) OR (m = escape) OR (m = display) OR (m = region),
+                        ps),
+ ps`emode = edit_top ->
+     change_ps_menu(
+       LAMBDA (m: menu):
+                        (m = parameter) OR (m = escape),
+                        ps),
+ (ps`emode = edit_patient) OR (ps`emode = edit_device) ->
+     change_ps_menu(
+       LAMBDA (m: menu):
+                        (m = parameter) OR (m = action) OR (m = escape),
+                        ps),
+  (ps`emode = edit_constraint) -> 			
+     change_ps_menu(
+       LAMBDA (m: menu):
+                        (m = parameter) OR
+			(m = relation) OR (m = num_value)
+      OR (m = enum_value) OR (m = escape),
+      ps),
+ (ps`emode = edit_rule) -> 			
+     change_ps_menu(
+       LAMBDA (m: menu):
+                        (m = action) OR (m = escape)
+                        OR (m = device) OR (m = display) OR (m = escape) OR (m = region),
+                        ps),
+ELSE -> ps
+ENDCOND
+% this isn't right needs to be preceded by p_enter_name
+p_device_entry(ps: p_state): p_state =
+LET ps1 = ps
+WITH [p_disp_top :=
+    ps`p_disp_top
+      WITH [ent_device := (# dv := ps`name_buffer,
+                           dt := no_device #)]] IN
+change_ps_menu(LAMBDA (m: menu):
+                     (m = pump) OR (m = vs_device),
+                     ps1) 
+
+p_complete_device(d: device_type,
+                    ps: p_state): p_state =
+LET ps1 =   change_ps_menu(edit_none_menu, ps) 
+  IN ps1 WITH 
+                [p_disp_top := ps1`p_disp_top
+                WITH [ent_device := (# dv := ((ps1`p_disp_top)`ent_device)`dv, dt := d #) ]]
+p_complete_device_p(ps: p_state): p_state =
+  p_complete_device(infusion_pump, ps)
+p_complete_device_vs(ps: p_state): p_state =
+  p_complete_device(vital_signs_device, ps)
+
+p_enter(ps: p_state): p_state =
+
+IF ps`emode = edit_none THEN
+  change_ps_menu(
+    LAMBDA (m: menu): (m = device) OR (m = escape),
+    ps) ELSE ps ENDIF
+%  ps`emode = edit_top ->
+%     ps WITH [menu_visible := LAMBDA (m: menu):
+%                        (m = parameter) OR (m = escape)],
+% (ps`emode = edit_patient) OR (ps`emode = edit_device) ->
+%     ps WITH [menu_visible :=  LAMBDA (m: menu):
+%                        (m = parameter) OR (m = action) OR (m = escape)],
+% (ps`emode = edit_rule) -> 			
+%     ps WITH [menu_visible := LAMBDA (m: menu):
+%                        (m = parameter) OR (m = action) OR
+%			(m = relation) OR (m = num_value)
+%			OR (m = enum_value) OR (m = escape)],
+%ELSE -> ps
+%ENDCOND
+
+p_clear(ps: p_state): p_state =
+IF (ps`emode = edit_rule) THEN
+    change_ps_menu(enter_value_options, ps) 
+ELSE ps ENDIF
+
+%% Needs change
+%p_cursor_move(ps: p_state): p_state =
+%LET ps = change_ps_menu(
+ % LAMBDA (m: menu): (m = constraint) OR (m = region) OR (m = escape),
+ %     ps) IN ps WITH [
+ %      prev_menu_visible := 
+ %        (ps`p_disp_top)`menu_visible]
+
+p_cursor_move(ps: p_state): p_state =
+change_ps_menu(
+  LAMBDA (m: menu): (m = constraint) OR (m = region) OR (m = escape),
+      ps)
+
+p_constraint(ps: p_state): p_state =
+COND
+ ps`prev_menu_entry = edit ->
+        p_edit_constraint(ps),
+ ps`prev_menu_entry = cursor_up -> 
+        p_scroll_up_rule(ps),
+ ps`prev_menu_entry = cursor_down ->
+        p_scroll_down_rule(ps),
+ ELSE -> p_escape(ps)    
+ENDCOND
+
+% assumes that p_enter_name has been invoked  
+p_select_region(ps: p_state): p_state =
+LET ps1 = p_select_disp_m(ps) 
+IN change_ps_menu(edit_none_menu, ps1) 
+
+p_region(ps: p_state): p_state =
+  COND
+    ps`prev_menu_entry = edit ->
+        p_edit_region(ps),
+    ps`prev_menu_entry = select ->
+        p_select_region(ps),
+    ps`prev_menu_entry = cursor_up ->
+        p_up_display(ps),
+    ps`prev_menu_entry = cursor_down ->
+        p_down_display(ps),
+    ELSE -> p_escape(ps)
+  ENDCOND
+
+p_device(ps: p_state): p_state =
+IF ((ps`emode = edit_none) OR 
+    (ps`emode = edit_rule)) THEN
+    COND   
+      (ps`prev_menu_entry = select) -> 
+         p_select_display_mode(ps),
+      ps`prev_menu_entry = enter ->
+			   p_device_entry(ps),
+			ps`prev_menu_entry = edit ->
+			   p_edit_device(ps),
+		    ELSE -> p_escape(ps)
+       ENDCOND
+ELSE p_escape(ps) ENDIF
+
+END patient_th

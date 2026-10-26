@@ -1,0 +1,8 @@
+(coord_t_and_c_th
+ (null_value_TCC1 0
+  (null_value_TCC1-1 nil 3813589199 ("" (subtype-tcc) nil nil)
+   ((mindex const-decl "nat" coord_t_and_c_th nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil))
+   nil (null_value subtype "coord_t_and_c_th.mindex" "posnat"))))
+

@@ -1,0 +1,247 @@
+% Michael Harrison (Newcastle University) and Paolo Masci (US National Institute of Aerospace)
+% July 2020
+% Messages
+node_th[maxrate: posnat, maxinfuse: posnat, maxtime: posnat]%, node_limit: posnat, max_index: posnat]%, aq_limit: posnat, pq_limit: posnat]
+: THEORY
+ BEGIN
+IMPORTING coord_t_and_c_th
+%max_index: posnat
+node: TYPE = upto(nlimit)
+index: TYPE = upto(mindex)
+% aindex: TYPE = upto(aq_limit)
+% pindex: TYPE = upto(pq_limit)
+%buff_mod(n, lim: nat): nat = IF n >= lim THEN n - lim ELSE n ENDIF
+ nodes: TYPE = setof[node]
+ msg_hdr_type: TYPE = {nomsg, tmmsg, pmmsg, mmmsg, updmsg, actmsg, cnstmsg}
+ b_status: TYPE = {full, empty, functioning}
+nw_error_type: TYPE = {clear, not_connected, no_msg, empty_q,
+                       full_q, spurious_action}
+ pan_message_type: TYPE = [# mhdr: msg_hdr_type, pat_nd: node, msg_nd: node, pan: panel #]
+ act_message_type: TYPE = [# mhdr: msg_hdr_type, pat_nd: node, msg_nd: node, act: action_id #]
+
+act_buff_type: TYPE = [index -> act_message_type]
+pan_buff_type: TYPE = [index -> pan_message_type]
+% edge: TYPE = [node, node]
+ no_node: node = nlimit
+ root_node: node = 0
+ coord_node: node = 0
+ % current_node: node = no_node 
+ increment_node(n: node): node = IF n = nlimit THEN no_node ELSE n + 1 ENDIF
+  empty_pan_msg: pan_message_type = (# mhdr := nomsg, pat_nd := no_node, msg_nd := no_node, pan := empty_panel #)
+empty_act_msg:act_message_type = (# mhdr := nomsg, pat_nd := no_node, msg_nd := no_node, act := nil_action #)
+ 
+ connected: TYPE = [node, node -> boolean]
+ %pan_msg_waiting_type: TYPE = [node -> sequence[pan_message_type]]
+ %act_msg_waiting_type: TYPE = [node -> sequence[act_message_type]]
+ pan_q_type: TYPE = [# current_pos: index, last_pos: index, 
+                       buff: pan_buff_type, buf_status: b_status #]
+ act_q_type: TYPE =  [# current_pos: index, last_pos: index, 
+                        buff: act_buff_type, buf_status: b_status #]
+ empty_pan_q: pan_q_type = (# current_pos := 0, last_pos := 0, 
+                              buff := LAMBDA (i: index): empty_pan_msg,
+                              buf_status := empty #)
+ empty_act_q: act_q_type = (# current_pos := 0, last_pos := 0, 
+                              buff := LAMBDA (i: index): empty_act_msg,
+                              buf_status := empty #)
+ pan_msg_waiting_type: TYPE = [node -> pan_q_type]
+ act_msg_waiting_type: TYPE = [node -> act_q_type]
+ network_error_type: TYPE = [# nsource: node, ndest: node, chan_error: nw_error_type #]
+ n_state: TYPE = [# current_node: node,
+                    n_links: connected,
+                    current_pan_msg: pan_message_type,
+                    current_act_msg: act_message_type,
+             %       coord_q: pan_q_type,
+                    pan_msg_waiting: pan_msg_waiting_type,
+                    act_msg_waiting: act_msg_waiting_type,
+                    nw_error: network_error_type #] 
+ init_n_state :n_state =
+         (# current_node := root_node + 1,
+                  n_links := LAMBDA (n1, n2: node): false, 
+                  current_pan_msg := empty_pan_msg,
+                  current_act_msg := empty_act_msg,
+         %         coord_q :=  empty_pan_q, 
+                  pan_msg_waiting := LAMBDA (n: node): empty_pan_q,
+                  act_msg_waiting := LAMBDA (n: node): empty_act_q,
+                  nw_error :=  (# nsource := no_node, ndest := no_node, chan_error := clear  #) 
+                 #)
+
+
+
+  % following updates the graph connecting two nodes - needs checking
+ update_n_graph(n1, n2: node, ns: n_state): n_state =
+    LET np = increment_node(current_node(ns)) IN
+        ns WITH [ current_node := np,
+                  n_links := LAMBDA (nx1, nx2: node):
+                        ((n1 = nx1) AND (n2 = nx2)) OR ((n1 = nx2) AND (n2 = nx1)) OR 
+                        ns`n_links(nx1, nx2) OR ns`n_links(nx2, nx1),
+		   nw_error := (# nsource := n1, ndest := n2,
+                           chan_error := clear  #)
+                            ]
+
+add_pan_buff(msg: pan_message_type, pmq: pan_q_type): pan_q_type =
+IF pmq`buf_status = full THEN pmq
+ELSE
+LET lp = IF pmq`last_pos < mindex THEN pmq`last_pos+1 ELSE 0 ENDIF IN
+  pmq WITH 
+   [ last_pos := lp,
+     buff := LAMBDA (i: index): 
+                IF i = pmq`last_pos
+                  THEN msg ELSE pmq`buff(i)
+                  ENDIF,
+     buf_status := IF lp = pmq`current_pos THEN full
+                      ELSE functioning ENDIF]
+ENDIF
+
+
+
+
+add_act_buff(msg: act_message_type, amq: act_q_type): act_q_type =
+IF amq`buf_status = full THEN amq
+ELSE
+LET lp = IF amq`last_pos < mindex THEN amq`last_pos+1 ELSE 0 ENDIF IN
+  amq WITH 
+   [ last_pos := IF amq`last_pos < mindex THEN amq`last_pos+1 ELSE 0 ENDIF,
+     buff := LAMBDA (i: index): 
+                IF i = amq`last_pos
+                  THEN msg ELSE amq`buff(i)
+                  ENDIF,
+     buf_status := IF lp = amq`current_pos THEN full
+                      ELSE functioning ENDIF]
+ENDIF
+
+
+   
+pan_send(n1, n2: node, msg: pan_message_type, ns: n_state): n_state =
+% the problem here is whether synchronous or asynchronous
+IF ns`n_links(n1, n2) THEN
+LET pmq = add_pan_buff(msg, ns`pan_msg_waiting(n2)) IN
+ ns WITH [pan_msg_waiting := LAMBDA (n: node):
+                          IF n = n2 THEN pmq
+                          ELSE ns`pan_msg_waiting(n) ENDIF,
+          nw_error := (# nsource := n1, ndest := n2,
+			       chan_error :=
+			         IF pmq`buf_status = full THEN full_q ELSE clear ENDIF #)
+                          ]
+ELSE ns WITH [nw_error := 
+               (# nsource := n1, ndest := n2, chan_error := not_connected  #)] ENDIF
+
+act_send(n1, n2: node, msg: act_message_type, ns: n_state): n_state =
+% the problem here is whether synchronous or asynchronous
+IF ns`n_links(n1, n2) THEN
+LET amq =  add_act_buff(msg, ns`act_msg_waiting(n2)) IN
+      ns WITH [act_msg_waiting := LAMBDA (n: node):
+                          IF n = n2 THEN amq
+                          ELSE ns`act_msg_waiting(n) ENDIF,
+               nw_error := (# nsource := n1, ndest := n2,
+			       chan_error :=
+			         IF amq`buf_status = full THEN full_q ELSE clear ENDIF #)
+                          ]
+ELSE ns WITH [nw_error :=
+               (# nsource := n1, ndest := n2, chan_error := not_connected  #)]
+ ENDIF
+
+send_coord(n: node, msg: pan_message_type, ns: n_state): n_state = 
+IF ns`n_links(n, coord_node) THEN
+LET pmq = add_pan_buff(msg, ns`pan_msg_waiting(coord_node)) IN
+ ns WITH [pan_msg_waiting := LAMBDA (n: node):
+                              IF n = coord_node THEN pmq
+                              ELSE ns`pan_msg_waiting(n) ENDIF,
+          nw_error := (# nsource := n, ndest := coord_node,
+			       chan_error :=
+			         IF pmq`buf_status = full THEN full_q ELSE clear ENDIF #)]                        
+ELSE ns WITH [nw_error := (# nsource := n, ndest := coord_node, chan_error := not_connected  #)]
+ENDIF
+
+sub_pan_buff(pmq: pan_q_type): pan_q_type =
+IF pmq`buf_status = empty THEN pmq
+ELSE LET ncp = IF pmq`current_pos < mindex THEN pmq`current_pos + 1
+               ELSE 0 ENDIF IN
+               pmq WITH
+      [current_pos := ncp,
+       buff := LAMBDA (i: index):
+                IF i = pmq`current_pos
+                THEN empty_pan_msg
+                ELSE pmq`buff(i) ENDIF,
+       buf_status := IF ncp = pmq`last_pos THEN empty
+                     ELSE functioning ENDIF
+      ]
+ENDIF
+ 
+sub_act_buff(amq: act_q_type): act_q_type =
+IF amq`buf_status = empty THEN amq
+ELSE LET ncp = IF amq`current_pos < mindex THEN amq`current_pos + 1
+               ELSE 0 ENDIF IN
+               amq WITH
+      [current_pos := ncp,
+       buff := LAMBDA (i: index):
+                IF i = amq`current_pos
+                THEN empty_act_msg
+                ELSE amq`buff(i) ENDIF,
+       buf_status := IF ncp = amq`last_pos THEN empty
+                     ELSE functioning ENDIF
+      ]
+ENDIF
+                       
+
+next_pan_pm(n: node, ns: n_state): n_state =
+   IF ns`pan_msg_waiting(n)`buf_status = empty THEN
+      ns WITH [current_pan_msg := empty_pan_msg,
+               nw_error := (# nsource := no_node, ndest := n,
+                                 chan_error := no_msg  #)
+               ]
+  ELSE LET curr_buff = ns`pan_msg_waiting(n), 
+           msg =  curr_buff`buff(curr_buff`current_pos) IN
+   ns WITH
+      [ current_pan_msg := msg,
+        pan_msg_waiting := LAMBDA (n1: node):
+                        IF n = n1 THEN sub_pan_buff(curr_buff) 
+                        ELSE ns`pan_msg_waiting(n1) ENDIF,
+        nw_error := (# nsource := msg`msg_nd, ndest := n,
+                                 chan_error := clear  #)]
+  ENDIF
+
+next_act_pm(n: node, ns: n_state): n_state =
+   IF ns`act_msg_waiting(n)`buf_status = empty THEN
+      ns WITH [current_act_msg := empty_act_msg,
+               nw_error := (# nsource := no_node, ndest := n,
+                                 chan_error := no_msg  #)
+               ]
+  ELSE LET curr_buff = ns`act_msg_waiting(n), 
+           msg =  curr_buff`buff(curr_buff`current_pos) IN
+   ns WITH
+      [ current_act_msg := msg,
+        act_msg_waiting := LAMBDA (n1: node):
+                        IF n = n1 THEN sub_act_buff(curr_buff) 
+                        ELSE ns`act_msg_waiting(n1) ENDIF,
+        nw_error := (# nsource := msg`msg_nd, ndest := n,
+                                 chan_error := clear  #) ]
+  ENDIF
+
+
+
+
+
+next_cm(ns: n_state): n_state =
+   IF ns`pan_msg_waiting(coord_node)`buf_status = empty THEN
+      ns WITH [current_pan_msg := empty_pan_msg,
+               nw_error := (# nsource := no_node, ndest := coord_node,
+                                 chan_error := no_msg  #)
+               ]
+  ELSE LET curr_buff = ns`pan_msg_waiting(coord_node), 
+           msg =  curr_buff`buff(curr_buff`current_pos) IN
+   ns WITH
+      [ current_pan_msg := msg,
+        pan_msg_waiting := LAMBDA (n: node):
+                        IF n = coord_node THEN sub_pan_buff(curr_buff) 
+                        ELSE ns`pan_msg_waiting(n) ENDIF,
+        nw_error := (# nsource := msg`msg_nd, ndest := coord_node,
+                                 chan_error := clear  #) ]
+  ENDIF
+
+
+
+
+
+  
+
+ END node_th

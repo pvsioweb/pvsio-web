@@ -1,0 +1,535 @@
+{
+ "system_th.IMP_patient_th_TCC1": [
+  {
+   "info": {
+    "theory": "system_th",
+    "formula": "IMP_patient_th_TCC1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "b4b700bb1c3706d93f0a9e2dbbe282330294978630d4406bad8c65817b032c79"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "IMP_patient_th_TCC1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(assuming-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "system_th.act_error_TCC1": [
+  {
+   "info": {
+    "theory": "system_th",
+    "formula": "act_error_TCC1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "0fca97dba7b6a93d1d97f1bc06507c8d67ad5bdb5dbfaab5c6f8d13c4de4cd88"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "act_error_TCC1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(cond-disjoint-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "system_th.act_error_TCC2": [
+  {
+   "info": {
+    "theory": "system_th",
+    "formula": "act_error_TCC2",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "0fca97dba7b6a93d1d97f1bc06507c8d67ad5bdb5dbfaab5c6f8d13c4de4cd88"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "act_error_TCC2",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(cond-coverage-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "system_th.act_patient_ok_TCC1": [
+  {
+   "info": {
+    "theory": "system_th",
+    "formula": "act_patient_ok_TCC1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "0fca97dba7b6a93d1d97f1bc06507c8d67ad5bdb5dbfaab5c6f8d13c4de4cd88"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "act_patient_ok_TCC1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(cond-disjoint-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "system_th.update_coord_panel_TCC1": [
+  {
+   "info": {
+    "theory": "system_th",
+    "formula": "update_coord_panel_TCC1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "0fca97dba7b6a93d1d97f1bc06507c8d67ad5bdb5dbfaab5c6f8d13c4de4cd88"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "update_coord_panel_TCC1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(cond-disjoint-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "system_th.constraint_broken_to_coordinator_TCC1": [
+  {
+   "info": {
+    "theory": "system_th",
+    "formula": "constraint_broken_to_coordinator_TCC1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "0fca97dba7b6a93d1d97f1bc06507c8d67ad5bdb5dbfaab5c6f8d13c4de4cd88"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "constraint_broken_to_coordinator_TCC1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(cond-disjoint-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "system_th.check_rule_set_TCC1": [
+  {
+   "info": {
+    "theory": "system_th",
+    "formula": "check_rule_set_TCC1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "0fca97dba7b6a93d1d97f1bc06507c8d67ad5bdb5dbfaab5c6f8d13c4de4cd88"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "check_rule_set_TCC1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(subtype-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "system_th.check_rule_set_TCC2": [
+  {
+   "info": {
+    "theory": "system_th",
+    "formula": "check_rule_set_TCC2",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "0fca97dba7b6a93d1d97f1bc06507c8d67ad5bdb5dbfaab5c6f8d13c4de4cd88"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "check_rule_set_TCC2",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(subtype-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "system_th.check_rule_set_TCC3": [
+  {
+   "info": {
+    "theory": "system_th",
+    "formula": "check_rule_set_TCC3",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "0fca97dba7b6a93d1d97f1bc06507c8d67ad5bdb5dbfaab5c6f8d13c4de4cd88"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "check_rule_set_TCC3",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(subtype-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "system_th.check_rule_set_TCC4": [
+  {
+   "info": {
+    "theory": "system_th",
+    "formula": "check_rule_set_TCC4",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "0fca97dba7b6a93d1d97f1bc06507c8d67ad5bdb5dbfaab5c6f8d13c4de4cd88"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "check_rule_set_TCC4",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(subtype-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "system_th.check_rule_set_TCC5": [
+  {
+   "info": {
+    "theory": "system_th",
+    "formula": "check_rule_set_TCC5",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "0fca97dba7b6a93d1d97f1bc06507c8d67ad5bdb5dbfaab5c6f8d13c4de4cd88"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "check_rule_set_TCC5",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(subtype-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "system_th.check_rule_set_TCC6": [
+  {
+   "info": {
+    "theory": "system_th",
+    "formula": "check_rule_set_TCC6",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "0fca97dba7b6a93d1d97f1bc06507c8d67ad5bdb5dbfaab5c6f8d13c4de4cd88"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "check_rule_set_TCC6",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(subtype-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "system_th.tick_device_TCC1": [
+  {
+   "info": {
+    "theory": "system_th",
+    "formula": "tick_device_TCC1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "07609be9acb661eff72adff1ae6bb4855adfa9876f7334e7ed299db7b76dcecc"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "tick_device_TCC1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(cond-disjoint-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "system_th.select_action_TCC1": [
+  {
+   "info": {
+    "theory": "system_th",
+    "formula": "select_action_TCC1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "0fca97dba7b6a93d1d97f1bc06507c8d67ad5bdb5dbfaab5c6f8d13c4de4cd88"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "select_action_TCC1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(cond-disjoint-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "system_th.coordinator_act_TCC1": [
+  {
+   "info": {
+    "theory": "system_th",
+    "formula": "coordinator_act_TCC1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "53e6fbb3db340e292a08dfdfff9ea5c696d66fb226e0a4f8b3ba70502a2cd3e3"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "coordinator_act_TCC1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(cond-disjoint-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "system_th.patient_act_TCC1": [
+  {
+   "info": {
+    "theory": "system_th",
+    "formula": "patient_act_TCC1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "53e6fbb3db340e292a08dfdfff9ea5c696d66fb226e0a4f8b3ba70502a2cd3e3"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "patient_act_TCC1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(cond-disjoint-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "system_th.patient_act_TCC2": [
+  {
+   "info": {
+    "theory": "system_th",
+    "formula": "patient_act_TCC2",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "53e6fbb3db340e292a08dfdfff9ea5c696d66fb226e0a4f8b3ba70502a2cd3e3"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "patient_act_TCC2",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(cond-disjoint-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "system_th.patient_act_TCC3": [
+  {
+   "info": {
+    "theory": "system_th",
+    "formula": "patient_act_TCC3",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "53e6fbb3db340e292a08dfdfff9ea5c696d66fb226e0a4f8b3ba70502a2cd3e3"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "patient_act_TCC3",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(cond-disjoint-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "system_th.patient_act_TCC4": [
+  {
+   "info": {
+    "theory": "system_th",
+    "formula": "patient_act_TCC4",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "53e6fbb3db340e292a08dfdfff9ea5c696d66fb226e0a4f8b3ba70502a2cd3e3"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "patient_act_TCC4",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(cond-disjoint-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "system_th.tick_pan_device_TCC1": [
+  {
+   "info": {
+    "theory": "system_th",
+    "formula": "tick_pan_device_TCC1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "0fca97dba7b6a93d1d97f1bc06507c8d67ad5bdb5dbfaab5c6f8d13c4de4cd88"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "tick_pan_device_TCC1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(cond-disjoint-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "system_th.init_coord_menu_TCC1": [
+  {
+   "info": {
+    "theory": "system_th",
+    "formula": "init_coord_menu_TCC1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "0fca97dba7b6a93d1d97f1bc06507c8d67ad5bdb5dbfaab5c6f8d13c4de4cd88"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "init_coord_menu_TCC1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(cond-disjoint-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "system_th.init_patient_menu_TCC1": [
+  {
+   "info": {
+    "theory": "system_th",
+    "formula": "init_patient_menu_TCC1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "0fca97dba7b6a93d1d97f1bc06507c8d67ad5bdb5dbfaab5c6f8d13c4de4cd88"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "init_patient_menu_TCC1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(cond-disjoint-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ]
+}

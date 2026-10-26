@@ -764,7 +764,7 @@ class PvsiowebServer {
         // console.log("[pvsioweb-server] Send Command Handler", { token });
         this.initProcessMap(socketid);
         token.socketId = socketid;
-        const res: PvsioResponse = await this.pvsioProcessMap[socketid]?.sendCommand(token.command, { useLastState: true });
+        const res: PvsioResponse = await this.pvsioProcessMap[socketid]?.sendCommand(token.command);
         if (res) {
             let extras: {} = {};
             console.log("\n-- Server response ----");
@@ -822,8 +822,8 @@ class PvsiowebServer {
                 this.pvsioProcessMap[socketid].close();
                 delete this.pvsioProcessMap[socketid];
             }
-            // recreate the pvsio process
-            this.pvsioProcessMap[socketid] = new PvsProxy({ pvsPath: this.pvsPath });
+            // recreate the pvsio process; the prototype can disable useLastState
+            this.pvsioProcessMap[socketid] = new PvsProxy({ pvsPath: this.pvsPath, useLastState: token?.useLastState ?? true });
             // set the workspace dir and start the pvs process with a callback for processing process ready and exit
             // messages from the process
             const res: boolean = await this.pvsioProcessMap[socketid].start({ contextFolder: root, fileName: token.data.fileName, fileExtension: ".pvs" });

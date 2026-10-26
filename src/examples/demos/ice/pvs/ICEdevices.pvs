@@ -1,0 +1,42 @@
+% Michael Harrison (Newcastle University) and Paolo Masci (US National Institute of Aerospace)
+% July 2020
+% devices
+
+devices_th[maxrate: posnat, 
+          maxinfuse: posnat, 
+          maxtime: {maxtime: posnat | maxinfuse <= maxtime}]
+	  : THEORY
+ BEGIN
+  IMPORTING coord_t_and_c_th
+  device: TYPE = upto(nlimit)
+  device_type: TYPE = {infusion_pump, vital_signs_device, no_device}
+  main_enum_par: TYPE = [device -> enum_parameter]
+  main_num_par: TYPE = [device -> num_parameter]
+  main_act: TYPE = [device -> action_ids]
+  % devices_type: TYPE = [device -> device_type]
+  devs_type: TYPE = [# dv: device, dt: device_type #]
+
+
+  nil_device: device = dlimit
+  undef_device: devs_type = (# dv := nil_device, dt := no_device #)
+  d_bot: device = 0
+  dev_act_type: TYPE = [# dev: device, act: action_id #]
+  num_constraint_type: TYPE = [# d: device, p: par, r: rel_op_type, 
+                   v: nonneg_real #]
+  enum_constraint_type: TYPE = [# d: device, p: par, r: rel_op_type, 
+                   v: enum #]
+		   
+  constraint_type: TYPE = [# vt: value_type, nc: num_constraint_type,
+                            ec: enum_constraint_type #]
+  production_type: TYPE = [cindex -> constraint_type]
+
+  rule_type: TYPE = [# rule: production_type, action: dev_act_type #]
+
+  patient_constraint_type: TYPE = [cindex -> rule_type]
+  %patient_health_type: TYPE = [device -> alert_status]
+  %all_disconnected: patient_health_type = LAMBDA (d: device): disconnected
+ END devices_th
+
+
+
+

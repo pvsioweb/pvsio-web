@@ -1,0 +1,257 @@
+main :THEORY
+ BEGIN IMPORTING pilldispenser_th, conversions
+
+  init(x: real): execState =
+    LET precompile = act_key1(init_pillbox(0)),
+        precompile = act_key2(init_pillbox(0)),
+        precompile = act_key3(init_pillbox(0))
+     IN init_pillbox(0)
+
+  autocomplete_password(st: state): state =
+    IF mode(st) = pwd OR mode(st) = db_pwd THEN
+      st
+        WITH [field
+                := LAMBDA (x: fields_type):
+                     COND x = password ->
+                            (# visible := TRUE,
+                               selected := FALSE,
+                               entered := TRUE #),
+                          ELSE -> st`field(x)
+                     ENDCOND]
+    ELSE st ENDIF
+
+  autocomplete_new_patient_details(st: state): state =
+    IF mode(st) = new_patient_details THEN
+      st
+        WITH [field
+                := LAMBDA (x: fields_type):
+                     COND x = name ->
+                            field(st)(name) WITH [entered := TRUE],
+                          x = dob -> field(st)(dob) WITH [entered := TRUE],
+                          x = id_card ->
+                            field(st)(id_card) WITH [entered := TRUE],
+                          x = carer ->
+                            field(st)(carer) WITH [entered := TRUE],
+                          x = mob -> field(st)(mob) WITH [entered := TRUE],
+			  ELSE -> field(st)(x)
+                     ENDCOND]
+    ELSE st ENDIF
+  
+  autocomplete_new_medicine(st: state): state =
+    IF mode(st) = new_med THEN
+      st WITH [field := LAMBDA(x:fields_type):
+          COND x = medicine -> field(st)(medicine) WITH [ entered := TRUE ],
+               x = dosage -> field(st)(dosage) WITH [ entered := TRUE ],
+               x = validity -> field(st)(validity) WITH [ entered := TRUE ],
+	             x = quantity -> field(st)(quantity) WITH [ entered := TRUE ],
+               x = column -> field(st)(column) WITH [ entered := TRUE ],
+	       ELSE -> field(st)(x)
+	  ENDCOND ]
+    ELSE st ENDIF
+
+  autocomplete_new_script(st: state): state =
+    IF mode(st) = new_patient_script THEN
+      st WITH [field := LAMBDA(x:fields_type):
+          COND x = name -> field(st)(name) WITH [ entered := TRUE ],
+               x = dosage -> field(st)(dosage) WITH [ entered := TRUE ],
+               x = quantity -> field(st)(quantity) WITH [ entered := TRUE ],
+	             x = prescription -> field(st)(prescription) WITH [ entered := TRUE ],
+	       ELSE -> field(st)(x)
+	  ENDCOND ]
+    ELSE st ENDIF
+  
+  autocomplete_new_dose(st: state): state =
+    IF mode(st) = new_dose THEN
+      st WITH [field := LAMBDA(x:fields_type):
+          COND x = monthly -> field(st)(monthly) WITH [ entered := TRUE ],
+               x = weekly -> field(st)(weekly) WITH [ entered := TRUE ],
+               x = daily -> field(st)(daily) WITH [ entered := TRUE ],
+	             x = bidaily -> field(st)(bidaily) WITH [ entered := TRUE ],
+               x = time1 -> field(st)(time1) WITH [ entered := TRUE ],
+               x = time2 -> field(st)(time2) WITH [ entered := TRUE ],
+	       ELSE -> field(st)(x)
+	  ENDCOND ]
+    ELSE st ENDIF
+
+  autocomplete(st: state): state =
+    autocomplete_new_dose(autocomplete_new_script(autocomplete_new_medicine(autocomplete_new_patient_details(st))))
+
+  autocompleteConfirm(st: state): state =
+    COND
+      (mode(st) = pwd)-> autocomplete_password(st),
+      (mode(st) = db_pwd) -> autocomplete_password(st),
+      (mode(st) = new_patient_details) -> autocomplete_new_patient_details(st),
+      (mode(st) = new_med) -> autocomplete_new_medicine(st),
+      ELSE -> st
+    ENDCOND
+  
+  autocomplete_new_dose_monthly(st: state): state =
+    IF mode(st) = new_dose THEN
+      st WITH [field := LAMBDA(x:fields_type):
+          COND x = monthly -> field(st)(monthly) WITH [ entered := TRUE ],
+               x = time1 -> field(st)(time1) WITH [ entered := TRUE ],
+               x = weekly -> field(st)(weekly) WITH [ visible := FALSE, entered := FALSE ],
+               x = daily -> field(st)(daily) WITH [ visible := FALSE, entered := FALSE ],
+	             x = bidaily -> field(st)(bidaily) WITH [ visible := FALSE, entered := FALSE ],
+               x = time2 -> field(st)(time2) WITH [ visible := FALSE, entered := FALSE ],
+	       ELSE -> field(st)(x)
+	  ENDCOND ]
+    ELSE st ENDIF
+
+  autocomplete_new_dose_weekly(st: state): state =
+    IF mode(st) = new_dose THEN
+      st WITH [field := LAMBDA(x:fields_type):
+          COND x = weekly -> field(st)(weekly) WITH [ entered := TRUE ],
+               x = time1 -> field(st)(time1) WITH [ entered := TRUE ],
+               x = monthly -> field(st)(monthly) WITH [ visible := FALSE, entered := FALSE ],
+               x = daily -> field(st)(daily) WITH [ visible := FALSE, entered := FALSE ],
+	             x = bidaily -> field(st)(bidaily) WITH [ visible := FALSE, entered := FALSE ],
+               x = time2 -> field(st)(time2) WITH [ visible := FALSE, entered := FALSE ],
+	       ELSE -> field(st)(x)
+	  ENDCOND ]
+    ELSE st ENDIF
+  
+  autocomplete_new_dose_daily(st: state): state =
+    IF mode(st) = new_dose THEN
+      st WITH [field := LAMBDA(x:fields_type):
+          COND x = daily -> field(st)(daily) WITH [ entered := TRUE ],
+               x = time1 -> field(st)(time1) WITH [ entered := TRUE ],
+               x = monthly -> field(st)(monthly) WITH [ visible := FALSE, entered := FALSE ],
+               x = weekly -> field(st)(weekly) WITH [ visible := FALSE, entered := FALSE ],
+	             x = bidaily -> field(st)(bidaily) WITH [ visible := FALSE, entered := FALSE ],
+               x = time2 -> field(st)(time2) WITH [ visible := FALSE, entered := FALSE ],
+	       ELSE -> field(st)(x)
+	  ENDCOND ]
+    ELSE st ENDIF
+
+  autocomplete_new_dose_bidaily(st: state): state =
+    IF mode(st) = new_dose THEN
+      st WITH [field := LAMBDA(x:fields_type):
+          COND x = bidaily -> field(st)(bidaily) WITH [ entered := TRUE ],
+               x = time1 -> field(st)(time1) WITH [ entered := TRUE ],
+               x = time2 -> field(st)(time2) WITH [ entered := TRUE ],
+               x = monthly -> field(st)(monthly) WITH [ visible := FALSE, entered := FALSE ],
+               x = weekly -> field(st)(weekly) WITH [ visible := FALSE, entered := FALSE ],
+	             x = daily -> field(st)(daily) WITH [ visible := FALSE, entered := FALSE ],
+	       ELSE -> field(st)(x)
+	  ENDCOND ]
+    ELSE st ENDIF
+
+  autocompleteCreate(st: state): state =
+    COND
+      (mode(st) = new_patient_script) -> autocomplete_new_script(st),
+      %(mode(st) = new_dose) -> autocomplete_new_dose_daily(st),
+      ELSE -> st
+    ENDCOND
+
+
+  %-- APIS
+  click_key1(st: state): execState =
+    COND
+      per_act_key1(st) -> act_key1(st),
+      ELSE -> st
+    ENDCOND
+  click_key2(st: state): execState =
+    COND
+      per_act_key2(st) -> act_key2(st),
+      ELSE -> st
+    ENDCOND
+  click_key3(st: state): execState =
+    COND
+      per_act_key3(st) -> act_key3(st),
+      ELSE -> st
+    ENDCOND
+  click_confirm(st: state): execState =
+      COND per_act_confirm(st) -> act_confirm(autocompleteConfirm(st)),
+           ELSE -> st
+      ENDCOND
+  click_quit(st: state): execState =
+      COND per_act_quit(st) -> act_quit(st),
+           ELSE -> st
+      ENDCOND
+  click_create_monthly(st: state): execState =
+    COND
+      per_act_create(st) -> act_create(autocomplete_new_dose_monthly(st)),
+      ELSE -> st
+    ENDCOND
+  click_create_weekly(st: state): execState =
+    COND
+      per_act_create(st) -> act_create(autocomplete_new_dose_weekly(st)),
+      ELSE -> st
+    ENDCOND
+  click_create_daily(st: state): execState =
+    COND
+      per_act_create(st) -> act_create(autocomplete_new_dose_daily(st)),
+      ELSE -> st
+    ENDCOND
+  click_create_bidaily(st: state): execState =
+    COND
+      per_act_create(st) -> act_create(autocomplete_new_dose_bidaily(st)),
+      ELSE -> st
+    ENDCOND
+  click_create(st: state): execState =
+    COND
+      per_act_create(st) -> act_create(autocompleteCreate(st)),
+      ELSE -> st
+    ENDCOND
+  tap_fingerprint_scanner(st: state): execState =
+    COND
+      mode(st) = scan -> scan_enabled_screen(st),
+      ELSE -> st
+    ENDCOND
+  tick(st: state): execState =
+    COND
+      mode(st) = scan_enabled -> act(tick, st),
+      ELSE -> st
+    ENDCOND
+  click_medicines(st: state): execState =
+    COND
+      per_act_medicines(st) -> act_medicines(st),
+      ELSE -> st
+    ENDCOND
+  click_database(st: state): execState =
+    COND
+      per_database_action(st) -> database_action(st),
+      ELSE -> st
+    ENDCOND
+  click_act_database(st: state): execState =
+    COND
+      per_database_action(st) -> act( database, st),
+      ELSE -> st
+    ENDCOND
+  click_prescriptions(st: state): execState =
+    COND
+      per_act_prescriptions(st) -> act_prescriptions(st),
+      ELSE -> st
+    ENDCOND
+  click_patients(st: state, p: p_index): execState =
+    COND
+      per_act_patient(st) -> act_patient(p, st),
+      ELSE -> st
+    ENDCOND
+  click_med(st: state, m: m_index): execState =
+    COND
+      per_act_med(st) -> act_med(m, st),
+      ELSE -> st
+    ENDCOND
+  click_script(st: state, s: s_index): execState =
+    COND
+      per_act_script(st) -> act_script(s, st),
+      ELSE -> st
+    ENDCOND
+  click_scroll_up(st:state) : execState =
+    COND
+      (mode(st) = patient_list)-> scroll_up_patient_list(st),
+      (mode(st) = db_med_list) -> scroll_up_med_list(st),
+      (mode(st) = patient_scripts_list) -> scroll_up_script_list(st),
+      ELSE -> st
+    ENDCOND
+  click_scroll_down(st:state) : execState =
+    COND
+      (mode(st) = patient_list)-> scroll_down_patient_list(st),
+      (mode(st) = db_med_list) -> scroll_down_med_list(st),
+      (mode(st) = patient_scripts_list) -> scroll_down_script_list(st),
+      ELSE -> st
+    ENDCOND
+
+ END main

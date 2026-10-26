@@ -1,0 +1,377 @@
+%infusion_pumps_th%[node_limit: posnat, max_index: posnat, aq_limit: posnat, pq_limit: posnat,
+% Michael Harrison (Newcastle University) and Paolo Masci (US National Institute of Aerospace)
+% July 2020
+% Infusion pumps
+
+infusion_pumps_th[maxrate  : posnat, 
+                  maxinfuse: posnat, 
+                  maxtime: {maxtime: posnat | maxinfuse <= maxtime}]%,
+                 % node_limit, max_index, d_limit:posnat]
+		  : THEORY
+ BEGIN
+   ASSUMING
+    maxinfuseLEQmaxtime: ASSUMPTION maxinfuse <= maxtime
+  ENDASSUMING
+  IMPORTING coord_t_and_c_th
+
+  %-- useful lemmas ------------------------------------------------------------------
+%%
+  % @type lemmas
+  % @description These lemmas are used in proving TCCs for both this theory and the Alaris theory
+%%
+%
+  vtbi_over_rate_lemma: LEMMA 
+    FORALL(v: ivols, r: {r: irates | (NOT r = 0)}): (v / r) >= 0 
+
+  vtbi_over_time_lemma: LEMMA
+    FORALL(v: ivols, t: {t: itimes | (NOT t = 0)}): (v / t) >= 0 
+  %--
+ IMPORTING  node_th[maxrate, maxinfuse, maxtime]%, 
+               %     node_limit, max_index]%, aq_limit, 
+                   % pq_limit]%, parameters_th, coord_t_and_c_th
+ IMPORTING devices_th[maxrate, maxinfuse, maxtime]%, d_limit]%, %action_id, 
+                       %upto(d_limit)]
+   d_state: TYPE = [# 
+     dev: device,
+     nde: node,
+     vtbi: ivols,
+     rate: irates,
+     time: itimes,
+     vol: ivols,
+     clamp: clamp_state,
+     m: mode,
+     dm: dispmode,
+     prevdm: dispmode,
+     clock: itimes,
+     bolus_time: itimes,
+     pan: panel,
+     priority: priority_type,
+     ip_error: boolean #]
+  
+  
+  
+%  infusion_pump: TYPE = device
+   timeout : itimes = 5
+   bolus_timeout: itimes = 5
+   bolus_rate: irates = 5
+
+  init_ip_panel: panel =
+     (#
+      pars := LAMBDA (p: par): (p = rte) OR (p = vtb) OR (p = tme) OR (p = dpm) OR (p = er),
+      num_disp := LAMBDA (p: par):
+                     COND
+                      p = rte -> 0,
+                      p = vtb -> 0,
+                      p = tme -> 0,
+                      ELSE -> null_value
+                     ENDCOND,
+       enum_disp := LAMBDA (p: par):
+                     COND
+                      p = dpm -> xdblank,
+                      p = er -> xok,
+                      ELSE -> xnilval
+                     ENDCOND,
+      cmds := LAMBDA (a: action_id): 
+                      a = powr OR a = incr OR a = decr OR a = bolus OR
+                      a = confirm OR a = choosetime OR a = choosevtbi OR 
+                      a = chooserate OR a = start OR a = hold OR a = tick OR 
+                      a = openclamp OR a = closeclamp
+     #)
+
+  %per_init_pump(ds: d_state): boolean = (ds`m = off)
+
+
+                 
+  init_d_state: d_state = (# dev := nil_device,
+                   nde := no_node,
+                   vtbi := 0,
+                   rate := 0,
+                   time := 0,
+                   vol := 0,
+                   clamp := open,
+                   m := off,
+                   dm := dblank,
+                   prevdm := dblank,
+                   priority := rte,
+                   clock := 0,  
+                   bolus_time := 0,
+                   pan := init_ip_panel,
+                   ip_error := false #)
+
+%fun_power(ds: d_state): d_state =
+%             IF ds`m = off THEN
+%	     ds WITH [ m := pause,
+%	               dm := mainmenu,
+%		       ip_error := false ] ELSE
+ %            init_d_state ENDIF
+ 
+% change
+fun_power(ds: d_state): d_state =
+             IF ds`m = off THEN
+	     ds WITH [ m := pause,
+	               dm := mainmenu,
+		       ip_error := false ] ELSE
+             ds WITH [ vtbi := 0,
+                   rate := 0,
+                   time := 0,
+                   vol := 0,
+                   clamp := open,
+                   m := off,
+                   dm := dblank,
+                   prevdm := dblank,
+                   priority := rte,
+                   clock := 0,  
+                   bolus_time := 0,
+                   pan := init_ip_panel,
+                   ip_error := false] ENDIF
+
+ 
+per_pause(ds: d_state): boolean = (ds`m = infuse) AND (ds`dm = dinfusing)
+fun_pause(ds: (per_pause)): d_state = 
+       ds WITH [ m := pause,
+                dm := mainmenu,
+		prevdm := dinfusing,
+                clock := 0 ]
+
+per_infuse(ds: d_state): boolean =  (ds`m = pause) AND (ds`dm = mainmenu)
+
+fun_infuse(ds: d_state): d_state =
+       ds WITH [ m := infuse,
+                dm := dinfusing,
+		prevdm := mainmenu,
+                clock := 0 ]
+
+per_choosetime(ds: d_state): boolean = (ds`m = pause) AND (ds`dm = mainmenu)
+per_chooserate(ds: d_state): boolean = (ds`m = pause) AND (ds`dm = mainmenu)
+per_choosevtbi(ds: d_state): boolean = (ds`m = pause) AND (ds`dm = mainmenu)
+
+fun_choosetime(ds: d_state): d_state = 
+        ds WITH [dm := dtime,
+	         prevdm := mainmenu,
+                 priority := tme,
+                 clock := 0]
+
+fun_chooserate(ds: d_state): d_state = 
+        ds WITH [dm := drate,
+                 prevdm := mainmenu,
+                 priority := rte,
+                 clock := 0]
+
+fun_choosevtbi(ds: d_state): d_state = 
+        ds WITH [dm := dvtbi,
+                 prevdm := mainmenu,
+                 clock := 0]
+
+per_confirm(ds: d_state): boolean = (ds`dm = drate) OR (ds`dm = dtime) OR 
+                                    (ds`dm = dvtbi) OR
+                                    (ds`dm = dalarm)
+
+fun_confirm(ds: d_state): d_state = 
+       IF ds`dm = dalarm THEN
+            IF ds`m = pause THEN
+              ds WITH [dm := prevdm(ds),
+                      prevdm := dm(ds),
+                      clock := 0] 
+            ELSE ds WITH [dm := dkvo, prevdm := dm(ds)] ENDIF
+        ELSE
+           ds WITH [dm := mainmenu,
+	            prevdm := dm(ds),
+                    clock := 0] ENDIF
+
+per_open_clamp(ds: d_state): boolean = (ds`clamp = closed)
+per_close_clamp(ds: d_state): boolean = (ds`clamp = open)
+fun_open_clamp(ds: d_state): d_state = 
+         ds WITH [clamp := open]
+fun_close_clamp(ds: d_state): d_state =
+         ds WITH [clamp := closed]
+
+per_incr(ds: d_state): boolean = (ds`dm = drate) OR (ds`dm = dtime) OR (ds`dm = dvtbi)
+% following needs to know what mode
+fun_incr(ds: d_state): d_state =
+  COND 
+   ((ds`dm = drate) AND (ds`rate < maxrate)) ->
+   ds WITH [rate := rate(ds) + 1,
+           time := vtbi(ds) / (rate(ds) + 1),
+           clock := 0],
+   ((ds`dm = dtime) AND (ds`time < maxtime)) ->
+   ds WITH [time := time(ds) + 1,
+           rate := vtbi(ds) / (time(ds) + 1),
+           clock := 0 ],
+   ((ds`dm = dvtbi) AND (ds`vtbi < maxinfuse)) ->
+   ds WITH [ vtbi := vtbi(ds) + 1,
+            rate := IF (priority(ds) = tme) AND (time(ds) > 0) 
+                    THEN (vtbi(ds) + 1)/time(ds) ELSE rate(ds) ENDIF,
+            time := IF (priority(ds) = rte) AND (rate(ds) > 0) 
+                    THEN (vtbi(ds) + 1)/rate(ds) ELSE time(ds) ENDIF,
+            clock := 0 ],
+     ELSE -> ds
+   ENDCOND
+   
+per_decr(ds: d_state): boolean = (ds`dm = drate) OR (ds`dm = dtime) OR (ds`dm = dvtbi)
+% following needs to know what mode
+fun_decr(ds: d_state): d_state =
+  COND 
+   ((ds`dm = drate) AND (ds`rate >= 1)) ->
+   ds WITH [rate := rate(ds) - 1,
+           time := IF rate(ds) /= 1 THEN vtbi(ds) / (rate(ds) - 1)
+	               ELSE 0 ENDIF,
+           clock := 0],
+   ((ds`dm = dtime) AND (ds`time >= 1)) ->
+   ds WITH [time := time(ds) - 1,
+           rate := IF time(ds) /= 1 THEN vtbi(ds) / (time(ds) - 1)
+	                ELSE 0 ENDIF,
+           clock := 0 ],
+   ((ds`dm = dvtbi) AND (ds`vtbi >= 1)) ->
+   ds WITH [ vtbi := vtbi(ds) - 1,
+            rate := IF (priority(ds) = tme) AND (time(ds) /= 0)
+                    THEN (vtbi(ds) - 1)/time(ds) ELSE rate(ds) ENDIF,
+            time := IF (priority(ds) = rte) AND (rate(ds) /= 0)
+                    THEN (vtbi(ds) - 1)/rate(ds) ELSE time(ds) ENDIF,
+            clock := 0 ],
+   ELSE -> ds
+   ENDCOND
+
+per_bolus(ds: d_state): boolean =
+   (ds`m = infuse) AND (ds`bolus_time = 0) AND (ds`vtbi >= bolus_rate)
+   
+
+fun_bolus(ds: (per_bolus)): d_state =
+    ds WITH [bolus_time := bolus_timeout]
+
+upd_pan(pn: panel, ds: d_state): panel =
+pn WITH
+    [num_disp := LAMBDA (p: par):
+                     COND
+                      p = rte -> rate(ds),
+                      p = vtb -> vtbi(ds),
+                      p = tme -> time(ds),
+                      ELSE -> null_value
+                     ENDCOND,
+     enum_disp := LAMBDA (p: par):
+                    COND
+		      p = dpm ->
+                        COND 
+                         dm(ds) = mainmenu -> xmainmenu,
+                         dm(ds) = dvtbi -> xdvtbi,
+                         dm(ds) = drate -> xdrate,
+                         dm(ds) = dtime -> xdtime,
+                         dm(ds) = dinfusing -> xdinfusing,
+                         dm(ds) = dalarm -> xdalarm,
+                         dm(ds) = dkvo -> xdkvo,
+			 dm(ds) = dblank -> xdblank
+                        ENDCOND,
+		       p = mde ->
+		         COND
+			   m(ds) = off -> xoff,
+			   m(ds) = pause -> xpause,
+			   m(ds) = infuse -> xinfuse
+			 ENDCOND,
+			p = er ->
+			  IF ip_error(ds) THEN xalarm ELSE xok ENDIF,
+			ELSE -> xnilval
+		       ENDCOND
+    ]
+
+available_act(pan: panel, ds: d_state): panel
+= pan WITH
+    [ cmds :=
+       LAMBDA (a: action_id):
+            (a = powr) OR
+	    ((a = incr) AND per_incr(ds)) OR
+	    ((a = decr) AND per_decr(ds)) OR
+	    ((a = bolus) AND per_bolus(ds)) OR
+	    ((a = confirm) AND per_confirm(ds)) OR
+	    ((a = choosetime) AND per_choosetime(ds)) OR
+	    ((a = choosevtbi) AND per_choosevtbi(ds)) OR
+	    ((a = chooserate) AND per_chooserate(ds)) OR
+	    ((a = start) AND per_infuse(ds)) OR
+	    ((a = hold) AND per_pause(ds)) OR
+	    ((a = openclamp) AND per_open_clamp(ds)) OR
+	    ((a = closeclamp) AND per_close_clamp(ds)) ]
+
+
+update_panel(ds: d_state): d_state =
+   ds WITH
+   [pan := upd_pan(pan(ds), ds)]
+ % update panel and send defined parameters to the coordinator  
+tick(ds: d_state): d_state =
+LET ds1 = ds WITH
+  [ dm := COND
+            (m(ds) = pause) AND (clock(ds) = timeout)
+               -> dalarm,
+            (m(ds) = infuse) AND (vtbi(ds) <=  rate(ds))
+               -> dalarm,
+            ELSE -> dm(ds)
+          ENDCOND,
+    prevdm := IF (m(ds) = pause) AND (clock(ds) = timeout) THEN dm(ds) 
+              ELSE prevdm(ds) ENDIF,
+    clock := IF (m(ds) = pause) AND (clock(ds) < timeout) THEN clock(ds) + 1
+             ELSE 0 ENDIF,
+    time := IF (m(ds) = infuse) AND (time(ds) >= 1) THEN time(ds) - 1
+            ELSE time(ds) ENDIF,
+    bolus_time := IF (m(ds) = infuse) AND (bolus_time(ds) >= 1) THEN bolus_time(ds) - 1
+                  ELSE 0 ENDIF,
+    vtbi := IF (m(ds) = infuse)
+              THEN 
+                IF bolus_time(ds) > 0
+                THEN IF (vtbi(ds) >= bolus_rate) THEN vtbi(ds) - bolus_rate
+                     ELSE 0 ENDIF
+                ELSE IF (vtbi(ds) >= rate(ds)) THEN vtbi(ds) - rate(ds)
+                   ELSE 0 ENDIF
+                ENDIF
+              ELSE vtbi(ds) ENDIF,
+    vol := IF (m(ds) = infuse)
+              THEN 
+                IF bolus_time(ds) > 0
+                THEN IF (vtbi(ds) >= bolus_rate) THEN vol(ds) + bolus_rate
+                     ELSE vol(ds) + vtbi(ds) ENDIF
+                ELSE IF (vtbi(ds) >= rate(ds)) THEN vtbi(ds) + rate(ds)
+                   ELSE vol(ds) + vtbi(ds) ENDIF
+                ENDIF
+              ELSE vol(ds) ENDIF
+  ]
+IN update_panel(ds1)
+
+
+
+% { start, hold, tick, openclamp, closeclamp}
+execute_ip(a: action_id, ds: d_state): d_state =
+      COND 
+        a = powr ->  fun_power(ds),
+        a = incr ->
+             IF  per_incr(ds) THEN fun_incr(ds) 
+                                  ELSE ds WITH [ip_error := true] ENDIF,
+        a = decr ->
+             IF  per_decr(ds) THEN fun_decr(ds) 
+                                  ELSE ds WITH [ip_error := true] ENDIF,
+         a = bolus ->
+             IF  per_bolus(ds) THEN fun_bolus(ds) 
+                                  ELSE ds WITH [ip_error := true] ENDIF,
+        a = confirm ->
+             IF per_confirm(ds) THEN fun_confirm(ds)
+                                   ELSE ds WITH [ip_error := true] ENDIF,
+        a = choosetime ->
+             IF per_choosetime(ds) THEN fun_choosetime(ds)
+                                   ELSE ds WITH [ip_error := true] ENDIF,
+        a = choosevtbi ->
+             IF per_choosevtbi(ds) THEN fun_choosevtbi(ds)
+                                   ELSE ds WITH [ip_error := true] ENDIF,
+        a = chooserate ->
+             IF per_chooserate(ds) THEN fun_chooserate(ds)
+                                   ELSE ds WITH [ip_error := true] ENDIF,
+        a = start ->
+             IF per_infuse(ds) THEN fun_infuse(ds)
+                                   ELSE ds WITH [ip_error := true] ENDIF,
+        a = hold ->
+             IF per_pause(ds) THEN fun_pause(ds)
+                                   ELSE ds WITH [ip_error := true] ENDIF,
+        ELSE -> ds WITH [ip_error := true]
+     ENDCOND
+
+ add_nde_device(nd: node, ds: d_state): d_state = ds WITH [nde := nd]           
+  
+ END infusion_pumps_th
+
+% patient theory brings together devices associated with a patient
+%
+%

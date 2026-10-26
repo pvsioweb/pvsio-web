@@ -1,0 +1,475 @@
+sim: THEORY
+  BEGIN IMPORTING printerJson[8,8,8]
+    nlimit: nat = 16
+    dlimit: nat = 16
+    plimit: nat = 16
+  % simState is a global variable storing the simulation state during a pvsio session
+    simState: Global[state, init(0)] % the initial value of simState is init(0)
+
+    % --------------------------------------------- Booter -------------------------------------------------
+
+    % Get state - use to get initial state
+    get_state_st: string = % return the current state as JSON (initially it is init(0))
+        LET st: state = val(simState) % read current simulation state
+        IN print_state(st)
+
+    % --------------------------------------------- CONNECT PATIENT -------------------------------------------------
+
+    click_connect_patient_coord(value: real): string = % the function prints a string representation of the JSON structure to be sent to the client. Takes no arguments because the current simulation state is stored in simState
+        LET st: state = val(simState), % read current simulation state
+            p: patient = value,
+            st = connect_to_coordinator(p, st),
+            update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+    
+    click_connect_patient(value: real): string = % the function prints a string representation of the JSON structure to be sent to the client. Takes no arguments because the current simulation state is stored in simState
+        LET st: state = val(simState), % read current simulation state
+            p: patient = value,
+            st = connect_new_element(p, st),
+            update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+
+    % --------------------------------------------- CONNECT DEVICE -------------------------------------------------
+
+    % creates node for device and connects it to the patient
+    % note this assumes that the coordinator is required to connect patient to
+    % devices
+    click_connect_device_to_patient(valueP: real, valueD: real): string = % the function prints a string representation of the JSON structure to be sent to the client. Takes no arguments because the current simulation state is stored in simState
+        LET st: state = val(simState), % read current simulation state
+            p: patient = valueP,
+            d: device = valueD,
+            st = connect_device_to_patient(p, d, infusion_pump, st),
+            update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+    
+    existsVS(l: [ upto(nlimit) -> device_type ], n: node): RECURSIVE bool =
+        COND
+        n = 0 -> IF l(n) = vital_signs_device THEN TRUE ELSE FALSE ENDIF,
+        n > 0 -> IF l(n) = vital_signs_device THEN TRUE ELSE existsVS(l, n-1) ENDIF
+        ENDCOND
+    MEASURE n
+
+    click_connect_device_to_patient_vs(valueP: real, valueD: real): string = % the function prints a string representation of the JSON structure to be sent to the client. Takes no arguments because the current simulation state is stored in simState
+        LET st: state = val(simState), % read current simulation state
+            p: patient = valueP,
+            d: device = valueD,
+            ps = st`pdb(p),
+            devs = ps`p_disp_top`devs,
+            st = IF existsVS(devs, dlimit) THEN st ELSE connect_device_to_patient(p, d, vital_signs_device, st) ENDIF,
+            update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+        % --------------------------------------------- Coordinator -------------------------------------------------
+
+    % --------------------------------------------- ENTER Functions -------------------------------------------------
+
+    click_coord_enter_patient(valueP: real): string = % the function prints a string representation of the JSON structure to be sent to the client. Takes no arguments because the current simulation state is stored in simState
+        LET st: state = val(simState), % read current simulation state
+            p: patient = valueP,
+            st = coordinator_enter_patient(p, st),
+            update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+    
+    click_coord_enter_device(valueD: real): string = % the function prints a string representation of the JSON structure to be sent to the client. Takes no arguments because the current simulation state is stored in simState
+        LET st: state = val(simState), % read current simulation state
+            d: device = valueD,
+            st = coordinator_enter_device(d, st),
+            update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+    
+    click_coord_enter_action(a: action_id): string = % the function prints a string representation of the JSON structure to be sent to the client. Takes no arguments because the current simulation state is stored in simState
+        LET st: state = val(simState), % read current simulation state
+            st = coordinator_enter_action(a, st),
+            update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+
+    % --------------------------------------------- COORDINATOR Functions -------------------------------------------------
+
+    %Prob not gonna use
+    click_coord_change_focus(df: disp_focus_type): string = % the function prints a string representation of the JSON structure to be sent to the client. Takes no arguments because the current simulation state is stored in simState
+        LET st: state = val(simState), % read current simulation state
+            st = change_focus(df, st),
+            update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+
+    click_coord_act_mono: string = % the function prints a string representation of the JSON structure to be sent to the client. Takes no arguments because the current simulation state is stored in simState
+        LET st: state = val(simState), % read current simulation state
+            st = coord_act_mono(st),
+            update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+
+    click_coord_act_mono_sync(value: real, valueD: real): string = % the function prints a string representation of the JSON structure to be sent to the client. Takes no arguments because the current simulation state is stored in simState
+        LET st: state = val(simState), % read current simulation state
+            p: patient = value,
+            d: device = valueD,
+            st = coord_act_mono(st),
+            st = tick_act_patient(p,st),
+            st = tick_act_device(d,p,st),
+            st = tick_pan_device(d,p,st),
+            st = tick_pan_patient(p,st),
+            st = tick_coordinator(st),
+            st = IF (st`pdb(p)`pmode = d_mode) AND (st`pdb(p)`p_disp_top`sel_device`dv = d) THEN
+                st WITH
+                    [pdb := LAMBDA (p1: patient):
+                    IF p1 = p THEN st`pdb(p) WITH [
+                        p_disp_device := st`pdb(p)`patient_panels(((st`pdb(p)`p_disp_top)`ent_device)`dv)
+                    ]
+                        ELSE st`pdb(p1) ENDIF ]
+            ELSE st ENDIF,
+            update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+
+    click_coord_menu_act(m:menu): string = % the function prints a string representation of the JSON structure to be sent to the client. Takes no arguments because the current simulation state is stored in simState
+        LET st: state = val(simState), % read current simulation state
+            st = coord_menu_act(m, st),
+            update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+
+    click_alarm_clean(valueP: real): string =
+        LET st: state = val(simState), % read current simulation state
+            p: patient = valueP,
+            i_st = st`coord_st,
+            st = st WITH [coord_st := update_alarm_disp_clean(p, i_st)],
+            update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+    % --------------------------------------------- Vital Signs Monitor  -------------------------------------------------
+
+    click_vital_signs_power(value: real): string =
+    LET st: state = val(simState), % read current simulation state
+            p: real = value,
+            st = st WITH
+            [pdb := LAMBDA (p1: patient):
+                   IF p1 = p THEN st`pdb(p1) WITH [vital_signs := execute_vs(powr, st`pdb(p1)`vital_signs)] ELSE st`pdb(p1) ENDIF],
+            update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+
+        % --------------------------------------------- Patient Layer -------------------------------------------------
+
+    % --------------------------------------------- ENTER DEVICE -------------------------------------------------
+
+    % enter patient device
+    click_patient_enter_device(valueP: real, valueD: real): string = % the function prints a string representation of the JSON structure to be sent to the client. Takes no arguments because the current simulation state is stored in simState
+        LET st: state = val(simState), % read current simulation state
+            p: patient = valueP,
+            d: device = valueD,
+            st = patient_enter_device(d, p, st),
+            update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+
+     % --------------------------------------------- Menu And Enter Functions -------------------------------------------------
+
+    click_patient_menu_act(m:menu, valueP: real): string = % the function prints a string representation of the JSON structure to be sent to the client. Takes no arguments because the current simulation state is stored in simState
+        LET st: state = val(simState), % read current simulation state
+            p: patient = valueP,
+            st = patient_menu_act(m, p, st),
+            update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+    
+    click_patient_enter_params(pn:par, valueP: real): string = % the function prints a string representation of the JSON structure to be sent to the client. Takes no arguments because the current simulation state is stored in simState
+        LET st: state = val(simState), % read current simulation state
+            p: patient = valueP,
+            st = patient_enter_parameter(pn, p, st),
+            update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+    
+    click_patient_enter_action(a: action_id, valueP: real): string = % the function prints a string representation of the JSON structure to be sent to the client. Takes no arguments because the current simulation state is stored in simState
+        LET st: state = val(simState), % read current simulation state
+            p: patient = valueP,
+            st = patient_enter_action(a, p, st),
+            update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+
+    click_patient_enter_relation(r: rel_op_type, valueP: real): string = % the function prints a string representation of the JSON structure to be sent to the client. Takes no arguments because the current simulation state is stored in simState
+        LET st: state = val(simState), % read current simulation state
+            p: patient = valueP,
+            st = patient_enter_relation(r, p, st),
+            update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+
+    %enum = xoff, xpause, xinfuse, xdblank, xmainmenu, xdvtbi, xdrate, xdtime, xdinfusing, 
+     %           xdalarm, xdkvo, xopen, xclosed, xrte, xtme, xisconnected, xactive, 
+     %           xnumeral, xenumerated, xnilval, xalarm, xok
+    click_patient_enter_enum_value(e: enum, valueP: real): string = % the function prints a string representation of the JSON structure to be sent to the client. Takes no arguments because the current simulation state is stored in simState
+        LET st: state = val(simState), % read current simulation state
+            p: patient = valueP,
+            st = patient_enter_enum_value(e, p, st),
+            update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+    
+    click_patient_enter_num_value(n: nonneg_real, valueP: real): string = % the function prints a string representation of the JSON structure to be sent to the client. Takes no arguments because the current simulation state is stored in simState
+        LET st: state = val(simState), % read current simulation state
+            p: patient = valueP,
+            st = patient_enter_num_value(n, p, st),
+            update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+
+     click_patient_enter_name(n: real, valueP: real): string = % the function prints a string representation of the JSON structure to be sent to the client. Takes no arguments because the current simulation state is stored in simState
+        LET st: state = val(simState), % read current simulation state
+            p: patient = valueP,
+            st = patient_enter_device_name(n, p, st),
+            update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+
+    click_patient_connect_device(valueP: real): string = % the function prints a string representation of the JSON structure to be sent to the client. Takes no arguments because the current simulation state is stored in simState
+        LET st: state = val(simState), % read current simulation state
+            p: patient = valueP,
+            st = connect_new_element(p, st),
+            update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+
+    click_patient_ok(valueP: real): string = % the function prints a string representation of the JSON structure to be sent to the client. Takes no arguments because the current simulation state is stored in simState
+        LET st: state = val(simState), % read current simulation state
+            p: patient = valueP,
+            st = act_patient_ok(p, st),
+            update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+
+    click_patient_ok_sync(valueP: real): string = % the function prints a string representation of the JSON structure to be sent to the client. Takes no arguments because the current simulation state is stored in simState
+        LET st: state = val(simState), % read current simulation state
+            p: patient = valueP,
+            st = act_patient_ok(p, st),
+            st = tick_coordinator(st),
+            update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+    % --------------------------------------------- DEVICE EXECUTE FUNCTIONS -------------------------------------------------
+
+    click_act_local_device(a: action_id, value: real, valueD: real): string =
+    LET st: state = val(simState), % read current simulation state
+        p: patient = value,
+        d: device = valueD,
+        st = local_device_execute(a,d,p,st),
+        update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)    
+
+    click_patient_device_exec(a: action_id, value: real, valueD: real): string =
+    LET st: state = val(simState), % read current simulation state
+        p: patient = value,
+        d: device = valueD,
+        st = st WITH
+            [pdb := LAMBDA (p1: patient):
+              IF p1 = p THEN dev_ex(d, a, st`pdb(p))
+	            ELSE st`pdb(p1) ENDIF ],
+        update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)   
+
+    click_patient_device_exec_sync(a: action_id, value: real, valueD: real): string =
+    LET st: state = val(simState), % read current simulation state
+        p: patient = value,
+        d: device = valueD,
+        st = st WITH
+            [pdb := LAMBDA (p1: patient):
+              IF p1 = p THEN dev_ex(d, a, st`pdb(p))
+	            ELSE st`pdb(p1) ENDIF ],
+        st = tick_pan_device(d,p,st),
+        st = tick_pan_patient(p,st),
+        st = tick_coordinator(st),
+        st = st WITH
+            [pdb := LAMBDA (p1: patient):
+              IF p1 = p THEN st`pdb(p) WITH [
+                p_disp_device := st`pdb(p)`patient_panels(((st`pdb(p)`p_disp_top)`ent_device)`dv)
+              ]
+	            ELSE st`pdb(p1) ENDIF ],
+        update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+
+    % --------------------------------------------- TICK FUNCTIONS -------------------------------------------------
+    % Tick
+    click_tick_device(value: real, valueD: real): string =
+    LET st: state = val(simState), % read current simulation state
+        p: patient = value,
+        d: device = valueD,
+        st = tick_pan_device(d,p,st),
+        st = tick_pan_patient(p,st),
+        st = tick_coordinator(st),
+        st = st WITH
+            [pdb := LAMBDA (p1: patient):
+              IF p1 = p THEN st`pdb(p) WITH [
+                p_disp_device := st`pdb(p)`patient_panels(((st`pdb(p)`p_disp_top)`ent_device)`dv)
+              ]
+	            ELSE st`pdb(p1) ENDIF ],
+        update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+
+    % Tick coordinator - updates coord state and pannels depending on update message
+    click_tick_coordinator: string =
+    LET st: state = val(simState), % read current simulation state
+        st = tick_coordinator(st),
+        update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+
+    % Updates pdb patient panels of a patient
+    click_tick_pan_patient(value: real): string =
+    LET st: state = val(simState), % read current simulation state
+        p: patient = value,
+        st = tick_pan_patient(p,st),
+        update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+
+    % Passes the action of a patient, ordered by the coordinator to the device
+    click_tick_act_patient(value: real): string =
+    LET st: state = val(simState), % read current simulation state
+        p: patient = value,
+        st = tick_act_patient(p,st),
+        update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+
+    % Executes pending action on the device
+    click_tick_act_device(value: real, valueD: real): string =
+    LET st: state = val(simState), % read current simulation state
+        p: patient = value,
+        d: device = valueD,
+        st = tick_act_device(d,p,st),
+        update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+
+    % Updates device pan
+    click_tick_pan_device(value: real, valueD: real): string =
+    LET st: state = val(simState), % read current simulation state
+        p: patient = value,
+        d: device = valueD,
+        st = tick_pan_device(d,p,st),
+        update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+
+    % --------------------------------------------- RESET AND POPULATE FUNCTIONS  -------------------------------------------------
+
+    click_reset: string =
+        LET st: state = val(simState), % read current simulation state
+            st = init(0),
+            update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+
+    vs_setup(st: state, valueP: real): state =
+        LET p: patient = valueP,
+            st = patient_enter_device(0, p, st), % enter vs and turn on
+            st = patient_menu_act(select, p, st),
+            st = patient_menu_act(device, p, st),
+            st = st WITH % Turn on VS
+                [pdb := LAMBDA (p1: patient):
+                    IF p1 = p THEN st`pdb(p1) WITH [vital_signs := execute_vs(powr, st`pdb(p1)`vital_signs)] ELSE st`pdb(p1) ENDIF],
+            st = tick_pan_device(0 ,p,st),
+            st = tick_pan_patient(p,st),
+            st = tick_coordinator(st),
+            st = patient_menu_act(edit, p, st),
+            st = patient_menu_act(top, p, st),
+            st = patient_enter_parameter(hrte, p, st),
+            st = patient_menu_act(select, p, st),
+            st = patient_menu_act(parameter, p, st),
+            st = patient_enter_parameter(mde, p, st),
+            st = patient_menu_act(select, p, st),
+            st = patient_menu_act(parameter, p, st),
+            st = act_patient_ok(p, st),
+            st = tick_coordinator(st),
+            st = patient_menu_act(edit, p, st),
+            st = patient_menu_act(main, p, st),
+            st = patient_enter_parameter(hrte, p, st),
+            st = patient_menu_act(select, p, st),
+            st = patient_menu_act(parameter, p, st),
+            st = patient_enter_parameter(blpl, p, st),
+            st = patient_menu_act(select, p, st),
+            st = patient_menu_act(parameter, p, st),
+            st = patient_enter_parameter(blph, p, st),
+            st = patient_menu_act(select, p, st),
+            st = patient_menu_act(parameter, p, st),
+            st = patient_enter_parameter(sp, p, st),
+            st = patient_menu_act(select, p, st),
+            st = patient_menu_act(parameter, p, st),
+            st = patient_enter_parameter(rkrt, p, st),
+            st = patient_menu_act(select, p, st),
+            st = patient_menu_act(parameter, p, st),
+            st = patient_enter_parameter(ptmp, p, st),
+            st = patient_menu_act(select, p, st),
+            st = patient_menu_act(parameter, p, st),
+            st = patient_enter_parameter(mde, p, st),
+            st = patient_menu_act(select, p, st),
+            st = patient_menu_act(parameter, p, st),
+            st = act_patient_ok(p, st),
+            st = tick_coordinator(st)
+        IN st
+
+    ip_setup(st: state, valueP: real, valueD: real): state =
+        LET p: patient = valueP,
+            d: device = valueD,
+            st = patient_enter_device(d, p, st), % enter ip 1 and turn on
+            st = patient_menu_act(select, p, st),
+            st = patient_menu_act(device, p, st),
+            st = st WITH
+                [pdb := LAMBDA (p1: patient):
+                IF p1 = p THEN dev_ex(d, powr, st`pdb(p))
+                    ELSE st`pdb(p1) ENDIF ],
+            st = tick_pan_device(d ,p,st),
+            st = tick_pan_patient(p,st),
+            st = tick_coordinator(st),
+            st = patient_menu_act(edit, p, st),
+            st = patient_menu_act(top, p, st),
+            st = patient_enter_parameter(dpm, p, st),
+            st = patient_menu_act(select, p, st),
+            st = patient_menu_act(parameter, p, st),
+            st = patient_enter_parameter(tme, p, st),
+            st = patient_menu_act(select, p, st),
+            st = patient_menu_act(parameter, p, st),
+            st = act_patient_ok(p, st),
+            st = tick_coordinator(st),
+            st = patient_menu_act(edit, p, st),
+            st = patient_menu_act(main, p, st),
+            st = patient_enter_parameter(rte, p, st),
+            st = patient_menu_act(select, p, st),
+            st = patient_menu_act(parameter, p, st),
+            st = patient_enter_parameter(dpm, p, st),
+            st = patient_menu_act(select, p, st),
+            st = patient_menu_act(parameter, p, st),
+            st = patient_enter_parameter(vtb, p, st),
+            st = patient_menu_act(select, p, st),
+            st = patient_menu_act(parameter, p, st),
+            st = patient_enter_parameter(tme, p, st),
+            st = patient_menu_act(select, p, st),
+            st = patient_menu_act(parameter, p, st),
+            st = patient_enter_action(powr, p, st),
+            st = patient_menu_act(select, p, st),
+            st = patient_menu_act(action, p, st),
+            st = patient_enter_action(start, p, st),
+            st = patient_menu_act(select, p, st),
+            st = patient_menu_act(action, p, st),
+            st = patient_enter_action(hold, p, st),
+            st = patient_menu_act(select, p, st),
+            st = patient_menu_act(action, p, st),
+            st = act_patient_ok(p, st),
+            st = tick_coordinator(st)
+        IN st
+    
+    click_populate_single_patient(valueP: real): string = % return the current state as JSON (initially it is init(0))
+        LET st: state = val(simState), % read current simulation state
+            p: patient = valueP,
+            st = IF p < 4 THEN connect_to_coordinator(p, st) ELSE st ENDIF, % connect patient
+            st = IF p < 4 THEN connect_device_to_patient(p, 0, vital_signs_device, st) ELSE st ENDIF, % connect devices, 3 for p 1, 2 for p 2 and 1 for p 3
+            st = IF p < 4 THEN connect_device_to_patient(p, 1, infusion_pump, st) ELSE st ENDIF,
+            st = IF p < 4 THEN connect_device_to_patient(p, 2, infusion_pump, st) ELSE st ENDIF,
+            st = IF p < 4 THEN vs_setup(st, p) ELSE st ENDIF,
+            st = IF p < 4 THEN ip_setup(st, p, 1) ELSE st ENDIF,
+            update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+
+    click_populate_multi: string =
+        LET st: state = val(simState), % read current simulation state
+            st = init(0),
+            st = connect_to_coordinator(0, st), % connect patient without devices 
+            st = connect_to_coordinator(1, st), % connect patient with 1 ip on and 1 vs on
+            st = connect_device_to_patient(1, 0, vital_signs_device, st), % connect devices, 3 for 1 1, 2 for 1 2 and 1 for 1 3
+            st = connect_device_to_patient(1, 1, infusion_pump, st),
+            st = vs_setup(st, 1),
+            st = ip_setup(st, 1, 1),
+            st = connect_to_coordinator(2, st), % connect patient with 1 ip on and 1 vs on, another ip but off
+            st = connect_device_to_patient(2, 0, vital_signs_device, st), % connect devices, 3 for 2 1, 2 for 2 2 and 1 for 2 3
+            st = connect_device_to_patient(2, 1, infusion_pump, st),
+            st = connect_device_to_patient(2, 2, infusion_pump, st),
+            st = vs_setup(st, 2),
+            st = ip_setup(st, 2, 1),
+            st = connect_to_coordinator(3, st), % connect patient with only on vs on
+            st = connect_device_to_patient(3, 0, vital_signs_device, st), % connect devices, 3 for 3 1, 2 for 3 2 and 1 for 3 3
+            st = vs_setup(st, 3),
+            st = connect_to_coordinator(4, st), % connect patient with 1 ip off and 1 vs on
+            st = connect_device_to_patient(4, 0, vital_signs_device, st), % connect devices, 3 for 4 1, 2 for 4 2 and 1 for 4 3
+            st = connect_device_to_patient(4, 1, infusion_pump, st),
+            st = vs_setup(st, 4),
+            update: boolean = set[state](simState, st) % update simulation state
+        IN print_state(st)
+END sim

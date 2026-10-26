@@ -1,0 +1,1214 @@
+(main
+ (action_id2string_TCC1 0
+  (action_id2string_TCC1-1 nil 3792926758
+   ("" (cond-disjoint-tcc) nil nil) nil nil
+   (action_id2string disjointness
+    "COND main.a = coord_t_and_c_th.powr -> \"powr\", main.a = coord_t_and_c_th.incr -> \"incr\", main.a = coord_t_and_c_th.decr -> \"decr\", main.a = coord_t_and_c_th.bolus -> \"bolus\", main.a = coord_t_and_c_th.confirm -> \"confirm\", main.a = coord_t_and_c_th.choosetime -> \"choosetime\", main.a = coord_t_and_c_th.choosevtbi -> \"choosevtbi\", main.a = coord_t_and_c_th.chooserate -> \"chooserate\", main.a = coord_t_and_c_th.start -> \"start\", main.a = coord_t_and_c_th.hold -> \"hold\", main.a = coord_t_and_c_th.tick -> \"tick\", main.a = coord_t_and_c_th.openclamp -> \"openclamp\", main.a = coord_t_and_c_th.closeclamp -> \"closeclamp\", main.a = coord_t_and_c_th.nil_action -> \"nil_action\" ENDCOND"
+    "nil")))
+ (action_id2string_TCC2 0
+  (action_id2string_TCC2-1 nil 3792926758
+   ("" (cond-coverage-tcc) nil nil) nil nil
+   (action_id2string coverage
+    "COND main.a = coord_t_and_c_th.powr -> \"powr\", main.a = coord_t_and_c_th.incr -> \"incr\", main.a = coord_t_and_c_th.decr -> \"decr\", main.a = coord_t_and_c_th.bolus -> \"bolus\", main.a = coord_t_and_c_th.confirm -> \"confirm\", main.a = coord_t_and_c_th.choosetime -> \"choosetime\", main.a = coord_t_and_c_th.choosevtbi -> \"choosevtbi\", main.a = coord_t_and_c_th.chooserate -> \"chooserate\", main.a = coord_t_and_c_th.start -> \"start\", main.a = coord_t_and_c_th.hold -> \"hold\", main.a = coord_t_and_c_th.tick -> \"tick\", main.a = coord_t_and_c_th.openclamp -> \"openclamp\", main.a = coord_t_and_c_th.closeclamp -> \"closeclamp\", main.a = coord_t_and_c_th.nil_action -> \"nil_action\" ENDCOND"
+    "nil")))
+ (rel_op_type2string_TCC1 0
+  (rel_op_type2string_TCC1-1 nil 3813307008
+   ("" (cond-disjoint-tcc) nil nil) nil nil
+   (rel_op_type2string disjointness
+    "COND main.r = coord_t_and_c_th.lt -> \"lt\", main.r = coord_t_and_c_th.le -> \"le\", main.r = coord_t_and_c_th.gt -> \"gt\", main.r = coord_t_and_c_th.ge -> \"ge\", main.r = coord_t_and_c_th.eq -> \"eq\", main.r = coord_t_and_c_th.neq -> \"neq\", main.r = coord_t_and_c_th.no_rel -> \"no_rel\" ENDCOND"
+    "nil")))
+ (rel_op_type2string_TCC2 0
+  (rel_op_type2string_TCC2-1 nil 3813307008
+   ("" (cond-coverage-tcc) nil nil) nil nil
+   (rel_op_type2string coverage
+    "COND main.r = coord_t_and_c_th.lt -> \"lt\", main.r = coord_t_and_c_th.le -> \"le\", main.r = coord_t_and_c_th.gt -> \"gt\", main.r = coord_t_and_c_th.ge -> \"ge\", main.r = coord_t_and_c_th.eq -> \"eq\", main.r = coord_t_and_c_th.neq -> \"neq\", main.r = coord_t_and_c_th.no_rel -> \"no_rel\" ENDCOND"
+    "nil")))
+ (device_type2string_TCC1 0
+  (device_type2string_TCC1-1 nil 3792926758
+   ("" (cond-coverage-tcc) nil nil) nil nil
+   (device_type2string disjointness
+    "COND main.dt = devices_th[8, 8, 8].infusion_pump -> \"infusion_pump\", main.dt = devices_th[8, 8, 8].vital_signs_device -> \"vital_signs_device\", main.dt = devices_th[8, 8, 8].no_device -> \"no_device\" ENDCOND"
+    "nil")))
+ (device_type2string_TCC2 0
+  (device_type2string_TCC2-1 nil 3797656964
+   ("" (cond-coverage-tcc) nil nil) nil nil
+   (device_type2string coverage
+    "COND main.dt = devices_th[8, 8, 8].infusion_pump -> \"infusion_pump\", main.dt = devices_th[8, 8, 8].vital_signs_device -> \"vital_signs_device\", main.dt = devices_th[8, 8, 8].no_device -> \"no_device\" ENDCOND"
+    "nil")))
+ (disp_focus_type2string_TCC1 0
+  (disp_focus_type2string_TCC1-1 nil 3803640740
+   ("" (cond-disjoint-tcc) nil nil) nil nil
+   (disp_focus_type2string disjointness
+    "COND main.df = coord_t_and_c_th.no_focus -> \"no_focus\", main.df = coord_t_and_c_th.top_focus -> \"top_focus\", main.df = coord_t_and_c_th.patient_focus -> \"patient_focus\", main.df = coord_t_and_c_th.device_focus -> \"device_focus\" ENDCOND"
+    "nil")))
+ (disp_focus_type2string_TCC2 0
+  (disp_focus_type2string_TCC2-1 nil 3803640740
+   ("" (cond-coverage-tcc) nil nil) nil nil
+   (disp_focus_type2string coverage
+    "COND main.df = coord_t_and_c_th.no_focus -> \"no_focus\", main.df = coord_t_and_c_th.top_focus -> \"top_focus\", main.df = coord_t_and_c_th.patient_focus -> \"patient_focus\", main.df = coord_t_and_c_th.device_focus -> \"device_focus\" ENDCOND"
+    "nil")))
+ (mode2string_TCC1 0
+  (mode2string_TCC1-1 nil 3792926758 ("" (cond-disjoint-tcc) nil nil)
+   nil nil
+   (mode2string disjointness
+    "COND main.m = coord_t_and_c_th.off -> \"off\", main.m = coord_t_and_c_th.pause -> \"pause\", main.m = coord_t_and_c_th.infuse -> \"infuse\" ENDCOND"
+    "nil")))
+ (mode2string_TCC2 0
+  (mode2string_TCC2-1 nil 3792926758 ("" (cond-coverage-tcc) nil nil)
+   nil nil
+   (mode2string coverage
+    "COND main.m = coord_t_and_c_th.off -> \"off\", main.m = coord_t_and_c_th.pause -> \"pause\", main.m = coord_t_and_c_th.infuse -> \"infuse\" ENDCOND"
+    "nil")))
+ (dispmode2string_TCC1 0
+  (dispmode2string_TCC1-1 nil 3792926758
+   ("" (cond-disjoint-tcc) nil nil) nil nil
+   (dispmode2string disjointness
+    "COND main.dm = coord_t_and_c_th.dblank -> \"dblank\", main.dm = coord_t_and_c_th.mainmenu -> \"mainmenu\", main.dm = coord_t_and_c_th.dvtbi -> \"dvtbi\", main.dm = coord_t_and_c_th.drate -> \"drate\", main.dm = coord_t_and_c_th.dtime -> \"dtime\", main.dm = coord_t_and_c_th.dinfusing -> \"dinfusing\", main.dm = coord_t_and_c_th.dalarm -> \"dalarm\", main.dm = coord_t_and_c_th.dkvo -> \"dkvo\" ENDCOND"
+    "nil")))
+ (dispmode2string_TCC2 0
+  (dispmode2string_TCC2-1 nil 3792926758
+   ("" (cond-coverage-tcc) nil nil) nil nil
+   (dispmode2string coverage
+    "COND main.dm = coord_t_and_c_th.dblank -> \"dblank\", main.dm = coord_t_and_c_th.mainmenu -> \"mainmenu\", main.dm = coord_t_and_c_th.dvtbi -> \"dvtbi\", main.dm = coord_t_and_c_th.drate -> \"drate\", main.dm = coord_t_and_c_th.dtime -> \"dtime\", main.dm = coord_t_and_c_th.dinfusing -> \"dinfusing\", main.dm = coord_t_and_c_th.dalarm -> \"dalarm\", main.dm = coord_t_and_c_th.dkvo -> \"dkvo\" ENDCOND"
+    "nil")))
+ (clamp_state2string_TCC1 0
+  (clamp_state2string_TCC1-1 nil 3792926758
+   ("" (cond-disjoint-tcc) nil nil) nil nil
+   (clamp_state2string disjointness
+    "COND main.c = coord_t_and_c_th.open -> \"open\", main.c = coord_t_and_c_th.closed -> \"closed\" ENDCOND"
+    "nil")))
+ (clamp_state2string_TCC2 0
+  (clamp_state2string_TCC2-1 nil 3792926758
+   ("" (cond-coverage-tcc) nil nil) nil nil
+   (clamp_state2string coverage
+    "COND main.c = coord_t_and_c_th.open -> \"open\", main.c = coord_t_and_c_th.closed -> \"closed\" ENDCOND"
+    "nil")))
+ (priority_type2string_TCC1 0
+  (priority_type2string_TCC1-1 nil 3792926758
+   ("" (cond-disjoint-tcc) nil nil) nil nil
+   (priority_type2string disjointness
+    "COND main.p = coord_t_and_c_th.rte -> \"rte\", main.p = coord_t_and_c_th.tme -> \"tme\" ENDCOND"
+    "nil")))
+ (priority_type2string_TCC2 0
+  (priority_type2string_TCC2-1 nil 3792926758
+   ("" (cond-coverage-tcc) nil nil) nil nil
+   (priority_type2string coverage
+    "COND main.p = coord_t_and_c_th.rte -> \"rte\", main.p = coord_t_and_c_th.tme -> \"tme\" ENDCOND"
+    "nil")))
+ (menu2string_TCC1 0
+  (menu2string_TCC1-1 nil 3813307008 ("" (cond-disjoint-tcc) nil nil)
+   nil nil
+   (menu2string disjointness
+    "COND main.m = coord_t_and_c_th.no_action -> \"no_action\", main.m = coord_t_and_c_th.connect -> \"connect\", main.m = coord_t_and_c_th.act -> \"act\", main.m = coord_t_and_c_th.quit -> \"quit\", main.m = coord_t_and_c_th.ok -> \"ok\", main.m = coord_t_and_c_th.delete -> \"delete\", main.m = coord_t_and_c_th.cursor_up -> \"cursor_up\", main.m = coord_t_and_c_th.cursor_down -> \"cursor_down\", main.m = coord_t_and_c_th.select -> \"select\", main.m = coord_t_and_c_th.enter -> \"enter\", main.m = coord_t_and_c_th.top -> \"top\", main.m = coord_t_and_c_th.main -> \"main\", main.m = coord_t_and_c_th.patient -> \"patient\", main.m = coord_t_and_c_th.device -> \"device\", main.m = coord_t_and_c_th.region -> \"region\", main.m = coord_t_and_c_th.rule -> \"rule\", main.m = coord_t_and_c_th.constraint -> \"constraint\", main.m = coord_t_and_c_th.edit -> \"edit\", main.m = coord_t_and_c_th.clear -> \"clear\", main.m = coord_t_and_c_th.display -> \"display\", main.m = coord_t_and_c_th.parameter -> \"parameter\", main.m = coord_t_and_c_th.action -> \"action\", main.m = coord_t_and_c_th.relation -> \"relation\", main.m = coord_t_and_c_th.num_value -> \"num_value\", main.m = coord_t_and_c_th.enum_value -> \"enum_value\", main.m = coord_t_and_c_th.escape -> \"escape\", main.m = coord_t_and_c_th.pump -> \"pump\", main.m = coord_t_and_c_th.vs_device -> \"vs_device\" ENDCOND"
+    "nil")))
+ (menu2string_TCC2 0
+  (menu2string_TCC2-1 nil 3813307008 ("" (cond-coverage-tcc) nil nil)
+   nil nil
+   (menu2string coverage
+    "COND main.m = coord_t_and_c_th.no_action -> \"no_action\", main.m = coord_t_and_c_th.connect -> \"connect\", main.m = coord_t_and_c_th.act -> \"act\", main.m = coord_t_and_c_th.quit -> \"quit\", main.m = coord_t_and_c_th.ok -> \"ok\", main.m = coord_t_and_c_th.delete -> \"delete\", main.m = coord_t_and_c_th.cursor_up -> \"cursor_up\", main.m = coord_t_and_c_th.cursor_down -> \"cursor_down\", main.m = coord_t_and_c_th.select -> \"select\", main.m = coord_t_and_c_th.enter -> \"enter\", main.m = coord_t_and_c_th.top -> \"top\", main.m = coord_t_and_c_th.main -> \"main\", main.m = coord_t_and_c_th.patient -> \"patient\", main.m = coord_t_and_c_th.device -> \"device\", main.m = coord_t_and_c_th.region -> \"region\", main.m = coord_t_and_c_th.rule -> \"rule\", main.m = coord_t_and_c_th.constraint -> \"constraint\", main.m = coord_t_and_c_th.edit -> \"edit\", main.m = coord_t_and_c_th.clear -> \"clear\", main.m = coord_t_and_c_th.display -> \"display\", main.m = coord_t_and_c_th.parameter -> \"parameter\", main.m = coord_t_and_c_th.action -> \"action\", main.m = coord_t_and_c_th.relation -> \"relation\", main.m = coord_t_and_c_th.num_value -> \"num_value\", main.m = coord_t_and_c_th.enum_value -> \"enum_value\", main.m = coord_t_and_c_th.escape -> \"escape\", main.m = coord_t_and_c_th.pump -> \"pump\", main.m = coord_t_and_c_th.vs_device -> \"vs_device\" ENDCOND"
+    "nil")))
+ (value_type2string_TCC1 0
+  (value_type2string_TCC1-1 nil 3792926758
+   ("" (cond-disjoint-tcc) nil nil) nil nil
+   (value_type2string disjointness
+    "COND main.p = coord_t_and_c_th.numeral -> \"numeral\", main.p = coord_t_and_c_th.enumerated -> \"enumerated\", main.p = coord_t_and_c_th.empty -> \"empty\" ENDCOND"
+    "nil")))
+ (value_type2string_TCC2 0
+  (value_type2string_TCC2-1 nil 3792926758
+   ("" (cond-coverage-tcc) nil nil) nil nil
+   (value_type2string coverage
+    "COND main.p = coord_t_and_c_th.numeral -> \"numeral\", main.p = coord_t_and_c_th.enumerated -> \"enumerated\", main.p = coord_t_and_c_th.empty -> \"empty\" ENDCOND"
+    "nil")))
+ (par2string_TCC1 0
+  (par2string_TCC1-1 nil 3792926758 ("" (cond-disjoint-tcc) nil nil)
+   nil nil
+   (par2string disjointness
+    "COND main.a = coord_t_and_c_th.rte -> \"rte\", main.a = coord_t_and_c_th.vtb -> \"vtb\", main.a = coord_t_and_c_th.tme -> \"tme\", main.a = coord_t_and_c_th.dpm -> \"dpm\", main.a = coord_t_and_c_th.mde -> \"mde\", main.a = coord_t_and_c_th.er -> \"er\", main.a = coord_t_and_c_th.hrte -> \"hrte\", main.a = coord_t_and_c_th.blpl -> \"blpl\", main.a = coord_t_and_c_th.blph -> \"blph\", main.a = coord_t_and_c_th.sp -> \"sp\", main.a = coord_t_and_c_th.rkrt -> \"rkrt\", main.a = coord_t_and_c_th.ptmp -> \"ptmp\" ENDCOND"
+    "nil")))
+ (par2string_TCC2 0
+  (par2string_TCC2-1 nil 3792926758 ("" (cond-coverage-tcc) nil nil)
+   nil nil
+   (par2string coverage
+    "COND main.a = coord_t_and_c_th.rte -> \"rte\", main.a = coord_t_and_c_th.vtb -> \"vtb\", main.a = coord_t_and_c_th.tme -> \"tme\", main.a = coord_t_and_c_th.dpm -> \"dpm\", main.a = coord_t_and_c_th.mde -> \"mde\", main.a = coord_t_and_c_th.er -> \"er\", main.a = coord_t_and_c_th.hrte -> \"hrte\", main.a = coord_t_and_c_th.blpl -> \"blpl\", main.a = coord_t_and_c_th.blph -> \"blph\", main.a = coord_t_and_c_th.sp -> \"sp\", main.a = coord_t_and_c_th.rkrt -> \"rkrt\", main.a = coord_t_and_c_th.ptmp -> \"ptmp\" ENDCOND"
+    "nil")))
+ (enum2string_TCC1 0
+  (enum2string_TCC1-1 nil 3792926758 ("" (cond-disjoint-tcc) nil nil)
+   nil nil
+   (enum2string disjointness
+    "COND main.e = coord_t_and_c_th.xoff -> \"xoff\", main.e = coord_t_and_c_th.xpause -> \"xpause\", main.e = coord_t_and_c_th.xinfuse -> \"xinfuse\", main.e = coord_t_and_c_th.xdblank -> \"xdblank\", main.e = coord_t_and_c_th.xmainmenu -> \"xmainmenu\", main.e = coord_t_and_c_th.xdvtbi -> \"xdvtbi\", main.e = coord_t_and_c_th.xdrate -> \"xdrate\", main.e = coord_t_and_c_th.xdtime -> \"xdtime\", main.e = coord_t_and_c_th.xdinfusing -> \"xdinfusing\", main.e = coord_t_and_c_th.xdalarm -> \"xdalarm\", main.e = coord_t_and_c_th.xdkvo -> \"xdkvo\", main.e = coord_t_and_c_th.xopen -> \"xopen\", main.e = coord_t_and_c_th.xclosed -> \"xclosed\", main.e = coord_t_and_c_th.xrte -> \"xrte\", main.e = coord_t_and_c_th.xtme -> \"xtme\", main.e = coord_t_and_c_th.xisconnected -> \"xisconnected\", main.e = coord_t_and_c_th.xactive -> \"xactive\", main.e = coord_t_and_c_th.xnumeral -> \"xnumeral\", main.e = coord_t_and_c_th.xenumerated -> \"xenumerated\", main.e = coord_t_and_c_th.xnilval -> \"xnilval\", main.e = coord_t_and_c_th.xalarm -> \"xalarm\", main.e = coord_t_and_c_th.xok -> \"xok\" ENDCOND"
+    "nil")))
+ (enum2string_TCC2 0
+  (enum2string_TCC2-1 nil 3792926758 ("" (cond-coverage-tcc) nil nil)
+   nil nil
+   (enum2string coverage
+    "COND main.e = coord_t_and_c_th.xoff -> \"xoff\", main.e = coord_t_and_c_th.xpause -> \"xpause\", main.e = coord_t_and_c_th.xinfuse -> \"xinfuse\", main.e = coord_t_and_c_th.xdblank -> \"xdblank\", main.e = coord_t_and_c_th.xmainmenu -> \"xmainmenu\", main.e = coord_t_and_c_th.xdvtbi -> \"xdvtbi\", main.e = coord_t_and_c_th.xdrate -> \"xdrate\", main.e = coord_t_and_c_th.xdtime -> \"xdtime\", main.e = coord_t_and_c_th.xdinfusing -> \"xdinfusing\", main.e = coord_t_and_c_th.xdalarm -> \"xdalarm\", main.e = coord_t_and_c_th.xdkvo -> \"xdkvo\", main.e = coord_t_and_c_th.xopen -> \"xopen\", main.e = coord_t_and_c_th.xclosed -> \"xclosed\", main.e = coord_t_and_c_th.xrte -> \"xrte\", main.e = coord_t_and_c_th.xtme -> \"xtme\", main.e = coord_t_and_c_th.xisconnected -> \"xisconnected\", main.e = coord_t_and_c_th.xactive -> \"xactive\", main.e = coord_t_and_c_th.xnumeral -> \"xnumeral\", main.e = coord_t_and_c_th.xenumerated -> \"xenumerated\", main.e = coord_t_and_c_th.xnilval -> \"xnilval\", main.e = coord_t_and_c_th.xalarm -> \"xalarm\", main.e = coord_t_and_c_th.xok -> \"xok\" ENDCOND"
+    "nil")))
+ (msghdr2string_TCC1 0
+  (msghdr2string_TCC1-1 nil 3792926758 ("" (cond-disjoint-tcc) nil nil)
+   nil nil
+   (msghdr2string disjointness
+    "COND main.mh = node_th[8, 8, 8].nomsg -> \"nomsg\", main.mh = node_th[8, 8, 8].tmmsg -> \"tmmsg\", main.mh = node_th[8, 8, 8].pmmsg -> \"pmmsg\", main.mh = node_th[8, 8, 8].mmmsg -> \"mmmsg\", main.mh = node_th[8, 8, 8].updmsg -> \"updmsg\", main.mh = node_th[8, 8, 8].actmsg -> \"actmsg\", main.mh = node_th[8, 8, 8].cnstmsg -> \"cnstmsg\" ENDCOND"
+    "nil")))
+ (msghdr2string_TCC2 0
+  (msghdr2string_TCC2-1 nil 3792926758 ("" (cond-coverage-tcc) nil nil)
+   nil nil
+   (msghdr2string coverage
+    "COND main.mh = node_th[8, 8, 8].nomsg -> \"nomsg\", main.mh = node_th[8, 8, 8].tmmsg -> \"tmmsg\", main.mh = node_th[8, 8, 8].pmmsg -> \"pmmsg\", main.mh = node_th[8, 8, 8].mmmsg -> \"mmmsg\", main.mh = node_th[8, 8, 8].updmsg -> \"updmsg\", main.mh = node_th[8, 8, 8].actmsg -> \"actmsg\", main.mh = node_th[8, 8, 8].cnstmsg -> \"cnstmsg\" ENDCOND"
+    "nil")))
+ (b_status2string_TCC1 0
+  (b_status2string_TCC1-1 nil 3792926758
+   ("" (cond-disjoint-tcc) nil nil) nil nil
+   (b_status2string disjointness
+    "COND main.bs = node_th[8, 8, 8].full -> \"full\", main.bs = node_th[8, 8, 8].empty -> \"empty\", main.bs = node_th[8, 8, 8].functioning -> \"functioning\" ENDCOND"
+    "nil")))
+ (b_status2string_TCC2 0
+  (b_status2string_TCC2-1 nil 3792926758
+   ("" (cond-coverage-tcc) nil nil) nil nil
+   (b_status2string coverage
+    "COND main.bs = node_th[8, 8, 8].full -> \"full\", main.bs = node_th[8, 8, 8].empty -> \"empty\", main.bs = node_th[8, 8, 8].functioning -> \"functioning\" ENDCOND"
+    "nil")))
+ (nw_error_type2string_TCC1 0
+  (nw_error_type2string_TCC1-1 nil 3792926758
+   ("" (cond-disjoint-tcc) nil nil) nil nil
+   (nw_error_type2string disjointness
+    "COND main.ne = node_th[8, 8, 8].clear -> \"clear\", main.ne = node_th[8, 8, 8].not_connected -> \"not_connected\", main.ne = node_th[8, 8, 8].no_msg -> \"no_msg\", main.ne = node_th[8, 8, 8].empty_q -> \"empty_q\", main.ne = node_th[8, 8, 8].full_q -> \"full_q\", main.ne = node_th[8, 8, 8].spurious_action -> \"spurious_action\" ENDCOND"
+    "nil")))
+ (nw_error_type2string_TCC2 0
+  (nw_error_type2string_TCC2-1 nil 3792926758
+   ("" (cond-coverage-tcc) nil nil) nil nil
+   (nw_error_type2string coverage
+    "COND main.ne = node_th[8, 8, 8].clear -> \"clear\", main.ne = node_th[8, 8, 8].not_connected -> \"not_connected\", main.ne = node_th[8, 8, 8].no_msg -> \"no_msg\", main.ne = node_th[8, 8, 8].empty_q -> \"empty_q\", main.ne = node_th[8, 8, 8].full_q -> \"full_q\", main.ne = node_th[8, 8, 8].spurious_action -> \"spurious_action\" ENDCOND"
+    "nil")))
+ (node_printer_bool_TCC1 0
+  (node_printer_bool_TCC1-1 nil 3792926758 ("" (subtype-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil)
+    (node type-eq-decl nil node_th nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (nlimit const-decl "nat" main nil))
+   nil
+   (node_printer_bool subtype "main.n"
+    "naturalnumbers.upto(main.nlimit)")))
+ (node_printer_bool_TCC2 0
+  (node_printer_bool_TCC2-1 nil 3792926758
+   ("" (termination-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil)
+    (node type-eq-decl nil node_th nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (nlimit const-decl "nat" main nil))
+   nil
+   (node_printer_bool subtype "main.n"
+    "naturalnumbers.upto(main.nlimit)")))
+ (node_printer_bool_TCC3 0
+  (node_printer_bool_TCC3-1 nil 3792926758
+   ("" (cond-disjoint-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (node type-eq-decl nil node_th nil)
+    (int_minus_int_is_int application-judgement "int" integers nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil))
+   nil
+   (node_printer_bool subtype "(number_fields.-)(main.n, 1)"
+    "node[8, 8, 8]")))
+ (node_printer_bool_TCC4 0
+  (node_printer_bool_TCC4-1 nil 3792926758
+   ("" (cond-coverage-tcc) nil nil) nil nil
+   (node_printer_bool termination
+    "main.node_printer_bool(main.l, (number_fields.-)(main.n, 1))"
+    "nil")))
+ (node_printer_bool_TCC5 0
+  (node_printer_bool_TCC5-1 nil 3797656964
+   ("" (cond-disjoint-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil)
+    (node type-eq-decl nil node_th nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil))
+   nil
+   (node_printer_bool disjointness
+    "COND main.n = 0 -> IF main.l(main.n) THEN stdstr.concat(stdstr.concat(stdstr.concat(\"node(\", stdstr.real2str(main.n)), \")\"), stdstr.newline) ELSE \" \" ENDIF, reals.>(main.n, 0) -> IF main.l(main.n) THEN stdstr.concat(stdstr.concat(stdstr.concat(stdstr.concat(stdstr.concat(\"node(\", stdstr.real2str(main.n)), \")\"), stdstr.space), main.node_printer_bool(main.l, (number_fields.-)(main.n, 1))), stdstr.newline) ELSE main.node_printer_bool(main.l, (number_fields.-)(main.n, 1)) ENDIF ENDCOND"
+    "nil")))
+ (node_printer_bool_TCC6 0
+  (node_printer_bool_TCC6-1 nil 3797656964
+   ("" (cond-coverage-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil)
+    (node type-eq-decl nil node_th nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil
+   (node_printer_bool coverage
+    "COND main.n = 0 -> IF main.l(main.n) THEN stdstr.concat(stdstr.concat(stdstr.concat(\"node(\", stdstr.real2str(main.n)), \")\"), stdstr.newline) ELSE \" \" ENDIF, reals.>(main.n, 0) -> IF main.l(main.n) THEN stdstr.concat(stdstr.concat(stdstr.concat(stdstr.concat(stdstr.concat(\"node(\", stdstr.real2str(main.n)), \")\"), stdstr.space), main.node_printer_bool(main.l, (number_fields.-)(main.n, 1))), stdstr.newline) ELSE main.node_printer_bool(main.l, (number_fields.-)(main.n, 1)) ENDIF ENDCOND"
+    "nil")))
+ (device_printer_bool_TCC1 0
+  (device_printer_bool_TCC1-1 nil 3813307008 ("" (subtype-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil)
+    (device type-eq-decl nil devices_th nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (dlimit const-decl "nat" main nil))
+   nil
+   (device_printer_bool subtype "main.d"
+    "naturalnumbers.upto(main.dlimit)")))
+ (device_printer_bool_TCC2 0
+  (device_printer_bool_TCC2-1 nil 3813307008 ("" (subtype-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil)
+    (device type-eq-decl nil devices_th nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (dlimit const-decl "nat" main nil))
+   nil
+   (device_printer_bool subtype "main.d"
+    "naturalnumbers.upto(main.dlimit)")))
+ (device_printer_bool_TCC3 0
+  (device_printer_bool_TCC3-1 nil 3813307008 ("" (subtype-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (device type-eq-decl nil devices_th nil)
+    (int_minus_int_is_int application-judgement "int" integers nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil))
+   nil
+   (device_printer_bool subtype "(number_fields.-)(main.d, 1)"
+    "device[8, 8, 8]")))
+ (device_printer_bool_TCC4 0
+  (device_printer_bool_TCC4-1 nil 3813307008
+   ("" (termination-tcc) nil nil) nil nil
+   (device_printer_bool termination
+    "main.device_printer_bool(main.l, (number_fields.-)(main.d, 1))"
+    "nil")))
+ (devs_printer_type_TCC1 0
+  (devs_printer_type_TCC1-1 nil 3797656964 ("" (subtype-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (node type-eq-decl nil node_th nil)
+    (int_minus_int_is_int application-judgement "int" integers nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (/= const-decl "boolean" notequal nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil))
+   nil
+   (devs_printer_type subtype "(number_fields.-)(main.n, 1)"
+    "node[8, 8, 8]")))
+ (devs_printer_type_TCC2 0
+  (devs_printer_type_TCC2-1 nil 3797656964
+   ("" (termination-tcc) nil nil)
+   ((/= const-decl "boolean" notequal nil)) nil
+   (devs_printer_type termination
+    "main.devs_printer_type(main.l, (number_fields.-)(main.n, 1))"
+    "nil")))
+ (patient_printer_bool_TCC1 0
+  (patient_printer_bool_TCC1-1 nil 3792926758
+   ("" (subtype-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil)
+    (patient type-eq-decl nil patient_th nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (plimit const-decl "nat" main nil))
+   nil
+   (patient_printer_bool subtype "main.p"
+    "naturalnumbers.upto(main.plimit)")))
+ (patient_printer_bool_TCC2 0
+  (patient_printer_bool_TCC2-1 nil 3792926758
+   ("" (termination-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil)
+    (patient type-eq-decl nil patient_th nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (plimit const-decl "nat" main nil))
+   nil
+   (patient_printer_bool subtype "main.p"
+    "naturalnumbers.upto(main.plimit)")))
+ (patient_printer_bool_TCC3 0
+  (patient_printer_bool_TCC3-1 nil 3792926758
+   ("" (cond-disjoint-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (patient type-eq-decl nil patient_th nil)
+    (int_minus_int_is_int application-judgement "int" integers nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil))
+   nil
+   (patient_printer_bool subtype "(number_fields.-)(main.p, 1)"
+    "patient[8, 8, 8]")))
+ (patient_printer_bool_TCC4 0
+  (patient_printer_bool_TCC4-1 nil 3792926758
+   ("" (cond-coverage-tcc) nil nil) nil nil
+   (patient_printer_bool termination
+    "main.patient_printer_bool(main.l, (number_fields.-)(main.p, 1))"
+    "nil")))
+ (connected_printer_bool_TCC1 0
+  (connected_printer_bool_TCC1-1 nil 3792926758
+   ("" (subtype-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil)
+    (node type-eq-decl nil node_th nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (nlimit const-decl "nat" main nil))
+   nil
+   (connected_printer_bool subtype "main.n2"
+    "naturalnumbers.upto(main.nlimit)")))
+ (connected_printer_bool_TCC2 0
+  (connected_printer_bool_TCC2-1 nil 3792926758
+   ("" (termination-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil)
+    (node type-eq-decl nil node_th nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (nlimit const-decl "nat" main nil))
+   nil
+   (connected_printer_bool subtype "main.n2"
+    "naturalnumbers.upto(main.nlimit)")))
+ (connected_printer_bool_TCC3 0
+  (connected_printer_bool_TCC3-1 nil 3797656964
+   ("" (subtype-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (node type-eq-decl nil node_th nil)
+    (int_minus_int_is_int application-judgement "int" integers nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil))
+   nil
+   (connected_printer_bool subtype "(number_fields.-)(main.n1, 1)"
+    "node[8, 8, 8]")))
+ (connected_printer_bool_TCC4 0
+  (connected_printer_bool_TCC4-1 nil 3797656964
+   ("" (termination-tcc) nil nil) nil nil
+   (connected_printer_bool termination
+    "main.connected_printer_bool(main.l, (number_fields.-)(main.n1, 1), main.n2)"
+    "nil")))
+ (nodes_link_printer_TCC1 0
+  (nodes_link_printer_TCC1-1 nil 3792926758 ("" (subtype-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (node type-eq-decl nil node_th nil)
+    (int_minus_int_is_int application-judgement "int" integers nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil))
+   nil
+   (nodes_link_printer subtype "(number_fields.-)(main.n2, 1)"
+    "node[8, 8, 8]")))
+ (nodes_link_printer_TCC2 0
+  (nodes_link_printer_TCC2-1 nil 3792926758
+   ("" (termination-tcc) nil nil) nil nil
+   (nodes_link_printer termination
+    "main.nodes_link_printer(main.l, main.n1, (number_fields.-)(main.n2, 1))"
+    "nil")))
+ (connected2string_TCC1 0
+  (connected2string_TCC1-1 nil 3792926758 ("" (subtype-tcc) nil nil)
+   ((nlimit const-decl "nat" coord_t_and_c_th nil)
+    (nlimit const-decl "nat" main nil))
+   nil
+   (connected2string subtype "main.c"
+    "[[naturalnumbers.upto(main.nlimit), naturalnumbers.upto(main.nlimit)] -> booleans.bool]")))
+ (connected2string_TCC2 0
+  (connected2string_TCC2-1 nil 3797656964 ("" (subtype-tcc) nil nil)
+   ((nlimit const-decl "nat" main nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil (connected2string subtype "main.nlimit" "node[8, 8, 8]")))
+ (act_buff_printer_TCC1 0
+  (act_buff_printer_TCC1-1 nil 3792926758 ("" (subtype-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (mindex const-decl "nat" coord_t_and_c_th nil)
+    (index type-eq-decl nil node_th nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (mindex const-decl "nat" main nil))
+   nil
+   (act_buff_printer subtype "main.i"
+    "naturalnumbers.upto(main.mindex)")))
+ (act_buff_printer_TCC2 0
+  (act_buff_printer_TCC2-1 nil 3792926758
+   ("" (termination-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (mindex const-decl "nat" coord_t_and_c_th nil)
+    (index type-eq-decl nil node_th nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (mindex const-decl "nat" main nil))
+   nil
+   (act_buff_printer subtype "main.i"
+    "naturalnumbers.upto(main.mindex)")))
+ (act_buff_printer_TCC3 0
+  (act_buff_printer_TCC3-1 nil 3792926758
+   ("" (cond-disjoint-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (index type-eq-decl nil node_th nil)
+    (int_minus_int_is_int application-judgement "int" integers nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (/= const-decl "boolean" notequal nil)
+    (mindex const-decl "nat" coord_t_and_c_th nil))
+   nil
+   (act_buff_printer subtype "(number_fields.-)(main.i, 1)"
+    "index[8, 8, 8]")))
+ (act_buff_printer_TCC4 0
+  (act_buff_printer_TCC4-1 nil 3792926758
+   ("" (cond-coverage-tcc) nil nil)
+   ((/= const-decl "boolean" notequal nil)) nil
+   (act_buff_printer termination
+    "main.act_buff_printer(main.l, (number_fields.-)(main.i, 1))"
+    "nil")))
+ (act_buff_printer_TCC5 0
+  (act_buff_printer_TCC5-1 nil 3797658046
+   ("" (cond-disjoint-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (mindex const-decl "nat" coord_t_and_c_th nil)
+    (index type-eq-decl nil node_th nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil))
+   nil
+   (act_buff_printer disjointness
+    "COND main.i = 0 -> IF main.l(main.i)`mhdr /= node_th[8, 8, 8].nomsg THEN stdstr.concat(stdstr.concat(stdstr.concat(stdstr.concat(\"index(\", stdstr.real2str(main.i)), \") := \"), main.act_msg_type2string(main.l(main.i))), stdstr.newline) ELSE \"\" ENDIF, reals.>(main.i, 0) -> IF main.l(main.i)`mhdr /= node_th[8, 8, 8].nomsg THEN stdstr.concat(stdstr.concat(stdstr.concat(stdstr.concat(stdstr.concat(stdstr.concat(\"index(\", stdstr.real2str(main.i)), \") := \"), main.act_msg_type2string(main.l(main.i))), stdstr.space), main.act_buff_printer(main.l, (number_fields.-)(main.i, 1))), stdstr.newline) ELSE main.act_buff_printer(main.l, (number_fields.-)(main.i, 1)) ENDIF ENDCOND"
+    "nil")))
+ (act_buff_printer_TCC6 0
+  (act_buff_printer_TCC6-1 nil 3797658046
+   ("" (cond-coverage-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (mindex const-decl "nat" coord_t_and_c_th nil)
+    (index type-eq-decl nil node_th nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil
+   (act_buff_printer coverage
+    "COND main.i = 0 -> IF main.l(main.i)`mhdr /= node_th[8, 8, 8].nomsg THEN stdstr.concat(stdstr.concat(stdstr.concat(stdstr.concat(\"index(\", stdstr.real2str(main.i)), \") := \"), main.act_msg_type2string(main.l(main.i))), stdstr.newline) ELSE \"\" ENDIF, reals.>(main.i, 0) -> IF main.l(main.i)`mhdr /= node_th[8, 8, 8].nomsg THEN stdstr.concat(stdstr.concat(stdstr.concat(stdstr.concat(stdstr.concat(stdstr.concat(\"index(\", stdstr.real2str(main.i)), \") := \"), main.act_msg_type2string(main.l(main.i))), stdstr.space), main.act_buff_printer(main.l, (number_fields.-)(main.i, 1))), stdstr.newline) ELSE main.act_buff_printer(main.l, (number_fields.-)(main.i, 1)) ENDIF ENDCOND"
+    "nil")))
+ (pan_buff_printer_TCC1 0
+  (pan_buff_printer_TCC1-1 nil 3792926758 ("" (subtype-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (index type-eq-decl nil node_th nil)
+    (int_minus_int_is_int application-judgement "int" integers nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (/= const-decl "boolean" notequal nil)
+    (mindex const-decl "nat" coord_t_and_c_th nil))
+   nil
+   (pan_buff_printer subtype "(number_fields.-)(main.i, 1)"
+    "index[8, 8, 8]")))
+ (pan_buff_printer_TCC2 0
+  (pan_buff_printer_TCC2-1 nil 3792926758
+   ("" (termination-tcc) nil nil)
+   ((/= const-decl "boolean" notequal nil)) nil
+   (pan_buff_printer termination
+    "main.pan_buff_printer(main.l, (number_fields.-)(main.i, 1))"
+    "nil")))
+ (patient_pan_printer_TCC1 0
+  (patient_pan_printer_TCC1-1 nil 3792926758 ("" (subtype-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil)
+    (patient type-eq-decl nil patient_th nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (mindex const-decl "nat" main nil))
+   nil
+   (patient_pan_printer subtype "main.p"
+    "naturalnumbers.upto(main.mindex)")))
+ (patient_pan_printer_TCC2 0
+  (patient_pan_printer_TCC2-1 nil 3792926758 ("" (subtype-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil)
+    (patient type-eq-decl nil patient_th nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (mindex const-decl "nat" main nil))
+   nil
+   (patient_pan_printer subtype "main.p"
+    "naturalnumbers.upto(main.mindex)")))
+ (patient_mode_type2string_TCC1 0
+  (patient_mode_type2string_TCC1-1 nil 3792926758
+   ("" (cond-disjoint-tcc) nil nil) nil nil
+   (patient_mode_type2string disjointness
+    "COND main.m = coord_t_and_c_th.error -> \"error\", main.m = coord_t_and_c_th.top -> \"top\", main.m = coord_t_and_c_th.p_mode -> \"p_mode\", main.m = coord_t_and_c_th.d_mode -> \"d_mode\" ENDCOND"
+    "nil")))
+ (patient_mode_type2string_TCC2 0
+  (patient_mode_type2string_TCC2-1 nil 3792926758
+   ("" (cond-coverage-tcc) nil nil) nil nil
+   (patient_mode_type2string coverage
+    "COND main.m = coord_t_and_c_th.error -> \"error\", main.m = coord_t_and_c_th.top -> \"top\", main.m = coord_t_and_c_th.p_mode -> \"p_mode\", main.m = coord_t_and_c_th.d_mode -> \"d_mode\" ENDCOND"
+    "nil")))
+ (patient_edit_type2string_TCC1 0
+  (patient_edit_type2string_TCC1-1 nil 3813307008
+   ("" (cond-disjoint-tcc) nil nil) nil nil
+   (patient_edit_type2string disjointness
+    "COND main.m = coord_t_and_c_th.edit_none -> \"edit_none\", main.m = coord_t_and_c_th.edit_top -> \"edit_top\", main.m = coord_t_and_c_th.edit_patient -> \"edit_patient\", main.m = coord_t_and_c_th.edit_device -> \"edit_device\", main.m = coord_t_and_c_th.edit_rule -> \"edit_rule\", main.m = coord_t_and_c_th.edit_constraint -> \"edit_constraint\" ENDCOND"
+    "nil")))
+ (patient_edit_type2string_TCC2 0
+  (patient_edit_type2string_TCC2-1 nil 3813307008
+   ("" (cond-coverage-tcc) nil nil) nil nil
+   (patient_edit_type2string coverage
+    "COND main.m = coord_t_and_c_th.edit_none -> \"edit_none\", main.m = coord_t_and_c_th.edit_top -> \"edit_top\", main.m = coord_t_and_c_th.edit_patient -> \"edit_patient\", main.m = coord_t_and_c_th.edit_device -> \"edit_device\", main.m = coord_t_and_c_th.edit_rule -> \"edit_rule\", main.m = coord_t_and_c_th.edit_constraint -> \"edit_constraint\" ENDCOND"
+    "nil")))
+ (devices2string_TCC1 0
+  (devices2string_TCC1-1 nil 3813307008 ("" (subtype-tcc) nil nil)
+   ((nlimit const-decl "nat" coord_t_and_c_th nil)
+    (dlimit const-decl "nat" main nil))
+   nil
+   (devices2string subtype "main.ds"
+    "[naturalnumbers.upto(main.dlimit) -> booleans.bool]")))
+ (devices2string_TCC2 0
+  (devices2string_TCC2-1 nil 3813307008 ("" (subtype-tcc) nil nil)
+   ((dlimit const-decl "nat" main nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil (devices2string subtype "main.dlimit" "device[8, 8, 8]")))
+ (patients_type2string_TCC1 0
+  (patients_type2string_TCC1-1 nil 3792926758
+   ("" (subtype-tcc) nil nil)
+   ((nlimit const-decl "nat" coord_t_and_c_th nil)
+    (plimit const-decl "nat" main nil))
+   nil
+   (patients_type2string subtype "main.ps"
+    "[naturalnumbers.upto(main.plimit) -> booleans.bool]")))
+ (patients_type2string_TCC2 0
+  (patients_type2string_TCC2-1 nil 3797656964
+   ("" (subtype-tcc) nil nil)
+   ((plimit const-decl "nat" main nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil
+   (patients_type2string subtype "main.plimit" "patient[8, 8, 8]")))
+ (act_buff_type2string_TCC1 0
+  (act_buff_type2string_TCC1-1 nil 3792926758
+   ("" (subtype-tcc) nil nil)
+   ((mindex const-decl "nat" coord_t_and_c_th nil)
+    (mindex const-decl "nat" main nil))
+   nil
+   (act_buff_type2string subtype "main.ab"
+    "[naturalnumbers.upto(main.mindex) -> act_message_type[8, 8, 8]]")))
+ (act_buff_type2string_TCC2 0
+  (act_buff_type2string_TCC2-1 nil 3797658046
+   ("" (subtype-tcc) nil nil)
+   ((mindex const-decl "nat" main nil)
+    (mindex const-decl "nat" coord_t_and_c_th nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil (act_buff_type2string subtype "main.mindex" "index[8, 8, 8]")))
+ (main_enum_par2string_TCC1 0
+  (main_enum_par2string_TCC1-1 nil 3792926758
+   ("" (subtype-tcc) nil nil)
+   ((nlimit const-decl "nat" coord_t_and_c_th nil)
+    (dlimit const-decl "nat" main nil))
+   nil
+   (main_enum_par2string subtype "main.mep"
+    "[naturalnumbers.upto(main.dlimit) -> enum_parameter]")))
+ (action_error_type2string_TCC1 0
+  (action_error_type2string_TCC1-1 nil 3813307008
+   ("" (subtype-tcc) nil nil)
+   ((nlimit const-decl "nat" coord_t_and_c_th nil)
+    (plimit const-decl "nat" main nil))
+   nil
+   (action_error_type2string subtype "main.aet"
+    "[naturalnumbers.upto(main.plimit) -> dev_act_type[8, 8, 8]]")))
+ (top_enum_params2string_TCC1 0
+  (top_enum_params2string_TCC1-1 nil 3813307008
+   ("" (subtype-tcc) nil nil)
+   ((nlimit const-decl "nat" coord_t_and_c_th nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil (top_enum_params2string subtype "6" "patient[8, 8, 8]")))
+ (coord_db_printer_TCC1 0
+  (coord_db_printer_TCC1-1 nil 3792926758 ("" (subtype-tcc) nil nil)
+   ((nlimit const-decl "nat" coord_t_and_c_th nil)) nil
+   (coord_db_printer subtype "1" "device[8, 8, 8]")))
+ (coord_db_printer_TCC2 0
+  (coord_db_printer_TCC2-1 nil 3792926758
+   ("" (termination-tcc) nil nil)
+   ((nlimit const-decl "nat" coord_t_and_c_th nil)) nil
+   (coord_db_printer subtype "1" "device[8, 8, 8]")))
+ (production_type_printer_TCC1 0
+  (production_type_printer_TCC1-1 nil 3813307008
+   ("" (subtype-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (cindex type-eq-decl nil coord_t_and_c_th nil)
+    (int_minus_int_is_int application-judgement "int" integers nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (/= const-decl "boolean" notequal nil)
+    (climit const-decl "nat" coord_t_and_c_th nil))
+   nil
+   (production_type_printer subtype "(number_fields.-)(main.c, 1)"
+    "cindex")))
+ (production_type_printer_TCC2 0
+  (production_type_printer_TCC2-1 nil 3813307008
+   ("" (termination-tcc) nil nil)
+   ((/= const-decl "boolean" notequal nil)) nil
+   (production_type_printer termination
+    "main.production_type_printer(main.l, (number_fields.-)(main.c, 1))"
+    "nil")))
+ (production_type_printer_TCC3 0
+  (production_type_printer_TCC3-1 nil 3813307008
+   ("" (cond-disjoint-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (climit const-decl "nat" coord_t_and_c_th nil)
+    (cindex type-eq-decl nil coord_t_and_c_th nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil))
+   nil
+   (production_type_printer disjointness
+    "COND main.c = 0 -> IF main.l(main.c)`vt /= coord_t_and_c_th.empty THEN stdstr.concat(stdstr.concat(stdstr.concat(stdstr.concat(\"constraint(\", stdstr.real2str(main.c)), \") := \"), main.constraint_type2string(main.l(main.c))), stdstr.newline) ELSE \"\" ENDIF, reals.>(main.c, 0) -> IF main.l(main.c)`vt /= coord_t_and_c_th.empty THEN stdstr.concat(stdstr.concat(stdstr.concat(stdstr.concat(stdstr.concat(stdstr.concat(\"constraint(\", stdstr.real2str(main.c)), \") := \"), main.constraint_type2string(main.l(main.c))), stdstr.space), main.production_type_printer(main.l, (number_fields.-)(main.c, 1))), stdstr.newline) ELSE main.production_type_printer(main.l, (number_fields.-)(main.c, 1)) ENDIF ENDCOND"
+    "nil")))
+ (production_type_printer_TCC4 0
+  (production_type_printer_TCC4-1 nil 3813307008
+   ("" (cond-coverage-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (climit const-decl "nat" coord_t_and_c_th nil)
+    (cindex type-eq-decl nil coord_t_and_c_th nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil
+   (production_type_printer coverage
+    "COND main.c = 0 -> IF main.l(main.c)`vt /= coord_t_and_c_th.empty THEN stdstr.concat(stdstr.concat(stdstr.concat(stdstr.concat(\"constraint(\", stdstr.real2str(main.c)), \") := \"), main.constraint_type2string(main.l(main.c))), stdstr.newline) ELSE \"\" ENDIF, reals.>(main.c, 0) -> IF main.l(main.c)`vt /= coord_t_and_c_th.empty THEN stdstr.concat(stdstr.concat(stdstr.concat(stdstr.concat(stdstr.concat(stdstr.concat(\"constraint(\", stdstr.real2str(main.c)), \") := \"), main.constraint_type2string(main.l(main.c))), stdstr.space), main.production_type_printer(main.l, (number_fields.-)(main.c, 1))), stdstr.newline) ELSE main.production_type_printer(main.l, (number_fields.-)(main.c, 1)) ENDIF ENDCOND"
+    "nil")))
+ (production_type2string_TCC1 0
+  (production_type2string_TCC1-1 nil 3813307008
+   ("" (subtype-tcc) nil nil)
+   ((climit const-decl "nat" coord_t_and_c_th nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil
+   (production_type2string subtype "coord_t_and_c_th.climit"
+    "cindex")))
+ (patient_constraint_printer_TCC1 0
+  (patient_constraint_printer_TCC1-1 nil 3813307008
+   ("" (subtype-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (cindex type-eq-decl nil coord_t_and_c_th nil)
+    (int_minus_int_is_int application-judgement "int" integers nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (/= const-decl "boolean" notequal nil)
+    (climit const-decl "nat" coord_t_and_c_th nil))
+   nil
+   (patient_constraint_printer subtype "(number_fields.-)(main.c, 1)"
+    "cindex")))
+ (patient_constraint_printer_TCC2 0
+  (patient_constraint_printer_TCC2-1 nil 3813307008
+   ("" (termination-tcc) nil nil)
+   ((/= const-decl "boolean" notequal nil)) nil
+   (patient_constraint_printer termination
+    "main.patient_constraint_printer(main.l, (number_fields.-)(main.c, 1))"
+    "nil")))
+ (patient_device_connect_type2string_TCC1 0
+  (patient_device_connect_type2string_TCC1-1 nil 3813307008
+   ("" (subtype-tcc) nil nil)
+   ((last_patient const-decl "nat" main nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil
+   (patient_device_connect_type2string subtype "main.last_patient"
+    "patient[8, 8, 8]")))
+ (istate0_TCC1 0
+  (istate0_TCC1-1 nil 3803640740 ("" (subtype-tcc) nil nil)
+   ((nlimit const-decl "nat" coord_t_and_c_th nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil (istate0 subtype "1" "patient[8, 8, 8]")))
+ (istate41a_TCC1 0
+  (istate41a_TCC1-1 nil 3813472753 ("" (subtype-tcc) nil nil)
+   ((nlimit const-decl "nat" coord_t_and_c_th nil)) nil
+   (istate41a subtype "2" "device[8, 8, 8]")))
+ (istate65_TCC1 0
+  (istate65_TCC1-1 nil 3813307008 ("" (subtype-tcc) nil nil)
+   ((nlimit const-decl "nat" coord_t_and_c_th nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil (istate65 subtype "2" "device[8, 8, 8]"))))
+

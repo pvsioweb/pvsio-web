@@ -1,0 +1,640 @@
+(patient_th
+ (IMP_infusion_pumps_th_TCC1 0
+  (IMP_infusion_pumps_th_TCC1-1 nil 3814170491
+   ("" (assuming-tcc) nil nil)
+   ((real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil
+   (IMP_infusion_pumps_th assuming
+    "infusion_pumps_th[patient_th.maxrate, patient_th.maxinfuse, patient_th.maxtime].infusion_pumps_th"
+    "maxinfuseLEQmaxtime: ASSUMPTION reals.<=(infusion_pumps_th.maxinfuse, infusion_pumps_th.maxtime)")))
+ (p_null_TCC1 0
+  (p_null_TCC1-1 nil 3814084179 ("" (subtype-tcc) nil nil)
+   ((plimit const-decl "nat" coord_t_and_c_th nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil (p_null subtype "coord_t_and_c_th.plimit" "patient")))
+ (p_bot_TCC1 0
+  (p_bot_TCC1-1 nil 3814084179 ("" (subtype-tcc) nil nil)
+   ((nlimit const-decl "nat" coord_t_and_c_th nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil (p_bot subtype "0" "patient")))
+ (init_rule_setup_TCC1 0
+  (init_rule_setup_TCC1-1 nil 3814084179 ("" (subtype-tcc) nil nil)
+   ((climit const-decl "nat" coord_t_and_c_th nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil (init_rule_setup subtype "0" "cindex")))
+ (init_p_state_TCC1 0
+  (init_p_state_TCC1-1 nil 3814084179 ("" (subtype-tcc) nil nil)
+   ((mindex const-decl "nat" coord_t_and_c_th nil)
+    (null_value const-decl "posnat" coord_t_and_c_th nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil (init_p_state subtype "coord_t_and_c_th.null_value" "nindex")))
+ (p_up_display_TCC1 0
+  (p_up_display_TCC1-1 nil 3814084179 ("" (cond-disjoint-tcc) nil nil)
+   nil nil
+   (p_up_display disjointness
+    "COND patient_th.ps`disp_focus = coord_t_and_c_th.no_focus -> coord_t_and_c_th.no_focus, patient_th.ps`disp_focus = coord_t_and_c_th.top_focus -> coord_t_and_c_th.no_focus, patient_th.ps`disp_focus = coord_t_and_c_th.patient_focus -> coord_t_and_c_th.top_focus, patient_th.ps`disp_focus = coord_t_and_c_th.device_focus -> coord_t_and_c_th.patient_focus ENDCOND"
+    "nil")))
+ (p_up_display_TCC2 0
+  (p_up_display_TCC2-1 nil 3814084179 ("" (cond-coverage-tcc) nil nil)
+   nil nil
+   (p_up_display coverage
+    "COND patient_th.ps`disp_focus = coord_t_and_c_th.no_focus -> coord_t_and_c_th.no_focus, patient_th.ps`disp_focus = coord_t_and_c_th.top_focus -> coord_t_and_c_th.no_focus, patient_th.ps`disp_focus = coord_t_and_c_th.patient_focus -> coord_t_and_c_th.top_focus, patient_th.ps`disp_focus = coord_t_and_c_th.device_focus -> coord_t_and_c_th.patient_focus ENDCOND"
+    "nil")))
+ (p_down_display_TCC1 0
+  (p_down_display_TCC1-1 nil 3814084179
+   ("" (cond-disjoint-tcc) nil nil) nil nil
+   (p_down_display disjointness
+    "COND patient_th.ps`disp_focus = coord_t_and_c_th.no_focus -> coord_t_and_c_th.top_focus, patient_th.ps`disp_focus = coord_t_and_c_th.top_focus -> coord_t_and_c_th.patient_focus, patient_th.ps`disp_focus = coord_t_and_c_th.patient_focus -> coord_t_and_c_th.device_focus, patient_th.ps`disp_focus = coord_t_and_c_th.device_focus -> coord_t_and_c_th.no_focus ENDCOND"
+    "nil")))
+ (add_nde_patient_device_TCC1 0
+  (add_nde_patient_device_TCC1-1 nil 3814084179
+   ("" (cond-disjoint-tcc) nil nil) nil nil
+   (add_nde_patient_device disjointness
+    "COND patient_th.dt = devices_th[patient_th.maxrate, patient_th.maxinfuse, patient_th.maxtime].infusion_pump -> LET ds = patient_th.ps`ip_state(patient_th.d) IN patient_th.ps WITH [p_disp_top := patient_th.ps`p_disp_top WITH [devs := LAMBDA (d1: devices_th[patient_th.maxrate, patient_th.maxinfuse, patient_th.maxtime].device): IF d1 = patient_th.d THEN patient_th.dt ELSE (patient_th.ps`p_disp_top)`devs(d1) ENDIF], patient_panels := LAMBDA (d1: devices_th[patient_th.maxrate, patient_th.maxinfuse, patient_th.maxtime].device): IF d1 = patient_th.d THEN patient_th.ds`pan ELSE patient_th.ps`patient_panels(d1) ENDIF, ip_state := IF patient_th.dt = devices_th[patient_th.maxrate, patient_th.maxinfuse, patient_th.maxtime].infusion_pump THEN LAMBDA (d1: devices_th[patient_th.maxrate, patient_th.maxinfuse, patient_th.maxtime].device): IF patient_th.d = d1 THEN patient_th.ds WITH [dev := patient_th.d, nde := patient_th.nd] ELSE patient_th.ps`ip_state(d1) ENDIF ELSE patient_th.ps`ip_state ENDIF], patient_th.dt = devices_th[patient_th.maxrate, patient_th.maxinfuse, patient_th.maxtime].vital_signs_device -> LET vs = patient_th.ps`vital_signs IN patient_th.ps WITH [p_disp_top := patient_th.ps`p_disp_top WITH [devs := LAMBDA (d1: devices_th[patient_th.maxrate, patient_th.maxinfuse, patient_th.maxtime].device): IF d1 = patient_th.d THEN patient_th.dt ELSE (patient_th.ps`p_disp_top)`devs(d1) ENDIF], patient_panels := LAMBDA (d1: devices_th[patient_th.maxrate, patient_th.maxinfuse, patient_th.maxtime].device): IF d1 = patient_th.d THEN patient_th.vs`pan ELSE patient_th.ps`patient_panels(d1) ENDIF, vital_signs := patient_th.ps`vital_signs WITH [dev := patient_th.d, nde := patient_th.nd]], ELSE -> patient_th.ps ENDCOND"
+    "nil")))
+ (dev_ex_TCC1 0
+  (dev_ex_TCC1-1 nil 3814084179 ("" (cond-disjoint-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil)
+    (nonneg_int nonempty-type-eq-decl nil integers nil)
+    (> const-decl "bool" reals nil)
+    (posnat nonempty-type-eq-decl nil integers nil)
+    (maxrate formal-const-decl "posnat" patient_th nil)
+    (maxinfuse formal-const-decl "posnat" patient_th nil)
+    (maxtime formal-const-decl
+     "{maxtime: posnat | maxinfuse <= maxtime}" patient_th nil)
+    (device type-eq-decl nil devices_th nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil
+   (dev_ex disjointness
+    "COND (patient_th.ps`p_disp_top)`devs(patient_th.d) = devices_th[patient_th.maxrate, patient_th.maxinfuse, patient_th.maxtime].infusion_pump -> patient_th.ps WITH [ip_state := LAMBDA (d1: devices_th[patient_th.maxrate, patient_th.maxinfuse, patient_th.maxtime].device): IF patient_th.d = d1 THEN infusion_pumps_th[patient_th.maxrate, patient_th.maxinfuse, patient_th.maxtime].execute_ip(patient_th.a, patient_th.ps`ip_state(patient_th.d)) ELSE patient_th.ps`ip_state(d1) ENDIF], (patient_th.ps`p_disp_top)`devs(patient_th.d) = devices_th[patient_th.maxrate, patient_th.maxinfuse, patient_th.maxtime].vital_signs_device -> patient_th.ps WITH [vital_signs := vital_signs_th[patient_th.maxrate, patient_th.maxinfuse, patient_th.maxtime].execute_vs(patient_th.a, patient_th.ps`vital_signs)], ELSE -> patient_th.ps ENDCOND"
+    "nil")))
+ (p_edit_region_TCC1 0
+  (p_edit_region_TCC1-1 nil 3814084179 ("" (cond-disjoint-tcc) nil nil)
+   ((per_p_edit const-decl "boolean" patient_th nil)) nil
+   (p_edit_region disjointness
+    "COND patient_th.ps`disp_focus = coord_t_and_c_th.top_focus -> patient_th.p_edit_top(patient_th.ps), patient_th.ps`disp_focus = coord_t_and_c_th.patient_focus -> patient_th.p_edit_main(patient_th.ps), patient_th.ps`disp_focus = coord_t_and_c_th.device_focus -> patient_th.p_edit_device(patient_th.ps), ELSE -> patient_th.ps ENDCOND"
+    "nil")))
+ (p_select_disp_m_TCC1 0
+  (p_select_disp_m_TCC1-1 nil 3814084179
+   ("" (cond-disjoint-tcc) nil nil) nil nil
+   (p_select_disp_m disjointness
+    "COND booleans.OR((patient_th.ps`disp_focus = coord_t_and_c_th.top_focus), (patient_th.ps`disp_focus = coord_t_and_c_th.patient_focus)) -> patient_th.p_select_top(patient_th.ps), patient_th.ps`disp_focus = coord_t_and_c_th.device_focus -> patient_th.p_select_d_mode(patient_th.ps), ELSE -> patient_th.ps ENDCOND"
+    "nil")))
+ (p_select_par_TCC1 0
+  (p_select_par_TCC1-1 nil 3814084179 ("" (cond-disjoint-tcc) nil nil)
+   ((/= const-decl "boolean" notequal nil)
+    (per_p_select const-decl "boolean" patient_th nil)
+    (per_e_select const-decl "boolean" patient_th nil))
+   nil
+   (p_select_par disjointness
+    "COND patient_th.per_p_select(patient_th.ps) -> LET ps = patient_th.change_ps_menu(patient_th.edit_menu, patient_th.ps) IN patient_th.ps WITH [p_rules_display := patient_th.ps`p_rules_display WITH [select_pars := sets[coord_t_and_c_th.par].add((patient_th.ps`p_disp_top)`ent_par, (patient_th.ps`p_rules_display)`select_pars)]], patient_th.per_e_select(patient_th.ps) -> LET ps = patient_th.change_ps_menu(patient_th.edit_constraint_menu, patient_th.ps) IN patient_th.ps WITH [p_rules_display := patient_th.ps`p_rules_display WITH [rule_setup := (patient_th.ps`p_rules_display)`rule_setup WITH [select_par := (patient_th.ps`p_disp_top)`ent_par]]], ELSE -> patient_th.ps ENDCOND"
+    "nil")))
+ (p_enum_value_TCC1 0
+  (p_enum_value_TCC1-1 nil 3814084179 ("" (cond-disjoint-tcc) nil nil)
+   nil nil
+   (p_enum_value disjointness
+    "COND patient_th.ps`prev_menu_entry = coord_t_and_c_th.select -> patient_th.p_enter_enum_value(patient_th.ps), patient_th.ps`prev_menu_entry = coord_t_and_c_th.clear -> patient_th.p_clear_enum_value(patient_th.ps), ELSE -> patient_th.ps ENDCOND"
+    "nil")))
+ (p_select_a_TCC1 0
+  (p_select_a_TCC1-1 nil 3814084179 ("" (cond-disjoint-tcc) nil nil)
+   ((per_a_d_r_select const-decl "boolean" patient_th nil)
+    (per_a_rule_select const-decl "boolean" patient_th nil))
+   nil
+   (p_select_a disjointness
+    "COND patient_th.per_a_d_r_select(patient_th.ps) -> LET ps = patient_th.change_ps_menu(patient_th.edit_menu, patient_th.ps) IN patient_th.ps WITH [p_rules_display := patient_th.ps`p_rules_display WITH [select_acts := sets[coord_t_and_c_th.action_id].add(patient_th.a, (patient_th.ps`p_rules_display)`select_acts)]], patient_th.per_a_rule_select(patient_th.ps) -> LET ps = patient_th.change_ps_menu(patient_th.edit_rule_menu, patient_th.ps) IN patient_th.ps WITH [p_rules_display := patient_th.ps`p_rules_display WITH [rule_setup := (patient_th.ps`p_rules_display)`rule_setup WITH [select_act := patient_th.a]]], ELSE -> patient_th.ps ENDCOND"
+    "nil")))
+ (p_update_constraint_TCC1 0
+  (p_update_constraint_TCC1-1 nil 3814084179
+   ("" (cond-disjoint-tcc) nil nil)
+   ((/= const-decl "boolean" notequal nil)
+    (mindex const-decl "nat" coord_t_and_c_th nil)
+    (null_value const-decl "posnat" coord_t_and_c_th nil))
+   nil
+   (p_update_constraint disjointness
+    "COND patient_th.rs`select_enum /= coord_t_and_c_th.xnilval -> coord_t_and_c_th.enumerated, patient_th.rs`select_num /= coord_t_and_c_th.null_value -> coord_t_and_c_th.numeral, ELSE -> coord_t_and_c_th.empty ENDCOND"
+    "nil")))
+ (p_update_constraint_TCC2 0
+  (p_update_constraint_TCC2-1 nil 3814084179 ("" (subtype-tcc) nil nil)
+   ((device type-eq-decl nil devices_th nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (posint_plus_nnint_is_posint application-judgement "posint"
+     integers nil)
+    (real_lt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (/= const-decl "boolean" notequal nil)
+    (mindex const-decl "nat" coord_t_and_c_th nil)
+    (null_value const-decl "posnat" coord_t_and_c_th nil)
+    (maxtime formal-const-decl
+     "{maxtime: posnat | maxinfuse <= maxtime}" patient_th nil)
+    (<= const-decl "bool" reals nil)
+    (maxinfuse formal-const-decl "posnat" patient_th nil)
+    (maxrate formal-const-decl "posnat" patient_th nil)
+    (posnat nonempty-type-eq-decl nil integers nil)
+    (> const-decl "bool" reals nil)
+    (nonneg_int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (d_bot const-decl "device" devices_th nil)
+    (null_nc const-decl "num_constraint_type" patient_th nil)
+    (null_ec const-decl "enum_constraint_type" patient_th nil)
+    (climit const-decl "nat" coord_t_and_c_th nil))
+   nil
+   (p_update_constraint subtype
+    "(number_fields.+)(patient_th.rs`current_production_index, 1)"
+    "cindex")))
+ (p_ok_rule_TCC1 0
+  (p_ok_rule_TCC1-1 nil 3814084179 ("" (subtype-tcc) nil nil)
+   ((posint_plus_nnint_is_posint application-judgement "posint"
+     integers nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (real_lt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (mindex const-decl "nat" coord_t_and_c_th nil)
+    (null_value const-decl "posnat" coord_t_and_c_th nil)
+    (/= const-decl "boolean" notequal nil)
+    (change_ps_menu const-decl "p_state" patient_th nil)
+    (climit const-decl "nat" coord_t_and_c_th nil))
+   nil
+   (p_ok_rule subtype
+    "(number_fields.+)((patient_th.ps`p_rules_display)`current_lim_rule_index, 1)"
+    "cindex")))
+ (act_patient_quit_TCC1 0
+  (act_patient_quit_TCC1-1 nil 3814084179
+   ("" (cond-disjoint-tcc) nil nil)
+   ((dlimit const-decl "nat" coord_t_and_c_th nil)
+    (maxtime formal-const-decl
+     "{maxtime: posnat | maxinfuse <= maxtime}" patient_th nil)
+    (<= const-decl "bool" reals nil)
+    (maxinfuse formal-const-decl "posnat" patient_th nil)
+    (maxrate formal-const-decl "posnat" patient_th nil)
+    (posnat nonempty-type-eq-decl nil integers nil)
+    (> const-decl "bool" reals nil)
+    (nonneg_int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (nil_device const-decl "device" devices_th nil))
+   nil
+   (act_patient_quit disjointness
+    "COND booleans.OR((patient_th.ps`emode = coord_t_and_c_th.edit_top), booleans.OR((patient_th.ps`emode = coord_t_and_c_th.edit_device), (patient_th.ps`emode = coord_t_and_c_th.edit_patient))) -> patient_th.p_quit_patient(patient_th.ps), (patient_th.ps`emode = coord_t_and_c_th.edit_constraint) -> patient_th.p_quit_constraint(patient_th.ps), (patient_th.ps`emode = coord_t_and_c_th.edit_rule) -> patient_th.p_quit_rule(patient_th.ps), ELSE -> patient_th.ps ENDCOND"
+    "nil")))
+ (p_delete_rule_TCC1 0
+  (p_delete_rule_TCC1-1 nil 3814084179 ("" (subtype-tcc) nil nil)
+   ((real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (int_minus_int_is_int application-judgement "int" integers nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (climit const-decl "nat" coord_t_and_c_th nil))
+   nil
+   (p_delete_rule subtype
+    "(number_fields.-)((patient_th.ps`p_rules_display)`current_lim_rule_index, 1)"
+    "cindex")))
+ (p_delete_rule_TCC2 0
+  (p_delete_rule_TCC2-1 nil 3814084179 ("" (subtype-tcc) nil nil)
+   ((climit const-decl "nat" coord_t_and_c_th nil)) nil
+   (p_delete_rule subtype "coord_t_and_c_th.climit" "cindex")))
+ (p_delete_rule_TCC3 0
+  (p_delete_rule_TCC3-1 nil 3814084179 ("" (subtype-tcc) nil nil)
+   ((real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (real_lt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (int_minus_int_is_int application-judgement "int" integers nil)
+    (cindex type-eq-decl nil coord_t_and_c_th nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (>= const-decl "bool" reals nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (<= const-decl "bool" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number nonempty-type-decl nil numbers nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (climit const-decl "nat" coord_t_and_c_th nil))
+   nil
+   (p_delete_rule subtype "(number_fields.-)(patient_th.c, 1)"
+    "cindex")))
+ (p_delete_rule_TCC4 0
+  (p_delete_rule_TCC4-1 nil 3814084179 ("" (cond-disjoint-tcc) nil nil)
+   ((real_lt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (cindex type-eq-decl nil coord_t_and_c_th nil)
+    (climit const-decl "nat" coord_t_and_c_th nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (>= const-decl "bool" reals nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (<= const-decl "bool" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number nonempty-type-decl nil numbers nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (boolean nonempty-type-decl nil booleans nil))
+   nil
+   (p_delete_rule disjointness
+    "COND reals.<(patient_th.c, (patient_th.ps`p_rules_display)`current_rule_index) -> (patient_th.ps`p_rules_display)`rule_set(patient_th.c), patient_th.c = (patient_th.ps`p_rules_display)`current_rule_index -> (# rule := patient_th.rs`current_production, action := (# dev := ((patient_th.ps`p_disp_top)`sel_device)`dv, act := patient_th.rs`select_act #) #), booleans.AND((reals.>(patient_th.c, (patient_th.ps`p_rules_display)`current_rule_index)), (reals.<(patient_th.c, (patient_th.ps`p_rules_display)`current_lim_rule_index))) -> (patient_th.ps`p_rules_display)`rule_set((number_fields.-)(patient_th.c, 1)), ELSE -> (patient_th.ps`p_rules_display)`rule_set(patient_th.c) ENDCOND"
+    "nil")))
+ (p_scroll_up_rule_TCC1 0
+  (p_scroll_up_rule_TCC1-1 nil 3814084179
+   ("" (skosimp*) (("" (all-typepreds) (("" (grind) nil nil)) nil))
+    nil)
+   ((real_lt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (nnint_plus_posint_is_posint application-judgement "posint"
+     integers nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (>= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (climit const-decl "nat" coord_t_and_c_th nil)
+    (odd? const-decl "bool" integers nil)
+    (> const-decl "bool" reals nil)
+    (numfield nonempty-type-eq-decl nil number_fields nil)
+    (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
+    (disp_focus_type type-decl nil coord_t_and_c_th nil)
+    (patient_edit_type type-decl nil coord_t_and_c_th nil)
+    (patient type-eq-decl nil patient_th nil)
+    (p_dstates type-eq-decl nil patient_th nil)
+    (nindex type-eq-decl nil coord_t_and_c_th nil)
+    (nonneg_int nonempty-type-eq-decl nil integers nil)
+    (posnat nonempty-type-eq-decl nil integers nil)
+    (maxrate formal-const-decl "posnat" patient_th nil)
+    (maxinfuse formal-const-decl "posnat" patient_th nil)
+    (<= const-decl "bool" reals nil)
+    (maxtime formal-const-decl
+     "{maxtime: posnat | maxinfuse <= maxtime}" patient_th nil)
+    (node type-eq-decl nil node_th nil)
+    (nonneg_real nonempty-type-eq-decl nil real_types nil)
+    (dpanel_type type-eq-decl nil patient_th nil)
+    (patient_mode_type type-decl nil coord_t_and_c_th nil)
+    (menu type-decl nil coord_t_and_c_th nil)
+    (menu_set type-eq-decl nil coord_t_and_c_th nil)
+    (panel type-eq-decl nil coord_t_and_c_th nil)
+    (p_disp_main_type type-eq-decl nil patient_th nil)
+    (p_disp_top_type type-eq-decl nil patient_th nil)
+    (rules_display_type type-eq-decl nil patient_th nil)
+    (v_state type-eq-decl nil vital_signs_th nil)
+    (p_state type-eq-decl nil patient_th nil)
+    (total_order? const-decl "bool" orders nil)
+    (pred type-eq-decl nil defined_types nil)
+    (< const-decl "bool" reals nil)
+    (strict_total_order? const-decl "bool" orders nil)
+    (irreflexive? const-decl "bool" relations nil)
+    (transitive? const-decl "bool" relations nil)
+    (strict_order? const-decl "bool" orders nil)
+    (trichotomous? const-decl "bool" orders nil)
+    (reflexive? const-decl "bool" relations nil)
+    (preorder? const-decl "bool" orders nil)
+    (antisymmetric? const-decl "bool" relations nil)
+    (partial_order? const-decl "bool" orders nil)
+    (dichotomous? const-decl "bool" orders nil)
+    (change_ps_menu const-decl "p_state" patient_th nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (even_times_int_is_even application-judgement "even_int" integers
+     nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil))
+   nil
+   (p_scroll_up_rule subtype
+    "(number_fields.+)((patient_th.ps`p_rules_display)`current_rule_index, 1)"
+    "cindex")))
+ (p_scroll_down_rule_TCC1 0
+  (p_scroll_down_rule_TCC1-1 nil 3814084179
+   ("" (skosimp*) (("" (all-typepreds) (("" (grind) nil nil)) nil))
+    nil)
+   ((real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (int_minus_int_is_int application-judgement "int" integers nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (>= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (climit const-decl "nat" coord_t_and_c_th nil)
+    (<= const-decl "bool" reals nil)
+    (total_order? const-decl "bool" orders nil)
+    (pred type-eq-decl nil defined_types nil)
+    (odd? const-decl "bool" integers nil)
+    (> const-decl "bool" reals nil)
+    (even? const-decl "bool" integers nil)
+    (disp_focus_type type-decl nil coord_t_and_c_th nil)
+    (patient_edit_type type-decl nil coord_t_and_c_th nil)
+    (patient type-eq-decl nil patient_th nil)
+    (p_dstates type-eq-decl nil patient_th nil)
+    (nindex type-eq-decl nil coord_t_and_c_th nil)
+    (nonneg_int nonempty-type-eq-decl nil integers nil)
+    (posnat nonempty-type-eq-decl nil integers nil)
+    (maxrate formal-const-decl "posnat" patient_th nil)
+    (maxinfuse formal-const-decl "posnat" patient_th nil)
+    (maxtime formal-const-decl
+     "{maxtime: posnat | maxinfuse <= maxtime}" patient_th nil)
+    (node type-eq-decl nil node_th nil)
+    (nonneg_real nonempty-type-eq-decl nil real_types nil)
+    (dpanel_type type-eq-decl nil patient_th nil)
+    (patient_mode_type type-decl nil coord_t_and_c_th nil)
+    (menu type-decl nil coord_t_and_c_th nil)
+    (menu_set type-eq-decl nil coord_t_and_c_th nil)
+    (panel type-eq-decl nil coord_t_and_c_th nil)
+    (p_disp_main_type type-eq-decl nil patient_th nil)
+    (p_disp_top_type type-eq-decl nil patient_th nil)
+    (rules_display_type type-eq-decl nil patient_th nil)
+    (v_state type-eq-decl nil vital_signs_th nil)
+    (p_state type-eq-decl nil patient_th nil)
+    (strict_total_order? const-decl "bool" orders nil)
+    (irreflexive? const-decl "bool" relations nil)
+    (transitive? const-decl "bool" relations nil)
+    (strict_order? const-decl "bool" orders nil)
+    (trichotomous? const-decl "bool" orders nil)
+    (reflexive? const-decl "bool" relations nil)
+    (preorder? const-decl "bool" orders nil)
+    (antisymmetric? const-decl "bool" relations nil)
+    (partial_order? const-decl "bool" orders nil)
+    (dichotomous? const-decl "bool" orders nil)
+    (change_ps_menu const-decl "p_state" patient_th nil)
+    (even_times_int_is_even application-judgement "even_int" integers
+     nil))
+   nil
+   (p_scroll_down_rule subtype
+    "(number_fields.-)((patient_th.ps`p_rules_display)`current_rule_index, 1)"
+    "cindex")))
+ (relate_n_TCC1 0
+  (relate_n_TCC1-1 nil 3814084179 ("" (cond-disjoint-tcc) nil nil) nil
+   nil
+   (relate_n disjointness
+    "COND patient_th.r = coord_t_and_c_th.lt -> reals.<(patient_th.v, patient_th.n), patient_th.r = coord_t_and_c_th.le -> reals.<=(patient_th.v, patient_th.n), patient_th.r = coord_t_and_c_th.gt -> reals.>(patient_th.v, patient_th.n), patient_th.r = coord_t_and_c_th.ge -> reals.>=(patient_th.v, patient_th.n), patient_th.r = coord_t_and_c_th.eq -> patient_th.v = patient_th.n, patient_th.r = coord_t_and_c_th.neq -> patient_th.v /= patient_th.n, ELSE -> booleans.FALSE ENDCOND"
+    "nil")))
+ (relate_e_TCC1 0
+  (relate_e_TCC1-1 nil 3814084179 ("" (cond-disjoint-tcc) nil nil) nil
+   nil
+   (relate_e disjointness
+    "COND patient_th.r = coord_t_and_c_th.eq -> patient_th.v = patient_th.n, patient_th.r = coord_t_and_c_th.neq -> patient_th.v /= patient_th.n, ELSE -> booleans.FALSE ENDCOND"
+    "nil")))
+ (p_check_constraint_TCC1 0
+  (p_check_constraint_TCC1-1 nil 3814084179
+   ("" (cond-disjoint-tcc) nil nil) nil nil
+   (p_check_constraint disjointness
+    "COND patient_th.ct`vt = coord_t_and_c_th.numeral -> LET pan = patient_th.dp((patient_th.ct`nc)`d) IN patient_th.relate_n((patient_th.pan`num_disp)((patient_th.ct`nc)`p), (patient_th.ct`nc)`r, (patient_th.ct`nc)`v), patient_th.ct`vt = coord_t_and_c_th.enumerated -> LET pan = patient_th.dp((patient_th.ct`ec)`d) IN patient_th.relate_e((patient_th.pan`enum_disp)((patient_th.ct`ec)`p), (patient_th.ct`ec)`r, (patient_th.ct`ec)`v), patient_th.ct`vt = coord_t_and_c_th.empty -> booleans.TRUE, ELSE -> booleans.FALSE ENDCOND"
+    "nil")))
+ (p_check_rule_broken_TCC1 0
+  (p_check_rule_broken_TCC1-1 nil 3814084179 ("" (subtype-tcc) nil nil)
+   ((maxtime formal-const-decl
+     "{maxtime: posnat | maxinfuse <= maxtime}" patient_th nil)
+    (<= const-decl "bool" reals nil)
+    (maxinfuse formal-const-decl "posnat" patient_th nil)
+    (maxrate formal-const-decl "posnat" patient_th nil)
+    (posnat nonempty-type-eq-decl nil integers nil)
+    (> const-decl "bool" reals nil)
+    (nonneg_int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (d_bot const-decl "device" devices_th nil)
+    (climit const-decl "nat" coord_t_and_c_th nil))
+   nil (p_check_rule_broken subtype "1" "cindex")))
+ (p_check_rule_broken_TCC2 0
+  (p_check_rule_broken_TCC2-1 nil 3814084179 ("" (subtype-tcc) nil nil)
+   ((maxtime formal-const-decl
+     "{maxtime: posnat | maxinfuse <= maxtime}" patient_th nil)
+    (<= const-decl "bool" reals nil)
+    (maxinfuse formal-const-decl "posnat" patient_th nil)
+    (maxrate formal-const-decl "posnat" patient_th nil)
+    (posnat nonempty-type-eq-decl nil integers nil)
+    (> const-decl "bool" reals nil)
+    (nonneg_int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (d_bot const-decl "device" devices_th nil)
+    (climit const-decl "nat" coord_t_and_c_th nil))
+   nil (p_check_rule_broken subtype "2" "cindex")))
+ (p_check_rule_broken_TCC3 0
+  (p_check_rule_broken_TCC3-1 nil 3814084179 ("" (subtype-tcc) nil nil)
+   ((maxtime formal-const-decl
+     "{maxtime: posnat | maxinfuse <= maxtime}" patient_th nil)
+    (<= const-decl "bool" reals nil)
+    (maxinfuse formal-const-decl "posnat" patient_th nil)
+    (maxrate formal-const-decl "posnat" patient_th nil)
+    (posnat nonempty-type-eq-decl nil integers nil)
+    (> const-decl "bool" reals nil)
+    (nonneg_int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (d_bot const-decl "device" devices_th nil)
+    (climit const-decl "nat" coord_t_and_c_th nil))
+   nil (p_check_rule_broken subtype "3" "cindex")))
+ (p_check_rule_broken_TCC4 0
+  (p_check_rule_broken_TCC4-1 nil 3814084179 ("" (subtype-tcc) nil nil)
+   ((maxtime formal-const-decl
+     "{maxtime: posnat | maxinfuse <= maxtime}" patient_th nil)
+    (<= const-decl "bool" reals nil)
+    (maxinfuse formal-const-decl "posnat" patient_th nil)
+    (maxrate formal-const-decl "posnat" patient_th nil)
+    (posnat nonempty-type-eq-decl nil integers nil)
+    (> const-decl "bool" reals nil)
+    (nonneg_int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (d_bot const-decl "device" devices_th nil)
+    (climit const-decl "nat" coord_t_and_c_th nil))
+   nil (p_check_rule_broken subtype "4" "cindex")))
+ (p_check_rule_broken_TCC5 0
+  (p_check_rule_broken_TCC5-1 nil 3814084179 ("" (subtype-tcc) nil nil)
+   ((maxtime formal-const-decl
+     "{maxtime: posnat | maxinfuse <= maxtime}" patient_th nil)
+    (<= const-decl "bool" reals nil)
+    (maxinfuse formal-const-decl "posnat" patient_th nil)
+    (maxrate formal-const-decl "posnat" patient_th nil)
+    (posnat nonempty-type-eq-decl nil integers nil)
+    (> const-decl "bool" reals nil)
+    (nonneg_int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (d_bot const-decl "device" devices_th nil)
+    (climit const-decl "nat" coord_t_and_c_th nil))
+   nil (p_check_rule_broken subtype "5" "cindex")))
+ (p_edit_TCC1 0
+  (p_edit_TCC1-1 nil 3814270472 ("" (cond-disjoint-tcc) nil nil)
+   ((per_p_edit const-decl "boolean" patient_th nil)) nil
+   (p_edit disjointness
+    "COND patient_th.per_p_edit(patient_th.ps) -> LET ps = patient_th.ps WITH [prev_menu_visible := (patient_th.ps`p_disp_top)`menu_visible] IN patient_th.change_ps_menu(patient_th.edit_options_menu, patient_th.ps), booleans.AND((patient_th.ps`pmode = coord_t_and_c_th.d_mode), (patient_th.ps`emode = coord_t_and_c_th.edit_rule)) -> LET ps = patient_th.ps WITH [prev_menu_visible := (patient_th.ps`p_disp_top)`menu_visible] IN patient_th.change_ps_menu(LAMBDA (m: coord_t_and_c_th.menu): booleans.OR((m = coord_t_and_c_th.constraint), (m = coord_t_and_c_th.escape)), patient_th.ps), ELSE -> patient_th.p_escape(patient_th.ps) ENDCOND"
+    "nil")))
+ (p_select_TCC1 0
+  (p_select_TCC1-1 nil 3814103765 ("" (cond-disjoint-tcc) nil nil) nil
+   nil
+   (p_select disjointness
+    "COND patient_th.ps`emode = coord_t_and_c_th.edit_none -> patient_th.change_ps_menu(LAMBDA (m: coord_t_and_c_th.menu): booleans.OR((m = coord_t_and_c_th.device), booleans.OR((m = coord_t_and_c_th.escape), booleans.OR((m = coord_t_and_c_th.display), (m = coord_t_and_c_th.region)))), patient_th.ps), patient_th.ps`emode = coord_t_and_c_th.edit_top -> patient_th.change_ps_menu(LAMBDA (m: coord_t_and_c_th.menu): booleans.OR((m = coord_t_and_c_th.parameter), (m = coord_t_and_c_th.escape)), patient_th.ps), booleans.OR((patient_th.ps`emode = coord_t_and_c_th.edit_patient), (patient_th.ps`emode = coord_t_and_c_th.edit_device)) -> patient_th.change_ps_menu(LAMBDA (m: coord_t_and_c_th.menu): booleans.OR((m = coord_t_and_c_th.parameter), booleans.OR((m = coord_t_and_c_th.action), (m = coord_t_and_c_th.escape))), patient_th.ps), (patient_th.ps`emode = coord_t_and_c_th.edit_constraint) -> patient_th.change_ps_menu(LAMBDA (m: coord_t_and_c_th.menu):      (m = coord_t_and_c_th.parameter) OR (m = coord_t_and_c_th.relation) OR (m = coord_t_and_c_th.num_value) OR (m = coord_t_and_c_th.enum_value) OR (m = coord_t_and_c_th.escape), patient_th.ps), (patient_th.ps`emode = coord_t_and_c_th.edit_rule) -> patient_th.change_ps_menu(LAMBDA (m: coord_t_and_c_th.menu):      (m = coord_t_and_c_th.action) OR (m = coord_t_and_c_th.escape) OR (m = coord_t_and_c_th.device) OR (m = coord_t_and_c_th.display) OR (m = coord_t_and_c_th.escape) OR (m = coord_t_and_c_th.region), patient_th.ps), ELSE -> patient_th.ps ENDCOND"
+    "nil")))
+ (p_constraint_TCC1 0
+  (p_constraint_TCC1-1 nil 3817556338 ("" (cond-disjoint-tcc) nil nil)
+   nil nil
+   (p_constraint disjointness
+    "COND patient_th.ps`prev_menu_entry = coord_t_and_c_th.edit -> patient_th.p_edit_constraint(patient_th.ps), patient_th.ps`prev_menu_entry = coord_t_and_c_th.cursor_up -> patient_th.p_scroll_up_rule(patient_th.ps), patient_th.ps`prev_menu_entry = coord_t_and_c_th.cursor_down -> patient_th.p_scroll_down_rule(patient_th.ps), ELSE -> patient_th.p_escape(patient_th.ps) ENDCOND"
+    "nil")))
+ (p_region_TCC1 0
+  (p_region_TCC1-1 nil 3817556338 ("" (cond-disjoint-tcc) nil nil) nil
+   nil
+   (p_region disjointness
+    "COND patient_th.ps`prev_menu_entry = coord_t_and_c_th.edit -> patient_th.p_edit_region(patient_th.ps), patient_th.ps`prev_menu_entry = coord_t_and_c_th.select -> patient_th.p_select_region(patient_th.ps), patient_th.ps`prev_menu_entry = coord_t_and_c_th.cursor_up -> patient_th.p_up_display(patient_th.ps), patient_th.ps`prev_menu_entry = coord_t_and_c_th.cursor_down -> patient_th.p_down_display(patient_th.ps), ELSE -> patient_th.p_escape(patient_th.ps) ENDCOND"
+    "nil")))
+ (p_device_TCC1 0
+  (p_device_TCC1-1 nil 3817556338 ("" (cond-disjoint-tcc) nil nil) nil
+   nil
+   (p_device disjointness
+    "COND (patient_th.ps`prev_menu_entry = coord_t_and_c_th.select) -> patient_th.p_select_display_mode(patient_th.ps), patient_th.ps`prev_menu_entry = coord_t_and_c_th.enter -> patient_th.p_device_entry(patient_th.ps), patient_th.ps`prev_menu_entry = coord_t_and_c_th.edit -> patient_th.p_edit_device(patient_th.ps), ELSE -> patient_th.p_escape(patient_th.ps) ENDCOND"
+    "nil"))))
+

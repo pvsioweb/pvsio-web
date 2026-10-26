@@ -1,0 +1,106 @@
+% Michael Harrison (Newcastle University) and Paolo Masci (US National Institute of Aerospace)
+% July 2020
+% Vital signs
+vital_signs_th[maxrate: posnat, 
+          maxinfuse: posnat, 
+          maxtime: {maxtime: posnat | maxinfuse <= maxtime}] : THEORY
+BEGIN
+  IMPORTING  node_th[maxrate, maxinfuse, maxtime]
+ IMPORTING devices_th[maxrate, maxinfuse, maxtime]
+v_state: TYPE = [# dev: device,
+                   nde: node,
+		   power: boolean,
+                   HR: nonneg_real,
+                   BPL: nonneg_real,
+		   BPH: nonneg_real,
+		   SPO2: nonneg_real,
+		   RR: nonneg_real,
+		   temp: nonneg_real,
+		   pan: panel,
+		   vs_error: boolean
+		  #]
+
+init_vs_panel: panel =
+     (#
+      pars := LAMBDA (p: par): (p = hrte) OR (p = blpl) OR (p = blph) OR
+                     (p = sp) OR (p = rkrt) OR (p = ptmp) OR (p = mde),
+      num_disp := LAMBDA (p: par):
+                     COND
+                      p = hrte -> 128,
+                      p = blpl -> 38,
+		      p = blph -> 76,
+		      p = sp -> 99,
+		      p = rkrt -> 20,
+                      p = ptmp -> 36.1,
+                      ELSE -> null_value
+                     ENDCOND,
+       enum_disp := LAMBDA (p: par):
+                     COND
+                      p = mde -> xoff,
+                     ELSE -> xnilval
+                     ENDCOND,
+      cmds := LAMBDA (a: action_id): 
+                      a = powr
+     #)
+% these values change according to the scenario
+init_vs: v_state =
+              (#   dev:= nil_device,
+	           nde := no_node,
+	           power := false,
+	           HR := 128,
+                   BPL := 38,
+		   BPH := 76,
+		   SPO2 := 99,
+		   RR := 20,
+		   temp := 36.1,
+		   pan := init_vs_panel,
+		   vs_error := false#)
+
+upd_pan(vs: v_state): panel =
+vs`pan WITH
+    [num_disp := LAMBDA (p: par):
+                     COND
+                      p = hrte -> vs`HR,
+                      p = blpl -> vs`BPL,
+                      p = blph -> vs`BPH,
+		      p = sp -> vs`SPO2,
+		      p = rkrt -> vs`RR,
+		      p = ptmp -> vs`temp,
+                      ELSE -> null_value
+                     ENDCOND,
+     enum_disp := LAMBDA (p: par):
+                     IF p = mde THEN
+		        IF vs`power THEN xok ELSE xoff ENDIF
+		     ELSE xnilval ENDIF
+     
+    ]
+
+
+per_tick_vs(vs: v_state): boolean = vs`power
+% change	   
+tick_vs(vs: v_state): v_state =
+     IF per_tick_vs(vs) THEN
+            LET vs = vs WITH
+                 [ HR := vs`HR + vs`HR * 0.03,
+                   BPL := vs`BPL - vs`BPL * 0.03,
+		   BPH := vs`BPH - vs`BPH * 0.03,
+		   SPO2 := vs`SPO2 - vs`SPO2 * 0.01,
+		   RR := vs`RR + vs`RR * 0.05,
+		   temp := vs`temp - vs`temp * 0.2 ]
+	     IN vs WITH [pan := upd_pan(vs) ]
+		   ELSE vs WITH [pan := upd_pan(vs) ] ENDIF
+		   
+switch_vs(vs: v_state): v_state = 
+     LET vs = vs WITH [power := NOT vs`power]
+     IN vs WITH [ pan := upd_pan(vs) ]
+
+available_act(pan: panel, vs: v_state): panel =
+         pan WITH [cmds := LAMBDA (a: action_id): (a = powr)]
+
+execute_vs(a: action_id, vs: v_state): v_state =
+COND
+   a = powr -> switch_vs(vs),
+   ELSE -> vs WITH [vs_error := TRUE]
+ENDCOND
+
+ END vital_signs_th

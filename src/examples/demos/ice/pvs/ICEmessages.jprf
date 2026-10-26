@@ -1,0 +1,218 @@
+{
+ "node_th.no_node_TCC1": [
+  {
+   "info": {
+    "theory": "node_th",
+    "formula": "no_node_TCC1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "696c88b13fd47701bea3f2b5a8dfe5b06e953f0b7fa49a2040323405f53293d9"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "no_node_TCC1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(subtype-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "node_th.root_node_TCC1": [
+  {
+   "info": {
+    "theory": "node_th",
+    "formula": "root_node_TCC1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "2693c1d0aab5ad64f0c50744165771ec8f7e6c7c4163cd065a9bed9655e7ed48"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "root_node_TCC1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(subtype-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "node_th.increment_node_TCC1": [
+  {
+   "info": {
+    "theory": "node_th",
+    "formula": "increment_node_TCC1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "2693c1d0aab5ad64f0c50744165771ec8f7e6c7c4163cd065a9bed9655e7ed48"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "increment_node_TCC1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(subtype-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "node_th.empty_pan_q_TCC1": [
+  {
+   "info": {
+    "theory": "node_th",
+    "formula": "empty_pan_q_TCC1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "2693c1d0aab5ad64f0c50744165771ec8f7e6c7c4163cd065a9bed9655e7ed48"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "empty_pan_q_TCC1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(subtype-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "node_th.init_n_state_TCC1": [
+  {
+   "info": {
+    "theory": "node_th",
+    "formula": "init_n_state_TCC1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "2693c1d0aab5ad64f0c50744165771ec8f7e6c7c4163cd065a9bed9655e7ed48"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "init_n_state_TCC1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(subtype-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "node_th.add_pan_buff_TCC1": [
+  {
+   "info": {
+    "theory": "node_th",
+    "formula": "add_pan_buff_TCC1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "2693c1d0aab5ad64f0c50744165771ec8f7e6c7c4163cd065a9bed9655e7ed48"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "add_pan_buff_TCC1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(subtype-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "node_th.add_act_buff_TCC1": [
+  {
+   "info": {
+    "theory": "node_th",
+    "formula": "add_act_buff_TCC1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "2693c1d0aab5ad64f0c50744165771ec8f7e6c7c4163cd065a9bed9655e7ed48"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "add_act_buff_TCC1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(subtype-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "node_th.sub_pan_buff_TCC1": [
+  {
+   "info": {
+    "theory": "node_th",
+    "formula": "sub_pan_buff_TCC1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "2693c1d0aab5ad64f0c50744165771ec8f7e6c7c4163cd065a9bed9655e7ed48"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "sub_pan_buff_TCC1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(subtype-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "node_th.sub_act_buff_TCC1": [
+  {
+   "info": {
+    "theory": "node_th",
+    "formula": "sub_act_buff_TCC1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "2693c1d0aab5ad64f0c50744165771ec8f7e6c7c4163cd065a9bed9655e7ed48"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "sub_act_buff_TCC1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(subtype-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ]
+}
