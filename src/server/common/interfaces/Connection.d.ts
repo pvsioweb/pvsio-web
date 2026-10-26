@@ -101,7 +101,8 @@ export declare interface StartProcessData extends FileDescriptor {
 }
 export declare interface StartProcessToken extends TokenId {
     type: "startProcess",
-    data: StartProcessData
+    data: StartProcessData,
+    useLastState?: boolean // whether commands receive the last state as first argument (default: true)
 }
 export declare interface StopProcessToken extends TokenId {
     type: "stopProcess",
