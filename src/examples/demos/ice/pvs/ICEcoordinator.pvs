@@ -1,0 +1,637 @@
+% Michael Harrison (Newcastle University) and Paolo Masci (US National Institute of Aerospace)
+% June 2020
+% new coordinator interface
+
+coordinator_th[maxrate: posnat, 
+               maxinfuse: posnat, 
+               maxtime: {maxtime: posnat | maxinfuse <= maxtime}%, 
+         %      node_limit, max_index, d_limit, p_limit: posnat 
+              ]: THEORY
+ BEGIN
+  IMPORTING patient_th[maxrate, maxinfuse, maxtime]%, 
+                     %  node_limit, max_index, d_limit, p_limit]
+%  IMPORTING devices_th[d_limit]
+  mode_type: TYPE = {normal, acknowledge, results_ready, unit_entry}
+  patient_triggers: TYPE+
+ % coordinator_device: TYPE = [device -> panel]
+
+ % parameter: TYPE = num_parameter
+
+patient_connect_type: TYPE = [patient -> nw_error_type]
+
+device_connect_type: TYPE = [device -> nw_error_type]
+
+patient_device_connect_type: TYPE = [patient -> device_connect_type]
+
+devices: TYPE = setof[device]
+    
+
+%channel_connect_type: TYPE =
+%     [# coordinator_channel: patients_connect_type,
+%        device_channels: device_channel_connect_type #]
+
+ action_error_type: TYPE = [patient -> dev_act_type]
+ top_enum_params: TYPE = [patient -> main_enum_par]
+ top_num_params: TYPE = [patient -> main_num_par]
+
+  patient_config: TYPE = 
+         [# p_enum_params: main_enum_par,
+	         p_num_params: main_num_par,
+            p_actions: main_act,
+	         p_av_actions: main_act,
+            p_devices: devices_type,
+            coord_devices: dpanel_type,
+	         d_available_actions: main_act
+         #]
+
+coord_disp_top_type: TYPE =
+   [# patients: patients_type,
+      selected_patient: patient,
+      patients_enum_params: top_enum_params,
+	   patients_num_params: top_num_params,
+	  % menu_entry: menu,
+	   menu_visible: menu_set,
+	   ent_device: device,
+	   ent_patient: patient,
+	   ent_action: action_id
+   #]
+
+disp_patient_type: TYPE =
+       [#  current_patient: patient, % when null not displayed
+           devices: devices_type,
+	        selected_device: device,
+           patient_enum_params: main_enum_par,
+           patient_num_params: main_num_par,
+           patient_actions: main_act,
+	        av_main_act: main_act,
+	        selected_action: action_id
+        #]
+
+disp_device_type: TYPE =
+       [# current_device: device, % when null then not displayed
+          e_disp: enum_parameter,
+          n_disp: num_parameter,
+	       c_disp: action_ids,
+	       av_c_disp: action_ids,
+	       selected_action: action_id % action that is selected
+       #]
+
+disp_alarm_type: TYPE =
+       [# patient_updates: patients_type,
+          device_update: devices,
+	       patient_connected: patient_connect_type,
+	       patient_device_connected: patient_device_connect_type,
+	       constraint_alarms: action_error_type
+        #]
+       
+  coord_db_type: TYPE = [patient -> patient_config]
+  
+  i_state: TYPE =
+        [# nde: node,
+           mode: patient_mode_type,
+           prev_menu_entry: menu,
+           prev_menu_visible: menu_set,	  
+	        disp_focus: disp_focus_type, % assumes that can change focus mode
+	        disp_top: coord_disp_top_type,
+           disp_alarm: disp_alarm_type, % empty when no attention all modes
+           disp_patient: disp_patient_type, % not visible when patient null
+           disp_device: disp_device_type, % not visible when device null
+           coord_db: coord_db_type      
+	   #]
+	   
+ empty_config: patient_config =
+    (# p_enum_params := LAMBDA (d: device):empty_enum_parameter,
+       p_num_params := LAMBDA (d: device):empty_num_parameter,
+      % param_set := emptyset,
+       p_actions := LAMBDA (d: device): emptyset,
+       p_av_actions := LAMBDA (d: device): emptyset,
+       p_devices := LAMBDA (d: device): no_device,
+       coord_devices := LAMBDA (d: device): empty_panel,
+       d_available_actions := LAMBDA (d: device): emptyset
+                            #)
+
+empty_top_display: coord_disp_top_type =
+(# patients := emptyset,
+   selected_patient := p_null,
+	patients_enum_params :=
+	    LAMBDA (p: patient): LAMBDA (d: device): empty_enum_parameter,
+   patients_num_params :=
+	    LAMBDA (p: patient): LAMBDA (d: device): empty_num_parameter,
+	%menu_entry := no_action,
+	menu_visible := LAMBDA (m: menu): (m = select) OR %(m = act) OR
+	                    (m = cursor_up) OR (m = cursor_down) OR
+			    (m = escape),
+	ent_device := nil_device,
+	ent_patient := p_null,
+	ent_action := nil_action
+      #)
+empty_patient_display: disp_patient_type  =
+      (# current_patient := p_null,
+		   devices := LAMBDA (d: device): no_device,
+		   selected_device := nil_device,
+		   patient_enum_params :=
+		       LAMBDA (d: device): empty_enum_parameter,
+         patient_num_params :=
+		       LAMBDA (d: device): empty_num_parameter,
+         patient_actions :=  LAMBDA (d: device): emptyset,
+		   av_main_act := LAMBDA (d: device): emptyset,
+		   selected_action := nil_action
+		  #)
+ empty_device_display: disp_device_type =
+      (# current_device := nil_device,
+		   e_disp := empty_enum_parameter,
+         n_disp := empty_num_parameter,
+         c_disp := emptyset,
+		   av_c_disp := emptyset,
+		   selected_action := nil_action
+		  #)
+
+empty_alarm_disp: disp_alarm_type =
+   (# patient_updates := emptyset,
+		device_update := emptyset,
+      patient_connected := LAMBDA (p: patient): not_connected,
+      patient_device_connected := LAMBDA (p: patient):
+		                                  LAMBDA (d: device):
+		                                  not_connected,
+      constraint_alarms := LAMBDA (p: patient): 
+                      (# dev := nil_device, act := nil_action #)
+		  #)
+			    
+ init_i_state: i_state =
+  (# nde := coord_node,
+     mode := top,
+     prev_menu_entry := no_action,
+     prev_menu_visible := LAMBDA (m: menu): (m = select) OR %(m = act) OR
+	                    (m = cursor_up) OR (m = cursor_down) OR
+			    (m = escape),
+     disp_focus := no_focus,
+     disp_top := empty_top_display,
+     disp_alarm := empty_alarm_disp,
+     disp_patient := empty_patient_display,
+     disp_device := empty_device_display,
+     coord_db := LAMBDA (p: patient): empty_config
+     #)
+
+top_menu: menu_set =
+      LAMBDA (m: menu): (m = select) OR %(m = act) OR
+	            (m = cursor_up) OR (m = cursor_down) OR
+			      (m = escape)
+select_options_menu: menu_set =
+      LAMBDA (m: menu):
+	    (m = patient) OR (m = device) OR (m = action) OR (m = escape) OR
+       (m = display) OR (m = region) OR (m = escape)
+       
+
+
+change_is_menu(ms: menu_set, is: i_state): i_state =
+is WITH
+      [ prev_menu_visible := (is`disp_top)`menu_visible,
+        disp_top :=
+         is`disp_top WITH
+             [menu_visible := ms]]
+
+i_escape(is: i_state): i_state =
+change_is_menu(is`prev_menu_visible, is) 
+
+ include_patient(p: patient, is: i_state): i_state =
+      is WITH [ disp_top :=
+                disp_top(is) WITH
+		  [patients :=  LAMBDA (p1: patient):
+                             (p1 = p) OR disp_top(is)`patients(p1)],
+                 disp_alarm :=
+                    disp_alarm(is) WITH
+		      [patient_updates :=
+		        LAMBDA (p1: patient):
+			   (p1 = p) OR (disp_alarm(is)`patient_updates)(p1)]
+	      ]
+
+update_error(is: i_state): i_state =
+      is WITH [ mode := error,
+                disp_patient := empty_patient_display    
+      ]
+
+update_patient_alarm_disp(p: patient, al: nw_error_type, is: i_state): i_state =
+  LET ad = disp_alarm(is) IN
+  is WITH [ disp_alarm :=
+              ad WITH [patient_connected :=
+	                LAMBDA (p1: patient):
+	                        IF p1 = p THEN al ELSE ad`patient_connected(p1) ENDIF ]		
+	  ]
+update_patient_device_alarm_disp(p: patient, d: device, al: nw_error_type,
+                                 is: i_state): i_state =
+  LET ad = disp_alarm(is) IN
+  is WITH [ disp_alarm :=
+              ad WITH [patient_device_connected :=
+	                LAMBDA (p1: patient):
+			   LAMBDA (d1: device):
+			     COND
+			         (p1 = p) AND (d1 = d) -> al,
+	                         ELSE -> ((ad`patient_device_connected)(p1))(d1)
+			     ENDCOND]		
+	  ]
+% connects device to patient in the coordinator
+% leaves the coordinator in the same mode, however adds the patient to the
+% alrm field if not in p_mode with p selected
+c_d_t_patient(p: patient, d: device, dt: device_type, is: i_state): i_state =
+     IF member(p, disp_top(is)`patients) AND
+      ((p_devices((is`coord_db)(p)))(d) = no_device)
+     THEN
+     LET devs = p_devices(is`coord_db(p)), devs = LAMBDA (d1: device):
+		            IF d1 = d THEN dt ELSE devs(d1) ENDIF,
+	 is1 = IF ((is`mode = p_mode) OR (is`mode = d_mode)) AND
+	       ((is`disp_patient)`current_patient = p)
+	       THEN is WITH [
+	         disp_patient := disp_patient(is) WITH [devices := devs],
+		 disp_alarm := IF ((is`disp_patient)`selected_device /= d)
+		              THEN disp_alarm(is) WITH
+		          [device_update :=
+			     add(d, disp_alarm(is)`device_update)]
+			       ELSE disp_alarm(is) ENDIF]
+		ELSE is WITH [ disp_alarm :=
+                    disp_alarm(is) WITH
+		   [patient_updates := add(p, disp_alarm(is)`patient_updates),
+		    device_update := add(d, disp_alarm(is)`device_update)
+		   ] ] ENDIF
+         IN is1 WITH [
+           coord_db := LAMBDA (px: patient):
+                      IF px = p THEN 
+                       is1`coord_db(p)  WITH
+                         [p_devices := devs,
+                          coord_devices :=
+			      LAMBDA (dx: device):
+                            IF (dx = d)
+			    THEN empty_panel
+			    ELSE
+			    (is1`coord_db(p))`coord_devices(dx)
+			    ENDIF] 
+                      ELSE is1`coord_db(px) ENDIF] 
+      ELSE update_error(is) ENDIF
+
+update_enum_pars(pan: panel, d: device, mep: main_enum_par): main_enum_par =
+     LAMBDA (d1: device):
+         IF d1 = d THEN
+	   LET pa2 = mep(d) IN
+	  LAMBDA (pr: par):
+	      IF pa2(pr) /= xnilval THEN pan`enum_disp(pr)
+	      ELSE xnilval ENDIF
+	   ELSE mep(d1) ENDIF
+
+update_num_pars(pan: panel, d: device, mep: main_num_par): main_num_par =
+      LAMBDA (d1: device): 
+           IF d1 = d THEN
+	   LET pa2 = mep(d) IN
+	  LAMBDA (pr: par):
+	      IF pa2(pr) /= null_value THEN pan`num_disp(pr)
+	      ELSE null_value ENDIF
+	   ELSE mep(d1) ENDIF
+
+update_p_actions(pan: panel, d: device, mac: main_act): main_act =
+       LAMBDA (d1: device):
+           IF d1 = d THEN
+	   LAMBDA (a: action_id): pan`cmds(a) AND (mac(d))(a)
+	   ELSE mac(d) ENDIF
+
+setup_enum_pars(pan: panel, d: device, mep: main_enum_par): main_enum_par =
+     LAMBDA (d1: device):
+         IF d1 = d THEN pan`enum_disp ELSE mep(d1) ENDIF
+           
+
+setup_num_pars(pan: panel, d: device, mep: main_num_par): main_num_par =
+      LAMBDA (d1: device): 
+           IF d1 = d THEN pan`num_disp ELSE mep(d1) ENDIF
+
+% sets up the device panel, and displays it if the the relevant patient is
+% displayed otherwise sets an alarm for that patient, if the right patient
+% but a different device is displayed then simply updates coord_db
+
+setup_p_d_panel(p: patient, d: device, pan: panel, is: i_state): i_state =
+     LET pc = (is`coord_db)(p) IN
+     IF member(p, disp_top(is)`patients) AND (pc`p_devices(d) /= no_device)
+     THEN
+     LET is1 =
+        IF (is`mode = d_mode) AND (disp_patient(is)`current_patient = p)
+	THEN
+	   IF disp_device(is)`current_device = d THEN
+	 is WITH [ disp_device := disp_device(is)
+	                   WITH [e_disp := pan`enum_disp,
+			         n_disp := pan`num_disp,
+				 c_disp := pan`cmds,
+				 av_c_disp := pan`cmds
+				 ]]
+	   ELSE
+	 is WITH [ disp_alarm := disp_alarm(is) WITH
+	              [device_update := add(d, disp_alarm(is)`device_update)]
+		]
+            ENDIF	            
+         ELSE is WITH [disp_alarm :=
+                 disp_alarm(is) WITH
+		   [patient_updates := add(p, disp_alarm(is)`patient_updates),
+		    device_update := add(d, disp_alarm(is)`device_update)]] ENDIF
+	 IN
+	 is1 WITH
+                 [ coord_db := LAMBDA (px: patient):
+                      IF px = p THEN 
+                       pc WITH
+                        [ coord_devices := 
+                             LAMBDA (d1: device): 
+                                IF d = d1 THEN pan ELSE pc`coord_devices(d1) ENDIF,
+		          d_available_actions := LAMBDA (d1: device):
+				     IF d1 = d THEN pan`cmds
+				     ELSE pc`d_available_actions(d1)
+				     ENDIF
+                        ]
+                       ELSE is`coord_db(px) ENDIF] 
+      ELSE update_error(is) ENDIF  
+
+setup_p_m_panel(p: patient, d: device, pan: panel, is:i_state): i_state = 
+  LET  pc = is`coord_db(p) IN	     
+     IF (pc`p_devices(d) /= no_device)    
+       THEN
+        LET pep = setup_enum_pars(pan, d, pc`p_enum_params),
+            pnp = setup_num_pars(pan, d, pc`p_num_params),
+	    pa = LAMBDA (d1: device):
+                       IF d1 = d THEN pan`cmds ELSE (pc`p_actions)(d1) ENDIF,
+            is1 =
+       IF (((is`mode = p_mode) OR (is`mode = d_mode)) AND
+             (disp_patient(is)`current_patient = p))
+       THEN is WITH [ disp_patient := disp_patient(is) WITH
+                      [patient_enum_params := pep,
+		       patient_num_params := pnp,
+		       patient_actions := pa,
+		       av_main_act := pa]]
+       ELSE is WITH [disp_alarm :=
+                    disp_alarm(is) WITH
+		      [patient_updates := add(p, disp_alarm(is)`patient_updates)]] ENDIF
+       IN
+       is1 WITH
+       [ coord_db := 
+           LAMBDA (px: patient):
+               IF px = p THEN 
+                   pc WITH 
+                   [p_actions := pa,
+		    p_av_actions := pa,
+                    p_enum_params := pep,
+                    p_num_params := pnp 
+                   ]
+                ELSE is`coord_db(px) ENDIF 
+                      ]
+       ELSE update_error(is) ENDIF
+
+% Change
+setup_p_t_panel(p: patient, d: device, pan: panel, is:i_state): i_state =
+  LET  pc = is`coord_db(p) IN	     
+     IF (pc`p_devices(d) /= no_device) 
+       THEN
+       LET pep = setup_enum_pars(pan, d, (is`disp_top)`patients_enum_params(p)), %pep = setup_enum_pars(pan, d, pc`p_enum_params),  Devia mandar o top
+           pnp = setup_num_pars(pan, d, (is`disp_top)`patients_num_params(p)) %pnp = setup_num_pars(pan, d, pc`p_num_params)  Devia mandar o bottom
+IN 
+ is WITH [disp_top := disp_top(is) WITH
+                  [ patients_enum_params := LAMBDA (p1: patient):
+		                            IF p1 = p THEN pep
+		    			    ELSE disp_top(is)`patients_enum_params(p1) ENDIF,
+		   patients_num_params := LAMBDA (p1: patient):
+		                            IF p1 = p THEN pnp
+					    ELSE disp_top(is)`patients_num_params(p1) ENDIF	       
+		       ]
+         ]
+     ELSE update_error(is)
+     ENDIF
+
+% In p_mode and d_mode if the current patient coincides then update patient_enum
+% params and patient_num params. Update the hidden panels.
+% Otherwise in d-mode update disp_device.
+
+update_p_panel(p: patient, d: device, pan: panel, is:i_state): i_state = 
+   IF (p /= null_pid) AND ((is`coord_db(p))`p_devices(d) /= no_device)   
+       THEN
+     LET pc = is`coord_db(p),
+         uep = update_enum_pars(pan, d, pc`p_enum_params),
+         unp = update_num_pars(pan, d, pc`p_num_params),
+	 uapc = update_p_actions(pan, d, pc`p_actions),
+	 uac = LAMBDA (d1: device):
+	          IF d = d1 THEN
+		  LAMBDA (a: action_id): (uapc(d))(a) AND pan`cmds(a)
+		  ELSE pc`p_av_actions(d1) ENDIF
+      IN
+	 is WITH
+	[disp_alarm := disp_alarm(is) WITH
+	              [patient_updates := IF (disp_patient(is)`current_patient /= p)
+	         THEN  add(p, disp_alarm(is)`patient_updates)
+		 ELSE disp_alarm(is)`patient_updates ENDIF],
+         disp_top := disp_top(is) WITH
+		      [patients_enum_params :=
+		            LAMBDA (p1: patient):
+		               IF p = p1 THEN
+			       update_enum_pars(pan, d, (is`disp_top)`patients_enum_params(p))
+			       ELSE (is`disp_top)`patients_enum_params(p1) ENDIF,
+		       patients_num_params :=
+		            LAMBDA (p1: patient):
+		               IF p = p1 THEN
+			       update_num_pars(pan, d, (is`disp_top)`patients_num_params(p))
+			       ELSE (is`disp_top)`patients_num_params(p1) ENDIF],
+	 disp_patient :=
+        IF (((is`mode = p_mode) OR (is`mode = d_mode)) AND
+	   (disp_patient(is)`current_patient = p))
+	THEN disp_patient(is) WITH
+	        [ patient_enum_params := uep,
+	          patient_num_params := unp,
+		  av_main_act := uac ]
+        ELSE disp_patient(is) ENDIF,
+	 disp_device :=
+	   IF ((is`mode = d_mode) AND (disp_device(is)`current_device = d))
+	  THEN disp_device(is) WITH
+	        [e_disp := pan`enum_disp,
+	         n_disp := pan`num_disp,
+	         av_c_disp := pan`cmds]
+	  ELSE disp_device(is) ENDIF,
+         coord_db := 
+             LAMBDA (px: patient):
+                IF px = p THEN 
+                     pc WITH 
+                     [
+                      p_enum_params := uep,
+                      p_num_params := unp,
+		      p_av_actions := uac,
+		      d_available_actions :=
+		          LAMBDA (d1: device):
+			    IF d = d1 THEN pan`cmds
+			    ELSE pc`d_available_actions(d1)
+			       ENDIF,
+                      coord_devices := 
+                        LAMBDA (d1: device): 
+                          IF d = d1 THEN
+			  pan WITH [cmds := (pc`coord_devices(d))`cmds]
+			  ELSE pc`coord_devices(d1) ENDIF
+                              ]
+                ELSE is`coord_db(px) ENDIF
+	 ]
+       ELSE update_error(is) ENDIF
+
+
+       
+i_select_p_mode(is: i_state): i_state =
+LET p = disp_top(is)`ent_patient IN
+    IF disp_top(is)`patients(p) THEN 
+    is WITH [mode := p_mode,
+             disp_alarm :=
+                    disp_alarm(is) WITH
+		      [patient_updates := remove(p, disp_alarm(is)`patient_updates)],
+             disp_patient :=
+	        (# current_patient := p,
+		   devices := (is`coord_db(p))`p_devices,
+		   selected_device := nil_device,
+                   patient_enum_params :=  (is`coord_db(p))`p_enum_params,
+                   patient_num_params := (is`coord_db(p))`p_num_params,
+                   patient_actions :=  (is`coord_db(p))`p_actions,
+		   av_main_act := (is`coord_db(p))`p_av_actions,
+		   selected_action := nil_action
+		#),
+	     disp_device := empty_device_display]
+    ELSE is ENDIF
+
+i_select_d_mode(is: i_state): i_state =
+LET  dp = is`disp_top, p = dp`selected_patient, d = dp`ent_device IN
+  IF ((is`mode = p_mode) OR (is`mode = d_mode) OR
+    (is`mode = top)) AND (d /= nil_device) 
+      AND ((is`coord_db(disp_patient(is)`current_patient))`p_devices(d) /= no_device) THEN
+      LET d_panel = (is`coord_db(p))`coord_devices(d),
+      is = is WITH [mode := d_mode,
+               disp_alarm :=
+                    disp_alarm(is) WITH
+            [patient_updates := 
+                 IF p /= (is`disp_patient)`current_patient THEN 
+                       remove(p, disp_alarm(is)`patient_updates) 
+                       ELSE disp_alarm(is)`patient_updates ENDIF,
+                 device_update :=
+               remove(d, disp_alarm(is)`device_update)],
+               disp_patient := 
+                   IF p /= (is`disp_patient)`current_patient 
+                   THEN (# current_patient := p,
+		                     devices := (is`coord_db(p))`p_devices,
+		                     selected_device := d,
+                           patient_enum_params :=  (is`coord_db(p))`p_enum_params,
+                           patient_num_params := (is`coord_db(p))`p_num_params,
+                           patient_actions :=  (is`coord_db(p))`p_actions,
+		                     av_main_act := (is`coord_db(p))`p_av_actions,
+		                     selected_action := nil_action
+		                  #) ELSE is`disp_patient ENDIF,
+               disp_device :=
+	         (# current_device := d,
+		    e_disp := d_panel`enum_disp,
+		    n_disp := d_panel`num_disp,
+		    c_disp := d_panel`cmds,
+		    av_c_disp := is`coord_db(p)`d_available_actions(d),
+		    selected_action := nil_action
+		    #)
+               ] IN change_is_menu(top_menu, is)
+      ELSE change_is_menu(top_menu, is) ENDIF
+      
+i_select_top(is: i_state): i_state =
+ LET is = change_is_menu(top_menu, is) IN
+      is WITH [  mode := top,
+          disp_patient := empty_patient_display,
+	  disp_device := empty_device_display]
+
+i_select_device(d: device, is: i_state): i_state =
+IF (is`disp_patient)`devices(d) /= no_device
+THEN
+LET is = is WITH [
+	    disp_patient :=
+                is`disp_patient WITH [selected_device := d]]
+IN change_is_menu(top_menu, is)
+ELSE change_is_menu(top_menu, is) ENDIF
+
+i_select_display(is: i_state): i_state =
+LET is =
+COND
+   is`disp_focus = top_focus -> i_select_top(is),
+   is`disp_focus = patient_focus -> i_select_p_mode(is),
+   is`disp_focus = device_focus -> i_select_d_mode(is),
+   ELSE -> is
+ ENDCOND 
+ IN change_is_menu(top_menu, is)
+
+
+update_selected_d_action(a: action_id, dd: disp_device_type): disp_device_type
+= dd WITH [selected_action := a]
+
+update_selected_p_action(a: action_id, pp: disp_patient_type): disp_patient_type
+= pp WITH [selected_action := a]
+
+
+i_select_ad(a: action_id, is: i_state): i_state =
+IF (is`disp_device)`av_c_disp(a)
+THEN is WITH [disp_device := update_selected_d_action(a, is`disp_device)]
+ELSE is ENDIF
+
+
+i_select_ap(a: action_id, is: i_state): i_state =
+LET d = (is`disp_patient)`selected_device IN
+IF (d /= nil_device) AND ((is`disp_patient)`av_main_act(d))(a)
+THEN is WITH [disp_patient := update_selected_p_action(a, is`disp_patient)]
+ELSE is ENDIF
+
+i_select_action(is: i_state): i_state =
+LET a = (is`disp_top)`ent_action, is1 =
+COND
+   is`mode = p_mode -> i_select_ap(a, is),
+   is`mode = d_mode -> i_select_ad(a, is),
+   ELSE -> is
+ENDCOND IN
+change_is_menu(top_menu, is1)
+	    
+
+i_select(is: i_state): i_state =
+change_is_menu(select_options_menu, is)
+
+i_select_patient(is: i_state): i_state =
+LET p = (is`disp_top)`ent_patient,
+    is = change_is_menu(top_menu, is) IN 
+IF (disp_top(is)`patients)(p)
+THEN
+is WITH
+  [disp_top :=
+       disp_top(is) WITH
+         [ selected_patient := p]] ELSE
+is ENDIF
+
+
+i_select_device(is: i_state): i_state =
+LET d = (is`disp_top)`ent_device IN
+IF ((is`mode = d_mode) OR (is`mode = p_mode)) AND
+   ((is`disp_patient)`devices(d) /= no_device)
+THEN LET is = change_is_menu(top_menu, is)
+    IN is WITH
+       [  disp_patient :=
+               disp_patient(is) WITH
+	       [selected_device := d]]
+ELSE is ENDIF
+
+i_up_display(is: i_state): i_state =
+LET is = change_is_menu(top_menu, is)
+IN is  WITH [disp_focus := COND
+                        is`disp_focus = no_focus -> no_focus,
+                        is`disp_focus = top_focus -> no_focus,
+			               is`disp_focus = patient_focus -> top_focus,
+			               is`disp_focus = device_focus -> patient_focus
+		       ENDCOND]
+
+i_down_display(is:i_state): i_state =
+LET is = change_is_menu(top_menu, is)
+IN is WITH [disp_focus := COND
+                        is`disp_focus = no_focus -> top_focus,
+                        is`disp_focus = top_focus -> patient_focus,
+			is`disp_focus = patient_focus -> device_focus,
+			is`disp_focus = device_focus -> no_focus
+		       ENDCOND
+	  ]
+
+ END coordinator_th
+
+
+
+
+ 
+
+
+

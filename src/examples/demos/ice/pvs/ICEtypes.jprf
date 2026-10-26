@@ -1,0 +1,26 @@
+{
+ "coord_t_and_c_th.null_value_TCC1": [
+  {
+   "info": {
+    "theory": "coord_t_and_c_th",
+    "formula": "null_value_TCC1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "c66e695f72b43e232f0e03807d97e9255257b8fd0adcd67c957473a18ed23a5d"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "null_value_TCC1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(subtype-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+
+    <link href="../../node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../node_modules/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="style.css">
+</head>
+<style>
+    ::placeholder {
+        font-family: 'Lato';
+        font-style: normal;
+        font-weight: 500;
+        font-size: 14px;
+        line-height: 34px;
+        display: flex;
+        align-items: center;
+        color: #A9C1FD;
+        flex: none;
+        order: 0;
+        flex-grow: 0;
+        opacity: 1;
+    }
+</style>
+
+<body class="noselect" style="background:#F6F8FB" ;>
+    <script src="../../node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="../../node_modules/handlebars/dist/handlebars.min.js"></script>
+    <script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../node_modules/underscore/underscore-min.js"></script>
+    <script src="../../node_modules/backbone/backbone.js"></script>
+    <script src="../../node_modules/requirejs/require.js" data-main="index.js"></script>
+
+    <!-- visual appearance of the prototype -->
+    <div
+        style="width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: scroll;">
+        <!-- only for now, delete this div and keep whats inside -->
+        <div id="content" class="content" style="width: 2420px; height: 1150px; display:block;position:absolute;">
+            <!-- only for now, delete styles besides display:block;position:absolute; -->
+            <div id="coordinator"
+                style="display: none;position: absolute;width: 2369px;height: 1582px;left: 0px;top: 0px;">
+                <!-- picture of the device -->
+                <img draggable="false" src="monitor.png" width="2369" height="1582">
+                <div id="coordScreen"
+                    style="position: absolute;width: 2249px;height: 1185px;left: 59px;top: 65px; background:#3E3E3E;">
+                    <div id="coordBlackBox"
+                        style="position: absolute;width: 1886px;height: 1044px;left: 313px;top: 68px; background:#303030; border-radius: 10px;">
+                        <div id="coordTopMode" style="overflow: hidden;">
+                            <div style="position: absolute;top: 60px;left: 0px;" class="lineCoord"></div>
+                            <label style="position: absolute;width: 1886px;height: 58px;left: 0px;top: 0px;"
+                                class="bigTitle">Patients</label>
+                            <div id="coordTopModeNoDevices">
+                                <label style="position: absolute;width: 411px;height: 198px;left: 737px;top: 446px;"
+                                    class="empty">No devices were setup for top mode....</label>
+                            </div>
+                        </div>
+                        <div id="coordPatientMode" style="overflow: hidden;">
+                            <label style="position: absolute;width: 324px;height: 68px;left: 351px;top: 224px;"
+                                class="smallTitleGreen">Devices:</label>
+                            <div id="coordPatientModeNoDevices">
+                                <label style="position: absolute;width: 411px;height: 198px;left: 737px;top: 446px;"
+                                    class="empty">No devices were setup for patient mode...</label>
+                            </div>
+                        </div>
+                        <div id="coordDeviceMode">
+
+                        </div>
+                        <div id="coordSharedBetweenPatDevModes">
+                            <div id="coordSelDeviceBox" class="deviceSelBox"
+                                style="position: absolute;left: 11px; top: 75px;">
+
+                            </div>
+                            <label style="position: absolute;width: 106px;height: 43px;left: 15px;top: 36px;"
+                                class="sidebarLabel">Enter Device:</label>
+                            <div
+                                style="position: absolute;width: 1866px;height: 40px;left: 0px;top: 173px; display: flex; justify-content: center; align-items: center;">
+                                <span
+                                    style="color: #FEFFFF; font-size: 16px; font-family: Lato; font-weight: 400; line-height: 24px; letter-spacing: 0.10px; word-wrap: break-word">If&nbsp;</span><span
+                                    style="color: #FAC032; font-size: 16px; font-family: Lato; font-weight: 400; line-height: 24px; letter-spacing: 0.10px; word-wrap: break-word">YELLOW:&nbsp;</span><span
+                                    style="color: #FEFFFF; font-size: 16px; font-family: Lato; font-weight: 400; line-height: 24px; letter-spacing: 0.10px; word-wrap: break-word">Device
+                                    successfully entered.&nbsp;If&nbsp;</span><span
+                                    style="color: #006448; font-size: 16px; font-family: Lato; font-weight: 400; line-height: 24px; letter-spacing: 0.10px; word-wrap: break-word">DARK
+                                    GREEN:&nbsp;</span><span
+                                    style="color: #FEFFFF; font-size: 16px; font-family: Lato; font-weight: 400; line-height: 24px; letter-spacing: 0.10px; word-wrap: break-word">Device
+                                    successfully selected.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="coordSidebar" style="position: absolute;width: 253px;height: 1185px;background:#22C084;">
+                        <label style="position: absolute;width: 191px;height: 70px;left: 31px;top: 14px;"
+                            class="sidebarHeader">ICE Minho</label>
+                        <label style="position: absolute;width: 106px;height: 43px;left: 21px;top: 84px;"
+                            class="sidebarLabel">Enter Patient:</label>
+                        <div style="position: absolute;width: 211px;height: 133px;left: 21px;top: 1072px;">
+                            <span
+                                style="color: #FEFFFF; font-size: 16px; font-family: Lato; font-weight: 400; line-height: 24px; letter-spacing: 0.10px; word-wrap: break-word">If&nbsp;</span><span
+                                style="color: #FAC032; font-size: 16px; font-family: Lato; font-weight: 400; line-height: 24px; letter-spacing: 0.10px; word-wrap: break-word">YELLOW:<br /></span><span
+                                style="color: #FEFFFF; font-size: 16px; font-family: Lato; font-weight: 400; line-height: 24px; letter-spacing: 0.10px; word-wrap: break-word">Patient
+                                successfully entered.<br /> If&nbsp;</span><span
+                                style="color: #006448; font-size: 16px; font-family: Lato; font-weight: 400; line-height: 24px; letter-spacing: 0.10px; word-wrap: break-word">DARK
+                                GREEN:<br /></span><span
+                                style="color: #FEFFFF; font-size: 16px; font-family: Lato; font-weight: 400; line-height: 24px; letter-spacing: 0.10px; word-wrap: break-word">Patient
+                                successfully selected.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="patientLayer"
+                style="display: none;position: absolute;width: 1139px;height: 1730px;left: 0px;top: 0px;">
+                <img draggable="false" src="tablet.png" width="1139" height="1730">
+                <div id="plScreen"
+                    style="position: absolute;width: 840px;height: 1465px;left: 138px;top: 120px; background:#3E3E3E;">
+                    <div id="plBlackBox"
+                        style="position: absolute;width: 827px;height: 1161px;left: 6px;top: 232px; background:#303030; border-radius: 10px;">
+                        <div style="position: absolute;top: 44px;left: 0px;" class="linePL"></div>
+                        <div id="plTopMode" style="display: none">
+                            <div id="plTopModeTopDisplay"
+                                style="position: absolute; top:113px; left: 0px; width: 827px; height: 180px; overflow: hidden;">
+                            </div>
+                            <div id="plTopModeMainDisplay"
+                                style="position: absolute; top:360px; left: 0px; width: 827px; height: 358px; overflow: hidden;">
+                            </div>
+                            <div id="plTopModeRulesDisplay"
+                                style="position: absolute; left: 0px; width: 827px; overflow: hidden;"></div>
+                            <label style="position: absolute;width: 827px;height: 48px;left: 0px;top: 0px;"
+                                class="bigTitle">Top Mode</label>
+                            <label style="position: absolute;width: 827px;height: 68px;left: 0px;top: 52px;"
+                                class="bigTitle">Top Display</label>
+                            <div style="position: absolute;top: 296px;left: 0px;" class="linePL"></div>
+                            <label style="position: absolute;width: 827px;height: 60px;left: 0px;top: 300px;"
+                                class="bigTitle">Patient Display</label>
+                            <div style="position: absolute;top: 721px;left: 0px;" class="linePL"></div>
+                            <label style="position: absolute;width: 827px;height: 64px;left: 0px;top: 729px;"
+                                class="bigTitle">Rules Display</label>
+                            <div id="plTopModeNoRules">
+                                <label style="position: absolute;width: 303px;height: 120px;left: 262px;top: 833px;"
+                                    class="empty">No rules created...</label>
+                            </div>
+                            <div id="plTopModeNoTopDisplay">
+                                <label style="position: absolute;width: 303px;height: 120px;left: 262px;top: 136px;"
+                                    class="empty">No devices setup for top display...</label>
+                            </div>
+                            <div id="plTopModeNoMainDisplay">
+                                <label style="position: absolute;width: 303px;height: 120px;left: 262px;top: 440px;"
+                                    class="empty">No devices setup for patient display...</label>
+                            </div>
+                            <label style="position: absolute;width: 257px;height: 56px;left: 20px;top: 1105px;"
+                                class="sidebarLabel">Coordinator patient configuration</label>
+                        </div>
+                        <div id="plDeviceMode" style="display: none">
+                            <div id="plDeviceModeRulesDisplay"
+                                style="position: absolute; left: 0px; width: 827px; overflow: hidden;"></div>
+                            <label style="position: absolute;width: 825px;height: 58px;left: 0px;top: 0px;"
+                                class="bigTitle">Device Mode</label>
+                            <label id="plDeviceModeRulesAssociated"
+                                style="position: absolute;width: 340px;height: 77px;left: 244px;top: 581px;"
+                                class="bigTitle">Rules associated with device</label>
+                            <label id="plDeviceModeNoRules"
+                                style="position: absolute;width: 303px;height: 120px;left: 262px;top: 713px;"
+                                class="empty">No rules associated with this device...</label>
+                        </div>
+                        <div id="plEdit" style="display: none">
+                            <div id="plEditDisplays" style="display: none">
+                                <label style="position: absolute;width: 324px;height: 68px;left: 10px;top: 82px;"
+                                    class="smallTitle">Parameters:</label>
+                                <label id="plEditDisplaysActionsTitle"
+                                    style="position: absolute;width: 324px;height: 68px;left: 10px;top: 415px;"
+                                    class="smallTitle">Actions:</label>
+                            </div>
+                            <div id="plEditConstraint" style="display: none">
+                                <label style="position: absolute;width: 324px;height: 68px;left: 15px;top: 62px;"
+                                    class="smallTitleGreen">Numeric value constraint:</label>
+                                <label style="position: absolute;width: 324px;height: 68px;left: 15px;top: 300px;"
+                                    class="smallTitleGreen">Enumeration value constraint:</label>
+                                <label id="plEditConstraintRules"
+                                    style="position: absolute;width: 324px;height: 68px;left: 15px;top: 581px;"
+                                    class="smallTitleGreen">Previous Constraints:</label>
+                            </div>
+                            <div id="plEditRules" style="display: none">
+                                <label style="position: absolute;width: 324px;height: 68px;left: 15px;top: 62px;"
+                                    class="smallTitleGreen">Rule action:</label>
+                                <label style="position: absolute;width: 324px;height: 68px;left: 15px;top: 289px;"
+                                    class="smallTitleGreen">Current Constraints:</label>
+                                <label style="position: absolute;width: 324px;height: 68px;left: 15px;top: 513px;"
+                                    class="smallTitleGreen">All Rules:</label>
+                                <div id="plEditRulesModeRulesDisplay"
+                                    style="position: absolute; left: 0px; width: 827px; overflow: hidden;"></div>
+                                <div id="plEditRulesNoRules">
+                                    <label style="position: absolute;width: 303px;height: 120px;left: 262px;top: 676px;"
+                                        class="empty">No rules created...</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="plTopbar" style="position: absolute;width: 840px;height: 180px;background:#22C084;">
+                        <label style="position: absolute;width: 840px;height: 122px;left: 0px;top: 0px;"
+                            class="sidebarHeader">ICE Minho</label>
+                        <div id="plTopbarChooseDevice" style="display: none">
+                            <label style="position: absolute;width: 106px;height: 43px;left: 8px;top: 17px;"
+                                class="sidebarLabel">Enter Device:</label>
+                            <div
+                                style="position: absolute;width: 771px;height: 44px;left: 34px;top: 139px;display: flex; justify-content: center; align-items: center;">
+                                <span
+                                    style="color: #FEFFFF; font-size: 16px; font-family: Lato; font-weight: 400; line-height: 24px; letter-spacing: 0.10px; word-wrap: break-word">If&nbsp;</span><span
+                                    style="color: #FAC032; font-size: 16px; font-family: Lato; font-weight: 400; line-height: 24px; letter-spacing: 0.10px; word-wrap: break-word">YELLOW:&nbsp;</span><span
+                                    style="color: #FEFFFF; font-size: 16px; font-family: Lato; font-weight: 400; line-height: 24px; letter-spacing: 0.10px; word-wrap: break-word">Device
+                                    successfully entered.&nbsp;If&nbsp;</span><span
+                                    style="color: #006448; font-size: 16px; font-family: Lato; font-weight: 400; line-height: 24px; letter-spacing: 0.10px; word-wrap: break-word">DARK
+                                    GREEN:&nbsp;</span><span
+                                    style="color: #FEFFFF; font-size: 16px; font-family: Lato; font-weight: 400; line-height: 24px; letter-spacing: 0.10px; word-wrap: break-word">Device
+                                    successfully selected.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="console"
+                style="display: none;width: 960px; height: 1500px; top: 59px; position: absolute; left: 1460px; background: var(--Mine-Shatf-2, #3E3E3E);">
+                <label style="position: absolute;width: 99px;height: 42px;left: 430px;top: 0px;"
+                    class="consoleHeader">Console:</label>
+                <label style="position: absolute;width: 122px;height: 44px;left: 20px;top: 66px;"
+                    class="consoleSmallMenu">Mode Changer:</label>
+                <label style="position: absolute;width: 66px;height: 44px;left: 26px;top: 140px;"
+                    class="consoleSmallMenu">Connect:</label>
+                <label style="position: absolute;width: 150px;height: 44px;left: 22px;top: 216px;"
+                    class="consoleSmallMenu">Populate Functions:</label>
+                <label style="position: absolute;width: 389px;height: 44px;left: 26px;top: 292px;text-align: start;"
+                    class="consoleSmallMenu">Change Patient Layer And Tick Current Patient And Device Value:</label>
+                <label style="position: absolute;width: 107px;height: 44px;left: 28px;top: 450px;"
+                    class="consoleSmallMenu">Tick functions:</label>
+                <label style="position: absolute;width: 95px;height: 44px;left: 28px;top: 552px;"
+                    class="consoleSmallMenu">State Mode:</label>
+                <label style="position: absolute;width: 165px;height: 44px;left: 28px;top: 686px;"
+                    class="consoleSmallMenu">State Synchronization:</label>
+                <label style="position: absolute;width: 432px;height: 44px;left: 28px;top: 771px; align-items: start;"
+                    class="consoleSmallMenu">Tick Interval (if sync type is set to automatic):</label>
+                <label id="timeUntilNextTick"
+                    style="position: absolute;width: 432px;height: 24px;left: 28px;top: 886px; color: var(--White, var(--twilight-blue, #FEFFFF)); align-items: start;"
+                    class="consoleSmallMenu">Time until next tick (in seconds): 20 s</label>
+                <label style="position: absolute;width: 211px;height: 44px;left: 31px;top: 910px;"
+                    class="consoleSmallMenu">Tick Functions Description:</label>
+                <div
+                    style="position: absolute; width: 423px; height: 200px; left: 32px;top: 953px; text-align: justify">
+                    <ul>
+                        <li style="color: #FAC032; margin-bottom: -20px;line-height: 15px;">
+                            <p class="consoleSyncText"><span style="color: #FAC032;">Coordinator: </span>When there is an
+                                <span style="color: #22C084;">act msg</span> or <span style="color: #22C084;">pan msg
+                                    waiting</span> for <span style="color: #22C084;">'node 0'</span> (the coordinator);
+                            </p>
+                        </li>
+                        <li style="color: #FAC032; margin-bottom: -20px;line-height: 15px;">
+                            <p class="consoleSyncText"><span style="color: #FAC032;">Curr Pan Patient: </span>When there
+                                is a <span style="color: #22C084;">pan msg waiting</span> for a node belonging to a
+                                patient; also evaluates the patient's rules;</p>
+                        </li>
+                        <li style="color: #FAC032; margin-bottom: -20px;line-height: 15px;">
+                            <p class="consoleSyncText"><span style="color: #FAC032;">Curr Act Patient: </span>When there
+                                is an <span style="color: #22C084;">act msg waiting</span> for a node belonging to a
+                                patient;</p>
+                        </li>
+                        <li style="color: #FAC032; margin-bottom: -20px;line-height: 15px;">
+                            <p class="consoleSyncText"><span style="color: #FAC032;">Curr Device Pan: </span>Always simulates a unit of time on the device and generates a new panel update;
+                            </p>
+                        </li>
+                        <li style="color: #FAC032; margin-bottom: -20px;line-height: 15px;">
+                            <p class="consoleSyncText"><span style="color: #FAC032;">Curr Device Act: </span>When there is an
+                                <span style="color: #22C084;">act msg waiting</span> for a node belonging to a device;
+                            </p>
+                        </li>
+                    </ul>
+                </div>
+                <label style="position: absolute;width: 170px;height: 44px;left: 37px;top: 1170px;"
+                    class="consoleSmallMenu">Synchronization When:</label>
+                <div
+                    style="position: absolute; width: 423px; height: 263px; left: 32px;top: 1214px; text-align: justify">
+                    <ul>
+                        <li style="color: #FAC032; margin-bottom: -20px;line-height: 15px;">
+                            <p class="consoleSyncText"><span style="color: #FAC032;">Edited a Display:</span> Do <span
+                                    style="color: #6CFFAF;">Coordinator</span>;</p>
+                        </li>
+                        <li style="color: #FAC032; margin-bottom: -20px;line-height: 15px;">
+                            <p class="consoleSyncText"><span style="color: #FAC032;">Executing an action from patient
+                                    layer:</span> Do <span style="color: #6CFFAF;">Curr Device Pan</span> of
+                                corresponding
+                                device → <span style="color: #6CFFAF;">Curr Pan Patient</span> corresponding to the
+                                patient → <span style="color: #6CFFAF;">Coordinator</span>;</p>
+                        </li>
+                        <li style="color: #FAC032; margin-bottom: -20px;line-height: 15px;">
+                            <p class="consoleSyncText"><span style="color: #FAC032;">Executing an action from
+                                    coordinator:</span> Do <span style="color: #11E9F6;">Curr Act Patient</span> → <span
+                                    style="color: #11E9F6;">Curr Device Act</span> → <span style="color: #6CFFAF;">Curr
+                                    Device
+                                    Pan</span> → <span style="color: #6CFFAF;">Curr Pan Patient</span> → <span
+                                    style="color: #6CFFAF;">Coordinator</span>;</p>
+                        </li>
+                        <li style="color: #FAC032; margin-bottom: -20px;line-height: 15px;">
+                            <p class="consoleSyncText"><span style="color: #FAC032;">Rule triggered:</span> Do <span
+                                    style="color: #6CFFAF;">Curr Pan Patient</span> to evaluate its rules. If an alarm is triggered → <span
+                                    style="color: #6CFFAF;">Coordinator</span> → <span style="color: #6CFFAF;">Curr
+                                    Device
+                                    Pan</span> → <span style="color: #6CFFAF;">Curr Pan Patient</span> → <span
+                                    style="color: #6CFFAF;">Coordinator</span>;</p>
+                        </li>
+                        <li style="color: #FAC032; margin-bottom: -20px;line-height: 15px;">
+                            <p class="consoleSyncText"><span style="color: #FAC032;">Executing an action from device
+                                    layer:</span> Do <span style="color: #6CFFAF;">Curr Device Pan</span> of
+                                corresponding
+                                device → <span style="color: #6CFFAF;">Curr Pan Patient</span> corresponding to the
+                                patient → <span style="color: #6CFFAF;">Coordinator</span>;</p>
+                        </li>
+                    </ul>
+                </div>
+                <label style="position: absolute;width: 49px;height: 44px;left: 480px;top: 66px;"
+                    class="consoleSmallMenu">State:</label>
+                <pre id="consoleState"
+                    style="position: absolute;width: 469px;height: 1375px;left: 480px;top: 110px; overflow-y: scroll;"
+                    class="state">
+
+                </pre>
+            </div>
+            <div id="deviceLayerIP"
+                style="display: none;position: absolute;width: 1700px;height: 694px;left: 0px;top: 0px;">
+                <img draggable="false" src="ipClean.png" width="1700" height="694">
+            </div>
+            <div id="deviceLayerVS"
+                style="display: none;position: absolute;width: 1560px;height: 1237px;left: 0px;top: 0px;">
+                <img draggable="false" src="VSmonitor.png" width="1560" height="1237">
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

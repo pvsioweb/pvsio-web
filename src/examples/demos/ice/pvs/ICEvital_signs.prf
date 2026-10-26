@@ -1,0 +1,52 @@
+(vital_signs_th
+ (init_vs_panel_TCC1 0
+  (init_vs_panel_TCC1-1 nil 3813306060 ("" (cond-disjoint-tcc) nil nil)
+   nil nil
+   (init_vs_panel disjointness
+    "COND vital_signs_th.p = coord_t_and_c_th.hrte -> 128, vital_signs_th.p = coord_t_and_c_th.blpl -> 38, vital_signs_th.p = coord_t_and_c_th.blph -> 76, vital_signs_th.p = coord_t_and_c_th.sp -> 99, vital_signs_th.p = coord_t_and_c_th.rkrt -> 20, vital_signs_th.p = coord_t_and_c_th.ptmp -> (number_fields./(361, 10)), ELSE -> coord_t_and_c_th.null_value ENDCOND"
+    "nil")))
+ (tick_vs_TCC1 0
+  (tick_vs_TCC1-1 nil 3813306060 ("" (subtype-tcc) nil nil)
+   ((nnreal_times_nnreal_is_nnreal application-judgement "nnreal"
+     real_types nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (per_tick_vs const-decl "boolean" vital_signs_th nil))
+   nil
+   (tick_vs subtype
+    "(number_fields.-)(vital_signs_th.vs`BPH, number_fields.*(vital_signs_th.vs`BPH, (number_fields./(3, 100))))"
+    "nonneg_real")))
+ (tick_vs_TCC2 0
+  (tick_vs_TCC2-1 nil 3813306060 ("" (subtype-tcc) nil nil)
+   ((nnreal_times_nnreal_is_nnreal application-judgement "nnreal"
+     real_types nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (per_tick_vs const-decl "boolean" vital_signs_th nil))
+   nil
+   (tick_vs subtype
+    "(number_fields.-)(vital_signs_th.vs`BPL, number_fields.*(vital_signs_th.vs`BPL, (number_fields./(3, 100))))"
+    "nonneg_real")))
+ (tick_vs_TCC3 0
+  (tick_vs_TCC3-1 nil 3813306060 ("" (subtype-tcc) nil nil)
+   ((nnreal_times_nnreal_is_nnreal application-judgement "nnreal"
+     real_types nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (per_tick_vs const-decl "boolean" vital_signs_th nil))
+   nil
+   (tick_vs subtype
+    "(number_fields.-)(vital_signs_th.vs`SPO2, number_fields.*(vital_signs_th.vs`SPO2, (number_fields./(1, 100))))"
+    "nonneg_real")))
+ (tick_vs_TCC4 0
+  (tick_vs_TCC4-1 nil 3813306060 ("" (subtype-tcc) nil nil)
+   ((nnreal_times_nnreal_is_nnreal application-judgement "nnreal"
+     real_types nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (per_tick_vs const-decl "boolean" vital_signs_th nil))
+   nil
+   (tick_vs subtype
+    "(number_fields.-)(vital_signs_th.vs`temp, number_fields.*(vital_signs_th.vs`temp, (number_fields./(2, 10))))"
+    "nonneg_real"))))
+

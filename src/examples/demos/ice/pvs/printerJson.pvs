@@ -1,0 +1,1654 @@
+printerJson[
+    maxrate: posnat, 
+    maxinfuse: posnat, 
+    maxtime: {maxtime: posnat | maxinfuse <= maxtime}
+]: THEORY
+  BEGIN 
+    IMPORTING system_th[maxrate, maxinfuse, maxtime]
+   mindex: nat = 16
+   nlimit: nat = 16
+   dlimit: nat = 16
+   plimit: nat = 16
+   last_patient: nat = 2
+   
+  action_id2string(a: action_id): string =
+   COND
+    a = powr -> doublequote + "powr" + doublequote,
+    a = incr -> doublequote + "incr" + doublequote,
+    a = decr -> doublequote + "decr" + doublequote,
+    a = bolus -> doublequote + "bolus" + doublequote,
+    a = confirm -> doublequote + "confirm" + doublequote,
+    a = choosetime -> doublequote + "choosetime" + doublequote,
+    a = choosevtbi -> doublequote + "choosevtbi" + doublequote,
+    a = chooserate -> doublequote + "chooserate" + doublequote,
+    a = start -> doublequote + "start" + doublequote,
+    a = hold -> doublequote + "hold" + doublequote,
+    a = tick -> doublequote + "tick" + doublequote,
+    a = openclamp -> doublequote + "openclamp" + doublequote,
+    a = closeclamp -> doublequote + "closeclamp" + doublequote,
+    a = nil_action -> doublequote + "nil_action" + doublequote
+    ENDCOND
+  CONVERSION action_id2string
+
+action_ids2string(fs: action_ids): string =
+  LET ans = "[ ",
+      ans = IF fs(powr) THEN ans + doublequote + "powr" + doublequote ELSE ans ENDIF,
+      ans = ans + IF fs(powr) AND (fs(incr) OR fs(decr) OR fs(bolus) OR 
+                       fs(confirm) OR fs(choosetime) OR fs(choosevtbi) OR
+                       fs(chooserate) OR fs(start) OR fs(hold) OR fs(tick) OR
+                       fs(openclamp) OR fs(closeclamp) OR fs(nil_action))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF fs(incr) THEN ans + doublequote + "incr" + doublequote ELSE ans ENDIF,
+      ans = ans + IF fs(incr) AND (fs(decr) OR fs(bolus) OR 
+                       fs(confirm) OR fs(choosetime) OR fs(choosevtbi) OR
+                       fs(chooserate) OR fs(start) OR fs(hold) OR fs(tick) OR
+                       fs(openclamp) OR fs(closeclamp) OR fs(nil_action))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF fs(decr) THEN ans + doublequote + "decr" + doublequote ELSE ans ENDIF,
+      ans = ans + IF fs(decr) AND (fs(bolus) OR 
+                       fs(confirm) OR fs(choosetime) OR fs(choosevtbi) OR
+                       fs(chooserate) OR fs(start) OR fs(hold) OR fs(tick) OR
+                       fs(openclamp) OR fs(closeclamp) OR fs(nil_action))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF fs(bolus) THEN ans + doublequote + "bolus" + doublequote ELSE ans ENDIF,
+      ans = ans + IF fs(bolus) AND (fs(confirm) OR fs(choosetime) OR fs(choosevtbi) OR
+                       fs(chooserate) OR fs(start) OR fs(hold) OR fs(tick) OR
+                       fs(openclamp) OR fs(closeclamp) OR fs(nil_action))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF fs(confirm) THEN ans + doublequote + "confirm" + doublequote ELSE ans ENDIF,
+      ans = ans + IF fs(confirm) AND (fs(choosetime) OR fs(choosevtbi) OR
+                       fs(chooserate) OR fs(start) OR fs(hold) OR fs(tick) OR
+                       fs(openclamp) OR fs(closeclamp) OR fs(nil_action))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF fs(choosetime) THEN ans + doublequote + "choosetime" + doublequote ELSE ans ENDIF,
+      ans = ans + IF fs(choosetime) AND (fs(choosevtbi) OR
+                       fs(chooserate) OR fs(start) OR fs(hold) OR fs(tick) OR
+                       fs(openclamp) OR fs(closeclamp) OR fs(nil_action))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF fs(choosevtbi) THEN ans + doublequote + "choosevtbi" + doublequote ELSE ans ENDIF,
+      ans = ans + IF fs(choosevtbi) AND (fs(chooserate) OR fs(start) OR fs(hold) OR fs(tick) OR
+                       fs(openclamp) OR fs(closeclamp) OR fs(nil_action))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF fs(chooserate) THEN ans + doublequote + "chooserate" + doublequote ELSE ans ENDIF,
+      ans = ans + IF fs(chooserate) AND (fs(start) OR fs(hold) OR fs(tick) OR
+                       fs(openclamp) OR fs(closeclamp) OR fs(nil_action))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF fs(start) THEN ans + doublequote + "start" + doublequote ELSE ans ENDIF,
+      ans = ans + IF fs(start) AND (fs(hold) OR fs(tick) OR
+                       fs(openclamp) OR fs(closeclamp) OR fs(nil_action))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF fs(hold) THEN ans + doublequote + "hold" + doublequote ELSE ans ENDIF,
+      ans = ans + IF fs(hold) AND (fs(tick) OR
+                       fs(openclamp) OR fs(closeclamp) OR fs(nil_action))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF fs(tick) THEN ans + doublequote + "tick" + doublequote ELSE ans ENDIF,
+      ans = ans + IF fs(tick) AND (fs(openclamp) OR fs(closeclamp) OR fs(nil_action))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF fs(openclamp) THEN ans + doublequote + "openclamp" + doublequote ELSE ans ENDIF,
+      ans = ans + IF fs(openclamp) AND (fs(closeclamp) OR fs(nil_action))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF fs(closeclamp) THEN ans + doublequote + "closeclamp" + doublequote ELSE ans ENDIF,
+      ans = ans + IF fs(closeclamp) AND (fs(nil_action))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF fs(nil_action) THEN ans + doublequote + "nil_action" + doublequote ELSE ans ENDIF
+   IN ans + " ]"
+  CONVERSION action_ids2string
+
+rel_op_type2string(r: rel_op_type): string =
+  COND
+    r = lt -> doublequote + "lt" + doublequote,
+    r = le -> doublequote + "le" + doublequote,
+    r = gt -> doublequote + "gt" + doublequote,
+    r = ge -> doublequote + "ge" + doublequote,
+    r = eq -> doublequote + "eq" + doublequote,
+    r = neq -> doublequote + "neq" + doublequote,
+    r = no_rel -> doublequote + "no_rel" + doublequote
+  ENDCOND
+CONVERSION rel_op_type2string
+
+relset2string(rs: relset): string =
+ LET ans = "[ ",
+      ans = IF rs(lt) THEN ans + doublequote + "lt" + doublequote ELSE ans ENDIF,
+      ans = ans + IF rs(lt) AND (rs(le) OR rs(gt) OR rs(ge) OR 
+                       rs(eq) OR rs(neq) OR rs(no_rel))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF rs(le) THEN ans + doublequote + "le" + doublequote ELSE ans ENDIF,
+      ans = ans + IF rs(le) AND (rs(gt) OR rs(ge) OR 
+                       rs(eq) OR rs(neq) OR rs(no_rel))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF rs(gt) THEN ans + doublequote + "gt" + doublequote ELSE ans ENDIF,
+      ans = ans + IF rs(gt) AND (rs(ge) OR 
+                       rs(eq) OR rs(neq) OR rs(no_rel))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF rs(ge) THEN ans + doublequote + "ge" + doublequote ELSE ans ENDIF,
+      ans = ans + IF rs(ge) AND (rs(eq) OR rs(neq) OR rs(no_rel))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF rs(eq) THEN ans + doublequote + "eq" + doublequote ELSE ans ENDIF,
+      ans = ans + IF rs(eq) AND (rs(neq) OR rs(no_rel))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF rs(neq) THEN ans + doublequote + "neq" + doublequote ELSE ans ENDIF,
+      ans = ans + IF rs(neq) AND (rs(no_rel))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF rs(no_rel) THEN ans + doublequote + "no_rel" + doublequote ELSE ans ENDIF
+   IN ans + " ]"
+  CONVERSION relset2string
+
+device_type2string(dt: device_type): string =
+  COND
+   dt = infusion_pump -> doublequote + "infusion_pump" + doublequote,
+   dt = vital_signs_device -> doublequote + "vital_signs_device" + doublequote,
+   dt = no_device -> doublequote + "no_device" + doublequote
+  ENDCOND
+ CONVERSION device_type2string
+
+device2string(d: device): string = "" + d
+
+
+devs_type2string(dst: devs_type): string =
+"{" + doublequote + "dv" + doublequote + ": " + dst`dv + "," + space +
+ doublequote + "dt" + doublequote + ": " + dst`dt + " }"
+CONVERSION devs_type2string
+
+disp_focus_type2string(df: disp_focus_type): string =
+COND
+   df = no_focus -> doublequote + "no_focus" + doublequote,
+   df = top_focus -> doublequote + "top_focus" + doublequote,
+   df = patient_focus -> doublequote + "patient_focus" + doublequote,
+   df = device_focus -> doublequote + "device_focus" + doublequote
+  ENDCOND
+ CONVERSION disp_focus_type2string
+
+mode2string(m: mode): string =
+   COND
+    m = off -> doublequote + "off" + doublequote,
+    m = pause     -> doublequote + "pause" + doublequote,
+    m = infuse  -> doublequote + "infuse" + doublequote
+    ENDCOND
+  CONVERSION mode2string
+
+dispmode2string(dm: dispmode): string =
+   COND
+    dm = dblank -> doublequote + "dblank" + doublequote,
+    dm = mainmenu     -> doublequote + "mainmenu" + doublequote,
+    dm = dvtbi  -> doublequote + "dvtbi" + doublequote,
+    dm = drate -> doublequote + "drate" + doublequote,
+    dm = dtime -> doublequote + "dtime" + doublequote,
+    dm = dinfusing -> doublequote + "dinfusing" + doublequote,
+    dm = dalarm -> doublequote + "dalarm" + doublequote,
+    dm = dkvo -> doublequote + "dkvo" + doublequote
+    ENDCOND
+  CONVERSION dispmode2string
+
+clamp_state2string(c: clamp_state): string =
+   COND
+    c = open -> doublequote + "open" + doublequote,
+    c = closed     -> doublequote + "closed" + doublequote
+    ENDCOND
+  CONVERSION clamp_state2string
+
+priority_type2string(p: priority_type): string =
+   COND
+    p = rte -> doublequote + "rte" + doublequote,
+    p = tme     -> doublequote + "tme" + doublequote
+    ENDCOND
+  CONVERSION priority_type2string
+
+menu2string(m: menu): string =
+COND
+    m = no_action -> doublequote + "no_action" + doublequote,
+    m = delete -> doublequote + "delete" + doublequote,
+    m = cursor_up -> doublequote + "cursor_up" + doublequote,
+    m = cursor_down -> doublequote + "cursor_down" + doublequote,
+    m = select -> doublequote + "select" + doublequote,
+    m = enter -> doublequote + "enter" + doublequote,
+    m = top     -> doublequote + "top" + doublequote,
+    m = main  -> doublequote + "main" + doublequote,
+    m = patient -> doublequote + "patient" + doublequote,
+    m = device -> doublequote + "device" + doublequote,
+    m = region -> doublequote + "region" + doublequote,
+    m = rule -> doublequote + "rule" + doublequote,
+    m = constraint -> doublequote + "constraint" + doublequote,
+    m = edit -> doublequote + "edit" + doublequote,
+    m = clear -> doublequote + "clear" + doublequote,
+    m = display -> doublequote + "display" + doublequote,
+    m = parameter -> doublequote + "parameter" + doublequote,
+    m = action     -> doublequote + "action" + doublequote,
+    m = relation  -> doublequote + "relation" + doublequote,
+    m = num_value -> doublequote + "num_value" + doublequote,
+    m = enum_value -> doublequote + "enum_value" + doublequote,
+    m = escape -> doublequote + "escape" + doublequote,
+    m = pump -> doublequote + "pump" + doublequote,
+    m = vs_device -> doublequote + "vs_device" + doublequote
+    ENDCOND
+  CONVERSION menu2string
+
+%menu_set2string(ms: menu_set): string =
+% LET ans = "[ ",
+%      ans = IF ms(no_action) THEN ans + doublequote + "no_actiondoublequote," + space ELSE ans ENDIF,
+%      ans = IF ms(delete) THEN ans + doublequote + "deletedoublequote," + space ELSE ans ENDIF,
+%      ans = IF ms(cursor_up) THEN ans + doublequote + "cursor_updoublequote," + space ELSE ans ENDIF,
+%      ans = IF ms(cursor_down) THEN ans + doublequote + "cursor_downdoublequote," + space ELSE ans ENDIF,
+%      ans = IF ms(select) THEN ans + doublequote + "selectdoublequote," + space ELSE ans ENDIF,
+%      ans = IF ms(enter) THEN ans + doublequote + "enterdoublequote," + space ELSE ans ENDIF,
+%      ans = IF ms(top) THEN ans + doublequote + "topdoublequote," + space ELSE ans ENDIF,
+%      ans = IF ms(main) THEN ans + doublequote + "maindoublequote," + space ELSE ans ENDIF,
+%      ans = IF ms(patient) THEN ans + doublequote + "patientdoublequote," + space ELSE ans ENDIF,
+%      ans = IF ms(device) THEN ans + doublequote + "devicedoublequote," + space ELSE ans ENDIF,
+%      ans = IF ms(region) THEN ans + doublequote + "regiondoublequote," + space ELSE ans ENDIF,
+%      ans = IF ms(rule) THEN ans + doublequote + "ruledoublequote," + space ELSE ans ENDIF,
+%      ans = IF ms(constraint) THEN ans + doublequote + "constraintdoublequote," + space ELSE ans ENDIF,
+%      ans = IF ms(edit) THEN ans + doublequote + "editdoublequote," + space ELSE ans ENDIF,
+%      ans = IF ms(clear) THEN ans + doublequote + "cleardoublequote," + space ELSE ans ENDIF,
+%      ans = IF ms(display) THEN ans + doublequote + "displaydoublequote," + space ELSE ans ENDIF,
+%      ans = IF ms(parameter) THEN ans + doublequote + "parameterdoublequote," + space ELSE ans ENDIF,
+%      ans = IF ms(action) THEN ans + doublequote + "actiondoublequote," + space ELSE ans ENDIF,
+%      ans = IF ms(relation) THEN ans + doublequote + "relationdoublequote," + space ELSE ans ENDIF,
+%      ans = IF ms(num_value) THEN ans + doublequote + "num_valuedoublequote," + space ELSE ans ENDIF,
+%      ans = IF ms(enum_value) THEN ans + doublequote + "enum_valuedoublequote," + space ELSE ans ENDIF,
+%      ans = IF ms(escape) THEN ans + doublequote + "escapedoublequote," + space ELSE ans ENDIF,
+%      ans = IF ms(pump) THEN ans + doublequote + "pumpdoublequote," + space ELSE ans ENDIF,
+%      ans = IF ms(vs_device) THEN ans + doublequote + "vs_devicedoublequote," + space ELSE ans ENDIF
+%   IN ans + " ]"
+%  CONVERSION menu_set2string
+
+menu_set2string(ms: menu_set): string =
+  LET json = "[",
+      json = json + IF ms(no_action) THEN doublequote + "no_action" + doublequote ELSE "" ENDIF,
+      json = json + IF ms(no_action) AND (ms(delete) OR ms(cursor_up) OR 
+                       ms(cursor_down) OR ms(select) OR ms(enter) OR ms(top) OR 
+                       ms(main) OR ms(patient) OR ms(device) OR ms(region) OR 
+                       ms(rule) OR ms(constraint) OR ms(edit) OR ms(clear) OR 
+                       ms(display) OR ms(parameter) OR ms(action) OR ms(relation) OR ms(num_value) OR 
+                       ms(enum_value) OR ms(escape) OR ms(pump) OR ms(vs_device))
+                    THEN ", " ELSE "" ENDIF,
+      json = json + IF ms(delete) THEN doublequote + "delete" + doublequote ELSE ""  ENDIF,
+      json = json + IF ms(delete) AND (ms(cursor_up) OR ms(cursor_down) OR
+                       ms(select) OR ms(enter) OR ms(top) OR ms(main) OR ms(patient) OR 
+                       ms(device) OR  ms(region) OR ms(rule) OR ms(constraint) OR 
+                       ms(edit) OR ms(clear) OR ms(display) OR  ms(parameter) OR 
+                       ms(action) OR ms(relation) OR ms(num_value) OR  ms(enum_value) OR ms(escape) OR ms(pump) OR 
+                       ms(vs_device))
+                    THEN ", " ELSE "" ENDIF,
+      json = json + IF ms(cursor_up) THEN doublequote + "cursor_up" + doublequote ELSE ""  ENDIF,
+      json = json + IF ms(cursor_up) AND (ms(cursor_down) OR ms(select) OR ms(enter) OR 
+                       ms(top) OR ms(main) OR ms(patient) OR ms(device) OR ms(region) OR 
+                       ms(rule) OR ms(constraint) OR  ms(edit) OR ms(clear) OR 
+                       ms(display) OR  ms(parameter) OR ms(action) OR ms(relation) OR ms(num_value) OR 
+                       ms(enum_value) OR ms(escape) OR ms(pump) OR ms(vs_device))
+                    THEN ", " ELSE "" ENDIF,
+      json = json + IF ms(cursor_down) THEN doublequote + "cursor_down" + doublequote ELSE "" ENDIF,
+      json = json + IF ms(cursor_down) AND (ms(select) OR ms(enter) OR ms(top) OR
+                       ms(main) OR ms(patient) OR ms(device) OR  ms(region) OR ms(rule) OR 
+                       ms(constraint) OR ms(edit) OR ms(clear) OR ms(display) OR 
+                       ms(parameter) OR ms(action) OR ms(relation) OR ms(num_value) OR ms(enum_value) OR 
+                       ms(escape) OR ms(pump) OR ms(vs_device))
+                    THEN ", " ELSE "" ENDIF,
+      json = json + IF ms(select) THEN doublequote + "select" + doublequote ELSE ""  ENDIF,
+      json = json + IF ms(select) AND (ms(enter) OR ms(top) OR ms(main) OR ms(patient) OR 
+                       ms(device) OR ms(region) OR ms(rule) OR ms(constraint) OR 
+                       ms(edit) OR ms(clear) OR ms(display) OR ms(parameter) OR 
+                       ms(action) OR ms(relation) OR ms(num_value) OR ms(enum_value) OR ms(escape) OR ms(pump) OR 
+                       ms(vs_device))
+                    THEN ", " ELSE "" ENDIF,
+      json = json + IF ms(enter) THEN doublequote + "enter" + doublequote ELSE ""  ENDIF,
+      json = json + IF ms(enter) AND (ms(top) OR ms(main) OR ms(patient) OR ms(device) OR 
+                       ms(region) OR ms(rule) OR ms(constraint) OR ms(edit) OR 
+                       ms(clear) OR ms(display) OR ms(parameter) OR ms(action) OR ms(relation) OR 
+                       ms(num_value) OR  ms(enum_value) OR ms(escape) OR ms(pump) OR ms(vs_device))
+                    THEN ", " ELSE "" ENDIF,
+      json = json + IF ms(top) THEN doublequote + "top" + doublequote ELSE ""  ENDIF,
+      json = json + IF ms(top) AND (ms(main) OR ms(patient) OR ms(device) OR 
+                       ms(region) OR ms(rule) OR ms(constraint) OR ms(edit) OR 
+                       ms(clear) OR ms(display) OR ms(parameter) OR ms(action) OR ms(relation) OR 
+                       ms(num_value) OR ms(enum_value) OR ms(escape) OR ms(pump) OR ms(vs_device))
+                    THEN ", " ELSE "" ENDIF,
+      json = json + IF ms(main) THEN doublequote + "main" + doublequote ELSE ""  ENDIF,
+      json = json + IF ms(main) AND (ms(patient) OR ms(device) OR ms(region) OR 
+                       ms(rule) OR ms(constraint) OR ms(edit) OR ms(clear) OR 
+                       ms(display) OR ms(parameter) OR ms(action) OR ms(relation) OR ms(num_value) OR 
+                       ms(enum_value) OR ms(escape) OR ms(pump) OR ms(vs_device))
+                    THEN ", " ELSE "" ENDIF,
+      json = json + IF ms(patient) THEN doublequote + "patient" + doublequote ELSE ""  ENDIF,
+      json = json + IF ms(patient) AND (ms(device) OR ms(region) OR ms(rule) OR 
+                       ms(constraint) OR ms(edit) OR ms(clear) OR ms(display) OR 
+                       ms(parameter) OR ms(action) OR ms(relation) OR ms(num_value) OR 
+                       ms(enum_value) OR ms(escape) OR ms(pump) OR ms(vs_device))
+                    THEN ", " ELSE "" ENDIF,
+      json = json + IF ms(device) THEN doublequote + "device" + doublequote ELSE ""  ENDIF,
+      json = json + IF ms(device) AND (ms(region) OR ms(rule) OR ms(constraint) OR 
+                       ms(edit) OR ms(clear) OR ms(display) OR  ms(parameter) OR 
+                       ms(action) OR ms(relation) OR ms(num_value) OR ms(enum_value) OR ms(escape) OR ms(pump) OR 
+                       ms(vs_device))
+                    THEN ", " ELSE "" ENDIF,
+      json = json + IF ms(region) THEN doublequote + "region" + doublequote ELSE ""  ENDIF,
+      json = json + IF ms(region) AND (ms(rule) OR ms(constraint) OR ms(edit) OR 
+                       ms(clear) OR ms(display) OR ms(parameter) OR ms(action) OR ms(relation) OR 
+                       ms(num_value) OR ms(enum_value) OR ms(escape) OR ms(pump) OR ms(vs_device))
+                    THEN ", " ELSE "" ENDIF,
+      json = json + IF ms(rule) THEN doublequote + "rule" + doublequote ELSE ""  ENDIF,
+      json = json + IF ms(rule) AND (ms(constraint) OR ms(edit) OR ms(clear) OR 
+                       ms(display) OR ms(parameter) OR ms(action) OR ms(relation) OR ms(num_value) OR 
+                       ms(enum_value) OR ms(escape) OR ms(pump) OR ms(vs_device))
+                    THEN ", " ELSE "" ENDIF,
+      json = json + IF ms(constraint) THEN doublequote + "constraint" + doublequote ELSE ""  ENDIF,
+      json = json + IF ms(constraint) AND (ms(edit) OR ms(clear) OR ms(display) OR 
+                       ms(parameter) OR ms(action) OR ms(relation) OR ms(num_value) OR 
+                       ms(enum_value) OR ms(escape) OR ms(pump) OR ms(vs_device))
+                    THEN ", " ELSE "" ENDIF,
+      json = json + IF ms(edit) THEN doublequote + "edit" + doublequote ELSE ""  ENDIF,
+      json = json + IF ms(edit) AND (ms(clear) OR ms(display) OR ms(parameter) OR ms(action) OR
+                       ms(relation) OR ms(num_value) OR ms(enum_value) OR ms(escape) OR ms(pump) OR 
+                       ms(vs_device))
+                    THEN ", " ELSE "" ENDIF,
+      json = json + IF ms(clear) THEN doublequote + "clear" + doublequote ELSE ""  ENDIF,
+      json = json + IF ms(clear) AND (ms(display) OR ms(parameter) OR ms(action) OR ms(relation) OR 
+                       ms(num_value) OR ms(enum_value) OR ms(escape) OR ms(pump) OR ms(vs_device))
+                    THEN ", " ELSE "" ENDIF,
+      json = json + IF ms(display) THEN doublequote + "display" + doublequote ELSE ""  ENDIF,
+      json = json + IF ms(display) AND (ms(parameter) OR ms(action) OR ms(relation) OR 
+                       ms(num_value) OR ms(enum_value) OR ms(escape) OR ms(pump) OR ms(vs_device))
+                    THEN ", " ELSE "" ENDIF,
+      json = json + IF ms(parameter) THEN doublequote + "parameter" + doublequote ELSE ""  ENDIF,
+      json = json + IF ms(parameter) AND (ms(action) OR ms(relation) OR ms(num_value) OR 
+                       ms(enum_value) OR ms(escape) OR ms(pump) OR ms(vs_device))
+                    THEN ", " ELSE "" ENDIF,
+      json = json + IF ms(action) THEN doublequote + "action" + doublequote ELSE ""  ENDIF,
+      json = json + IF ms(action) AND (ms(relation) OR ms(num_value) OR 
+                       ms(enum_value) OR ms(escape) OR ms(pump) OR ms(vs_device))
+                    THEN ", " ELSE "" ENDIF,            
+      json = json + IF ms(relation) THEN doublequote + "relation" + doublequote ELSE ""  ENDIF,
+      json = json + IF ms(relation) AND (ms(num_value) OR ms(enum_value) OR ms(escape) OR ms(pump) OR 
+                       ms(vs_device))
+                    THEN ", " ELSE "" ENDIF,
+      json = json + IF ms(num_value) THEN doublequote + "num_value" + doublequote ELSE ""  ENDIF,
+      json = json + IF ms(num_value) AND (ms(enum_value) OR ms(pump) OR ms(vs_device))
+                    THEN ", " ELSE "" ENDIF,
+      json = json + IF ms(enum_value) THEN doublequote + "enum_value" + doublequote ELSE ""  ENDIF,
+      json = json + IF ms(enum_value) AND (ms(escape) OR ms(pump) OR ms(vs_device))
+                    THEN ", " ELSE "" ENDIF,
+      json = json + IF ms(escape) THEN doublequote + "escape" + doublequote ELSE ""  ENDIF,
+      json = json + IF ms(escape) AND (ms(pump) OR ms(vs_device))
+                    THEN ", " ELSE "" ENDIF,
+      json = json + IF ms(pump) THEN doublequote + "pump" + doublequote ELSE ""  ENDIF,
+      json = json + IF ms(pump) AND ms(vs_device)
+                    THEN ", " ELSE "" ENDIF,
+      json = json + IF ms(vs_device) THEN doublequote + "vs_device" + doublequote ELSE ""  ENDIF
+  IN json + "]"
+  CONVERSION menu_set2string
+
+value_type2string(p: value_type): string =
+   COND
+    p = numeral -> doublequote + "numeral" + doublequote,
+    p = enumerated     -> doublequote + "enumerated" + doublequote,
+    p = empty -> doublequote + "empty" + doublequote
+    ENDCOND
+  CONVERSION value_type2string
+
+par2string(a: par): string =
+   COND
+    a = rte -> doublequote + "rte" + doublequote,
+    a = vtb     -> doublequote + "vtb" + doublequote,
+    a = tme  -> doublequote + "tme" + doublequote,
+    a = dpm -> doublequote + "dpm" + doublequote,
+    a = mde     -> doublequote + "mde" + doublequote,
+    a = er  -> doublequote + "er" + doublequote,
+    a = hrte -> doublequote + "hrte" + doublequote,
+    a = blpl -> doublequote + "blpl" + doublequote,
+    a = blph -> doublequote + "blph" + doublequote,
+    a = sp -> doublequote + "sp" + doublequote,
+    a = rkrt -> doublequote + "rkrt" + doublequote,
+    a = ptmp -> doublequote + "ptmp" + doublequote
+    ENDCOND
+  CONVERSION par2string
+
+
+
+parset2string(ps: parset): string =
+LET ans = "[ ",
+      ans = IF ps(rte) THEN ans + doublequote + "rte" + doublequote ELSE ans ENDIF,
+      ans = ans + IF ps(rte) AND (ps(vtb) OR ps(tme) OR ps(dpm) OR 
+                       ps(mde) OR ps(er) OR ps(hrte) OR 
+                       ps(blpl) OR ps(blph) OR ps(sp) OR ps(rkrt) OR ps(ptmp))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF ps(vtb) THEN ans + doublequote + "vtb" + doublequote ELSE ans ENDIF,
+      ans = ans + IF ps(vtb) AND (ps(tme) OR ps(dpm) OR 
+                       ps(mde) OR ps(er) OR ps(hrte) OR 
+                       ps(blpl) OR ps(blph) OR ps(sp) OR ps(rkrt) OR ps(ptmp))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF ps(tme) THEN ans + doublequote + "tme" + doublequote ELSE ans ENDIF,
+      ans = ans + IF ps(tme) AND (ps(dpm) OR 
+                       ps(mde) OR ps(er) OR ps(hrte) OR 
+                       ps(blpl) OR ps(blph) OR ps(sp) OR ps(rkrt) OR ps(ptmp))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF ps(dpm) THEN ans + doublequote + "dpm" + doublequote ELSE ans ENDIF,
+      ans = ans + IF ps(dpm) AND (ps(mde) OR ps(er) OR ps(hrte) OR 
+                       ps(blpl) OR ps(blph) OR ps(sp) OR ps(rkrt) OR ps(ptmp))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF ps(mde) THEN ans + doublequote + "mde" + doublequote ELSE ans ENDIF,
+      ans = ans + IF ps(mde) AND (ps(er) OR ps(hrte) OR 
+                       ps(blpl) OR ps(blph) OR ps(sp) OR ps(rkrt) OR ps(ptmp))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF ps(er) THEN ans + doublequote + "er" + doublequote ELSE ans ENDIF,
+      ans = ans + IF ps(er) AND (ps(hrte) OR 
+                       ps(blpl) OR ps(blph) OR ps(sp) OR ps(rkrt) OR ps(ptmp))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF ps(hrte) THEN ans + doublequote + "hrte" + doublequote ELSE ans ENDIF,
+      ans = ans + IF ps(hrte) AND (ps(blpl) OR ps(blph) OR ps(sp) OR ps(rkrt) OR ps(ptmp))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF ps(blpl) THEN ans + doublequote + "blpl" + doublequote ELSE ans ENDIF,
+      ans = ans + IF ps(blpl) AND (ps(blph) OR ps(sp) OR ps(rkrt) OR ps(ptmp))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF ps(blph) THEN ans + doublequote + "blph" + doublequote ELSE ans ENDIF,
+      ans = ans + IF ps(blph) AND (ps(sp) OR ps(rkrt) OR ps(ptmp))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF ps(sp) THEN ans + doublequote + "sp" + doublequote ELSE ans ENDIF,
+      ans = ans + IF ps(sp) AND (ps(rkrt) OR ps(ptmp))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF ps(rkrt) THEN ans + doublequote + "rkrt" + doublequote ELSE ans ENDIF,
+      ans = ans + IF ps(rkrt) AND (ps(ptmp))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF ps(ptmp) THEN ans + doublequote + "ptmp" + doublequote ELSE ans ENDIF
+   IN ans + " ]"
+  CONVERSION parset2string
+
+enum2string(e: enum): string =
+   COND
+    e = xoff -> doublequote + "xoff" + doublequote,
+    e = xpause     -> doublequote + "xpause" + doublequote,
+    e = xinfuse  -> doublequote + "xinfuse" + doublequote,
+    e = xdblank -> doublequote + "xdblank" + doublequote,
+    e = xmainmenu -> doublequote + "xmainmenu" + doublequote,
+    e = xdvtbi -> doublequote + "xdvtbi" + doublequote,
+    e = xdrate -> doublequote + "xdrate" + doublequote,
+    e = xdtime -> doublequote + "xdtime" + doublequote,
+    e = xdinfusing -> doublequote + "xdinfusing" + doublequote,
+    e = xdalarm -> doublequote + "xdalarm" + doublequote,
+    e = xdkvo -> doublequote + "xdkvo" + doublequote,
+    e = xopen -> doublequote + "xopen" + doublequote,
+    e = xclosed -> doublequote + "xclosed" + doublequote,
+    e = xrte -> doublequote + "xrte" + doublequote,
+    e = xtme -> doublequote + "xtme" + doublequote,
+    e = xisconnected -> doublequote + "xisconnected" + doublequote,
+    e = xactive -> doublequote + "xactive" + doublequote,
+    e = xnumeral -> doublequote + "xnumeral" + doublequote,
+    e = xenumerated -> doublequote + "xenumerated" + doublequote,
+    e = xnilval -> doublequote + "xnilval" + doublequote,
+    e = xalarm -> doublequote + "xalarm" + doublequote,
+    e = xok -> doublequote + "xok" + doublequote
+    ENDCOND
+CONVERSION enum2string
+
+enumset2string(es: enumset): string =
+ LET ans = "[ ",
+      ans = IF es(xoff) THEN ans + doublequote + "xoff" + doublequote ELSE ans ENDIF,
+      ans = ans + IF es(xoff) AND (es(xpause) OR es(xinfuse) OR es(xdblank) OR 
+                       es(xmainmenu) OR es(xdvtbi) OR es(xdrate) OR 
+                       es(xdtime) OR es(xdinfusing) OR es(xdalarm) OR es(xdkvo) OR
+                       es(xopen) OR es(xclosed) OR es(xrte) OR es(xtme) OR es(xisconnected) OR
+                       es(xactive) OR es(xnumeral) OR es(xenumerated) OR es(xnilval) OR es(xalarm) OR es(xok))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF es(xpause) THEN ans + doublequote + "xpause" + doublequote ELSE ans ENDIF,
+      ans = ans + IF es(xpause) AND (es(xinfuse) OR es(xdblank) OR 
+                       es(xmainmenu) OR es(xdvtbi) OR es(xdrate) OR 
+                       es(xdtime) OR es(xdinfusing) OR es(xdalarm) OR es(xdkvo) OR
+                       es(xopen) OR es(xclosed) OR es(xrte) OR es(xtme) OR es(xisconnected) OR
+                       es(xactive) OR es(xnumeral) OR es(xenumerated) OR es(xnilval) OR es(xalarm) OR es(xok))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF es(xinfuse) THEN ans + doublequote + "xinfuse" + doublequote ELSE ans ENDIF,
+      ans = ans + IF es(xinfuse) AND (es(xdblank) OR 
+                       es(xmainmenu) OR es(xdvtbi) OR es(xdrate) OR 
+                       es(xdtime) OR es(xdinfusing) OR es(xdalarm) OR es(xdkvo) OR
+                       es(xopen) OR es(xclosed) OR es(xrte) OR es(xtme) OR es(xisconnected) OR
+                       es(xactive) OR es(xnumeral) OR es(xenumerated) OR es(xnilval) OR es(xalarm) OR es(xok))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF es(xdblank) THEN ans + doublequote + "xdblank" + doublequote ELSE ans ENDIF,
+      ans = ans + IF es(xdblank) AND (es(xmainmenu) OR es(xdvtbi) OR es(xdrate) OR 
+                       es(xdtime) OR es(xdinfusing) OR es(xdalarm) OR es(xdkvo) OR
+                       es(xopen) OR es(xclosed) OR es(xrte) OR es(xtme) OR es(xisconnected) OR
+                       es(xactive) OR es(xnumeral) OR es(xenumerated) OR es(xnilval) OR es(xalarm) OR es(xok))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF es(xmainmenu) THEN ans + doublequote + "xmainmenu" + doublequote ELSE ans ENDIF,
+      ans = ans + IF es(xmainmenu) AND (es(xdvtbi) OR es(xdrate) OR 
+                       es(xdtime) OR es(xdinfusing) OR es(xdalarm) OR es(xdkvo) OR
+                       es(xopen) OR es(xclosed) OR es(xrte) OR es(xtme) OR es(xisconnected) OR
+                       es(xactive) OR es(xnumeral) OR es(xenumerated) OR es(xnilval) OR es(xalarm) OR es(xok))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF es(xdvtbi) THEN ans + doublequote + "xdvtbi" + doublequote ELSE ans ENDIF,
+      ans = ans + IF es(xdvtbi) AND (es(xdrate) OR 
+                       es(xdtime) OR es(xdinfusing) OR es(xdalarm) OR es(xdkvo) OR
+                       es(xopen) OR es(xclosed) OR es(xrte) OR es(xtme) OR es(xisconnected) OR
+                       es(xactive) OR es(xnumeral) OR es(xenumerated) OR es(xnilval) OR es(xalarm) OR es(xok))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF es(xdrate) THEN ans + doublequote + "xdrate" + doublequote ELSE ans ENDIF,
+      ans = ans + IF es(xdrate) AND (es(xdtime) OR es(xdinfusing) OR es(xdalarm) OR es(xdkvo) OR
+                       es(xopen) OR es(xclosed) OR es(xrte) OR es(xtme) OR es(xisconnected) OR
+                       es(xactive) OR es(xnumeral) OR es(xenumerated) OR es(xnilval) OR es(xalarm) OR es(xok))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF es(xdtime) THEN ans + doublequote + "xdtime" + doublequote ELSE ans ENDIF,
+      ans = ans + IF es(xdtime) AND (es(xdinfusing) OR es(xdalarm) OR es(xdkvo) OR
+                       es(xopen) OR es(xclosed) OR es(xrte) OR es(xtme) OR es(xisconnected) OR
+                       es(xactive) OR es(xnumeral) OR es(xenumerated) OR es(xnilval) OR es(xalarm) OR es(xok))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF es(xdinfusing) THEN ans + doublequote + "xdinfusing" + doublequote ELSE ans ENDIF,
+      ans = ans + IF es(xdinfusing) AND (es(xdalarm) OR es(xdkvo) OR
+                       es(xopen) OR es(xclosed) OR es(xrte) OR es(xtme) OR es(xisconnected) OR
+                       es(xactive) OR es(xnumeral) OR es(xenumerated) OR es(xnilval) OR es(xalarm) OR es(xok))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF es(xdalarm) THEN ans + doublequote + "xdalarm" + doublequote ELSE ans ENDIF,
+      ans = ans + IF es(xdalarm) AND (es(xdkvo) OR
+                       es(xopen) OR es(xclosed) OR es(xrte) OR es(xtme) OR es(xisconnected) OR
+                       es(xactive) OR es(xnumeral) OR es(xenumerated) OR es(xnilval) OR es(xalarm) OR es(xok))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF es(xdkvo) THEN ans + doublequote + "xdkvo" + doublequote ELSE ans ENDIF,
+      ans = ans + IF es(xdkvo) AND (es(xopen) OR es(xclosed) OR es(xrte) OR es(xtme) OR es(xisconnected) OR
+                       es(xactive) OR es(xnumeral) OR es(xenumerated) OR es(xnilval) OR es(xalarm) OR es(xok))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF es(xopen) THEN ans + doublequote + "xopen" + doublequote ELSE ans ENDIF,
+      ans = ans + IF es(xopen) AND (es(xclosed) OR es(xrte) OR es(xtme) OR es(xisconnected) OR
+                       es(xactive) OR es(xnumeral) OR es(xenumerated) OR es(xnilval) OR es(xalarm) OR es(xok))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF es(xclosed) THEN ans + doublequote + "xclosed" + doublequote ELSE ans ENDIF,
+      ans = ans + IF es(xclosed) AND (es(xrte) OR es(xtme) OR es(xisconnected) OR
+                       es(xactive) OR es(xnumeral) OR es(xenumerated) OR es(xnilval) OR es(xalarm) OR es(xok))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF es(xrte) THEN ans + doublequote + "xrte" + doublequote ELSE ans ENDIF,
+      ans = ans + IF es(xrte) AND (es(xtme) OR es(xisconnected) OR
+                       es(xactive) OR es(xnumeral) OR es(xenumerated) OR es(xnilval) OR es(xalarm) OR es(xok))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF es(xtme) THEN ans + doublequote + "xtme" + doublequote ELSE ans ENDIF,
+      ans = ans + IF es(xtme) AND (es(xisconnected) OR
+                       es(xactive) OR es(xnumeral) OR es(xenumerated) OR es(xnilval) OR es(xalarm) OR es(xok))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF es(xisconnected) THEN ans + doublequote + "xisconnected" + doublequote ELSE ans ENDIF,
+      ans = ans + IF es(xisconnected) AND (es(xactive) OR es(xnumeral) OR es(xenumerated) OR es(xnilval) OR es(xalarm) OR es(xok))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF es(xactive) THEN ans + doublequote + "xactive" + doublequote ELSE ans ENDIF,
+      ans = ans + IF es(xactive) AND (es(xnumeral) OR es(xenumerated) OR es(xnilval) OR es(xalarm) OR es(xok))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF es(xnumeral) THEN ans + doublequote + "xnumeral" + doublequote ELSE ans ENDIF,
+      ans = ans + IF es(xnumeral) AND (es(xenumerated) OR es(xnilval) OR es(xalarm) OR es(xok))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF es(xenumerated) THEN ans + doublequote + "xenumerated" + doublequote ELSE ans ENDIF,
+      ans = ans + IF es(xenumerated) AND (es(xnilval) OR es(xalarm) OR es(xok))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF es(xnilval) THEN ans + doublequote + "xnilval" + doublequote ELSE ans ENDIF,
+      ans = ans + IF es(xnilval) AND (es(xalarm) OR es(xok))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF es(xalarm) THEN ans + doublequote + "xalarm" + doublequote ELSE ans ENDIF,
+      ans = ans + IF es(xalarm) AND (es(xok))
+                    THEN ", " ELSE "" ENDIF,
+      ans = IF es(xok) THEN ans + doublequote + "xok" + doublequote ELSE ans ENDIF
+   IN ans + " ]"
+  CONVERSION enumset2string
+
+
+msghdr2string(mh: msg_hdr_type): string =
+COND
+    mh = nomsg -> doublequote + "nomsg" + doublequote,
+    mh = tmmsg -> doublequote + "tmmsg" + doublequote,
+    mh = pmmsg -> doublequote + "pmmsg" + doublequote,
+    mh = mmmsg -> doublequote + "mmmsg" + doublequote,
+    mh = updmsg -> doublequote + "updmsg" + doublequote,
+    mh = actmsg -> doublequote + "actmsg" + doublequote,
+    mh = cnstmsg -> doublequote + "cnstmsg" + doublequote
+ENDCOND
+  CONVERSION msghdr2string
+
+b_status2string(bs: b_status): string =
+COND
+    bs = full -> doublequote + "full" + doublequote,
+    bs = empty -> doublequote + "empty" + doublequote,
+    bs = functioning -> doublequote + "functioning" + doublequote
+ENDCOND
+  CONVERSION b_status2string
+
+nw_error_type2string(ne: nw_error_type): string =
+COND
+    ne = clear -> doublequote + "clear" + doublequote,
+    ne = not_connected -> doublequote + "not_connected" + doublequote,
+    ne = no_msg -> doublequote + "no_msg" + doublequote,
+    ne = empty_q -> doublequote + "empty_q" + doublequote,
+    ne = full_q -> doublequote + "full_q" + doublequote,
+    ne = spurious_action -> doublequote + "spurious_action" + doublequote
+ ENDCOND
+  CONVERSION nw_error_type2string
+
+network_error_type2string(nwe: network_error_type): string =
+"{" + doublequote + "nsource" + doublequote + ": " + nwe`nsource +  ", "+ space +
+       doublequote + "ndest" + doublequote + ": " + nwe`ndest +  ", "+ space +
+       doublequote + "chan_error" + doublequote + ": " + nwe`chan_error + " }"
+CONVERSION network_error_type2string
+
+num_parameter2string(np: num_parameter): string =
+LET ans = "{ ",
+      ans = IF (np(rte) /= null_value)
+            THEN ans + "" + rte + ": " +  np(rte) ELSE ans ENDIF,
+      ans = IF (np(rte) /= null_value) AND ((np(vtb) /= null_value) OR (np(tme) /= null_value) OR 
+            (np(hrte) /= null_value) OR (np(blpl) /= null_value) OR (np(blph) /= null_value) OR (np(sp) /= null_value) OR
+            (np(rkrt) /= null_value) OR (np(ptmp) /= null_value)) THEN ans + "," + space ELSE ans ENDIF,
+      ans = IF (np(vtb) /= null_value)
+            THEN ans + "" + vtb + ": " +  np(vtb) ELSE ans ENDIF,
+      ans = IF (np(vtb) /= null_value) AND ((np(tme) /= null_value) OR 
+            (np(hrte) /= null_value) OR (np(blpl) /= null_value) OR (np(blph) /= null_value) OR (np(sp) /= null_value) OR
+            (np(rkrt) /= null_value) OR (np(ptmp) /= null_value)) THEN ans + "," + space ELSE ans ENDIF,
+      ans = IF (np(tme) /= null_value)
+            THEN ans + "" + tme + ": " +  np(tme) ELSE ans ENDIF,
+      ans = IF (np(tme) /= null_value) AND ((np(hrte) /= null_value) OR (np(blpl) /= null_value) OR (np(blph) /= null_value) OR (np(sp) /= null_value) OR
+            (np(rkrt) /= null_value) OR (np(ptmp) /= null_value)) THEN ans + "," + space ELSE ans ENDIF,
+      ans = IF (np(hrte) /= null_value)
+            THEN ans + "" + hrte + ": " +  np(hrte) ELSE ans ENDIF,
+      ans = IF (np(hrte) /= null_value) AND ((np(blpl) /= null_value) OR (np(blph) /= null_value) OR (np(sp) /= null_value) OR
+            (np(rkrt) /= null_value) OR (np(ptmp) /= null_value)) THEN ans + "," + space ELSE ans ENDIF,
+      ans = IF (np(blpl) /= null_value)
+            THEN ans + "" + blpl + ": " +  np(blpl) ELSE ans ENDIF,
+      ans = IF (np(blpl) /= null_value) AND ((np(blph) /= null_value) OR (np(sp) /= null_value) OR
+            (np(rkrt) /= null_value) OR (np(ptmp) /= null_value)) THEN ans + "," + space ELSE ans ENDIF,
+      ans = IF (np(blph) /= null_value)
+            THEN ans + "" + blph + ": " +  np(blph) ELSE ans ENDIF,
+      ans = IF (np(blph) /= null_value) AND ((np(sp) /= null_value) OR
+            (np(rkrt) /= null_value) OR (np(ptmp) /= null_value)) THEN ans + "," + space ELSE ans ENDIF,
+      ans = IF (np(sp) /= null_value)
+            THEN ans + "" + sp + ": " +  np(sp) ELSE ans ENDIF,
+      ans = IF (np(sp) /= null_value) AND ((np(rkrt) /= null_value) OR (np(ptmp) /= null_value)) THEN ans + "," + space ELSE ans ENDIF,
+      ans = IF (np(rkrt) /= null_value)
+            THEN ans + "" + rkrt + ": " +  np(rkrt) ELSE ans ENDIF,
+      ans = IF (np(rkrt) /= null_value) AND ((np(ptmp) /= null_value)) THEN ans + "," + space ELSE ans ENDIF,
+      ans = IF (np(ptmp) /= null_value)
+            THEN ans + "" + ptmp + ": " +  np(ptmp) + "" + space ELSE ans ENDIF
+   IN ans + " }"
+  CONVERSION num_parameter2string
+
+
+enum_parameter2string(ep: enum_parameter): string =
+LET ans = "{ ",
+      ans = IF (ep(dpm) /= xnilval)
+            THEN ans + "" + dpm + ": " +  ep(dpm) ELSE ans ENDIF,
+      ans = IF (ep(dpm) /= xnilval) AND ((ep(mde) /= xnilval) OR (ep(er) /= xnilval)) THEN ans + "," + space ELSE ans ENDIF,
+      ans = IF (ep(mde) /= xnilval) THEN ans + "" + mde + ": " +  ep(mde) + space ELSE ans ENDIF,
+      ans = IF (ep(mde) /= xnilval) AND ((ep(er) /= xnilval)) THEN ans + "," + space ELSE ans ENDIF,
+      ans = IF (ep(er) /= xnilval)
+            THEN ans + "" + er + ": " +  ep(er) + "" + space ELSE ans ENDIF
+   IN ans + " }"
+  CONVERSION enum_parameter2string
+
+
+
+panel2string(pa: panel): string =
+  "{" + newline + 
+  doublequote + "pars" + doublequote + ": " + pa`pars +  ", "+ newline +
+  doublequote + "enum_disp" + doublequote + ": " + pa`enum_disp +  ", "+ newline +
+  doublequote + "num_disp" + doublequote + ": " + pa`num_disp +  ", "+ newline +
+  doublequote + "cmds" + doublequote + ": " + pa`cmds + newline +
+  "      }"
+CONVERSION panel2string
+
+v_state2string(vs: v_state): string =
+  "{" + newline + 
+  doublequote + "dev" + doublequote + ": " + vs`dev +  ", "+ newline +
+  doublequote + "nde" + doublequote + ": " + vs`nde +  ", "+ newline +
+  doublequote + "power" + doublequote + ": " + vs`power +  ", "+ newline +
+  doublequote + "HR" + doublequote + ": " + vs`HR +  ", "+ newline +
+  doublequote + "BPL" + doublequote + ": " + vs`BPL +  ", "+ newline +
+  doublequote + "BPH" + doublequote + ": " + vs`BPH +  ", "+ newline +
+  doublequote + "SPO2" + doublequote + ": " + vs`SPO2 +  ", "+ newline +
+  doublequote + "RR" + doublequote + ": " + vs`RR +  ", "+ newline +
+  doublequote + "temp" + doublequote + ": " + vs`temp +  ", "+ newline +
+  doublequote + "pan" + doublequote + ": " + vs`pan + ", "+ newline + 
+  doublequote + "vs_error" + doublequote + ": " + vs`vs_error + newline + 
+  "    }"
+CONVERSION v_state2string
+
+
+
+pan_message_type2string(pa: pan_message_type): string =
+   "{" + doublequote + "mhdr" + doublequote + ": " + pa`mhdr +  ", " + newline +
+       doublequote + "pat_nd" + doublequote + ": " + pa`pat_nd + ", " + newline +
+       doublequote + "msg_nd" + doublequote + ": " + pa`msg_nd + ", " + newline +
+       doublequote + "pan" + doublequote + ": " + pa`pan + " }"
+  CONVERSION pan_message_type2string
+
+act_msg_type2string(aa: act_message_type): string =
+   "{" + doublequote + "mhdr" + doublequote + ": " + aa`mhdr + ", " + newline +
+       doublequote + "pat_nd" + doublequote + ": " + aa`pat_nd + ", " + newline +
+       doublequote + "msg_nd" + doublequote + ": " + aa`msg_nd + ", " + newline +
+       doublequote + "act" + doublequote + ": " + aa`act + " }"
+  CONVERSION act_msg_type2string
+
+
+has_previous_node(l: [ upto(nlimit) -> bool ], n: node): RECURSIVE bool =
+  COND
+    n = 0 -> IF l(n) THEN TRUE ELSE FALSE ENDIF,
+    n > 0 -> IF l(n) THEN TRUE ELSE has_previous_node(l, n-1) ENDIF 
+  ENDCOND
+  MEASURE n
+
+  node_printer_bool(l: [ upto(nlimit) -> bool ], n: node): RECURSIVE string =
+    COND
+      n = 0 -> IF l(n) THEN doublequote + "node(" + n + ")" + doublequote  ELSE "" ENDIF,
+      n > 0 -> IF l(n) AND has_previous_node(l, n - 1) THEN node_printer_bool(l, n - 1) +  ", " + doublequote + "node(" + n + ")" + doublequote  ELSIF l(n) THEN doublequote + "node(" + n + ")" + doublequote + node_printer_bool(l, n - 1) ELSE node_printer_bool(l, n - 1) ENDIF
+    ENDCOND
+  MEASURE n
+
+has_previous_device(l: [ upto(nlimit) -> bool ], d: device): RECURSIVE bool =
+  COND
+    d = 0 -> IF l(d) THEN TRUE ELSE FALSE ENDIF,
+    d > 0 -> IF l(d) THEN TRUE ELSE has_previous_device(l, d - 1) ENDIF 
+  ENDCOND
+  MEASURE d
+
+ device_printer_bool(l: [ upto(dlimit) -> bool ], d: device): RECURSIVE string =
+    COND
+      d = 0 -> IF l(d) THEN doublequote + "device(" + d + ")" + doublequote ELSE "" ENDIF,
+      d > 0 -> IF l(d) and has_previous_device(l, d - 1) THEN device_printer_bool(l, d - 1) + newline + ", "  + doublequote + "device(" + d + ")" + doublequote ELSIF l(d) THEN doublequote + "device(" + d + ")" + doublequote + device_printer_bool(l, d - 1) + newline ELSE device_printer_bool(l, d - 1) ENDIF
+    ENDCOND
+  MEASURE d
+
+has_previous_devs_printer_type(l: [ upto(nlimit) -> device_type ], n: node): RECURSIVE bool =
+  COND
+    n = 0 -> IF l(n) /= no_device THEN TRUE ELSE FALSE ENDIF,
+    n > 0 -> IF l(n) /= no_device THEN TRUE ELSE has_previous_devs_printer_type(l, n-1) ENDIF 
+  ENDCOND
+  MEASURE n
+
+
+devs_printer_type(l: [ upto(nlimit) -> device_type ], n: node): RECURSIVE string =
+    COND
+      n = 0 -> IF l(n) /= no_device THEN "{" + doublequote + "d" + doublequote + " : " + n + "," + doublequote + "val" + doublequote + " : " + l(n) + "}"
+                     ELSE " " ENDIF,
+      n > 0 -> IF l(n) /= no_device AND has_previous_devs_printer_type(l, n - 1) THEN devs_printer_type(l, n - 1) + ", " + "{" + doublequote + "d" + doublequote + " : " + n + "," + doublequote + "val" + doublequote + " : " + l(n) + "}"
+               ELSIF l(n) /= no_device THEN "{" + doublequote + "d" + doublequote + " : " + n + "," + doublequote + "val" + doublequote + " : " + l(n) + "}" ELSE devs_printer_type(l, n - 1) ENDIF
+    ENDCOND
+  MEASURE n
+
+has_previous_patient(l: [ upto(nlimit) -> bool ], p: patient): RECURSIVE bool =
+  COND
+    p = 0 -> IF l(p) THEN TRUE ELSE FALSE ENDIF,
+    p > 0 -> IF l(p) THEN TRUE ELSE has_previous_patient(l, p-1) ENDIF 
+  ENDCOND
+  MEASURE p
+
+patient_printer_bool(l: [ upto(plimit) -> bool ], p: patient): RECURSIVE string =
+    COND
+      p = 0 -> IF l(p) THEN "" + p + "" ELSE " " ENDIF,
+      p > 0 -> IF l(p) and has_previous_patient(l, p - 1) THEN patient_printer_bool(l, p - 1) + ", " + newline + p ELSIF l(p) THEN p + newline + patient_printer_bool(l, p - 1) ELSE patient_printer_bool(l, p - 1) ENDIF
+    ENDCOND
+  MEASURE p
+
+
+has_previous_connected_printer(l: [upto(nlimit), upto(nlimit) -> bool], n1, n2: node): RECURSIVE bool =
+  COND
+    n1 = 0 -> IF l(n1, n2) THEN TRUE ELSE FALSE ENDIF,
+    n1 > 0 -> IF l(n1, n2) THEN TRUE ELSE has_previous_connected_printer(l, n1-1, n2) ENDIF 
+  ENDCOND
+  MEASURE n1
+
+connected_printer_bool(l: [upto(nlimit), upto(nlimit) -> bool], n1, n2: node)
+  : RECURSIVE string =
+COND
+   n1 = 0 -> IF l(n1, n2)
+             THEN "" + doublequote + "nodes linked <" + n1 + "," + n2 + ">" + doublequote ELSE "" ENDIF,
+   n1 > 0 -> IF l(n1, n2) AND has_previous_connected_printer(l, n1-1, n2)
+             THEN "" + connected_printer_bool(l, n1-1, n2) + ", " + doublequote + "nodes linked <" + n1 + "," + n2 + ">" + doublequote
+              ELSIF l(n1, n2) THEN doublequote + "nodes linked <" + n1 + "," + n2 + ">" + doublequote ELSE connected_printer_bool(l, n1-1, n2) ENDIF
+ENDCOND
+MEASURE n1
+
+nodes_link_printer(l: [upto(nlimit), upto(nlimit) -> bool], n1, n2: node):
+                             RECURSIVE string =
+COND
+  n2 = 0 -> "[" + connected_printer_bool(l, n1, n2) + "]",
+  n2 > 0 -> nodes_link_printer(l, n1, n2-1) + ", [" + connected_printer_bool(l, n1, n2) + "]"
+ENDCOND
+MEASURE n2
+
+connected2string(c: connected): string =
+"[" + nodes_link_printer(c, nlimit, nlimit) + "" + "]"
+ CONVERSION connected2string
+
+node_to_integer_printer(l: [ upto(nlimit) -> integer ], n: node, nv: integer): RECURSIVE string =
+    COND
+      n = 0 -> IF l(n) /= nv THEN "" + l(n) ELSE
+               "" ENDIF,
+      n > 0 -> IF l(n) /= nv
+               THEN node_to_integer_printer(l, n - 1, nv) + "," + newline + l(n)
+	       ELSE node_to_integer_printer(l, n - 1, nv) ENDIF
+    ENDCOND
+  MEASURE n
+
+
+patient_to_device2string(pd: patient_to_device): string =
+ "{" + doublequote + "pat" + doublequote + ": " + pd`pat + "," + newline +
+    doublequote + "dev" + doublequote + ": " + pd`dev + newline + " }"
+  CONVERSION patient_to_device2string
+
+dev_act_type2string(da: dev_act_type): string =
+"{" + doublequote + "dev" + doublequote + ": " + da`dev + "," + newline +
+    doublequote + "act" + doublequote + ": " + da`act + newline + " }"
+  CONVERSION dev_act_type2string
+
+has_previous_node_to_pd_printer(l: [ upto(nlimit) -> patient_to_device ], n: node): RECURSIVE bool =
+  COND
+    n = 0 -> IF l(n)`pat /= p_null THEN TRUE ELSE FALSE ENDIF,
+    n > 0 -> IF l(n)`pat /= p_null THEN TRUE ELSE has_previous_node_to_pd_printer(l, n-1) ENDIF 
+  ENDCOND
+  MEASURE n
+
+node_to_pd_printer(l: [ upto(nlimit) -> patient_to_device ], n: node): RECURSIVE string =
+    COND
+      n = 0 -> IF l(n)`pat /= p_null THEN "{" + doublequote + "node" + doublequote + ":" + n + "," + doublequote + "pd" + doublequote + ":" + l(n) + "}" ELSE "" ENDIF,
+      n > 0 -> IF l(n)`pat /= p_null AND has_previous_node_to_pd_printer(l, n-1) THEN node_to_pd_printer(l, n - 1) + "," + newline + "{" + doublequote + "node" + doublequote + ":" + n + "," + doublequote + "pd" + doublequote + ":" + l(n) + "}" ELSIF l(n)`pat /= p_null THEN "{" + doublequote + "node" + doublequote + ":" + n + "," + doublequote + "pd" + doublequote + ":" + l(n) + "}" ELSE node_to_pd_printer(l, n - 1) ENDIF
+    ENDCOND
+  MEASURE n
+
+has_previous_node_to_patient_printer(l: [ upto(nlimit) -> patient ], n: node, pv: patient): RECURSIVE bool =
+  COND
+    n = 0 -> IF l(n) /= pv  THEN TRUE ELSE FALSE ENDIF,
+    n > 0 -> IF l(n) /= pv  THEN TRUE ELSE has_previous_node_to_patient_printer(l, n-1, pv) ENDIF 
+  ENDCOND
+  MEASURE n
+
+node_to_patient_printer(l: [ upto(nlimit) -> patient ], n: node, pv: patient): RECURSIVE string =
+    COND
+      n = 0 -> IF l(n) /= pv THEN "{" + doublequote + "node" + doublequote + ":" + n + "," + doublequote + "patient" + doublequote + ":" + l(n) + "}" ELSE
+               "" ENDIF,
+      n > 0 -> IF l(n) /= pv AND has_previous_node_to_patient_printer(l, n-1, pv)
+               THEN node_to_patient_printer(l, n - 1, pv) + "," + newline +  "{" + doublequote + "node" + doublequote + ":" + n + "," + doublequote + "patient" + doublequote + ":" + l(n) + "}"
+	       ELSIF l(n) /= pv THEN "{" + doublequote + "node" + doublequote + ":" + n + "," + doublequote + "patient" + doublequote + ":" + l(n) + "}" ELSE node_to_patient_printer(l, n - 1, pv) ENDIF
+    ENDCOND
+  MEASURE n
+
+has_previous_act_buff_printer(l: [ upto(mindex) -> act_message_type ], i: index): RECURSIVE bool =
+  COND
+    i = 0 -> IF l(i)`mhdr /= nomsg  THEN TRUE ELSE FALSE ENDIF,
+    i > 0 -> IF l(i)`mhdr /= nomsg THEN TRUE ELSE has_previous_act_buff_printer(l, i-1) ENDIF 
+  ENDCOND
+  MEASURE i
+
+act_buff_printer(l: [ upto(mindex) -> act_message_type ], i: index): RECURSIVE string =
+    COND
+      i = 0 -> IF l(i)`mhdr /= nomsg THEN "" + l(i) + newline ELSE
+               "" ENDIF,
+      i > 0 -> IF l(i)`mhdr /= nomsg AND has_previous_act_buff_printer(l, i-1)
+               THEN act_buff_printer(l, i - 1) + "," + newline + l(i)
+	       ELSIF l(i)`mhdr /= nomsg THEN l(i) ELSE act_buff_printer(l, i - 1) ENDIF
+    ENDCOND
+  MEASURE i
+
+has_previous_pan_buff_printer(l: [ upto(mindex) -> pan_message_type ], i: index): RECURSIVE bool =
+  COND
+    i = 0 -> IF l(i)`mhdr /= nomsg  THEN TRUE ELSE FALSE ENDIF,
+    i > 0 -> IF l(i)`mhdr /= nomsg THEN TRUE ELSE has_previous_pan_buff_printer(l, i-1) ENDIF 
+  ENDCOND
+  MEASURE i
+
+pan_buff_printer(l: [ upto(mindex) -> pan_message_type ], i: index): RECURSIVE string =
+    COND
+      i = 0 -> IF l(i)`mhdr /= nomsg THEN "" + l(i) + newline ELSE
+               "" ENDIF,
+      i > 0 -> IF l(i)`mhdr /= nomsg AND has_previous_pan_buff_printer(l, i-1)
+               THEN pan_buff_printer(l, i - 1) + "," + newline + l(i)
+	       ELSIF l(i)`mhdr /= nomsg  THEN l(i) ELSE pan_buff_printer(l, i - 1) ENDIF
+    ENDCOND
+  MEASURE i
+
+has_previous_patient_pan_printer(l: [ upto(mindex) -> panel ], p: patient): RECURSIVE bool =
+  COND
+    p = 0 -> IF l(p)`pars /= emptyset THEN TRUE ELSE FALSE ENDIF,
+    p > 0 -> IF l(p)`pars /= emptyset THEN TRUE ELSE has_previous_patient_pan_printer(l, p-1) ENDIF 
+  ENDCOND
+  MEASURE p
+
+patient_pan_printer(l: [ upto(mindex) -> panel ], p: patient): RECURSIVE string =
+COND
+      p = 0 -> IF l(p)`pars /= emptyset THEN "" + l(p) ELSE
+               "" ENDIF,
+      p > 0 -> IF l(p)`pars /= emptyset AND has_previous_patient_pan_printer(l, p-1)
+               THEN patient_pan_printer(l, p - 1) + "," + newline + l(p)
+	       ELSIF l(p)`pars /= emptyset THEN l(p) ELSE patient_pan_printer(l, p - 1) ENDIF
+    ENDCOND
+  MEASURE p
+
+patient_mode_type2string(m: patient_mode_type): string =
+   COND
+    m = error -> doublequote + "error" + doublequote,
+    m = top     -> doublequote + "top" + doublequote,
+    m = p_mode -> doublequote + "p_mode" + doublequote,
+    m = d_mode -> doublequote + "d_mode" + doublequote  
+    ENDCOND
+  CONVERSION patient_mode_type2string
+
+patient_edit_type2string(m: patient_edit_type): string =
+   COND
+    m = edit_none -> doublequote + "edit_none" + doublequote,
+    m = edit_top -> doublequote + "edit_top" + doublequote,
+    m = edit_patient -> doublequote + "edit_patient" + doublequote,
+    m = edit_device -> doublequote + "edit_device" + doublequote,
+    m = edit_rule -> doublequote + "edit_rule" + doublequote,
+    m = edit_constraint -> doublequote + "edit_constraint" + doublequote
+   ENDCOND
+ CONVERSION patient_edit_type2string
+
+nodes2string(ns: nodes): string =
+  "[" + node_printer_bool(ns, nlimit) + " ]"
+ CONVERSION nodes2string
+
+devices2string(ds: devices): string =
+  "[ " + device_printer_bool(ds, dlimit) + "]"
+CONVERSION devices2string
+
+patients_type2string(ps: patients_type): string =
+  "[ " + patient_printer_bool(ps, plimit) + "]"
+ CONVERSION patients_type2string
+
+devices_type2string(ds:devices_type): string =
+  "[ " + devs_printer_type(ds, dlimit) + "]"
+ CONVERSION devices_type2string
+
+act_buff_type2string(ab: act_buff_type): string =
+  "[ " + act_buff_printer(ab, mindex) + "]"
+  CONVERSION act_buff_type2string
+
+pan_buff_type2string(pb: pan_buff_type): string =
+  "[ " + pan_buff_printer(pb, mindex) + "]"
+  CONVERSION pan_buff_type2string
+
+
+pan_q_type2string(pq: pan_q_type): string =
+ "{" + doublequote + "current_pos" + doublequote + ": " + pq`current_pos +  ", "+ space +
+       doublequote + "last_pos" + doublequote + ": " + pq`last_pos +  ", "+ space +
+       doublequote + "buff" + doublequote + ": " + pq`buff +  ", "+ space +
+       doublequote + "buf_status" + doublequote + ": " + pq`buf_status + " }"
+  CONVERSION pan_q_type2string
+
+act_q_type2string(aq: act_q_type): string =
+ "{" + doublequote + "current_pos" + doublequote + ": " + aq`current_pos +  ", "+ space +
+       doublequote + "last_pos" + doublequote + ": " + aq`last_pos +  ", "+ space +
+       doublequote + "buff" + doublequote + ": " + aq`buff +  ", "+ space +
+       doublequote + "buf_status" + doublequote + ": " + aq`buf_status + " }"
+  CONVERSION act_q_type2string
+
+d_state2string(ds: d_state): string =
+   "{" + doublequote + "dev" + doublequote + ": " + ds`dev +  ", "+ newline +
+       doublequote + "nde" + doublequote + ": " + ds`nde +  ", "+ newline +
+       doublequote + "vtbi" + doublequote + ": " + ds`vtbi +  ", "+ newline +
+       doublequote + "rate" + doublequote + ": " + ds`rate +  ", "+ newline +
+       doublequote + "time" + doublequote + ": " + ds`time +  ", "+ newline +
+       doublequote + "vol" + doublequote + ": " + ds`vol +  ", "+ newline +
+       doublequote + "clamp" + doublequote + ": " + ds`clamp +  ", "+ newline +
+       doublequote + "m" + doublequote + ": " + ds`m +  ", "+ newline +
+       doublequote + "dm" + doublequote + ": " + ds`dm +  ", "+ newline +
+       doublequote + "prevdm" + doublequote + ": " + ds`prevdm +  ", "+ newline +
+       doublequote + "clock" + doublequote + ": " + ds`clock +  ", "+ newline +
+       doublequote + "bolus_time" + doublequote + ": " + ds`bolus_time +  ", "+ newline +
+       doublequote + "pan" + doublequote + ": " + ds`pan +  ", "+ newline +
+       doublequote + "priority" + doublequote + ": " + ds`priority +  ", "+ newline +
+       doublequote + "ip_error" + doublequote + ": " + ds`ip_error + " }"
+  CONVERSION d_state2string
+
+has_previous_pan_msg_waiting_printer(l: [ upto(nlimit) -> pan_q_type ], n: node): RECURSIVE bool =
+  COND
+    n = 0 -> IF l(n)`buf_status /= empty THEN TRUE ELSE FALSE ENDIF,
+    n > 0 -> IF l(n)`buf_status /= empty THEN TRUE ELSE has_previous_pan_msg_waiting_printer(l, n-1) ENDIF 
+  ENDCOND
+  MEASURE n
+
+pan_msg_waiting_printer(l: [ upto(nlimit) -> pan_q_type ], n: node): RECURSIVE string =
+ COND
+      n = 0 -> IF l(n)`buf_status /= empty THEN "{" + doublequote + "node" + doublequote + ":" + n + "," + doublequote + "msgs" + doublequote + ":" + l(n) + "}" ELSE
+               "" ENDIF,
+      n > 0 -> IF l(n)`buf_status /= empty AND has_previous_pan_msg_waiting_printer(l, n-1)
+               THEN pan_msg_waiting_printer(l, n - 1) + "," + space + "{" + doublequote + "node" + doublequote + ":" + n + "," + doublequote + "msgs" + doublequote + ":" + l(n) + "}"
+	       ELSIF l(n)`buf_status /= empty THEN "{" + doublequote + "node" + doublequote + ":" + n + "," + doublequote + "msgs" + doublequote + ":" + l(n) + "}" ELSE pan_msg_waiting_printer(l, n - 1) ENDIF
+    ENDCOND
+  MEASURE n
+
+has_previous_act_msg_waiting_printer(l: [ upto(nlimit) -> act_q_type ], n: node): RECURSIVE bool =
+  COND
+    n = 0 -> IF l(n)`buf_status /= empty THEN TRUE ELSE FALSE ENDIF,
+    n > 0 -> IF l(n)`buf_status /= empty THEN TRUE ELSE has_previous_act_msg_waiting_printer(l, n-1) ENDIF 
+  ENDCOND
+  MEASURE n
+
+act_msg_waiting_printer(l: [ upto(nlimit) -> act_q_type ], n: node): RECURSIVE string =
+ COND
+      n = 0 -> IF l(n)`buf_status /= empty THEN "{" + doublequote + "node" + doublequote + ":" + n + "," + doublequote + "msgs" + doublequote + ":" + l(n) + "}" ELSE
+               "" ENDIF,
+      n > 0 -> IF l(n)`buf_status /= empty AND has_previous_act_msg_waiting_printer(l, n-1)
+               THEN act_msg_waiting_printer(l, n - 1) + "," + space + "{" + doublequote + "node" + doublequote + ":" + n + "," + doublequote + "msgs" + doublequote + ":" + l(n) + "}"
+	       ELSIF l(n)`buf_status /= empty THEN "{" + doublequote + "node" + doublequote + ":" + n + "," + doublequote + "msgs" + doublequote + ":" + l(n) + "}" ELSE act_msg_waiting_printer(l, n - 1) ENDIF
+    ENDCOND
+  MEASURE n
+
+has_previous_d_panel_type_printer(l: [ upto(dlimit) -> panel], d: device): RECURSIVE bool =
+  COND
+    d = 0 -> IF l(d)`pars /= emptyset THEN TRUE ELSE FALSE ENDIF,
+    d > 0 -> IF l(d)`pars /= emptyset THEN TRUE ELSE has_previous_d_panel_type_printer(l, d-1) ENDIF 
+  ENDCOND
+  MEASURE d
+
+d_panel_type_printer(l: [ upto(dlimit) -> panel], d: device): RECURSIVE string =
+ COND
+      d = 0 -> 
+        IF l(d)`pars /= emptyset THEN "{" + doublequote + "d" + doublequote + " : " + d + "," + doublequote + "val" + doublequote + " : " + l(d) + "}" ELSE "" ENDIF,
+      d > 0 -> 
+        IF l(d)`pars /= emptyset AND has_previous_d_panel_type_printer(l, d-1)
+        THEN d_panel_type_printer(l, d - 1) + "," + "{" + doublequote + "d" + doublequote + " : " + d + "," + doublequote + "val" + doublequote + " : " + l(d) + "}"
+        ELSIF l(d)`pars /= emptyset THEN "{" + doublequote + "d" + doublequote + " : " + d + "," + doublequote + "val" + doublequote + " : " + l(d) + "}" ELSE d_panel_type_printer(l, d - 1) ENDIF
+  ENDCOND
+MEASURE d
+
+has_previous_p_dstates_printer(l: [upto(dlimit) -> d_state], d: device): RECURSIVE bool =
+  COND
+    d = 0 -> IF l(d)`nde /= no_node  THEN TRUE ELSE FALSE ENDIF,
+    d > 0 -> IF l(d)`nde /= no_node THEN TRUE ELSE has_previous_p_dstates_printer(l, d-1) ENDIF 
+  ENDCOND
+  MEASURE d
+
+p_dstates_printer(l: [upto(dlimit) -> d_state], d: device): RECURSIVE string =
+   COND
+      d = 0 -> IF l(d)`nde /= no_node THEN "" + l(d) ELSE
+               "" ENDIF,
+      d > 0 -> IF l(d)`nde /= no_node AND has_previous_p_dstates_printer(l, d-1)
+               THEN p_dstates_printer(l, d - 1) + "," + space + l(d)
+	       ELSIF l(d)`nde /= no_node THEN l(d) ELSE p_dstates_printer(l, d - 1) ENDIF
+    ENDCOND
+  MEASURE d
+
+has_previous_main_act_printer(l: [upto(dlimit) -> action_ids], d: device): RECURSIVE bool =
+  COND
+    d = 0 -> IF l(d) /= emptyset THEN TRUE ELSE FALSE ENDIF,
+    d > 0 -> IF l(d) /= emptyset THEN TRUE ELSE has_previous_main_act_printer(l, d-1) ENDIF 
+  ENDCOND
+  MEASURE d
+
+main_act_printer(l: [upto(dlimit) -> action_ids], d: device): RECURSIVE string =
+   COND
+      d = 0 -> IF l(d) /= emptyset THEN "{" + doublequote + "d" + doublequote + " : " + d + "," + doublequote + "val" + doublequote + " : " + l(d) + "}" ELSE
+               "" ENDIF,
+      d > 0 -> IF l(d) /= emptyset AND has_previous_main_act_printer(l, d-1)
+               THEN main_act_printer(l, d - 1) + "," + space + "{" + doublequote + "d" + doublequote + " : " + d + "," + doublequote + "val" + doublequote + " : " + l(d) + "}"
+	       ELSIF l(d) /= emptyset  THEN "{" + doublequote + "d" + doublequote + " : " + d + "," + doublequote + "val" + doublequote + " : " + l(d) + "}" ELSE main_act_printer(l, d - 1) ENDIF
+    ENDCOND
+  MEASURE d
+
+has_previous_main_enum_par_printer(l: [upto(dlimit) -> enum_parameter], d: device): RECURSIVE bool =
+  COND
+    d = 0 -> IF l(d) /= empty_enum_parameter THEN TRUE ELSE FALSE ENDIF,
+    d > 0 -> IF l(d) /= empty_enum_parameter THEN TRUE ELSE has_previous_main_enum_par_printer(l, d-1) ENDIF 
+  ENDCOND
+  MEASURE d
+
+% AQUI
+main_enum_par_printer(l: [upto(dlimit) -> enum_parameter], d: device): RECURSIVE string =
+   COND
+      d = 0 -> IF l(d) /= empty_enum_parameter THEN "{" + doublequote + "d" + doublequote + " : " + d + "," + doublequote + "val" + doublequote + " : " + l(d) + "}" ELSE
+               "" ENDIF,
+      d > 0 -> IF l(d) /= empty_enum_parameter AND has_previous_main_enum_par_printer(l, d-1)
+               THEN main_enum_par_printer(l, d - 1) + "," + space + "{" + doublequote + "d" + doublequote + " : " + d + "," + doublequote + "val" + doublequote + " : " + l(d) + "}"
+	       ELSIF l(d) /= empty_enum_parameter THEN "{" + doublequote + "d" + doublequote + " : " + d + "," + doublequote + "val" + doublequote + " : " + l(d) + "}" ELSE main_enum_par_printer(l, d - 1) ENDIF
+    ENDCOND
+  MEASURE d
+
+has_previous_main_num_par_printer(l: [upto(dlimit) -> num_parameter], d: device): RECURSIVE bool =
+  COND
+    d = 0 -> IF l(d) /= empty_num_parameter THEN TRUE ELSE FALSE ENDIF,
+    d > 0 -> IF l(d) /= empty_num_parameter THEN TRUE ELSE has_previous_main_num_par_printer(l, d-1) ENDIF 
+  ENDCOND
+  MEASURE d
+
+% AQUI
+main_num_par_printer(l: [upto(dlimit) -> num_parameter], d: device): RECURSIVE string =
+   COND
+      d = 0 -> IF l(d) /= empty_num_parameter
+		  THEN "{" + doublequote + "d" + doublequote + " : " + d + "," + doublequote + "val" + doublequote + " : " + l(d) + "}" ELSE
+               "" ENDIF,
+      d > 0 -> IF l(d) /= empty_num_parameter AND has_previous_main_num_par_printer(l, d-1)
+               THEN main_num_par_printer(l, d - 1) + "," + space + "{" + doublequote + "d" + doublequote + " : " + d + "," + doublequote + "val" + doublequote + " : " + l(d) + "}"
+	       ELSIF l(d) /= empty_num_parameter THEN "{" + doublequote + "d" + doublequote + " : " + d + "," + doublequote + "val" + doublequote + " : " + l(d) + "}" ELSE main_num_par_printer(l, d - 1) ENDIF
+    ENDCOND
+  MEASURE d
+
+ main_enum_par2string(mep: main_enum_par): string =
+"[ " + main_enum_par_printer(mep, dlimit) + "]"
+  CONVERSION main_enum_par2string
+
+has_previous_action_error_printer(l: [upto(plimit) -> dev_act_type], p: patient): RECURSIVE bool =
+  COND
+    p = 0 -> IF l(p)`dev /= nil_device THEN TRUE ELSE FALSE ENDIF,
+    p > 0 -> IF l(p)`dev /= nil_device THEN TRUE ELSE has_previous_action_error_printer(l, p-1) ENDIF 
+  ENDCOND
+  MEASURE p
+
+action_error_printer(l: [upto(plimit) -> dev_act_type], p: patient): RECURSIVE string =
+   COND
+      p = 0 -> IF l(p)`dev /= nil_device THEN "{" + doublequote + "p" + doublequote + " : " + p + "," + doublequote + "val" + doublequote + " : " + l(p) + "}" ELSE
+                "" ENDIF,
+      p > 0 -> IF l(p)`dev /= nil_device AND has_previous_action_error_printer(l, p-1) THEN action_error_printer(l, p - 1) + "," + space + "{" + doublequote + "p" + doublequote + " : " + p + "," + doublequote + "val" + doublequote + " : " + l(p) + "}"
+              ELSIF l(p)`dev /= nil_device THEN "{" + doublequote + "p" + doublequote + " : " + p + "," + doublequote + "val" + doublequote + " : " + l(p) + "}" ELSE action_error_printer(l, p - 1) ENDIF
+    ENDCOND
+  MEASURE p
+
+
+action_error_type2string(aet: action_error_type): string =
+"[ " + action_error_printer(aet, plimit) + "]"
+CONVERSION action_error_type2string
+
+has_previous_top_enum_par_printer(l: [upto(plimit) -> main_enum_par], p: patient): RECURSIVE bool =
+  COND
+    p = 0 -> IF has_previous_main_enum_par_printer(l(p), dlimit) THEN TRUE ELSE FALSE ENDIF,
+    p > 0 -> IF has_previous_main_enum_par_printer(l(p), dlimit) THEN TRUE ELSE has_previous_top_enum_par_printer(l, p-1) ENDIF 
+  ENDCOND
+  MEASURE p
+
+
+top_enum_par_printer(l: [upto(plimit) -> main_enum_par], p: patient): RECURSIVE string =
+   COND
+      p = 0 -> IF has_previous_main_enum_par_printer(l(p), dlimit) THEN "{" + doublequote + "p" + doublequote + " : " + p + "," + doublequote + "val" + doublequote + " : " + l(p) + "}" ELSE "" ENDIF,
+      p > 0 -> IF has_previous_main_enum_par_printer(l(p), dlimit) AND has_previous_top_enum_par_printer(l, p-1) THEN
+      top_enum_par_printer(l, p - 1) + "," + space + "{" + doublequote + "p" + doublequote + " : " + p + "," + doublequote + "val" + doublequote + " : " + l(p) + "}"
+      ELSIF has_previous_main_enum_par_printer(l(p), dlimit) THEN "{" + doublequote + "p" + doublequote + " : " + p + "," + doublequote + "val" + doublequote + " : " + l(p) + "}" ELSE top_enum_par_printer(l, p - 1) ENDIF
+    ENDCOND
+  MEASURE p
+
+top_enum_params2string(tep: top_enum_params): string =
+"[ " + top_enum_par_printer(tep, plimit) + "]"
+CONVERSION top_enum_params2string
+
+main_num_par2string(mnp: main_num_par): string =
+"[ " + main_num_par_printer(mnp, dlimit) + "]"
+  CONVERSION main_num_par2string
+
+has_previous_top_num_par_printer(l: [upto(plimit) -> main_num_par], p: patient): RECURSIVE bool =
+  COND
+    p = 0 -> IF has_previous_main_num_par_printer(l(p), dlimit) THEN TRUE ELSE FALSE ENDIF,
+    p > 0 -> IF has_previous_main_num_par_printer(l(p), dlimit) THEN TRUE ELSE has_previous_top_num_par_printer(l, p-1) ENDIF 
+  ENDCOND
+  MEASURE p
+
+top_num_par_printer(l: [upto(plimit) -> main_num_par], p: patient): RECURSIVE string =
+   COND
+      p = 0 -> IF has_previous_main_num_par_printer(l(p), dlimit) THEN 
+      "{" + doublequote + "p" + doublequote + " : " + p + "," + doublequote + "val" + doublequote + " : " + l(p) + "}" ELSE "" ENDIF,
+      p > 0 -> IF has_previous_main_num_par_printer(l(p), dlimit) AND has_previous_top_num_par_printer(l, p-1) THEN
+      top_num_par_printer(l, p - 1) + "," + space + "{" + doublequote + "p" + doublequote + " : " + p + "," + doublequote + "val" + doublequote + " : " + l(p) + "}"
+      ELSIF has_previous_main_num_par_printer(l(p), dlimit) THEN "{" + doublequote + "p" + doublequote + " : " + p + "," + doublequote + "val" + doublequote + " : " + l(p) + "}" ELSE top_num_par_printer(l, p - 1) ENDIF
+    ENDCOND
+  MEASURE p
+
+top_num_params2string(tep: top_num_params): string =
+"[ " + top_num_par_printer(tep, plimit) + "]"
+CONVERSION top_num_params2string
+
+main_act2string(ma: main_act): string =
+"[ " + main_act_printer(ma, dlimit) + "]"
+  CONVERSION main_act2string
+
+dpanel_type2string(dp: dpanel_type): string =
+"[ " + d_panel_type_printer(dp, dlimit) + "]"
+  CONVERSION dpanel_type2string
+
+patient_config2string(pc: patient_config): string =
+     "{" + doublequote + "p_enum_params" + doublequote + ": " + pc`p_enum_params +  ", "+ newline +
+       doublequote + "p_num_params" + doublequote + ": " + pc`p_num_params +  ", "+ newline +
+    %   "param_set := " + pc`param_set + space +
+       doublequote + "p_actions" + doublequote + ": " + pc`p_actions +  ", "+ newline +
+       doublequote + "p_av_actions" + doublequote + ": " + pc`p_av_actions +  ", "+ newline +
+       doublequote + "p_devices" + doublequote + ": " + pc`p_devices +  ", "+ newline +
+       doublequote + "coord_devices" + doublequote + ": " + pc`coord_devices +  ", "+ newline +
+       doublequote + "d_available_actions" + doublequote + ": " + pc`d_available_actions + newline + " }"
+  CONVERSION patient_config2string
+
+
+has_previous_coord_db_printer_device_type(l: [ upto(dlimit) -> device_type ], d: device): RECURSIVE bool =
+  COND
+    d = 0 -> IF l(d) /= no_device THEN TRUE ELSE FALSE ENDIF,
+    d > 0 -> IF l(d) /= no_device THEN TRUE ELSE has_previous_coord_db_printer_device_type(l, d-1) ENDIF 
+  ENDCOND
+  MEASURE d
+
+has_previous_coord_db_printer(l: [upto(plimit) -> patient_config], p: patient): RECURSIVE bool =
+  COND
+    p = 0 -> IF has_previous_coord_db_printer_device_type(l(p)`p_devices, dlimit) THEN TRUE ELSE FALSE ENDIF,
+    p > 0 -> IF has_previous_coord_db_printer_device_type(l(p)`p_devices, dlimit) THEN TRUE ELSE has_previous_coord_db_printer(l, p-1) ENDIF 
+  ENDCOND
+  MEASURE p
+
+coord_db_printer(l: [upto(plimit) -> patient_config], p: patient): RECURSIVE string =
+   COND
+      p = 0 -> IF has_previous_coord_db_printer_device_type(l(p)`p_devices, dlimit) THEN "{" + doublequote + "p" + doublequote + " : " + p + "," + doublequote + "val" + doublequote + " : " + l(p) + "}" + newline ELSE "" ENDIF,
+      p > 0 -> IF has_previous_coord_db_printer_device_type(l(p)`p_devices, dlimit) and has_previous_coord_db_printer(l, p-1) 
+      THEN coord_db_printer(l, p - 1) + ", " + newline + "{" + doublequote + "p" + doublequote + " : " + p + "," + doublequote + "val" + doublequote + " : " + l(p) + "}"
+      ELSIF has_previous_coord_db_printer_device_type(l(p)`p_devices, dlimit) THEN "{" + doublequote + "p" + doublequote + " : " + p + "," + doublequote + "val" + doublequote + " : " + l(p) + "}"
+      ELSE coord_db_printer(l, p - 1) ENDIF
+    ENDCOND
+  MEASURE p
+
+%coord_db_printer(l: [upto(plimit) -> patient_config], p: patient): RECURSIVE string =
+%   COND
+ %     p = 0 -> IF l(p)`p_devices(1) /= no_device and l(p+1)`p_devices(1) /= no_device THEN ", " + l(p) + newline ELSIF l(p)`p_devices(1) /= no_device THEN l(p) + newline ELSE "" ENDIF,
+ %     p > 0 -> IF l(p)`p_devices(1) /= no_device and l(p+1)`p_devices(1) /= no_device THEN ", " + l(p) + coord_db_printer(l, p - 1) + newline ELSIF l(p)`p_devices(1) /= no_device THEN l(p) + coord_db_printer(l, p - 1) + newline ELSE coord_db_printer(l, p - 1) ENDIF
+ %   ENDCOND
+ % MEASURE p
+
+%has_previous_coord_db_printer(l: [upto(plimit) -> patient_config], p: patient): RECURSIVE bool =
+%  COND
+%    p = 0 -> IF l(p) /= empty_config THEN TRUE ELSE FALSE ENDIF,
+%    p > 0 -> IF l(p) /= empty_config THEN TRUE ELSE has_previous_coord_db_printer(l, p-1) ENDIF 
+%  ENDCOND
+%  MEASURE p
+
+%coord_db_printer(l: [upto(plimit) -> patient_config], p: patient): RECURSIVE string =
+ %  COND
+ %     p = 0 -> l(p),
+ %     p > 0 -> coord_db_printer(l, p - 1) + "," + newline + l(p)
+ %   ENDCOND
+ % MEASURE p
+
+%coord_db_printer(l: [upto(plimit) -> patient_config], p: patient): RECURSIVE string =
+ %  COND
+ %     p = 0 -> IF l(p) /= empty_config  THEN l(p) ELSE "" ENDIF,
+ %     p > 0 -> IF l(p) /= empty_config AND has_previous_coord_db_printer(l, p-1) THEN coord_db_printer(l, p - 1) + "," + newline + l(p)
+  %            ELSIF l(p) /= empty_config THEN l(p) ELSE coord_db_printer(l, p - 1) ENDIF
+  %  ENDCOND
+ % MEASURE p
+
+coord_db_type2string(cd: coord_db_type): string =
+  "[ " + coord_db_printer(cd, plimit) + "]"
+CONVERSION coord_db_type2string
+
+
+pan_msg_waiting_type2string(pw: pan_msg_waiting_type): string =
+  "[ " + pan_msg_waiting_printer(pw, nlimit) + "]"
+CONVERSION pan_msg_waiting_type2string
+
+act_msg_waiting_type2string(aw: act_msg_waiting_type): string =
+  "[ " + act_msg_waiting_printer(aw, nlimit) + "]"
+CONVERSION act_msg_waiting_type2string
+
+n_state2string(ns: n_state): string =
+   "{" + newline + 
+    " " + doublequote + "current_node" + doublequote + ": " + ns`current_node +  ", "+ newline +
+    " " + doublequote + "n_links" + doublequote + ": " + ns`n_links +  ", "+ newline +
+    " " + doublequote + "current_pan_msg" + doublequote + ": " + ns`current_pan_msg +  ", "+ newline +
+    " " + doublequote + "current_act_msg" + doublequote + ": " + ns`current_act_msg +  ", "+ newline +
+    " " + doublequote + "pan_msg_waiting" + doublequote + ": " + ns`pan_msg_waiting +  ", "+ newline +
+    " " + doublequote + "act_msg_waiting" + doublequote + ": " + ns`act_msg_waiting +  ", "+ newline +
+    " " + doublequote + "nw_error" + doublequote + ": " + ns`nw_error + newline +
+    "}" + newline
+CONVERSION n_state2string
+
+
+
+
+
+p_dstates2string(pd: p_dstates): string =
+"[ " + p_dstates_printer(pd, dlimit) + "]"
+CONVERSION p_dstates2string
+
+p_disp_main_type2string(pdm: p_disp_main_type): string =
+  "{" + newline + 
+  "     " + doublequote + "disp_enum_params" + doublequote + ": " + pdm`disp_enum_params +  ", "+ newline +
+  "     " + doublequote + "disp_num_params" + doublequote + ": " + pdm`disp_num_params +  ", "+ newline +
+  "     " + doublequote + "p_actions" + doublequote + ": " + pdm`p_actions + newline + 
+  "    }" 
+CONVERSION p_disp_main_type2string
+
+p_disp_top_type2string(pdt: p_disp_top_type): string =
+  "{" + newline +
+  "     " + doublequote + "sel_device" + doublequote + ": " + pdt`sel_device +  ", "+ newline +
+  "     " + doublequote + "devs" + doublequote + ": " + pdt`devs +  ", "+ newline +
+  "     " + doublequote + "disp_enum_params" + doublequote + ": " + pdt`disp_enum_params +  ", "+ newline +
+  "     " + doublequote + "disp_num_params" + doublequote + ": " + pdt`disp_num_params +  ", "+ newline + 
+%  "      menu_entry := " + pdt`menu_entry +  ", "+ newline +
+  "     " + doublequote + "menu_visible" + doublequote + ": " + pdt`menu_visible +  ", "+ newline +
+  "     " + doublequote + "ent_device" + doublequote + ": " + pdt`ent_device +  ", "+ newline +
+  "     " + doublequote + "ent_par" + doublequote + ": " + pdt`ent_par +  ", "+ newline +
+  "     " + doublequote + "ent_rel" + doublequote + ": " + pdt`ent_rel +  ", "+ newline +
+  "     " + doublequote + "ent_act" + doublequote + ": " + pdt`ent_act +  ", "+ newline +
+  "     " + doublequote + "ent_enum" + doublequote + ": " + pdt`ent_enum + newline + 
+  "    }" + newline 
+CONVERSION p_disp_top_type2string
+
+coord_disp_top_type2string(cdt: coord_disp_top_type): string =
+  "{" + newline + 
+  "     " + doublequote + "patients" + doublequote + ": " + patients_type2string(cdt`patients) +  ", "+ newline +
+  "     " + doublequote + "selected_patient" + doublequote + ": " + cdt`selected_patient +  ", "+ newline +
+  "     " + doublequote + "patients_enum_params" + doublequote + ": " + cdt`patients_enum_params + ", "+ newline +
+  "     " + doublequote + "patients_num_params" + doublequote + ": " + cdt`patients_num_params + ", "+ newline +
+  %"      menu_entry := " + cdt`menu_entry +  ", "+ newline +
+  "     " + doublequote + "menu_visible" + doublequote + ": " + cdt`menu_visible +  ", "+ newline +
+  "     " + doublequote + "ent_device" + doublequote + ": " + cdt`ent_device +  ", "+ newline +
+  "     " + doublequote + "ent_patient" + doublequote + ": " + cdt`ent_patient +  ", "+ newline +
+  "     " + doublequote + "ent_action" + doublequote + ": " + cdt`ent_action + newline + 
+  "    }" + newline
+CONVERSION coord_disp_top_type2string
+
+enum_constraint_type2string(ec: enum_constraint_type): string =
+  "{ " + doublequote + "d" + doublequote + ": " + ec`d + ", "+ newline +
+  doublequote + "p" + doublequote + ": " + ec`p + ", "+ newline +
+  doublequote + "r" + doublequote + ": " + ec`r + ", "+ newline +
+  doublequote + "v" + doublequote + ": " + ec`v + newline + " }"
+CONVERSION enum_constraint_type2string
+
+num_constraint_type2string(nc: num_constraint_type): string =
+ "{ " + doublequote + "d" + doublequote + ": " + nc`d + ", " + newline +
+       doublequote + "p" + doublequote + ": " + nc`p + ", " + newline +
+       doublequote + "r" + doublequote + ": " + nc`r + ", " + newline +
+       doublequote + "v" + doublequote + ": " + nc`v + newline + " }"
+  CONVERSION num_constraint_type2string
+
+constraint_type2string(ct: constraint_type): string =
+    "{ " + doublequote + "vt" + doublequote + ": " + ct`vt + ", "+ newline +
+       doublequote + "nc" + doublequote + ": " + ct`nc + ", "+ newline +
+       doublequote + "ec" + doublequote + ": " + ct`ec + newline + " }"
+    CONVERSION constraint_type2string
+
+has_previous_production_type_printer(l: [ upto(climit) -> constraint_type ], c: cindex): RECURSIVE bool =
+  COND
+    c = 0 -> IF l(c)`vt /= empty THEN TRUE ELSE FALSE ENDIF,
+    c > 0 -> IF l(c)`vt /= empty THEN TRUE ELSE has_previous_production_type_printer(l, c-1) ENDIF 
+  ENDCOND
+  MEASURE c
+
+production_type_printer(l: [ upto(climit) -> constraint_type ], c: cindex): RECURSIVE string =
+ COND
+      c = 0 -> IF l(c)`vt /= empty THEN l(c) + newline ELSE
+               "" ENDIF,
+      c > 0 -> IF l(c)`vt /= empty AND has_previous_production_type_printer(l, c-1)
+               THEN production_type_printer(l, c - 1) + "," + space + l(c)
+	       ELSIF l(c)`vt /= empty THEN l(c) ELSE production_type_printer(l, c - 1) ENDIF
+    ENDCOND
+  MEASURE c
+  
+production_type2string(pt: production_type): string =
+"[ " + production_type_printer(pt, climit) + "]"
+  CONVERSION production_type2string
+
+rule_type2string(rt: rule_type): string =
+ "{ " + doublequote + "rule" + doublequote + ": " + rt`rule + ", "+ newline +
+       doublequote + "action" + doublequote + ": " + rt`action + newline + 
+  " }" 
+  CONVERSION rule_type2string
+
+has_previous_patient_constraint_printer(l: [ upto(climit) -> rule_type ], c: cindex): RECURSIVE bool =
+  COND
+    c = 0 -> IF (l(c)`action)`act /= nil_action THEN TRUE ELSE FALSE ENDIF,
+    c > 0 -> IF (l(c)`action)`act /= nil_action THEN TRUE ELSE has_previous_patient_constraint_printer(l, c-1) ENDIF 
+  ENDCOND
+  MEASURE c
+
+patient_constraint_printer(l: [ upto(climit) -> rule_type ], c: cindex): RECURSIVE string =
+ COND
+      c = 0 -> IF (l(c)`action)`act /= nil_action THEN l(c) + newline ELSE
+               "" ENDIF,
+      c > 0 -> IF (l(c)`action)`act /= nil_action AND has_previous_patient_constraint_printer(l, c-1)
+               THEN patient_constraint_printer(l, c - 1) + "," + space + l(c)
+	       ELSIF (l(c)`action)`act /= nil_action THEN l(c) ELSE patient_constraint_printer(l, c - 1) ENDIF
+    ENDCOND
+  MEASURE c
+
+
+
+rule_setup_type2string(rst: rule_setup_type): string =
+  "{" + newline +
+  "       " + doublequote + "current_production_index" + doublequote + ": " + rst`current_production_index +  ", "+ newline +
+  "       " + doublequote + "current_production" + doublequote + ": " + rst`current_production +  ", "+ newline +
+  "       " + doublequote + "select_par" + doublequote + ":  " + rst`select_par +  ", "+ newline +
+  "       " + doublequote + "select_act" + doublequote + ": " + rst`select_act +  ", "+ newline +
+  "       " + doublequote + "select_rel" + doublequote + ": " + rst`select_rel +  ", "+ newline +
+  "       " + doublequote + "select_num" + doublequote + ": " + rst`select_num +  ", "+ newline +
+  "       " + doublequote + "select_enum" + doublequote + ": " + rst`select_enum + newline +
+  "      }"
+CONVERSION rule_setup_type2string
+
+patient_constraint_type2string(pct: patient_constraint_type): string =
+"[ " + patient_constraint_printer(pct, climit) + "]"
+CONVERSION patient_constraint_type2string
+
+rules_display_type2string(rdt: rules_display_type): string =
+  "{" + newline + 
+  "     " + doublequote + "rule_setup" + doublequote + ": " + rdt`rule_setup +  ", "+ newline +
+  "     " + doublequote + "select_pars" + doublequote + ": " + rdt`select_pars +  ", "+ newline +
+  "     " + doublequote + "select_acts" + doublequote + ": " + rdt`select_acts +  ", "+ newline +
+  "     " + doublequote + "current_rule_index" + doublequote + ": " + rdt`current_rule_index +  ", "+ newline +
+  "     " + doublequote + "current_lim_rule_index" + doublequote + ": " + rdt`current_lim_rule_index +  ", "+ newline +
+  "     " + doublequote + "rule_set" + doublequote + ": " + rdt`rule_set + newline + 
+  "    }" + newline
+CONVERSION rules_display_type2string
+
+p_state2string(ps: p_state): string =
+  "{ " + newline + 
+  "   " + doublequote + "id" + doublequote + ": " + ps`id +  ", "+ newline +
+  "   " + doublequote + "nde" + doublequote + ": " + ps`nde +  ", "+ newline +
+  "   " + doublequote + "pmode" + doublequote + ": " + ps`pmode +  ", "+ newline +
+  "   " + doublequote + "emode" + doublequote + ": " + ps`emode +  ", "+ newline +
+  "   " + doublequote + "name_buffer" + doublequote + ": " + ps`name_buffer +  ", "+ newline +
+  "   " + doublequote + "num_buffer" + doublequote + ": " + ps`num_buffer +  ", "+ newline +
+  "   " + doublequote + "disp_focus" + doublequote + ": " + ps`disp_focus +  ", "+ newline +
+  "   " + doublequote + "prev_menu_entry" + doublequote + ": " + ps`prev_menu_entry +  ", "+ newline +
+  "   " + doublequote + "prev_menu_visible" + doublequote + ": " + ps`prev_menu_visible +  ", "+ newline +
+  "   " + doublequote + "p_disp_top" + doublequote + ": " + ps`p_disp_top +  ", "+ newline +
+  "   " + doublequote + "p_disp_main" + doublequote + ": " + ps`p_disp_main +  ", "+ newline +
+  "   " + doublequote + "p_disp_device" + doublequote + ": " + ps`p_disp_device +  ", "+ newline +
+  "   " + doublequote + "p_rules_display" + doublequote + ": " + ps`p_rules_display +  ", "+ newline +
+  "   " + doublequote + "patient_panels" + doublequote + ": " + ps`patient_panels +  ", "+ newline +
+  "   " + doublequote + "vital_signs" + doublequote + ": " + ps`vital_signs +  ", "+ newline +
+  "   " + doublequote + "ip_state" + doublequote + ": " + ps`ip_state + newline +
+  "  }" + newline
+CONVERSION p_state2string
+
+has_previous_patient_db_printer(l: [ upto(plimit) -> p_state ], p: patient): RECURSIVE bool =
+  COND
+    p = 0 -> IF l(p)`id /= null_pid THEN TRUE ELSE FALSE ENDIF,
+    p > 0 -> IF l(p)`id /= null_pid THEN TRUE ELSE has_previous_patient_db_printer(l, p-1) ENDIF 
+  ENDCOND
+  MEASURE p
+
+patient_db_printer(l: [ upto(plimit) -> p_state ], p: patient): RECURSIVE string =
+COND
+  p = 0 -> 
+    IF l(p)`id /= null_pid 
+    THEN newline + l(p) + ""
+    ELSE "" ENDIF,
+  p > 0 -> 
+    IF l(p)`id /= null_pid AND has_previous_patient_db_printer(l, p-1)
+    THEN newline + patient_db_printer(l, p - 1) + "," + l(p)
+    ELSIF l(p)`id /= null_pid THEN l(p) ELSE patient_db_printer(l, p - 1) ENDIF
+ENDCOND
+  MEASURE p
+
+
+has_previous_patient_connect_printer(l: [ upto(plimit) -> nw_error_type ], p: patient): RECURSIVE bool =
+  COND
+    p = 0 -> IF l(p) /= not_connected  THEN TRUE ELSE FALSE ENDIF,
+    p > 0 -> IF l(p) /= not_connected  THEN TRUE ELSE has_previous_patient_connect_printer(l, p-1) ENDIF 
+  ENDCOND
+  MEASURE p
+
+patient_connect_printer(l: [ upto(plimit) -> nw_error_type ], p: patient): RECURSIVE string =
+COND
+  p = 0 -> 
+    IF l(p) /= not_connected 
+    THEN "" + l(p)
+    ELSE "" ENDIF,
+  p > 0 -> 
+    IF l(p) /= not_connected AND has_previous_patient_connect_printer(l, p-1)
+    THEN patient_connect_printer(l, p - 1) + "," + l(p)
+    ELSIF l(p) /= not_connected  THEN l(p) ELSE patient_connect_printer(l, p - 1) ENDIF
+  ENDCOND
+MEASURE p
+
+has_previous_device_connect_printer(l: [ upto(dlimit) -> nw_error_type ], d: device): RECURSIVE bool =
+  COND
+    d = 0 -> IF l(d) /= not_connected  THEN TRUE ELSE FALSE ENDIF,
+    d > 0 -> IF l(d) /= not_connected  THEN TRUE ELSE has_previous_device_connect_printer(l, d-1) ENDIF 
+  ENDCOND
+  MEASURE d
+
+device_connect_printer(l: [ upto(dlimit) -> nw_error_type ], d: device): RECURSIVE string =
+  COND
+    d = 0 -> 
+      IF l(d) /= not_connected 
+      THEN "" + l(d)
+      ELSE "" ENDIF,
+    d > 0 -> 
+      IF l(d) /= not_connected AND has_previous_device_connect_printer(l, d-1)
+      THEN device_connect_printer(l, d - 1) + "," + l(d)
+      ELSIF l(d) /= not_connected  THEN l(d) ELSE device_connect_printer(l, d - 1) ENDIF
+  ENDCOND
+MEASURE d
+
+device_connect_type2string(dc: device_connect_type): string =
+"[ " + device_connect_printer(dc, dlimit) + "]"
+  CONVERSION device_connect_type2string
+  
+patient_device_connect_printer(l: [ upto(plimit) -> device_connect_type ], p: patient): RECURSIVE string =
+COND
+      p = 0 -> "" + l(p),
+      p > 0 -> patient_device_connect_printer(l, p - 1) +  "," + l(p)
+ENDCOND
+  MEASURE p
+
+
+node_to_patient2string(np: node_to_patient): string =
+"[ " + node_to_patient_printer(np, nlimit, p_null) + "]"
+  CONVERSION node_to_patient2string
+
+node_to_pd2string(nd: node_to_pd): string =
+"[ " + node_to_pd_printer(nd, nlimit) + "]"
+  CONVERSION node_to_pd2string
+
+disp_patient_type2string(dp: disp_patient_type): string =
+  "{" + newline +
+  "     " + doublequote + "current_patient" + doublequote + ": " + dp`current_patient +  ","+ newline +
+  "     " + doublequote + "devices" + doublequote + ": " + dp`devices +  ","+ newline +
+  "     " + doublequote + "selected_device" + doublequote + ": " + dp`selected_device +  ","+ newline +
+  "     " + doublequote + "patient_enum_params" + doublequote + ": " + dp`patient_enum_params +  ","+ newline +
+  "     " + doublequote + "patient_num_params" + doublequote + ": " + dp`patient_num_params +  ","+ newline +
+  "     " + doublequote + "patient_actions" + doublequote + ": " + dp`patient_actions +  ","+ newline +
+  "     " + doublequote + "av_main_act" + doublequote + ": " + dp`av_main_act +  ","+ newline +
+  "     " + doublequote + "selected_action" + doublequote + ": " + dp`selected_action + newline + 
+  "    }"
+CONVERSION disp_patient_type2string
+
+disp_device_type2string(dd: disp_device_type): string =
+  "{" + newline + 
+  "     " + doublequote + "current_device" + doublequote + ": " + dd`current_device +  ","+ newline +
+  "     " + doublequote + "e_disp" + doublequote + ": " + dd`e_disp +  "," + newline +
+  "     " + doublequote + "n_disp" + doublequote + ": " + dd`n_disp +  ","+ newline +
+  "     " + doublequote + "c_disp" + doublequote + ": " + dd`c_disp +  ","+ newline +
+  "     " + doublequote + "av_c_disp" + doublequote + ": " + dd`av_c_disp +  ","+ newline +
+  "     " + doublequote + "selected_action" + doublequote + ": " + dd`selected_action + newline + 
+  "    }"
+CONVERSION disp_device_type2string
+
+patient_connect_type2string(pc: patient_connect_type): string =
+"[" + patient_connect_printer(pc, plimit) + " ]"
+CONVERSION patient_connect_type2string
+
+patient_device_connect_type2string(pc: patient_device_connect_type): string =
+"[" + patient_device_connect_printer(pc, plimit) + " ]"
+CONVERSION patient_device_connect_type2string
+ 
+disp_alarm_type2string(da: disp_alarm_type): string =
+  "{" + newline + 
+  "     " + doublequote + "patient_updates" + doublequote + ": " + da`patient_updates +  ","+ newline +
+  "     " + doublequote + "device_update" + doublequote + ": " + da`device_update +  ","+ newline +
+  "     " + doublequote + "patient_connected" + doublequote + ": " + da`patient_connected +  ","+ newline +
+  "     " + doublequote + "patient_device_connected" + doublequote + ": " + da`patient_device_connected +  ","+ newline +
+  "     " + doublequote + "constraint_alarms" + doublequote + ": " + da`constraint_alarms + newline +
+  "    }"
+CONVERSION disp_alarm_type2string
+
+i_state2string(is: i_state): string =
+  "{ " + newline + 
+  "   " + doublequote + "nde" + doublequote + ": " + is`nde +  ","+ newline +
+  "   " + doublequote + "mode" + doublequote + ": " + is`mode +  ","+ newline +
+  "   " + doublequote + "prev_menu_entry" + doublequote + ": " + is`prev_menu_entry +  ","+ newline +
+  "   " + doublequote + "prev_menu_visible" + doublequote + ": " + menu_set2string(is`prev_menu_visible) +  ","+ newline +
+  "   " + doublequote + "disp_focus" + doublequote + ": " + is`disp_focus +  ","+ newline +
+  "   " + doublequote + "disp_top" + doublequote + ": " + is`disp_top +  ","+ newline +
+  "   " + doublequote + "disp_alarm" + doublequote + ": " + is`disp_alarm +  ","+ newline +
+  "   " + doublequote + "disp_patient" + doublequote + ": " + is`disp_patient +  ","+ newline +
+  "   " + doublequote + "disp_device" + doublequote + ": " + is`disp_device +  ","+ newline +
+  "   " + doublequote + "coord_db" + doublequote + ": " + is`coord_db + newline + newline +
+  "  }"
+CONVERSION i_state2string
+
+patient_db_type2string(pd: patient_db_type): string =
+"[" + patient_db_printer(pd, plimit) + "]"
+  CONVERSION patient_db_type2string
+
+print_state(st: state): string =
+ LET ans = "{" + newline,
+     ans = ans + doublequote + "nde_state" + doublequote + ": " + n_state2string(st`nde_state) + ","+ newline,
+    ans = ans + doublequote + "p_nodes" + doublequote + ": " + node_to_patient2string(st`p_nodes) +  ","+ newline, %Comentado
+    ans = ans + doublequote + "d_nodes" + doublequote + ": " + node_to_pd2string(st`d_nodes) +  "," + newline, %Comentado
+     ans = ans + doublequote + "ps" + doublequote + ": " + nodes2string(st`ps) +  ","+ newline,
+     ans = ans + doublequote + "patient_nodes" + doublequote + ": " + nodes2string(st`patient_nodes) +  ","+ newline,
+     ans = ans + doublequote + "patient menus" + doublequote + ": {}" +  "," + newline,
+     ans = ans + doublequote + "pdb" + doublequote + ": " + patient_db_type2string(st`pdb) + ","+ newline ,
+     ans = ans + doublequote + "coord_st" + doublequote + ": " + i_state2string(st`coord_st) +  ","+ newline,
+     ans = ans + doublequote + "coord_menu" + doublequote + ": {}" + newline
+     %ans = ans + "comms_error := " + nw_error_type2string(st`comms_error) + newline
+   IN ans + "}"
+   
+  filter_coord_menu(st: state): list[coord_t_and_c_th.menu] = 
+    LET
+      coord_m: coord_menu.menu_type = st`coord_menu,
+      dom: setof[coord_t_and_c_th.menu] = {x: coord_t_and_c_th.menu | TRUE } % domain of coord_menu??
+    IN (: select,
+          cursor_up,
+          cursor_down,
+          display,
+          patient,
+          device,
+          action,
+          escape :)
+
+  click_coord_menu_select(st: state): state = st
+  click_coord_menu_cursor_up(st: state): state = st
+
+%%%  JSON printer
+
+to_json_coord_disp_top_type(st: coord_disp_top_type): string = 
+  LET json = "{" + doublequote + "typedoublequote:" + doublequote + "coord_disp_top_typedoublequote," + doublequote + "valuedoublequote: {",
+      json = json + doublequote + "patientsdoublequote: {doublequotetypedoublequote:" + doublequote + "patients_typedoublequote," + doublequote + "valuedoublequote: {}}, ",
+      json = json + doublequote + "selected_patientdoublequote: {doublequotetypedoublequote:" + doublequote + "patientdoublequote," + doublequote + "valuedoublequote: {}}, ",
+      json = json + doublequote + "patients_enum_paramsdoublequote: {doublequotetypedoublequote:" + doublequote + "top_enum_paramsdoublequote," + doublequote + "valuedoublequote: {}}, ",
+      json = json + doublequote + "patients_num_paramsdoublequote: {doublequotetypedoublequote:" + doublequote + "top_num_paramsdoublequote," + doublequote + "valuedoublequote: {}}, ",
+      json = json + doublequote + "menu_visibledoublequote: "+ menu_set2string(st`menu_visible)+", ",
+      json = json + doublequote + "ent_devicedoublequote: {doublequotetypedoublequote:" + doublequote + "devicedoublequote," + doublequote + "valuedoublequote: {}}, ",
+      json = json + doublequote + "ent_patientdoublequote: {doublequotetypedoublequote:" + doublequote + "patientdoublequote," + doublequote + "valuedoublequote: {}}, ",
+      json = json + doublequote + "ent_actiondoublequote: {doublequotetypedoublequote:" + doublequote + "action_iddoublequote," + doublequote + "valuedoublequote: {}}"
+  IN json + "}}"
+
+to_json_coord_st(st: i_state): string = 
+  LET json = "{doublequotetypedoublequote:" + doublequote + "i_statedoublequote," + doublequote + "valuedoublequote: {",
+      json = json + doublequote + "ndedoublequote: {doublequotetypedoublequote:" + doublequote + "nodedoublequote," + doublequote + "valuedoublequote: {}}, ",
+      json = json + doublequote + "modedoublequote: {doublequotetypedoublequote:" + doublequote + "patient_mode_typedoublequote," + doublequote + "valuedoublequote: {}}, ",
+      json = json + doublequote + "prev_menu_entrydoublequote: {doublequotetypedoublequote:" + doublequote + "menudoublequote," + doublequote + "valuedoublequote: {}}, ",
+      json = json + doublequote + "prev_menu_visibledoublequote: {doublequotetypedoublequote:" + doublequote + "menu_setdoublequote," + doublequote + "valuedoublequote: {}}, ",
+      json = json + doublequote + "disp_focusdoublequote: {doublequotetypedoublequote:" + doublequote + "disp_focus_typedoublequote," + doublequote + "valuedoublequote: {}}, ",
+      json = json + doublequote + "disp_topdoublequote: "+to_json_coord_disp_top_type(st`disp_top)+", ",
+      json = json + doublequote + "disp_alarmdoublequote: {doublequotetypedoublequote:" + doublequote + "disp_alarm_typedoublequote," + doublequote + "valuedoublequote: {}}, ",
+      json = json + doublequote + "disp_patientdoublequote: {doublequotetypedoublequote:" + doublequote + "disp_patient_typedoublequote," + doublequote + "valuedoublequote: {}}, ",
+      json = json + doublequote + "disp_devicedoublequote: {doublequotetypedoublequote:" + doublequote + "disp_device_typedoublequote," + doublequote + "valuedoublequote: {}}, ",
+      json = json + doublequote + "coord_dbdoublequote: {doublequotetypedoublequote:" + doublequote + "coord_db_typedoublequote," + doublequote + "valuedoublequote: {}}"
+  IN json + "}}"
+
+to_json(st: state): string =
+  LET json = "{doublequotetypedoublequote:" + doublequote + "statedoublequote," + doublequote + "valuedoublequote: {",
+      json = json + doublequote + "nde_statedoublequote: {doublequotetypedoublequote:" + doublequote + "n_statedoublequote," + doublequote + "valuedoublequote: {}}, ",
+      json = json + doublequote + "p_nodesdoublequote: {doublequotetypedoublequote:" + doublequote + "node_to_patientdoublequote," + doublequote + "valuedoublequote: {}}, ",
+      json = json + doublequote + "d_nodesdoublequote: {doublequotetypedoublequote:" + doublequote + "node_to_pddoublequote," + doublequote + "valuedoublequote: {}}, ",
+      json = json + doublequote + "psdoublequote: {doublequotetypedoublequote:" + doublequote + "patients_typedoublequote," + doublequote + "valuedoublequote: {}}, ",
+      json = json + doublequote + "patient_nodesdoublequote: {doublequotetypedoublequote:" + doublequote + "nodesdoublequote," + doublequote + "valuedoublequote: {}}, ",
+      json = json + doublequote + "patient_menusdoublequote: {doublequotetypedoublequote:" + doublequote + "patient_mn_typedoublequote," + doublequote + "valuedoublequote: {}}, ",
+      json = json + doublequote + "pdbdoublequote: {doublequotetypedoublequote:" + doublequote + "patient_db_typedoublequote," + doublequote + "valuedoublequote: {}}, ",
+      json = json + doublequote + "coord_stdoublequote: "+to_json_coord_st(st`coord_st)+", ",
+      json = json + doublequote + "coord_menudoublequote: {doublequotetypedoublequote:" + doublequote + "coord_menu.menu_typedoublequote," + doublequote + "valuedoublequote: {}}"
+  IN json + "}}"
+
+  
+END printerJson

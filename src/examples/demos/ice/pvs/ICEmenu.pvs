@@ -1,0 +1,11 @@
+menu_th[T: TYPE]: THEORY
+ BEGIN
+   IMPORTING coord_t_and_c_th
+  menu_type: TYPE = [menu -> [T -> T]]
+  act_menu(m: menu, vm: menu_set, mt: menu_type, t: T): T =
+  IF vm(m) THEN (mt(m))(t) ELSE t ENDIF
+  
+
+
+  
+ END menu_th

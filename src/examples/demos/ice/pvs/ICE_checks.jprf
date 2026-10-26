@@ -1,0 +1,4732 @@
+{
+ "ICE_checks_th.interimupdcheck": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "interimupdcheck",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "5d62d95c16c6db7992fde252a587e8217ecbba3fb3dd883853b8c6ad34e40271"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "interimupdcheck",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.interimupdcheckvs": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "interimupdcheckvs",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "5d62d95c16c6db7992fde252a587e8217ecbba3fb3dd883853b8c6ad34e40271"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "interimupdcheckvs",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "ICE_checks_th.interimupdcheck1a": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "interimupdcheck1a",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "5d62d95c16c6db7992fde252a587e8217ecbba3fb3dd883853b8c6ad34e40271"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "interimupdcheck1a",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.interimupdcheck1b": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "interimupdcheck1b",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "5d62d95c16c6db7992fde252a587e8217ecbba3fb3dd883853b8c6ad34e40271"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "interimupdcheck1b",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.interimupdcheck1ap": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "interimupdcheck1ap",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "5d62d95c16c6db7992fde252a587e8217ecbba3fb3dd883853b8c6ad34e40271"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "interimupdcheck1ap",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.interimupdcheck1bp": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "interimupdcheck1bp",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "5d62d95c16c6db7992fde252a587e8217ecbba3fb3dd883853b8c6ad34e40271"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "interimupdcheck1bp",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.extractactbuff": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "extractactbuff",
+    "status": "unfinished",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "44c9263d350be288f4bfaccffc69e820d18e5c74700308cffd8e52be830706d2"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "extractactbuff",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.send_next_symmetry": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "send_next_symmetry",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "5d62d95c16c6db7992fde252a587e8217ecbba3fb3dd883853b8c6ad34e40271"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "send_next_symmetry",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.send_next_symmetry1": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "send_next_symmetry1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "5d62d95c16c6db7992fde252a587e8217ecbba3fb3dd883853b8c6ad34e40271"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "send_next_symmetry1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.setup_check1": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "setup_check1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "5d62d95c16c6db7992fde252a587e8217ecbba3fb3dd883853b8c6ad34e40271"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "setup_check1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.setup_check2": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "setup_check2",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "5d62d95c16c6db7992fde252a587e8217ecbba3fb3dd883853b8c6ad34e40271"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "setup_check2",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(skosimp*)",
+      "type": "proof-command",
+      "rules": []
+     },
+     {
+      "branch": "",
+      "name": "(beta)",
+      "type": "proof-command",
+      "rules": []
+     },
+     {
+      "branch": "",
+      "name": "(flatten)",
+      "type": "proof-command",
+      "rules": []
+     },
+     {
+      "branch": "",
+      "name": "(split)",
+      "type": "proof-command",
+      "rules": [
+       {
+        "branch": "1",
+        "name": "(1)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "1",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       },
+       {
+        "branch": "2",
+        "name": "(2)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "2",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       },
+       {
+        "branch": "3",
+        "name": "(3)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "3",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       },
+       {
+        "branch": "4",
+        "name": "(4)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "4",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       },
+       {
+        "branch": "5",
+        "name": "(5)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "5",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       },
+       {
+        "branch": "6",
+        "name": "(6)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "6",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       },
+       {
+        "branch": "7",
+        "name": "(7)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "7",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       },
+       {
+        "branch": "8",
+        "name": "(8)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "8",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       },
+       {
+        "branch": "9",
+        "name": "(9)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "9",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       },
+       {
+        "branch": "10",
+        "name": "(10)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "10",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       },
+       {
+        "branch": "11",
+        "name": "(11)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "11",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       },
+       {
+        "branch": "12",
+        "name": "(12)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "12",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       },
+       {
+        "branch": "13",
+        "name": "(13)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "13",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       },
+       {
+        "branch": "14",
+        "name": "(14)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "14",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       },
+       {
+        "branch": "15",
+        "name": "(15)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "15",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       },
+       {
+        "branch": "16",
+        "name": "(16)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "16",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       },
+       {
+        "branch": "17",
+        "name": "(17)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "17",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       },
+       {
+        "branch": "18",
+        "name": "(18)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "18",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.Extractactbuff": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "Extractactbuff",
+    "status": "unfinished",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "b25db89ea2998837b7d3e14e0df1b716abaa18823d90cebbc1034a01a58beb80"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "Extractactbuff",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(skosimp*)",
+      "type": "proof-command",
+      "rules": []
+     },
+     {
+      "branch": "",
+      "name": "(beta)",
+      "type": "proof-command",
+      "rules": []
+     },
+     {
+      "branch": "",
+      "name": "(flatten)",
+      "type": "proof-command",
+      "rules": []
+     },
+     {
+      "branch": "",
+      "name": "(expand execute_patient_device)",
+      "type": "proof-command",
+      "rules": []
+     },
+     {
+      "branch": "",
+      "name": "(lift-if)",
+      "type": "proof-command",
+      "rules": []
+     },
+     {
+      "branch": "",
+      "name": "(split)",
+      "type": "proof-command",
+      "rules": [
+       {
+        "branch": "1",
+        "name": "(1)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "1",
+          "name": "(flatten)",
+          "type": "proof-command",
+          "rules": []
+         },
+         {
+          "branch": "1",
+          "name": "(expand ex_a)",
+          "type": "proof-command",
+          "rules": []
+         },
+         {
+          "branch": "1",
+          "name": "(lift-if)",
+          "type": "proof-command",
+          "rules": []
+         },
+         {
+          "branch": "1",
+          "name": "(split)",
+          "type": "proof-command",
+          "rules": [
+           {
+            "branch": "1.1",
+            "name": "(1.1)",
+            "type": "proof-branch",
+            "rules": [
+             {
+              "branch": "1.1",
+              "name": "(split)",
+              "type": "proof-command",
+              "rules": [
+               {
+                "branch": "1.1.1",
+                "name": "(1.1.1)",
+                "type": "proof-branch",
+                "rules": [
+                 {
+                  "branch": "1.1.1",
+                  "name": "(expand act_send)",
+                  "type": "proof-command",
+                  "rules": []
+                 },
+                 {
+                  "branch": "1.1.1",
+                  "name": "(flatten)",
+                  "type": "proof-command",
+                  "rules": []
+                 },
+                 {
+                  "branch": "1.1.1",
+                  "name": "(lift-if)",
+                  "type": "proof-command",
+                  "rules": []
+                 },
+                 {
+                  "branch": "1.1.1",
+                  "name": "(split)",
+                  "type": "proof-command",
+                  "rules": [
+                   {
+                    "branch": "1.1.1.1",
+                    "name": "(1.1.1.1)",
+                    "type": "proof-branch",
+                    "rules": [
+                     {
+                      "branch": "1.1.1.1",
+                      "name": "(flatten)",
+                      "type": "proof-command",
+                      "rules": []
+                     },
+                     {
+                      "branch": "1.1.1.1",
+                      "name": "(split)",
+                      "type": "proof-command",
+                      "rules": [
+                       {
+                        "branch": "1.1.1.1.1",
+                        "name": "(1.1.1.1.1)",
+                        "type": "proof-branch",
+                        "rules": [
+                         {
+                          "branch": "1.1.1.1.1",
+                          "name": "(grind)",
+                          "type": "proof-command",
+                          "rules": []
+                         }
+                        ]
+                       },
+                       {
+                        "branch": "1.1.1.1.2",
+                        "name": "(1.1.1.1.2)",
+                        "type": "proof-branch",
+                        "rules": [
+                         {
+                          "branch": "1.1.1.1.2",
+                          "name": "(flatten)",
+                          "type": "proof-command",
+                          "rules": []
+                         },
+                         {
+                          "branch": "1.1.1.1.2",
+                          "name": "(expand device_execute)",
+                          "type": "proof-command",
+                          "rules": []
+                         },
+                         {
+                          "branch": "1.1.1.1.2",
+                          "name": "(lift-if)",
+                          "type": "proof-command",
+                          "rules": []
+                         },
+                         {
+                          "branch": "1.1.1.1.2",
+                          "name": "(split)",
+                          "type": "proof-command",
+                          "rules": [
+                           {
+                            "branch": "1.1.1.1.2.1",
+                            "name": "(1.1.1.1.2.1)",
+                            "type": "proof-branch",
+                            "rules": [
+                             {
+                              "branch": "1.1.1.1.2.1",
+                              "name": "(flatten)",
+                              "type": "proof-command",
+                              "rules": []
+                             },
+                             {
+                              "branch": "1.1.1.1.2.1",
+                              "name": "(expand next_act_pm)",
+                              "type": "proof-command",
+                              "rules": []
+                             },
+                             {
+                              "branch": "1.1.1.1.2.1",
+                              "name": "(lift-if)",
+                              "type": "proof-command",
+                              "rules": []
+                             },
+                             {
+                              "branch": "1.1.1.1.2.1",
+                              "name": "(split)",
+                              "type": "proof-command",
+                              "rules": [
+                               {
+                                "branch": "1.1.1.1.2.1.1",
+                                "name": "(1.1.1.1.2.1.1)",
+                                "type": "proof-branch",
+                                "rules": [
+                                 {
+                                  "branch": "1.1.1.1.2.1.1",
+                                  "name": "(flatten)",
+                                  "type": "proof-command",
+                                  "rules": []
+                                 },
+                                 {
+                                  "branch": "1.1.1.1.2.1.1",
+                                  "name": "(lift-if)",
+                                  "type": "proof-command",
+                                  "rules": []
+                                 },
+                                 {
+                                  "branch": "1.1.1.1.2.1.1",
+                                  "name": "(split)",
+                                  "type": "proof-command",
+                                  "rules": [
+                                   {
+                                    "branch": "1.1.1.1.2.1.1.1",
+                                    "name": "(1.1.1.1.2.1.1.1)",
+                                    "type": "proof-branch",
+                                    "rules": [
+                                     {
+                                      "branch": "1.1.1.1.2.1.1.1",
+                                      "name": "(flatten)",
+                                      "type": "proof-command",
+                                      "rules": []
+                                     },
+                                     {
+                                      "branch": "1.1.1.1.2.1.1.1",
+                                      "name": "(grind)",
+                                      "type": "proof-command",
+                                      "rules": []
+                                     }
+                                    ]
+                                   },
+                                   {
+                                    "branch": "1.1.1.1.2.1.1.2",
+                                    "name": "(1.1.1.1.2.1.1.2)",
+                                    "type": "proof-branch",
+                                    "rules": [
+                                     {
+                                      "branch": "1.1.1.1.2.1.1.2",
+                                      "name": "(flatten)",
+                                      "type": "proof-command",
+                                      "rules": []
+                                     },
+                                     {
+                                      "branch": "1.1.1.1.2.1.1.2",
+                                      "name": "(grind)",
+                                      "type": "proof-command",
+                                      "rules": []
+                                     }
+                                    ]
+                                   }
+                                  ]
+                                 }
+                                ]
+                               },
+                               {
+                                "branch": "1.1.1.1.2.1.2",
+                                "name": "(1.1.1.1.2.1.2)",
+                                "type": "proof-branch",
+                                "rules": [
+                                 {
+                                  "branch": "1.1.1.1.2.1.2",
+                                  "name": "(grind)",
+                                  "type": "proof-command",
+                                  "rules": []
+                                 }
+                                ]
+                               }
+                              ]
+                             }
+                            ]
+                           },
+                           {
+                            "branch": "1.1.1.1.2.2",
+                            "name": "(1.1.1.1.2.2)",
+                            "type": "proof-branch",
+                            "rules": [
+                             {
+                              "branch": "1.1.1.1.2.2",
+                              "name": "(grind)",
+                              "type": "proof-command",
+                              "rules": []
+                             }
+                            ]
+                           }
+                          ]
+                         }
+                        ]
+                       }
+                      ]
+                     }
+                    ]
+                   },
+                   {
+                    "branch": "1.1.1.2",
+                    "name": "(1.1.1.2)",
+                    "type": "proof-branch",
+                    "rules": [
+                     {
+                      "branch": "1.1.1.2",
+                      "name": "(grind)",
+                      "type": "proof-command",
+                      "rules": []
+                     }
+                    ]
+                   }
+                  ]
+                 }
+                ]
+               },
+               {
+                "branch": "1.1.2",
+                "name": "(1.1.2)",
+                "type": "proof-branch",
+                "rules": [
+                 {
+                  "branch": "1.1.2",
+                  "name": "(grind)",
+                  "type": "proof-command",
+                  "rules": []
+                 }
+                ]
+               }
+              ]
+             }
+            ]
+           },
+           {
+            "branch": "1.2",
+            "name": "(1.2)",
+            "type": "proof-branch",
+            "rules": [
+             {
+              "branch": "1.2",
+              "name": "(split)",
+              "type": "proof-command",
+              "rules": [
+               {
+                "branch": "1.2.1",
+                "name": "(1.2.1)",
+                "type": "proof-branch",
+                "rules": [
+                 {
+                  "branch": "1.2.1",
+                  "name": "(flatten)",
+                  "type": "proof-command",
+                  "rules": []
+                 },
+                 {
+                  "branch": "1.2.1",
+                  "name": "(expand act_send)",
+                  "type": "proof-command",
+                  "rules": []
+                 },
+                 {
+                  "branch": "1.2.1",
+                  "name": "(lift-if)",
+                  "type": "proof-command",
+                  "rules": []
+                 },
+                 {
+                  "branch": "1.2.1",
+                  "name": "(split)",
+                  "type": "proof-command",
+                  "rules": [
+                   {
+                    "branch": "1.2.1.1",
+                    "name": "(1.2.1.1)",
+                    "type": "proof-branch",
+                    "rules": [
+                     {
+                      "branch": "1.2.1.1",
+                      "name": "(flatten)",
+                      "type": "proof-command",
+                      "rules": []
+                     },
+                     {
+                      "branch": "1.2.1.1",
+                      "name": "(split)",
+                      "type": "proof-command",
+                      "rules": [
+                       {
+                        "branch": "1.2.1.1.1",
+                        "name": "(1.2.1.1.1)",
+                        "type": "proof-branch",
+                        "rules": [
+                         {
+                          "branch": "1.2.1.1.1",
+                          "name": "(grind)",
+                          "type": "proof-command",
+                          "rules": []
+                         }
+                        ]
+                       },
+                       {
+                        "branch": "1.2.1.1.2",
+                        "name": "(1.2.1.1.2)",
+                        "type": "proof-branch",
+                        "rules": [
+                         {
+                          "branch": "1.2.1.1.2",
+                          "name": "(grind)",
+                          "type": "proof-command",
+                          "rules": []
+                         }
+                        ]
+                       }
+                      ]
+                     }
+                    ]
+                   },
+                   {
+                    "branch": "1.2.1.2",
+                    "name": "(1.2.1.2)",
+                    "type": "proof-branch",
+                    "rules": [
+                     {
+                      "branch": "1.2.1.2",
+                      "name": "(flatten)",
+                      "type": "proof-command",
+                      "rules": []
+                     }
+                    ]
+                   }
+                  ]
+                 }
+                ]
+               },
+               {
+                "branch": "1.2.2",
+                "name": "(1.2.2)",
+                "type": "proof-branch",
+                "rules": [
+                 {
+                  "branch": "1.2.2",
+                  "name": "(flatten)",
+                  "type": "proof-command",
+                  "rules": []
+                 },
+                 {
+                  "branch": "1.2.2",
+                  "name": "(expand act_send)",
+                  "type": "proof-command",
+                  "rules": []
+                 },
+                 {
+                  "branch": "1.2.2",
+                  "name": "(lift-if)",
+                  "type": "proof-command",
+                  "rules": []
+                 },
+                 {
+                  "branch": "1.2.2",
+                  "name": "(split)",
+                  "type": "proof-command",
+                  "rules": [
+                   {
+                    "branch": "1.2.2.1",
+                    "name": "(1.2.2.1)",
+                    "type": "proof-branch",
+                    "rules": [
+                     {
+                      "branch": "1.2.2.1",
+                      "name": "(flatten)",
+                      "type": "proof-command",
+                      "rules": []
+                     },
+                     {
+                      "branch": "1.2.2.1",
+                      "name": "(split)",
+                      "type": "proof-command",
+                      "rules": [
+                       {
+                        "branch": "1.2.2.1.1",
+                        "name": "(1.2.2.1.1)",
+                        "type": "proof-branch",
+                        "rules": [
+                         {
+                          "branch": "1.2.2.1.1",
+                          "name": "(flatten)",
+                          "type": "proof-command",
+                          "rules": []
+                         },
+                         {
+                          "branch": "1.2.2.1.1",
+                          "name": "(grind)",
+                          "type": "proof-command",
+                          "rules": []
+                         }
+                        ]
+                       },
+                       {
+                        "branch": "1.2.2.1.2",
+                        "name": "(1.2.2.1.2)",
+                        "type": "proof-branch",
+                        "rules": [
+                         {
+                          "branch": "1.2.2.1.2",
+                          "name": "(flatten)",
+                          "type": "proof-command",
+                          "rules": []
+                         },
+                         {
+                          "branch": "1.2.2.1.2",
+                          "name": "(expand device_execute)",
+                          "type": "proof-command",
+                          "rules": []
+                         },
+                         {
+                          "branch": "1.2.2.1.2",
+                          "name": "(lift-if)",
+                          "type": "proof-command",
+                          "rules": []
+                         },
+                         {
+                          "branch": "1.2.2.1.2",
+                          "name": "(split)",
+                          "type": "proof-command",
+                          "rules": [
+                           {
+                            "branch": "1.2.2.1.2.1",
+                            "name": "(1.2.2.1.2.1)",
+                            "type": "proof-branch",
+                            "rules": [
+                             {
+                              "branch": "1.2.2.1.2.1",
+                              "name": "(flatten)",
+                              "type": "proof-command",
+                              "rules": []
+                             },
+                             {
+                              "branch": "1.2.2.1.2.1",
+                              "name": "(expand add_act_buff)",
+                              "type": "proof-command",
+                              "rules": []
+                             },
+                             {
+                              "branch": "1.2.2.1.2.1",
+                              "name": "(expand next_act_pm)",
+                              "type": "proof-command",
+                              "rules": []
+                             },
+                             {
+                              "branch": "1.2.2.1.2.1",
+                              "name": "(lift-if)",
+                              "type": "proof-command",
+                              "rules": []
+                             },
+                             {
+                              "branch": "1.2.2.1.2.1",
+                              "name": "(split)",
+                              "type": "proof-command",
+                              "rules": [
+                               {
+                                "branch": "1.2.2.1.2.1.1",
+                                "name": "(1.2.2.1.2.1.1)",
+                                "type": "proof-branch",
+                                "rules": [
+                                 {
+                                  "branch": "1.2.2.1.2.1.1",
+                                  "name": "(flatten)",
+                                  "type": "proof-command",
+                                  "rules": []
+                                 },
+                                 {
+                                  "branch": "1.2.2.1.2.1.1",
+                                  "name": "(grind)",
+                                  "type": "proof-command",
+                                  "rules": []
+                                 }
+                                ]
+                               },
+                               {
+                                "branch": "1.2.2.1.2.1.2",
+                                "name": "(1.2.2.1.2.1.2)",
+                                "type": "proof-branch",
+                                "rules": [
+                                 {
+                                  "branch": "1.2.2.1.2.1.2",
+                                  "name": "(lift-if)",
+                                  "type": "proof-command",
+                                  "rules": []
+                                 },
+                                 {
+                                  "branch": "1.2.2.1.2.1.2",
+                                  "name": "(split)",
+                                  "type": "proof-command",
+                                  "rules": [
+                                   {
+                                    "branch": "1.2.2.1.2.1.2.1",
+                                    "name": "(1.2.2.1.2.1.2.1)",
+                                    "type": "proof-branch",
+                                    "rules": [
+                                     {
+                                      "branch": "1.2.2.1.2.1.2.1",
+                                      "name": "(propax)",
+                                      "type": "proof-command",
+                                      "rules": []
+                                     }
+                                    ]
+                                   },
+                                   {
+                                    "branch": "1.2.2.1.2.1.2.2",
+                                    "name": "(1.2.2.1.2.1.2.2)",
+                                    "type": "proof-branch",
+                                    "rules": [
+                                     {
+                                      "branch": "1.2.2.1.2.1.2.2",
+                                      "name": "(flatten)",
+                                      "type": "proof-command",
+                                      "rules": []
+                                     },
+                                     {
+                                      "branch": "1.2.2.1.2.1.2.2",
+                                      "name": "(split)",
+                                      "type": "proof-command",
+                                      "rules": [
+                                       {
+                                        "branch": "1.2.2.1.2.1.2.2.1",
+                                        "name": "(1.2.2.1.2.1.2.2.1)",
+                                        "type": "proof-branch",
+                                        "rules": [
+                                         {
+                                          "branch": "1.2.2.1.2.1.2.2.1",
+                                          "name": "(flatten)",
+                                          "type": "proof-command",
+                                          "rules": []
+                                         },
+                                         {
+                                          "branch": "1.2.2.1.2.1.2.2.1",
+                                          "name": "(split)",
+                                          "type": "proof-command",
+                                          "rules": [
+                                           {
+                                            "branch": "1.2.2.1.2.1.2.2.1.1",
+                                            "name": "(1.2.2.1.2.1.2.2.1.1)",
+                                            "type": "proof-branch",
+                                            "rules": [
+                                             {
+                                              "branch": "1.2.2.1.2.1.2.2.1.1",
+                                              "name": "(propax)",
+                                              "type": "proof-command",
+                                              "rules": []
+                                             }
+                                            ]
+                                           },
+                                           {
+                                            "branch": "1.2.2.1.2.1.2.2.1.2",
+                                            "name": "(1.2.2.1.2.1.2.2.1.2)",
+                                            "type": "proof-branch",
+                                            "rules": [
+                                             {
+                                              "branch": "1.2.2.1.2.1.2.2.1.2",
+                                              "name": "(flatten)",
+                                              "type": "proof-command",
+                                              "rules": []
+                                             },
+                                             {
+                                              "branch": "1.2.2.1.2.1.2.2.1.2",
+                                              "name": "(lift-if)",
+                                              "type": "proof-command",
+                                              "rules": []
+                                             },
+                                             {
+                                              "branch": "1.2.2.1.2.1.2.2.1.2",
+                                              "name": "(split)",
+                                              "type": "proof-command",
+                                              "rules": [
+                                               {
+                                                "branch": "1.2.2.1.2.1.2.2.1.2.1",
+                                                "name": "(1.2.2.1.2.1.2.2.1.2.1)",
+                                                "type": "proof-branch",
+                                                "rules": [
+                                                 {
+                                                  "branch": "1.2.2.1.2.1.2.2.1.2.1",
+                                                  "name": "(flatten)",
+                                                  "type": "proof-command",
+                                                  "rules": []
+                                                 },
+                                                 {
+                                                  "branch": "1.2.2.1.2.1.2.2.1.2.1",
+                                                  "name": "(postpone)",
+                                                  "type": "proof-command",
+                                                  "rules": []
+                                                 }
+                                                ]
+                                               },
+                                               {
+                                                "branch": "1.2.2.1.2.1.2.2.1.2.2",
+                                                "name": "(1.2.2.1.2.1.2.2.1.2.2)",
+                                                "type": "proof-branch",
+                                                "rules": [
+                                                 {
+                                                  "branch": "1.2.2.1.2.1.2.2.1.2.2",
+                                                  "name": "(postpone)",
+                                                  "type": "proof-command",
+                                                  "rules": []
+                                                 }
+                                                ]
+                                               }
+                                              ]
+                                             }
+                                            ]
+                                           }
+                                          ]
+                                         }
+                                        ]
+                                       },
+                                       {
+                                        "branch": "1.2.2.1.2.1.2.2.2",
+                                        "name": "(1.2.2.1.2.1.2.2.2)",
+                                        "type": "proof-branch",
+                                        "rules": [
+                                         {
+                                          "branch": "1.2.2.1.2.1.2.2.2",
+                                          "name": "(postpone)",
+                                          "type": "proof-command",
+                                          "rules": []
+                                         }
+                                        ]
+                                       }
+                                      ]
+                                     }
+                                    ]
+                                   }
+                                  ]
+                                 }
+                                ]
+                               }
+                              ]
+                             }
+                            ]
+                           },
+                           {
+                            "branch": "1.2.2.1.2.2",
+                            "name": "(1.2.2.1.2.2)",
+                            "type": "proof-branch",
+                            "rules": [
+                             {
+                              "branch": "1.2.2.1.2.2",
+                              "name": "(postpone)",
+                              "type": "proof-command",
+                              "rules": []
+                             }
+                            ]
+                           }
+                          ]
+                         }
+                        ]
+                       }
+                      ]
+                     }
+                    ]
+                   },
+                   {
+                    "branch": "1.2.2.2",
+                    "name": "(1.2.2.2)",
+                    "type": "proof-branch",
+                    "rules": [
+                     {
+                      "branch": "1.2.2.2",
+                      "name": "(postpone)",
+                      "type": "proof-command",
+                      "rules": []
+                     }
+                    ]
+                   }
+                  ]
+                 }
+                ]
+               }
+              ]
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "branch": "2",
+        "name": "(2)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "2",
+          "name": "(postpone)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "clips": [
+    {
+     "branch": "",
+     "name": "(expand execute_patient_device)",
+     "type": "proof-command",
+     "rules": []
+    },
+    {
+     "branch": "",
+     "name": "(lift-if)",
+     "type": "proof-command",
+     "rules": []
+    },
+    {
+     "branch": "",
+     "name": "(split)",
+     "type": "proof-command",
+     "rules": [
+      {
+       "branch": "1",
+       "name": "(1)",
+       "type": "proof-branch",
+       "rules": [
+        {
+         "branch": "1",
+         "name": "(flatten)",
+         "type": "proof-command",
+         "rules": []
+        },
+        {
+         "branch": "1",
+         "name": "(expand ex_a)",
+         "type": "proof-command",
+         "rules": []
+        },
+        {
+         "branch": "1",
+         "name": "(lift-if)",
+         "type": "proof-command",
+         "rules": []
+        },
+        {
+         "branch": "1",
+         "name": "(split)",
+         "type": "proof-command",
+         "rules": [
+          {
+           "branch": "1.1",
+           "name": "(1.1)",
+           "type": "proof-branch",
+           "rules": [
+            {
+             "branch": "1.1",
+             "name": "(split)",
+             "type": "proof-command",
+             "rules": [
+              {
+               "branch": "1.1.1",
+               "name": "(1.1.1)",
+               "type": "proof-branch",
+               "rules": [
+                {
+                 "branch": "1.1.1",
+                 "name": "(expand act_send)",
+                 "type": "proof-command",
+                 "rules": []
+                },
+                {
+                 "branch": "1.1.1",
+                 "name": "(flatten)",
+                 "type": "proof-command",
+                 "rules": []
+                },
+                {
+                 "branch": "1.1.1",
+                 "name": "(lift-if)",
+                 "type": "proof-command",
+                 "rules": []
+                },
+                {
+                 "branch": "1.1.1",
+                 "name": "(split)",
+                 "type": "proof-command",
+                 "rules": [
+                  {
+                   "branch": "1.1.1.1",
+                   "name": "(1.1.1.1)",
+                   "type": "proof-branch",
+                   "rules": [
+                    {
+                     "branch": "1.1.1.1",
+                     "name": "(flatten)",
+                     "type": "proof-command",
+                     "rules": []
+                    },
+                    {
+                     "branch": "1.1.1.1",
+                     "name": "(split)",
+                     "type": "proof-command",
+                     "rules": [
+                      {
+                       "branch": "1.1.1.1.1",
+                       "name": "(1.1.1.1.1)",
+                       "type": "proof-branch",
+                       "rules": [
+                        {
+                         "branch": "1.1.1.1.1",
+                         "name": "(grind)",
+                         "type": "proof-command",
+                         "rules": []
+                        }
+                       ]
+                      },
+                      {
+                       "branch": "1.1.1.1.2",
+                       "name": "(1.1.1.1.2)",
+                       "type": "proof-branch",
+                       "rules": [
+                        {
+                         "branch": "1.1.1.1.2",
+                         "name": "(flatten)",
+                         "type": "proof-command",
+                         "rules": []
+                        },
+                        {
+                         "branch": "1.1.1.1.2",
+                         "name": "(expand device_execute)",
+                         "type": "proof-command",
+                         "rules": []
+                        },
+                        {
+                         "branch": "1.1.1.1.2",
+                         "name": "(lift-if)",
+                         "type": "proof-command",
+                         "rules": []
+                        },
+                        {
+                         "branch": "1.1.1.1.2",
+                         "name": "(split)",
+                         "type": "proof-command",
+                         "rules": [
+                          {
+                           "branch": "1.1.1.1.2.1",
+                           "name": "(1.1.1.1.2.1)",
+                           "type": "proof-branch",
+                           "rules": [
+                            {
+                             "branch": "1.1.1.1.2.1",
+                             "name": "(flatten)",
+                             "type": "proof-command",
+                             "rules": []
+                            },
+                            {
+                             "branch": "1.1.1.1.2.1",
+                             "name": "(expand next_act_pm)",
+                             "type": "proof-command",
+                             "rules": []
+                            },
+                            {
+                             "branch": "1.1.1.1.2.1",
+                             "name": "(lift-if)",
+                             "type": "proof-command",
+                             "rules": []
+                            },
+                            {
+                             "branch": "1.1.1.1.2.1",
+                             "name": "(split)",
+                             "type": "proof-command",
+                             "rules": [
+                              {
+                               "branch": "1.1.1.1.2.1.1",
+                               "name": "(1.1.1.1.2.1.1)",
+                               "type": "proof-branch",
+                               "rules": [
+                                {
+                                 "branch": "1.1.1.1.2.1.1",
+                                 "name": "(flatten)",
+                                 "type": "proof-command",
+                                 "rules": []
+                                },
+                                {
+                                 "branch": "1.1.1.1.2.1.1",
+                                 "name": "(lift-if)",
+                                 "type": "proof-command",
+                                 "rules": []
+                                },
+                                {
+                                 "branch": "1.1.1.1.2.1.1",
+                                 "name": "(split)",
+                                 "type": "proof-command",
+                                 "rules": [
+                                  {
+                                   "branch": "1.1.1.1.2.1.1.1",
+                                   "name": "(1.1.1.1.2.1.1.1)",
+                                   "type": "proof-branch",
+                                   "rules": [
+                                    {
+                                     "branch": "1.1.1.1.2.1.1.1",
+                                     "name": "(flatten)",
+                                     "type": "proof-command",
+                                     "rules": []
+                                    },
+                                    {
+                                     "branch": "1.1.1.1.2.1.1.1",
+                                     "name": "(grind)",
+                                     "type": "proof-command",
+                                     "rules": []
+                                    }
+                                   ]
+                                  },
+                                  {
+                                   "branch": "1.1.1.1.2.1.1.2",
+                                   "name": "(1.1.1.1.2.1.1.2)",
+                                   "type": "proof-branch",
+                                   "rules": [
+                                    {
+                                     "branch": "1.1.1.1.2.1.1.2",
+                                     "name": "(flatten)",
+                                     "type": "proof-command",
+                                     "rules": []
+                                    },
+                                    {
+                                     "branch": "1.1.1.1.2.1.1.2",
+                                     "name": "(grind)",
+                                     "type": "proof-command",
+                                     "rules": []
+                                    }
+                                   ]
+                                  }
+                                 ]
+                                }
+                               ]
+                              },
+                              {
+                               "branch": "1.1.1.1.2.1.2",
+                               "name": "(1.1.1.1.2.1.2)",
+                               "type": "proof-branch",
+                               "rules": [
+                                {
+                                 "branch": "1.1.1.1.2.1.2",
+                                 "name": "(grind)",
+                                 "type": "proof-command",
+                                 "rules": []
+                                }
+                               ]
+                              }
+                             ]
+                            }
+                           ]
+                          },
+                          {
+                           "branch": "1.1.1.1.2.2",
+                           "name": "(1.1.1.1.2.2)",
+                           "type": "proof-branch",
+                           "rules": [
+                            {
+                             "branch": "1.1.1.1.2.2",
+                             "name": "(grind)",
+                             "type": "proof-command",
+                             "rules": []
+                            }
+                           ]
+                          }
+                         ]
+                        }
+                       ]
+                      }
+                     ]
+                    }
+                   ]
+                  },
+                  {
+                   "branch": "1.1.1.2",
+                   "name": "(1.1.1.2)",
+                   "type": "proof-branch",
+                   "rules": [
+                    {
+                     "branch": "1.1.1.2",
+                     "name": "(grind)",
+                     "type": "proof-command",
+                     "rules": []
+                    }
+                   ]
+                  }
+                 ]
+                }
+               ]
+              },
+              {
+               "branch": "1.1.2",
+               "name": "(1.1.2)",
+               "type": "proof-branch",
+               "rules": [
+                {
+                 "branch": "1.1.2",
+                 "name": "(grind)",
+                 "type": "proof-command",
+                 "rules": []
+                }
+               ]
+              }
+             ]
+            }
+           ]
+          },
+          {
+           "branch": "1.2",
+           "name": "(1.2)",
+           "type": "proof-branch",
+           "rules": [
+            {
+             "branch": "1.2",
+             "name": "(split)",
+             "type": "proof-command",
+             "rules": [
+              {
+               "branch": "1.2.1",
+               "name": "(1.2.1)",
+               "type": "proof-branch",
+               "rules": [
+                {
+                 "branch": "1.2.1",
+                 "name": "(flatten)",
+                 "type": "proof-command",
+                 "rules": []
+                },
+                {
+                 "branch": "1.2.1",
+                 "name": "(expand act_send)",
+                 "type": "proof-command",
+                 "rules": []
+                },
+                {
+                 "branch": "1.2.1",
+                 "name": "(lift-if)",
+                 "type": "proof-command",
+                 "rules": []
+                },
+                {
+                 "branch": "1.2.1",
+                 "name": "(split)",
+                 "type": "proof-command",
+                 "rules": [
+                  {
+                   "branch": "1.2.1.1",
+                   "name": "(1.2.1.1)",
+                   "type": "proof-branch",
+                   "rules": [
+                    {
+                     "branch": "1.2.1.1",
+                     "name": "(flatten)",
+                     "type": "proof-command",
+                     "rules": []
+                    },
+                    {
+                     "branch": "1.2.1.1",
+                     "name": "(split)",
+                     "type": "proof-command",
+                     "rules": [
+                      {
+                       "branch": "1.2.1.1.1",
+                       "name": "(1.2.1.1.1)",
+                       "type": "proof-branch",
+                       "rules": [
+                        {
+                         "branch": "1.2.1.1.1",
+                         "name": "(grind)",
+                         "type": "proof-command",
+                         "rules": []
+                        }
+                       ]
+                      },
+                      {
+                       "branch": "1.2.1.1.2",
+                       "name": "(1.2.1.1.2)",
+                       "type": "proof-branch",
+                       "rules": [
+                        {
+                         "branch": "1.2.1.1.2",
+                         "name": "(grind)",
+                         "type": "proof-command",
+                         "rules": []
+                        }
+                       ]
+                      }
+                     ]
+                    }
+                   ]
+                  },
+                  {
+                   "branch": "1.2.1.2",
+                   "name": "(1.2.1.2)",
+                   "type": "proof-branch",
+                   "rules": [
+                    {
+                     "branch": "1.2.1.2",
+                     "name": "(flatten)",
+                     "type": "proof-command",
+                     "rules": []
+                    }
+                   ]
+                  }
+                 ]
+                }
+               ]
+              },
+              {
+               "branch": "1.2.2",
+               "name": "(1.2.2)",
+               "type": "proof-branch",
+               "rules": [
+                {
+                 "branch": "1.2.2",
+                 "name": "(flatten)",
+                 "type": "proof-command",
+                 "rules": []
+                },
+                {
+                 "branch": "1.2.2",
+                 "name": "(expand act_send)",
+                 "type": "proof-command",
+                 "rules": []
+                },
+                {
+                 "branch": "1.2.2",
+                 "name": "(lift-if)",
+                 "type": "proof-command",
+                 "rules": []
+                },
+                {
+                 "branch": "1.2.2",
+                 "name": "(split)",
+                 "type": "proof-command",
+                 "rules": [
+                  {
+                   "branch": "1.2.2.1",
+                   "name": "(1.2.2.1)",
+                   "type": "proof-branch",
+                   "rules": [
+                    {
+                     "branch": "1.2.2.1",
+                     "name": "(flatten)",
+                     "type": "proof-command",
+                     "rules": []
+                    },
+                    {
+                     "branch": "1.2.2.1",
+                     "name": "(split)",
+                     "type": "proof-command",
+                     "rules": [
+                      {
+                       "branch": "1.2.2.1.1",
+                       "name": "(1.2.2.1.1)",
+                       "type": "proof-branch",
+                       "rules": [
+                        {
+                         "branch": "1.2.2.1.1",
+                         "name": "(flatten)",
+                         "type": "proof-command",
+                         "rules": []
+                        },
+                        {
+                         "branch": "1.2.2.1.1",
+                         "name": "(grind)",
+                         "type": "proof-command",
+                         "rules": []
+                        }
+                       ]
+                      },
+                      {
+                       "branch": "1.2.2.1.2",
+                       "name": "(1.2.2.1.2)",
+                       "type": "proof-branch",
+                       "rules": [
+                        {
+                         "branch": "1.2.2.1.2",
+                         "name": "(flatten)",
+                         "type": "proof-command",
+                         "rules": []
+                        },
+                        {
+                         "branch": "1.2.2.1.2",
+                         "name": "(expand device_execute)",
+                         "type": "proof-command",
+                         "rules": []
+                        },
+                        {
+                         "branch": "1.2.2.1.2",
+                         "name": "(lift-if)",
+                         "type": "proof-command",
+                         "rules": []
+                        },
+                        {
+                         "branch": "1.2.2.1.2",
+                         "name": "(split)",
+                         "type": "proof-command",
+                         "rules": [
+                          {
+                           "branch": "1.2.2.1.2.1",
+                           "name": "(1.2.2.1.2.1)",
+                           "type": "proof-branch",
+                           "rules": [
+                            {
+                             "branch": "1.2.2.1.2.1",
+                             "name": "(flatten)",
+                             "type": "proof-command",
+                             "rules": []
+                            },
+                            {
+                             "branch": "1.2.2.1.2.1",
+                             "name": "(expand add_act_buff)",
+                             "type": "proof-command",
+                             "rules": []
+                            },
+                            {
+                             "branch": "1.2.2.1.2.1",
+                             "name": "(expand next_act_pm)",
+                             "type": "proof-command",
+                             "rules": []
+                            },
+                            {
+                             "branch": "1.2.2.1.2.1",
+                             "name": "(lift-if)",
+                             "type": "proof-command",
+                             "rules": []
+                            },
+                            {
+                             "branch": "1.2.2.1.2.1",
+                             "name": "(split)",
+                             "type": "proof-command",
+                             "rules": [
+                              {
+                               "branch": "1.2.2.1.2.1.1",
+                               "name": "(1.2.2.1.2.1.1)",
+                               "type": "proof-branch",
+                               "rules": [
+                                {
+                                 "branch": "1.2.2.1.2.1.1",
+                                 "name": "(flatten)",
+                                 "type": "proof-command",
+                                 "rules": []
+                                },
+                                {
+                                 "branch": "1.2.2.1.2.1.1",
+                                 "name": "(grind)",
+                                 "type": "proof-command",
+                                 "rules": []
+                                }
+                               ]
+                              },
+                              {
+                               "branch": "1.2.2.1.2.1.2",
+                               "name": "(1.2.2.1.2.1.2)",
+                               "type": "proof-branch",
+                               "rules": [
+                                {
+                                 "branch": "1.2.2.1.2.1.2",
+                                 "name": "(lift-if)",
+                                 "type": "proof-command",
+                                 "rules": []
+                                },
+                                {
+                                 "branch": "1.2.2.1.2.1.2",
+                                 "name": "(split)",
+                                 "type": "proof-command",
+                                 "rules": [
+                                  {
+                                   "branch": "1.2.2.1.2.1.2.1",
+                                   "name": "(1.2.2.1.2.1.2.1)",
+                                   "type": "proof-branch",
+                                   "rules": [
+                                    {
+                                     "branch": "1.2.2.1.2.1.2.1",
+                                     "name": "(propax)",
+                                     "type": "proof-command",
+                                     "rules": []
+                                    }
+                                   ]
+                                  },
+                                  {
+                                   "branch": "1.2.2.1.2.1.2.2",
+                                   "name": "(1.2.2.1.2.1.2.2)",
+                                   "type": "proof-branch",
+                                   "rules": [
+                                    {
+                                     "branch": "1.2.2.1.2.1.2.2",
+                                     "name": "(flatten)",
+                                     "type": "proof-command",
+                                     "rules": []
+                                    },
+                                    {
+                                     "branch": "1.2.2.1.2.1.2.2",
+                                     "name": "(split)",
+                                     "type": "proof-command",
+                                     "rules": [
+                                      {
+                                       "branch": "1.2.2.1.2.1.2.2.1",
+                                       "name": "(1.2.2.1.2.1.2.2.1)",
+                                       "type": "proof-branch",
+                                       "rules": [
+                                        {
+                                         "branch": "1.2.2.1.2.1.2.2.1",
+                                         "name": "(flatten)",
+                                         "type": "proof-command",
+                                         "rules": []
+                                        },
+                                        {
+                                         "branch": "1.2.2.1.2.1.2.2.1",
+                                         "name": "(split)",
+                                         "type": "proof-command",
+                                         "rules": [
+                                          {
+                                           "branch": "1.2.2.1.2.1.2.2.1.1",
+                                           "name": "(1.2.2.1.2.1.2.2.1.1)",
+                                           "type": "proof-branch",
+                                           "rules": [
+                                            {
+                                             "branch": "1.2.2.1.2.1.2.2.1.1",
+                                             "name": "(propax)",
+                                             "type": "proof-command",
+                                             "rules": []
+                                            }
+                                           ]
+                                          },
+                                          {
+                                           "branch": "1.2.2.1.2.1.2.2.1.2",
+                                           "name": "(1.2.2.1.2.1.2.2.1.2)",
+                                           "type": "proof-branch",
+                                           "rules": [
+                                            {
+                                             "branch": "1.2.2.1.2.1.2.2.1.2",
+                                             "name": "(flatten)",
+                                             "type": "proof-command",
+                                             "rules": []
+                                            },
+                                            {
+                                             "branch": "1.2.2.1.2.1.2.2.1.2",
+                                             "name": "(lift-if)",
+                                             "type": "proof-command",
+                                             "rules": []
+                                            },
+                                            {
+                                             "branch": "1.2.2.1.2.1.2.2.1.2",
+                                             "name": "(split)",
+                                             "type": "proof-command",
+                                             "rules": [
+                                              {
+                                               "branch": "1.2.2.1.2.1.2.2.1.2.1",
+                                               "name": "(1.2.2.1.2.1.2.2.1.2.1)",
+                                               "type": "proof-branch",
+                                               "rules": [
+                                                {
+                                                 "branch": "1.2.2.1.2.1.2.2.1.2.1",
+                                                 "name": "(flatten)",
+                                                 "type": "proof-command",
+                                                 "rules": []
+                                                },
+                                                {
+                                                 "branch": "1.2.2.1.2.1.2.2.1.2.1",
+                                                 "name": "(postpone)",
+                                                 "type": "proof-command",
+                                                 "rules": []
+                                                }
+                                               ]
+                                              },
+                                              {
+                                               "branch": "1.2.2.1.2.1.2.2.1.2.2",
+                                               "name": "(1.2.2.1.2.1.2.2.1.2.2)",
+                                               "type": "proof-branch",
+                                               "rules": [
+                                                {
+                                                 "branch": "1.2.2.1.2.1.2.2.1.2.2",
+                                                 "name": "(postpone)",
+                                                 "type": "proof-command",
+                                                 "rules": []
+                                                }
+                                               ]
+                                              }
+                                             ]
+                                            }
+                                           ]
+                                          }
+                                         ]
+                                        }
+                                       ]
+                                      },
+                                      {
+                                       "branch": "1.2.2.1.2.1.2.2.2",
+                                       "name": "(1.2.2.1.2.1.2.2.2)",
+                                       "type": "proof-branch",
+                                       "rules": [
+                                        {
+                                         "branch": "1.2.2.1.2.1.2.2.2",
+                                         "name": "(postpone)",
+                                         "type": "proof-command",
+                                         "rules": []
+                                        }
+                                       ]
+                                      }
+                                     ]
+                                    }
+                                   ]
+                                  }
+                                 ]
+                                }
+                               ]
+                              }
+                             ]
+                            }
+                           ]
+                          },
+                          {
+                           "branch": "1.2.2.1.2.2",
+                           "name": "(1.2.2.1.2.2)",
+                           "type": "proof-branch",
+                           "rules": [
+                            {
+                             "branch": "1.2.2.1.2.2",
+                             "name": "(postpone)",
+                             "type": "proof-command",
+                             "rules": []
+                            }
+                           ]
+                          }
+                         ]
+                        }
+                       ]
+                      }
+                     ]
+                    }
+                   ]
+                  },
+                  {
+                   "branch": "1.2.2.2",
+                   "name": "(1.2.2.2)",
+                   "type": "proof-branch",
+                   "rules": [
+                    {
+                     "branch": "1.2.2.2",
+                     "name": "(postpone)",
+                     "type": "proof-command",
+                     "rules": []
+                    }
+                   ]
+                  }
+                 ]
+                }
+               ]
+              }
+             ]
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "branch": "2",
+       "name": "(2)",
+       "type": "proof-branch",
+       "rules": [
+        {
+         "branch": "2",
+         "name": "(postpone)",
+         "type": "proof-command",
+         "rules": []
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "branch": "1.1.1.2.1.2.2",
+     "name": "(grind)",
+     "type": "proof-command",
+     "rules": []
+    },
+    {
+     "branch": "1.1.1.2.1",
+     "name": "(grind)",
+     "type": "proof-command",
+     "rules": []
+    },
+    {
+     "branch": "1.1.1.2",
+     "name": "(grind)",
+     "type": "proof-command",
+     "rules": []
+    },
+    {
+     "branch": "1.1.1",
+     "name": "(grind)",
+     "type": "proof-command",
+     "rules": []
+    },
+    {
+     "branch": "1.1",
+     "name": "(grind)",
+     "type": "proof-command",
+     "rules": []
+    },
+    {
+     "branch": "",
+     "name": "(expand execute_patient_device)",
+     "type": "proof-command",
+     "rules": []
+    },
+    {
+     "branch": "",
+     "name": "(lift-if)",
+     "type": "proof-command",
+     "rules": []
+    },
+    {
+     "branch": "",
+     "name": "(split)",
+     "type": "proof-command",
+     "rules": [
+      {
+       "branch": "1",
+       "name": "(1)",
+       "type": "proof-branch",
+       "rules": [
+        {
+         "branch": "1",
+         "name": "(flatten)",
+         "type": "proof-command",
+         "rules": []
+        },
+        {
+         "branch": "1",
+         "name": "(expand ex_a)",
+         "type": "proof-command",
+         "rules": []
+        },
+        {
+         "branch": "1",
+         "name": "(lift-if)",
+         "type": "proof-command",
+         "rules": []
+        },
+        {
+         "branch": "1",
+         "name": "(split)",
+         "type": "proof-command",
+         "rules": [
+          {
+           "branch": "1.1",
+           "name": "(1.1)",
+           "type": "proof-branch",
+           "rules": [
+            {
+             "branch": "1.1",
+             "name": "(split)",
+             "type": "proof-command",
+             "rules": [
+              {
+               "branch": "1.1.1",
+               "name": "(1.1.1)",
+               "type": "proof-branch",
+               "rules": [
+                {
+                 "branch": "1.1.1",
+                 "name": "(expand act_send)",
+                 "type": "proof-command",
+                 "rules": []
+                },
+                {
+                 "branch": "1.1.1",
+                 "name": "(flatten)",
+                 "type": "proof-command",
+                 "rules": []
+                },
+                {
+                 "branch": "1.1.1",
+                 "name": "(lift-if)",
+                 "type": "proof-command",
+                 "rules": []
+                },
+                {
+                 "branch": "1.1.1",
+                 "name": "(split)",
+                 "type": "proof-command",
+                 "rules": [
+                  {
+                   "branch": "1.1.1.1",
+                   "name": "(1.1.1.1)",
+                   "type": "proof-branch",
+                   "rules": [
+                    {
+                     "branch": "1.1.1.1",
+                     "name": "(flatten)",
+                     "type": "proof-command",
+                     "rules": []
+                    },
+                    {
+                     "branch": "1.1.1.1",
+                     "name": "(split)",
+                     "type": "proof-command",
+                     "rules": [
+                      {
+                       "branch": "1.1.1.1.1",
+                       "name": "(1.1.1.1.1)",
+                       "type": "proof-branch",
+                       "rules": [
+                        {
+                         "branch": "1.1.1.1.1",
+                         "name": "(grind)",
+                         "type": "proof-command",
+                         "rules": []
+                        }
+                       ]
+                      },
+                      {
+                       "branch": "1.1.1.1.2",
+                       "name": "(1.1.1.1.2)",
+                       "type": "proof-branch",
+                       "rules": [
+                        {
+                         "branch": "1.1.1.1.2",
+                         "name": "(flatten)",
+                         "type": "proof-command",
+                         "rules": []
+                        },
+                        {
+                         "branch": "1.1.1.1.2",
+                         "name": "(expand device_execute)",
+                         "type": "proof-command",
+                         "rules": []
+                        },
+                        {
+                         "branch": "1.1.1.1.2",
+                         "name": "(lift-if)",
+                         "type": "proof-command",
+                         "rules": []
+                        },
+                        {
+                         "branch": "1.1.1.1.2",
+                         "name": "(split)",
+                         "type": "proof-command",
+                         "rules": [
+                          {
+                           "branch": "1.1.1.1.2.1",
+                           "name": "(1.1.1.1.2.1)",
+                           "type": "proof-branch",
+                           "rules": [
+                            {
+                             "branch": "1.1.1.1.2.1",
+                             "name": "(flatten)",
+                             "type": "proof-command",
+                             "rules": []
+                            },
+                            {
+                             "branch": "1.1.1.1.2.1",
+                             "name": "(expand next_act_pm)",
+                             "type": "proof-command",
+                             "rules": []
+                            },
+                            {
+                             "branch": "1.1.1.1.2.1",
+                             "name": "(lift-if)",
+                             "type": "proof-command",
+                             "rules": []
+                            },
+                            {
+                             "branch": "1.1.1.1.2.1",
+                             "name": "(split)",
+                             "type": "proof-command",
+                             "rules": [
+                              {
+                               "branch": "1.1.1.1.2.1.1",
+                               "name": "(1.1.1.1.2.1.1)",
+                               "type": "proof-branch",
+                               "rules": [
+                                {
+                                 "branch": "1.1.1.1.2.1.1",
+                                 "name": "(flatten)",
+                                 "type": "proof-command",
+                                 "rules": []
+                                },
+                                {
+                                 "branch": "1.1.1.1.2.1.1",
+                                 "name": "(lift-if)",
+                                 "type": "proof-command",
+                                 "rules": []
+                                },
+                                {
+                                 "branch": "1.1.1.1.2.1.1",
+                                 "name": "(split)",
+                                 "type": "proof-command",
+                                 "rules": [
+                                  {
+                                   "branch": "1.1.1.1.2.1.1.1",
+                                   "name": "(1.1.1.1.2.1.1.1)",
+                                   "type": "proof-branch",
+                                   "rules": [
+                                    {
+                                     "branch": "1.1.1.1.2.1.1.1",
+                                     "name": "(flatten)",
+                                     "type": "proof-command",
+                                     "rules": []
+                                    },
+                                    {
+                                     "branch": "1.1.1.1.2.1.1.1",
+                                     "name": "(grind)",
+                                     "type": "proof-command",
+                                     "rules": []
+                                    }
+                                   ]
+                                  },
+                                  {
+                                   "branch": "1.1.1.1.2.1.1.2",
+                                   "name": "(1.1.1.1.2.1.1.2)",
+                                   "type": "proof-branch",
+                                   "rules": [
+                                    {
+                                     "branch": "1.1.1.1.2.1.1.2",
+                                     "name": "(flatten)",
+                                     "type": "proof-command",
+                                     "rules": []
+                                    },
+                                    {
+                                     "branch": "1.1.1.1.2.1.1.2",
+                                     "name": "(grind)",
+                                     "type": "proof-command",
+                                     "rules": []
+                                    }
+                                   ]
+                                  }
+                                 ]
+                                }
+                               ]
+                              },
+                              {
+                               "branch": "1.1.1.1.2.1.2",
+                               "name": "(1.1.1.1.2.1.2)",
+                               "type": "proof-branch",
+                               "rules": [
+                                {
+                                 "branch": "1.1.1.1.2.1.2",
+                                 "name": "(grind)",
+                                 "type": "proof-command",
+                                 "rules": []
+                                }
+                               ]
+                              }
+                             ]
+                            }
+                           ]
+                          },
+                          {
+                           "branch": "1.1.1.1.2.2",
+                           "name": "(1.1.1.1.2.2)",
+                           "type": "proof-branch",
+                           "rules": [
+                            {
+                             "branch": "1.1.1.1.2.2",
+                             "name": "(grind)",
+                             "type": "proof-command",
+                             "rules": []
+                            }
+                           ]
+                          }
+                         ]
+                        }
+                       ]
+                      }
+                     ]
+                    }
+                   ]
+                  },
+                  {
+                   "branch": "1.1.1.2",
+                   "name": "(1.1.1.2)",
+                   "type": "proof-branch",
+                   "rules": [
+                    {
+                     "branch": "1.1.1.2",
+                     "name": "(grind)",
+                     "type": "proof-command",
+                     "rules": []
+                    }
+                   ]
+                  }
+                 ]
+                }
+               ]
+              },
+              {
+               "branch": "1.1.2",
+               "name": "(1.1.2)",
+               "type": "proof-branch",
+               "rules": [
+                {
+                 "branch": "1.1.2",
+                 "name": "(grind)",
+                 "type": "proof-command",
+                 "rules": []
+                }
+               ]
+              }
+             ]
+            }
+           ]
+          },
+          {
+           "branch": "1.2",
+           "name": "(1.2)",
+           "type": "proof-branch",
+           "rules": [
+            {
+             "branch": "1.2",
+             "name": "(split)",
+             "type": "proof-command",
+             "rules": [
+              {
+               "branch": "1.2.1",
+               "name": "(1.2.1)",
+               "type": "proof-branch",
+               "rules": [
+                {
+                 "branch": "1.2.1",
+                 "name": "(flatten)",
+                 "type": "proof-command",
+                 "rules": []
+                },
+                {
+                 "branch": "1.2.1",
+                 "name": "(expand act_send)",
+                 "type": "proof-command",
+                 "rules": []
+                },
+                {
+                 "branch": "1.2.1",
+                 "name": "(lift-if)",
+                 "type": "proof-command",
+                 "rules": []
+                },
+                {
+                 "branch": "1.2.1",
+                 "name": "(split)",
+                 "type": "proof-command",
+                 "rules": [
+                  {
+                   "branch": "1.2.1.1",
+                   "name": "(1.2.1.1)",
+                   "type": "proof-branch",
+                   "rules": [
+                    {
+                     "branch": "1.2.1.1",
+                     "name": "(flatten)",
+                     "type": "proof-command",
+                     "rules": []
+                    },
+                    {
+                     "branch": "1.2.1.1",
+                     "name": "(split)",
+                     "type": "proof-command",
+                     "rules": [
+                      {
+                       "branch": "1.2.1.1.1",
+                       "name": "(1.2.1.1.1)",
+                       "type": "proof-branch",
+                       "rules": [
+                        {
+                         "branch": "1.2.1.1.1",
+                         "name": "(grind)",
+                         "type": "proof-command",
+                         "rules": []
+                        }
+                       ]
+                      },
+                      {
+                       "branch": "1.2.1.1.2",
+                       "name": "(1.2.1.1.2)",
+                       "type": "proof-branch",
+                       "rules": [
+                        {
+                         "branch": "1.2.1.1.2",
+                         "name": "(grind)",
+                         "type": "proof-command",
+                         "rules": []
+                        }
+                       ]
+                      }
+                     ]
+                    }
+                   ]
+                  },
+                  {
+                   "branch": "1.2.1.2",
+                   "name": "(1.2.1.2)",
+                   "type": "proof-branch",
+                   "rules": [
+                    {
+                     "branch": "1.2.1.2",
+                     "name": "(flatten)",
+                     "type": "proof-command",
+                     "rules": []
+                    }
+                   ]
+                  }
+                 ]
+                }
+               ]
+              },
+              {
+               "branch": "1.2.2",
+               "name": "(1.2.2)",
+               "type": "proof-branch",
+               "rules": [
+                {
+                 "branch": "1.2.2",
+                 "name": "(flatten)",
+                 "type": "proof-command",
+                 "rules": []
+                },
+                {
+                 "branch": "1.2.2",
+                 "name": "(expand act_send)",
+                 "type": "proof-command",
+                 "rules": []
+                },
+                {
+                 "branch": "1.2.2",
+                 "name": "(lift-if)",
+                 "type": "proof-command",
+                 "rules": []
+                },
+                {
+                 "branch": "1.2.2",
+                 "name": "(split)",
+                 "type": "proof-command",
+                 "rules": [
+                  {
+                   "branch": "1.2.2.1",
+                   "name": "(1.2.2.1)",
+                   "type": "proof-branch",
+                   "rules": [
+                    {
+                     "branch": "1.2.2.1",
+                     "name": "(flatten)",
+                     "type": "proof-command",
+                     "rules": []
+                    },
+                    {
+                     "branch": "1.2.2.1",
+                     "name": "(split)",
+                     "type": "proof-command",
+                     "rules": [
+                      {
+                       "branch": "1.2.2.1.1",
+                       "name": "(1.2.2.1.1)",
+                       "type": "proof-branch",
+                       "rules": [
+                        {
+                         "branch": "1.2.2.1.1",
+                         "name": "(flatten)",
+                         "type": "proof-command",
+                         "rules": []
+                        },
+                        {
+                         "branch": "1.2.2.1.1",
+                         "name": "(grind)",
+                         "type": "proof-command",
+                         "rules": []
+                        }
+                       ]
+                      },
+                      {
+                       "branch": "1.2.2.1.2",
+                       "name": "(1.2.2.1.2)",
+                       "type": "proof-branch",
+                       "rules": [
+                        {
+                         "branch": "1.2.2.1.2",
+                         "name": "(flatten)",
+                         "type": "proof-command",
+                         "rules": []
+                        },
+                        {
+                         "branch": "1.2.2.1.2",
+                         "name": "(expand device_execute)",
+                         "type": "proof-command",
+                         "rules": []
+                        },
+                        {
+                         "branch": "1.2.2.1.2",
+                         "name": "(lift-if)",
+                         "type": "proof-command",
+                         "rules": []
+                        },
+                        {
+                         "branch": "1.2.2.1.2",
+                         "name": "(split)",
+                         "type": "proof-command",
+                         "rules": [
+                          {
+                           "branch": "1.2.2.1.2.1",
+                           "name": "(1.2.2.1.2.1)",
+                           "type": "proof-branch",
+                           "rules": [
+                            {
+                             "branch": "1.2.2.1.2.1",
+                             "name": "(flatten)",
+                             "type": "proof-command",
+                             "rules": []
+                            },
+                            {
+                             "branch": "1.2.2.1.2.1",
+                             "name": "(expand add_act_buff)",
+                             "type": "proof-command",
+                             "rules": []
+                            },
+                            {
+                             "branch": "1.2.2.1.2.1",
+                             "name": "(expand next_act_pm)",
+                             "type": "proof-command",
+                             "rules": []
+                            },
+                            {
+                             "branch": "1.2.2.1.2.1",
+                             "name": "(lift-if)",
+                             "type": "proof-command",
+                             "rules": []
+                            },
+                            {
+                             "branch": "1.2.2.1.2.1",
+                             "name": "(split)",
+                             "type": "proof-command",
+                             "rules": [
+                              {
+                               "branch": "1.2.2.1.2.1.1",
+                               "name": "(1.2.2.1.2.1.1)",
+                               "type": "proof-branch",
+                               "rules": [
+                                {
+                                 "branch": "1.2.2.1.2.1.1",
+                                 "name": "(flatten)",
+                                 "type": "proof-command",
+                                 "rules": []
+                                },
+                                {
+                                 "branch": "1.2.2.1.2.1.1",
+                                 "name": "(grind)",
+                                 "type": "proof-command",
+                                 "rules": []
+                                }
+                               ]
+                              },
+                              {
+                               "branch": "1.2.2.1.2.1.2",
+                               "name": "(1.2.2.1.2.1.2)",
+                               "type": "proof-branch",
+                               "rules": [
+                                {
+                                 "branch": "1.2.2.1.2.1.2",
+                                 "name": "(lift-if)",
+                                 "type": "proof-command",
+                                 "rules": []
+                                },
+                                {
+                                 "branch": "1.2.2.1.2.1.2",
+                                 "name": "(split)",
+                                 "type": "proof-command",
+                                 "rules": [
+                                  {
+                                   "branch": "1.2.2.1.2.1.2.1",
+                                   "name": "(1.2.2.1.2.1.2.1)",
+                                   "type": "proof-branch",
+                                   "rules": [
+                                    {
+                                     "branch": "1.2.2.1.2.1.2.1",
+                                     "name": "(propax)",
+                                     "type": "proof-command",
+                                     "rules": []
+                                    }
+                                   ]
+                                  },
+                                  {
+                                   "branch": "1.2.2.1.2.1.2.2",
+                                   "name": "(1.2.2.1.2.1.2.2)",
+                                   "type": "proof-branch",
+                                   "rules": [
+                                    {
+                                     "branch": "1.2.2.1.2.1.2.2",
+                                     "name": "(flatten)",
+                                     "type": "proof-command",
+                                     "rules": []
+                                    },
+                                    {
+                                     "branch": "1.2.2.1.2.1.2.2",
+                                     "name": "(split)",
+                                     "type": "proof-command",
+                                     "rules": [
+                                      {
+                                       "branch": "1.2.2.1.2.1.2.2.1",
+                                       "name": "(1.2.2.1.2.1.2.2.1)",
+                                       "type": "proof-branch",
+                                       "rules": [
+                                        {
+                                         "branch": "1.2.2.1.2.1.2.2.1",
+                                         "name": "(flatten)",
+                                         "type": "proof-command",
+                                         "rules": []
+                                        },
+                                        {
+                                         "branch": "1.2.2.1.2.1.2.2.1",
+                                         "name": "(split)",
+                                         "type": "proof-command",
+                                         "rules": [
+                                          {
+                                           "branch": "1.2.2.1.2.1.2.2.1.1",
+                                           "name": "(1.2.2.1.2.1.2.2.1.1)",
+                                           "type": "proof-branch",
+                                           "rules": [
+                                            {
+                                             "branch": "1.2.2.1.2.1.2.2.1.1",
+                                             "name": "(propax)",
+                                             "type": "proof-command",
+                                             "rules": []
+                                            }
+                                           ]
+                                          },
+                                          {
+                                           "branch": "1.2.2.1.2.1.2.2.1.2",
+                                           "name": "(1.2.2.1.2.1.2.2.1.2)",
+                                           "type": "proof-branch",
+                                           "rules": [
+                                            {
+                                             "branch": "1.2.2.1.2.1.2.2.1.2",
+                                             "name": "(flatten)",
+                                             "type": "proof-command",
+                                             "rules": []
+                                            },
+                                            {
+                                             "branch": "1.2.2.1.2.1.2.2.1.2",
+                                             "name": "(lift-if)",
+                                             "type": "proof-command",
+                                             "rules": []
+                                            },
+                                            {
+                                             "branch": "1.2.2.1.2.1.2.2.1.2",
+                                             "name": "(split)",
+                                             "type": "proof-command",
+                                             "rules": [
+                                              {
+                                               "branch": "1.2.2.1.2.1.2.2.1.2.1",
+                                               "name": "(1.2.2.1.2.1.2.2.1.2.1)",
+                                               "type": "proof-branch",
+                                               "rules": [
+                                                {
+                                                 "branch": "1.2.2.1.2.1.2.2.1.2.1",
+                                                 "name": "(flatten)",
+                                                 "type": "proof-command",
+                                                 "rules": []
+                                                },
+                                                {
+                                                 "branch": "1.2.2.1.2.1.2.2.1.2.1",
+                                                 "name": "(postpone)",
+                                                 "type": "proof-command",
+                                                 "rules": []
+                                                }
+                                               ]
+                                              },
+                                              {
+                                               "branch": "1.2.2.1.2.1.2.2.1.2.2",
+                                               "name": "(1.2.2.1.2.1.2.2.1.2.2)",
+                                               "type": "proof-branch",
+                                               "rules": [
+                                                {
+                                                 "branch": "1.2.2.1.2.1.2.2.1.2.2",
+                                                 "name": "(postpone)",
+                                                 "type": "proof-command",
+                                                 "rules": []
+                                                }
+                                               ]
+                                              }
+                                             ]
+                                            }
+                                           ]
+                                          }
+                                         ]
+                                        }
+                                       ]
+                                      },
+                                      {
+                                       "branch": "1.2.2.1.2.1.2.2.2",
+                                       "name": "(1.2.2.1.2.1.2.2.2)",
+                                       "type": "proof-branch",
+                                       "rules": [
+                                        {
+                                         "branch": "1.2.2.1.2.1.2.2.2",
+                                         "name": "(postpone)",
+                                         "type": "proof-command",
+                                         "rules": []
+                                        }
+                                       ]
+                                      }
+                                     ]
+                                    }
+                                   ]
+                                  }
+                                 ]
+                                }
+                               ]
+                              }
+                             ]
+                            }
+                           ]
+                          },
+                          {
+                           "branch": "1.2.2.1.2.2",
+                           "name": "(1.2.2.1.2.2)",
+                           "type": "proof-branch",
+                           "rules": [
+                            {
+                             "branch": "1.2.2.1.2.2",
+                             "name": "(postpone)",
+                             "type": "proof-command",
+                             "rules": []
+                            }
+                           ]
+                          }
+                         ]
+                        }
+                       ]
+                      }
+                     ]
+                    }
+                   ]
+                  },
+                  {
+                   "branch": "1.2.2.2",
+                   "name": "(1.2.2.2)",
+                   "type": "proof-branch",
+                   "rules": [
+                    {
+                     "branch": "1.2.2.2",
+                     "name": "(postpone)",
+                     "type": "proof-command",
+                     "rules": []
+                    }
+                   ]
+                  }
+                 ]
+                }
+               ]
+              }
+             ]
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "branch": "2",
+       "name": "(2)",
+       "type": "proof-branch",
+       "rules": [
+        {
+         "branch": "2",
+         "name": "(postpone)",
+         "type": "proof-command",
+         "rules": []
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "branch": "1.2.2.1.2.1.2.2.1.2",
+     "name": "(grind)",
+     "type": "proof-command",
+     "rules": []
+    },
+    {
+     "branch": "1.2.2.1.2.1.2.2.1",
+     "name": "(grind)",
+     "type": "proof-command",
+     "rules": []
+    },
+    {
+     "branch": "1.2.2.1.2.1.2.2",
+     "name": "(grind)",
+     "type": "proof-command",
+     "rules": []
+    },
+    {
+     "branch": "1.2.2.1.2.1",
+     "name": "(grind)",
+     "type": "proof-command",
+     "rules": []
+    },
+    {
+     "branch": "1.2.2.1.2",
+     "name": "(grind)",
+     "type": "proof-command",
+     "rules": []
+    },
+    {
+     "branch": "1.2",
+     "name": "(grind)",
+     "type": "proof-command",
+     "rules": []
+    },
+    {
+     "branch": "1",
+     "name": "(grind)",
+     "type": "proof-command",
+     "rules": []
+    }
+   ]
+  }
+ ],
+ "ICE_checks_th.setup_check3": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "setup_check3",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "a5d5b65e921767cb6733076ac8e3c9aab475c003caca8be14e55f8cfd35cd25e"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "setup_check3",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": [
+    {
+     "branch": "2",
+     "name": "(expand \"patient_submenu_invoke\")",
+     "type": "proof-command",
+     "rules": []
+    },
+    {
+     "branch": "2",
+     "name": "(expand \"patient_menu_invoke\")",
+     "type": "proof-command",
+     "rules": []
+    },
+    {
+     "branch": "1.1.2",
+     "name": "(expand \"patient_act\")",
+     "type": "proof-command",
+     "rules": []
+    },
+    {
+     "branch": "1.1.2",
+     "name": "(lift-if)",
+     "type": "proof-command",
+     "rules": []
+    },
+    {
+     "branch": "1.1.2",
+     "name": "(split)",
+     "type": "proof-command",
+     "rules": [
+      {
+       "branch": "1.1.2.1",
+       "name": "(1.1.2.1)",
+       "type": "proof-branch",
+       "rules": [
+        {
+         "branch": "1.1.2.1",
+         "name": "(flatten)",
+         "type": "proof-command",
+         "rules": []
+        },
+        {
+         "branch": "1.1.2.1",
+         "name": "(expand patient_act)",
+         "type": "proof-command",
+         "rules": []
+        },
+        {
+         "branch": "1.1.2.1",
+         "name": "(grind)",
+         "type": "proof-command",
+         "rules": []
+        }
+       ]
+      },
+      {
+       "branch": "1.1.2.2",
+       "name": "(1.1.2.2)",
+       "type": "proof-branch",
+       "rules": [
+        {
+         "branch": "1.1.2.2",
+         "name": "(flatten)",
+         "type": "proof-command",
+         "rules": []
+        },
+        {
+         "branch": "1.1.2.2",
+         "name": "(expand patient_act)",
+         "type": "proof-command",
+         "rules": []
+        },
+        {
+         "branch": "1.1.2.2",
+         "name": "(grind)",
+         "type": "proof-command",
+         "rules": []
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "branch": "1.1.1.2.2",
+     "name": "(grind)",
+     "type": "proof-command",
+     "rules": []
+    },
+    {
+     "branch": "1",
+     "name": "(expand patient_act)",
+     "type": "proof-command",
+     "rules": []
+    }
+   ]
+  }
+ ],
+ "ICE_checks_th.setup_check4": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "setup_check4",
+    "status": "untried",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "b25db89ea2998837b7d3e14e0df1b716abaa18823d90cebbc1034a01a58beb80"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "setup_check4",
+    "type": "root",
+    "rules": []
+   }
+  }
+ ],
+ "ICE_checks_th.setup_check4a": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "setup_check4a",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "7f2b401564fd2a88c7d6a9950365a01f0ee34310f9810b6d5f3a51ea5e753b90"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "setup_check4a",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": [
+    {
+     "branch": "1.1.2",
+     "name": "(expand \"patient_act\")",
+     "type": "proof-command",
+     "rules": []
+    }
+   ]
+  }
+ ],
+ "ICE_checks_th.setup_check4b": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "setup_check4b",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "53960f27622f29df0128898baab2d1dc2dfd6f78697f28af0a6a882e485c0592"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "setup_check4b",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": [
+    {
+     "branch": "2.1.2",
+     "name": "(expand \"patient_act\")",
+     "type": "proof-command",
+     "rules": []
+    }
+   ]
+  }
+ ],
+ "ICE_checks_th.setup_check4c": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "setup_check4c",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "0e5872e8f3d3066cc18933ecde68e5f1976cb95d0b6cb7a900827b4fd0f0f619"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "setup_check4c",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.setup_check4d": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "setup_check4d",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "4b0f140b330b2e18c7de04411a82ebe3b33aa93abc863d601993e8d47c85af31"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "setup_check4d",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.setup_check4e": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "setup_check4e",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "4b0f140b330b2e18c7de04411a82ebe3b33aa93abc863d601993e8d47c85af31"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "setup_check4e",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.add_setup_check1apt0": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "add_setup_check1apt0",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "4b0f140b330b2e18c7de04411a82ebe3b33aa93abc863d601993e8d47c85af31"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "add_setup_check1apt0",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.add_setup_check1apt1": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "add_setup_check1apt1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "343d911448b826e221772403e3d7dc3f7a80624be5708347c6d9e03c11df4afb"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "add_setup_check1apt1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.add_setup_check1a": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "add_setup_check1a",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "343d911448b826e221772403e3d7dc3f7a80624be5708347c6d9e03c11df4afb"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "add_setup_check1a",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.add_setup_check1b": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "add_setup_check1b",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "343d911448b826e221772403e3d7dc3f7a80624be5708347c6d9e03c11df4afb"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "add_setup_check1b",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.add_setup_check1b1": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "add_setup_check1b1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "343d911448b826e221772403e3d7dc3f7a80624be5708347c6d9e03c11df4afb"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "add_setup_check1b1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.interimupdcheck1bm": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "interimupdcheck1bm",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "5d62d95c16c6db7992fde252a587e8217ecbba3fb3dd883853b8c6ad34e40271"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "interimupdcheck1bm",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": [
+    {
+     "branch": "1.1",
+     "name": "(grind)",
+     "type": "proof-command",
+     "rules": []
+    },
+    {
+     "branch": "1.2.2.1.2.2",
+     "name": "(grind)",
+     "type": "proof-command",
+     "rules": [
+      {
+       "branch": "1.2.2.1.2.2.1",
+       "name": "(1.2.2.1.2.2.1)",
+       "type": "proof-branch",
+       "rules": []
+      }
+     ]
+    },
+    {
+     "branch": "1.2.2.1",
+     "name": "(grind)",
+     "type": "proof-command",
+     "rules": [
+      {
+       "branch": "1.2.2.1.1",
+       "name": "(1.2.2.1.1)",
+       "type": "proof-branch",
+       "rules": []
+      }
+     ]
+    },
+    {
+     "branch": "1",
+     "name": "(grind)",
+     "type": "proof-command",
+     "rules": [
+      {
+       "branch": "1.1",
+       "name": "(1.1)",
+       "type": "proof-branch",
+       "rules": []
+      }
+     ]
+    },
+    {
+     "branch": "",
+     "name": "(grind)",
+     "type": "proof-command",
+     "rules": [
+      {
+       "branch": "1",
+       "name": "(1)",
+       "type": "proof-branch",
+       "rules": []
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "ICE_checks_th.interimupdcheck1apm": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "interimupdcheck1apm",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "5d62d95c16c6db7992fde252a587e8217ecbba3fb3dd883853b8c6ad34e40271"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "interimupdcheck1apm",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.interimupdcheck1bpm": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "interimupdcheck1bpm",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "5d62d95c16c6db7992fde252a587e8217ecbba3fb3dd883853b8c6ad34e40271"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "interimupdcheck1bpm",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.ebuff": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "ebuff",
+    "status": "untried",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "b25db89ea2998837b7d3e14e0df1b716abaa18823d90cebbc1034a01a58beb80"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "ebuff",
+    "type": "root",
+    "rules": []
+   }
+  }
+ ],
+ "ICE_checks_th.setup_check1b6": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "setup_check1b6",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "af895303e9a5b00cc347864c193a54b0fa0db88abc6f29651c04ac7ee77dfa64"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "setup_check1b6",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.coordinator_sm_check": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "coordinator_sm_check",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "f1c8c774c7ba12531a3034bc0b1a82ed4f8a3439ccd1966f820d595717ae756c"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "coordinator_sm_check",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": [
+    {
+     "branch": "",
+     "name": "(grind)",
+     "type": "proof-command",
+     "rules": []
+    }
+   ]
+  }
+ ],
+ "ICE_checks_th.coordinator_sm1_check": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "coordinator_sm1_check",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "f1c8c774c7ba12531a3034bc0b1a82ed4f8a3439ccd1966f820d595717ae756c"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "coordinator_sm1_check",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.coordinator_sm2_check": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "coordinator_sm2_check",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "3fdccfb27a4977ad293d8ce6a17d7389ab4d23faf95ac0671da60c318c6e2c2a"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "coordinator_sm2_check",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.check_next_act_patient": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "check_next_act_patient",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "5d62d95c16c6db7992fde252a587e8217ecbba3fb3dd883853b8c6ad34e40271"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "check_next_act_patient",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.ebuff0a": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "ebuff0a",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "5d62d95c16c6db7992fde252a587e8217ecbba3fb3dd883853b8c6ad34e40271"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "ebuff0a",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(skosimp*)",
+      "type": "proof-command",
+      "rules": []
+     },
+     {
+      "branch": "",
+      "name": "(beta)",
+      "type": "proof-command",
+      "rules": []
+     },
+     {
+      "branch": "",
+      "name": "(flatten)",
+      "type": "proof-command",
+      "rules": []
+     },
+     {
+      "branch": "",
+      "name": "(split)",
+      "type": "proof-command",
+      "rules": [
+       {
+        "branch": "1",
+        "name": "(1)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "1",
+          "name": "(expand \"add_act_buff\")",
+          "type": "proof-command",
+          "rules": []
+         },
+         {
+          "branch": "1",
+          "name": "(lift-if)",
+          "type": "proof-command",
+          "rules": []
+         },
+         {
+          "branch": "1",
+          "name": "(split)",
+          "type": "proof-command",
+          "rules": [
+           {
+            "branch": "1.1",
+            "name": "(1.1)",
+            "type": "proof-branch",
+            "rules": [
+             {
+              "branch": "1.1",
+              "name": "(grind)",
+              "type": "proof-command",
+              "rules": []
+             }
+            ]
+           },
+           {
+            "branch": "1.2",
+            "name": "(1.2)",
+            "type": "proof-branch",
+            "rules": [
+             {
+              "branch": "1.2",
+              "name": "(flatten)",
+              "type": "proof-command",
+              "rules": []
+             },
+             {
+              "branch": "1.2",
+              "name": "(split)",
+              "type": "proof-command",
+              "rules": [
+               {
+                "branch": "1.2.1",
+                "name": "(1.2.1)",
+                "type": "proof-branch",
+                "rules": [
+                 {
+                  "branch": "1.2.1",
+                  "name": "(flatten)",
+                  "type": "proof-command",
+                  "rules": []
+                 },
+                 {
+                  "branch": "1.2.1",
+                  "name": "(grind)",
+                  "type": "proof-command",
+                  "rules": []
+                 }
+                ]
+               },
+               {
+                "branch": "1.2.2",
+                "name": "(1.2.2)",
+                "type": "proof-branch",
+                "rules": [
+                 {
+                  "branch": "1.2.2",
+                  "name": "(flatten)",
+                  "type": "proof-command",
+                  "rules": []
+                 },
+                 {
+                  "branch": "1.2.2",
+                  "name": "(grind)",
+                  "type": "proof-command",
+                  "rules": []
+                 }
+                ]
+               }
+              ]
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "branch": "2",
+        "name": "(2)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "2",
+          "name": "(expand \"tick_act_patient\")",
+          "type": "proof-command",
+          "rules": []
+         },
+         {
+          "branch": "2",
+          "name": "(expand \"next_act_patient\")",
+          "type": "proof-command",
+          "rules": []
+         },
+         {
+          "branch": "2",
+          "name": "(lift-if)",
+          "type": "proof-command",
+          "rules": []
+         },
+         {
+          "branch": "2",
+          "name": "(split)",
+          "type": "proof-command",
+          "rules": [
+           {
+            "branch": "2.1",
+            "name": "(2.1)",
+            "type": "proof-branch",
+            "rules": [
+             {
+              "branch": "2.1",
+              "name": "(flatten)",
+              "type": "proof-command",
+              "rules": []
+             },
+             {
+              "branch": "2.1",
+              "name": "(grind)",
+              "type": "proof-command",
+              "rules": []
+             }
+            ]
+           },
+           {
+            "branch": "2.2",
+            "name": "(2.2)",
+            "type": "proof-branch",
+            "rules": [
+             {
+              "branch": "2.2",
+              "name": "(grind)",
+              "type": "proof-command",
+              "rules": []
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "clips": [
+    {
+     "branch": "",
+     "name": "(expand \"coord_act_mono\")",
+     "type": "proof-command",
+     "rules": []
+    },
+    {
+     "branch": "",
+     "name": "(expand \"act_mono\")",
+     "type": "proof-command",
+     "rules": []
+    },
+    {
+     "branch": "",
+     "name": "(split)",
+     "type": "proof-command",
+     "rules": [
+      {
+       "branch": "1",
+       "name": "(1)",
+       "type": "proof-branch",
+       "rules": [
+        {
+         "branch": "1",
+         "name": "(lift-if)",
+         "type": "proof-command",
+         "rules": []
+        },
+        {
+         "branch": "1",
+         "name": "(split)",
+         "type": "proof-command",
+         "rules": [
+          {
+           "branch": "1.1",
+           "name": "(1.1)",
+           "type": "proof-branch",
+           "rules": [
+            {
+             "branch": "1.1",
+             "name": "(flatten)",
+             "type": "proof-command",
+             "rules": []
+            },
+            {
+             "branch": "1.1",
+             "name": "(grind)",
+             "type": "proof-command",
+             "rules": []
+            }
+           ]
+          },
+          {
+           "branch": "1.2",
+           "name": "(1.2)",
+           "type": "proof-branch",
+           "rules": [
+            {
+             "branch": "1.2",
+             "name": "(flatten)",
+             "type": "proof-command",
+             "rules": []
+            },
+            {
+             "branch": "1.2",
+             "name": "(grind)",
+             "type": "proof-command",
+             "rules": []
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      {
+       "branch": "2",
+       "name": "(2)",
+       "type": "proof-branch",
+       "rules": [
+        {
+         "branch": "2",
+         "name": "(lift-if)",
+         "type": "proof-command",
+         "rules": []
+        },
+        {
+         "branch": "2",
+         "name": "(split)",
+         "type": "proof-command",
+         "rules": [
+          {
+           "branch": "2.1",
+           "name": "(2.1)",
+           "type": "proof-branch",
+           "rules": [
+            {
+             "branch": "2.1",
+             "name": "(flatten)",
+             "type": "proof-command",
+             "rules": []
+            },
+            {
+             "branch": "2.1",
+             "name": "(grind)",
+             "type": "proof-command",
+             "rules": []
+            }
+           ]
+          },
+          {
+           "branch": "2.2",
+           "name": "(2.2)",
+           "type": "proof-branch",
+           "rules": [
+            {
+             "branch": "2.2",
+             "name": "(flatten)",
+             "type": "proof-command",
+             "rules": []
+            },
+            {
+             "branch": "2.2",
+             "name": "(grind)",
+             "type": "proof-command",
+             "rules": []
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "ICE_checks_th.ebuff0": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "ebuff0",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "5d62d95c16c6db7992fde252a587e8217ecbba3fb3dd883853b8c6ad34e40271"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "ebuff0",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(skosimp*)",
+      "type": "proof-command",
+      "rules": []
+     },
+     {
+      "branch": "",
+      "name": "(beta)",
+      "type": "proof-command",
+      "rules": []
+     },
+     {
+      "branch": "",
+      "name": "(flatten)",
+      "type": "proof-command",
+      "rules": []
+     },
+     {
+      "branch": "",
+      "name": "(split)",
+      "type": "proof-command",
+      "rules": [
+       {
+        "branch": "1",
+        "name": "(1)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "1",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       },
+       {
+        "branch": "2",
+        "name": "(2)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "2",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.ebuff1": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "ebuff1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "5d62d95c16c6db7992fde252a587e8217ecbba3fb3dd883853b8c6ad34e40271"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "ebuff1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(skosimp*)",
+      "type": "proof-command",
+      "rules": []
+     },
+     {
+      "branch": "",
+      "name": "(beta)",
+      "type": "proof-command",
+      "rules": []
+     },
+     {
+      "branch": "",
+      "name": "(flatten)",
+      "type": "proof-command",
+      "rules": []
+     },
+     {
+      "branch": "",
+      "name": "(split)",
+      "type": "proof-command",
+      "rules": [
+       {
+        "branch": "1",
+        "name": "(1)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "1",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       },
+       {
+        "branch": "2",
+        "name": "(2)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "2",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.setup_check1a": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "setup_check1a",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "5d62d95c16c6db7992fde252a587e8217ecbba3fb3dd883853b8c6ad34e40271"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "setup_check1a",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(skosimp*)",
+      "type": "proof-command",
+      "rules": []
+     },
+     {
+      "branch": "",
+      "name": "(beta)",
+      "type": "proof-command",
+      "rules": []
+     },
+     {
+      "branch": "",
+      "name": "(flatten)",
+      "type": "proof-command",
+      "rules": []
+     },
+     {
+      "branch": "",
+      "name": "(split)",
+      "type": "proof-command",
+      "rules": [
+       {
+        "branch": "1",
+        "name": "(1)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "1",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       },
+       {
+        "branch": "2",
+        "name": "(2)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "2",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       },
+       {
+        "branch": "3",
+        "name": "(3)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "3",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       },
+       {
+        "branch": "4",
+        "name": "(4)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "4",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       },
+       {
+        "branch": "5",
+        "name": "(5)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "5",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       },
+       {
+        "branch": "6",
+        "name": "(6)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "6",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       },
+       {
+        "branch": "7",
+        "name": "(7)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "7",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       },
+       {
+        "branch": "8",
+        "name": "(8)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "8",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.setup_check4a1": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "setup_check4a1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "6a516058a7f10d5daf74c6b2b2241e7ff5a0ce843a237b1e15ef40683b5ea0f2"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "setup_check4a1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(skosimp*)",
+      "type": "proof-command",
+      "rules": []
+     },
+     {
+      "branch": "",
+      "name": "(beta)",
+      "type": "proof-command",
+      "rules": []
+     },
+     {
+      "branch": "",
+      "name": "(flatten)",
+      "type": "proof-command",
+      "rules": []
+     },
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.setup_check4b1": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "setup_check4b1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "5ffd9a34718121243059618950350fa139ab5304493f859afb00251b970b94d5"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "setup_check4b1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.setup_check4c1": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "setup_check4c1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "0e5872e8f3d3066cc18933ecde68e5f1976cb95d0b6cb7a900827b4fd0f0f619"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "setup_check4c1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.setup_check4c2": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "setup_check4c2",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "0e5872e8f3d3066cc18933ecde68e5f1976cb95d0b6cb7a900827b4fd0f0f619"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "setup_check4c2",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.setup_check1b2": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "setup_check1b2",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "343d911448b826e221772403e3d7dc3f7a80624be5708347c6d9e03c11df4afb"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "setup_check1b2",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.setup_check1b3": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "setup_check1b3",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "343d911448b826e221772403e3d7dc3f7a80624be5708347c6d9e03c11df4afb"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "setup_check1b3",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.setup_check1b4": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "setup_check1b4",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "343d911448b826e221772403e3d7dc3f7a80624be5708347c6d9e03c11df4afb"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "setup_check1b4",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.setup_check1b5": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "setup_check1b5",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "343d911448b826e221772403e3d7dc3f7a80624be5708347c6d9e03c11df4afb"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "setup_check1b5",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": []
+  }
+ ],
+ "ICE_checks_th.coordinator_sm3_check": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "coordinator_sm3_check",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "71195ac8ad405aa80c339984ea5afbfda06878c4063937d4054c73c7f4e38cf1"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "coordinator_sm3_check",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(skosimp*)",
+      "type": "proof-command",
+      "rules": []
+     },
+     {
+      "branch": "",
+      "name": "(beta)",
+      "type": "proof-command",
+      "rules": []
+     },
+     {
+      "branch": "",
+      "name": "(flatten)",
+      "type": "proof-command",
+      "rules": []
+     },
+     {
+      "branch": "",
+      "name": "(split)",
+      "type": "proof-command",
+      "rules": [
+       {
+        "branch": "1",
+        "name": "(1)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "1",
+          "name": "(expand \"sm2_pred\")",
+          "type": "proof-command",
+          "rules": []
+         },
+         {
+          "branch": "1",
+          "name": "(flatten)",
+          "type": "proof-command",
+          "rules": []
+         },
+         {
+          "branch": "1",
+          "name": "(expand \"coord_menu_act\")",
+          "type": "proof-command",
+          "rules": []
+         },
+         {
+          "branch": "1",
+          "name": "(expand \"act_menu\")",
+          "type": "proof-command",
+          "rules": []
+         },
+         {
+          "branch": "1",
+          "name": "(split)",
+          "type": "proof-command",
+          "rules": [
+           {
+            "branch": "1.1",
+            "name": "(1.1)",
+            "type": "proof-branch",
+            "rules": [
+             {
+              "branch": "1.1",
+              "name": "(flatten)",
+              "type": "proof-command",
+              "rules": []
+             },
+             {
+              "branch": "1.1",
+              "name": "(replace -6 1)",
+              "type": "proof-command",
+              "rules": []
+             },
+             {
+              "branch": "1.1",
+              "name": "(beta)",
+              "type": "proof-command",
+              "rules": []
+             },
+             {
+              "branch": "1.1",
+              "name": "(expand \"i_select\")",
+              "type": "proof-command",
+              "rules": []
+             },
+             {
+              "branch": "1.1",
+              "name": "(expand \"change_is_menu\")",
+              "type": "proof-command",
+              "rules": []
+             },
+             {
+              "branch": "1.1",
+              "name": "(expand \"select_options_menu\")",
+              "type": "proof-command",
+              "rules": []
+             },
+             {
+              "branch": "1.1",
+              "name": "(propax)",
+              "type": "proof-command",
+              "rules": []
+             }
+            ]
+           },
+           {
+            "branch": "1.2",
+            "name": "(1.2)",
+            "type": "proof-branch",
+            "rules": [
+             {
+              "branch": "1.2",
+              "name": "(grind)",
+              "type": "proof-command",
+              "rules": []
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       },
+       {
+        "branch": "2",
+        "name": "(2)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "2",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       },
+       {
+        "branch": "3",
+        "name": "(3)",
+        "type": "proof-branch",
+        "rules": [
+         {
+          "branch": "3",
+          "name": "(grind)",
+          "type": "proof-command",
+          "rules": []
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   "clips": [
+    {
+     "branch": "",
+     "name": "(grind)",
+     "type": "proof-command",
+     "rules": []
+    },
+    {
+     "branch": "",
+     "name": "(grind)",
+     "type": "proof-command",
+     "rules": []
+    }
+   ]
+  }
+ ],
+ "ICE_checks_th.setup_check3a": [
+  {
+   "info": {
+    "theory": "ICE_checks_th",
+    "formula": "setup_check3a",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "5432906b5b6394c5d23377bc9fe4424d82984e9a5245ecfaa55abcc18ff0efd5"
+   },
+   "origin": ".prf",
+   "proofTree": {
+    "branch": "",
+    "name": "setup_check3a",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(grind)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   },
+   "clips": [
+    {
+     "branch": "",
+     "name": "(grind)",
+     "type": "proof-command",
+     "rules": []
+    }
+   ]
+  }
+ ]
+}

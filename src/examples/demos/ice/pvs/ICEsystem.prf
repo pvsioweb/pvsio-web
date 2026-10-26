@@ -1,0 +1,390 @@
+(system_th
+ (IMP_patient_th_TCC1 0
+  (IMP_patient_th_TCC1-1 nil 3813472599 ("" (assuming-tcc) nil nil)
+   ((real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil
+   (IMP_patient_th assuming
+    "patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].patient_th"
+    "maxinfuseLEQmaxtime: ASSUMPTION reals.<=(patient_th.maxinfuse, patient_th.maxtime)")))
+ (init_coord_menu_TCC1 0
+  (init_coord_menu_TCC1-1 nil 3817560331
+   ("" (cond-disjoint-tcc) nil nil) nil nil
+   (init_coord_menu disjointness
+    "COND system_th.m = coord_t_and_c_th.select -> coordinator_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].i_select, system_th.m = coord_t_and_c_th.cursor_up -> coordinator_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].i_up_display, system_th.m = coord_t_and_c_th.cursor_down -> coordinator_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].i_down_display, system_th.m = coord_t_and_c_th.display -> coordinator_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].i_select_display, system_th.m = coord_t_and_c_th.patient -> coordinator_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].i_select_patient, system_th.m = coord_t_and_c_th.device -> coordinator_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].i_select_device, system_th.m = coord_t_and_c_th.action -> coordinator_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].i_select_action, system_th.m = coord_t_and_c_th.escape -> coordinator_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].i_escape, ELSE -> coordinator_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].i_escape ENDCOND"
+    "nil")))
+ (init_patient_menu_TCC1 0
+  (init_patient_menu_TCC1-1 nil 3817560331
+   ("" (cond-disjoint-tcc) nil nil) nil nil
+   (init_patient_menu disjointness
+    "COND system_th.m = coord_t_and_c_th.escape -> patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_escape, system_th.m = coord_t_and_c_th.cursor_up -> patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_cursor_move, system_th.m = coord_t_and_c_th.cursor_down -> patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_cursor_move, system_th.m = coord_t_and_c_th.constraint -> patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_constraint, system_th.m = coord_t_and_c_th.delete -> patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_delete_rule, system_th.m = coord_t_and_c_th.clear -> patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_clear, system_th.m = coord_t_and_c_th.select -> patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_select, system_th.m = coord_t_and_c_th.parameter -> patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_select_par, system_th.m = coord_t_and_c_th.relation -> patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_select_relation, system_th.m = coord_t_and_c_th.action -> patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_select_a, system_th.m = coord_t_and_c_th.display -> patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_select_region, system_th.m = coord_t_and_c_th.enum_value -> patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_enum_value, system_th.m = coord_t_and_c_th.num_value -> patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_num_value, system_th.m = coord_t_and_c_th.edit -> patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_edit, system_th.m = coord_t_and_c_th.top -> patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_edit_top, system_th.m = coord_t_and_c_th.main -> patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_edit_main, system_th.m = coord_t_and_c_th.region -> patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_region, system_th.m = coord_t_and_c_th.device -> patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_device, system_th.m = coord_t_and_c_th.enter -> patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_enter, system_th.m = coord_t_and_c_th.pump -> patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_complete_device_p, system_th.m = coord_t_and_c_th.vs_device -> patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_complete_device_vs, ELSE -> patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_escape ENDCOND"
+    "nil")))
+ (act_error_TCC1 0
+  (act_error_TCC1-1 nil 3813306072 ("" (cond-disjoint-tcc) nil nil)
+   ((NOT const-decl "[bool -> bool]" booleans nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil)
+    (node type-eq-decl nil node_th nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (maxtime formal-const-decl
+     "{maxtime: posnat | maxinfuse <= maxtime}" system_th nil)
+    (<= const-decl "bool" reals nil)
+    (maxinfuse formal-const-decl "posnat" system_th nil)
+    (maxrate formal-const-decl "posnat" system_th nil)
+    (posnat nonempty-type-eq-decl nil integers nil)
+    (> const-decl "bool" reals nil)
+    (nonneg_int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (coord_node const-decl "node" node_th nil)
+    (plimit const-decl "nat" coord_t_and_c_th nil)
+    (p_null const-decl "patient" patient_th nil))
+   nil
+   (act_error disjointness
+    "COND system_th.n1 = node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].coord_node -> system_th.st WITH [coord_st := coordinator_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].update_patient_alarm_disp(system_th.st`p_nodes(system_th.n2), system_th.ne`chan_error, system_th.st`coord_st)], booleans.AND(system_th.n1 /= node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].coord_node, booleans.AND(system_th.st`p_nodes(system_th.n1) /= patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_null, system_th.n2 = node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].coord_node)) -> system_th.st WITH [coord_st := coordinator_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].update_patient_alarm_disp(system_th.st`p_nodes(system_th.n1), system_th.ne`chan_error, system_th.st`coord_st)], booleans.AND(system_th.n1 /= node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].coord_node, booleans.AND(system_th.st`p_nodes(system_th.n1) /= patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_null, system_th.n2 /= node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].coord_node)) -> system_th.st WITH [coord_st := coordinator_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].update_patient_alarm_disp(system_th.st`p_nodes(system_th.n1), system_th.ne`chan_error, system_th.st`coord_st)], booleans.AND(system_th.n1 /= node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].coord_node, booleans.AND(system_th.st`p_nodes(system_th.n1) = patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_null, system_th.st`p_nodes(system_th.n2) /= patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_null)) -> system_th.st WITH [coord_st := coordinator_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].update_patient_device_alarm_disp(system_th.st`p_nodes(system_th.n2), system_th.st`d_nodes(system_th.n2)`dev, system_th.ne`chan_error, system_th.st`coord_st)], booleans.AND(system_th.n1 /= node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].coord_node, booleans.AND(system_th.st`p_nodes(system_th.n1) = patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_null, system_th.st`p_nodes(system_th.n2) = patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_null)) -> system_th.st WITH [coord_st := coordinator_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].update_patient_device_alarm_disp(patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_null, devices_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].nil_device, node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].spurious_action, system_th.st`coord_st)] ENDCOND"
+    "nil")))
+ (act_error_TCC2 0
+  (act_error_TCC2-1 nil 3813306072 ("" (cond-coverage-tcc) nil nil)
+   ((NOT const-decl "[bool -> bool]" booleans nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil)
+    (node type-eq-decl nil node_th nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (maxtime formal-const-decl
+     "{maxtime: posnat | maxinfuse <= maxtime}" system_th nil)
+    (<= const-decl "bool" reals nil)
+    (maxinfuse formal-const-decl "posnat" system_th nil)
+    (maxrate formal-const-decl "posnat" system_th nil)
+    (posnat nonempty-type-eq-decl nil integers nil)
+    (> const-decl "bool" reals nil)
+    (nonneg_int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (coord_node const-decl "node" node_th nil)
+    (plimit const-decl "nat" coord_t_and_c_th nil)
+    (p_null const-decl "patient" patient_th nil))
+   nil
+   (act_error coverage
+    "COND system_th.n1 = node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].coord_node -> system_th.st WITH [coord_st := coordinator_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].update_patient_alarm_disp(system_th.st`p_nodes(system_th.n2), system_th.ne`chan_error, system_th.st`coord_st)], booleans.AND(system_th.n1 /= node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].coord_node, booleans.AND(system_th.st`p_nodes(system_th.n1) /= patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_null, system_th.n2 = node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].coord_node)) -> system_th.st WITH [coord_st := coordinator_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].update_patient_alarm_disp(system_th.st`p_nodes(system_th.n1), system_th.ne`chan_error, system_th.st`coord_st)], booleans.AND(system_th.n1 /= node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].coord_node, booleans.AND(system_th.st`p_nodes(system_th.n1) /= patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_null, system_th.n2 /= node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].coord_node)) -> system_th.st WITH [coord_st := coordinator_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].update_patient_alarm_disp(system_th.st`p_nodes(system_th.n1), system_th.ne`chan_error, system_th.st`coord_st)], booleans.AND(system_th.n1 /= node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].coord_node, booleans.AND(system_th.st`p_nodes(system_th.n1) = patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_null, system_th.st`p_nodes(system_th.n2) /= patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_null)) -> system_th.st WITH [coord_st := coordinator_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].update_patient_device_alarm_disp(system_th.st`p_nodes(system_th.n2), system_th.st`d_nodes(system_th.n2)`dev, system_th.ne`chan_error, system_th.st`coord_st)], booleans.AND(system_th.n1 /= node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].coord_node, booleans.AND(system_th.st`p_nodes(system_th.n1) = patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_null, system_th.st`p_nodes(system_th.n2) = patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_null)) -> system_th.st WITH [coord_st := coordinator_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].update_patient_device_alarm_disp(patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_null, devices_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].nil_device, node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].spurious_action, system_th.st`coord_st)] ENDCOND"
+    "nil")))
+ (act_patient_ok_TCC1 0
+  (act_patient_ok_TCC1-1 nil 3813306072
+   ("" (cond-disjoint-tcc) nil nil)
+   ((patient type-eq-decl nil patient_th nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (device type-eq-decl nil devices_th nil)
+    (node type-eq-decl nil node_th nil)
+    (plimit const-decl "nat" coord_t_and_c_th nil)
+    (maxtime formal-const-decl
+     "{maxtime: posnat | maxinfuse <= maxtime}" system_th nil)
+    (<= const-decl "bool" reals nil)
+    (maxinfuse formal-const-decl "posnat" system_th nil)
+    (maxrate formal-const-decl "posnat" system_th nil)
+    (posnat nonempty-type-eq-decl nil integers nil)
+    (> const-decl "bool" reals nil)
+    (nonneg_int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (p_null const-decl "patient" patient_th nil)
+    (dlimit const-decl "nat" coord_t_and_c_th nil)
+    (nil_device const-decl "device" devices_th nil)
+    (mindex const-decl "nat" coord_t_and_c_th nil)
+    (null_value const-decl "posnat" coord_t_and_c_th nil)
+    (filter_panel const-decl "panel" system_th nil))
+   nil
+   (act_patient_ok disjointness
+    "COND system_th.ps`emode = coord_t_and_c_th.edit_device -> LET msg = (# mhdr := node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].pmmsg, pat_nd := system_th.pn, msg_nd := IF ((system_th.ps`p_disp_top)`devs(system_th.d) = devices_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].vital_signs_device) THEN (system_th.ps`vital_signs)`nde ELSE (system_th.ps`ip_state)(system_th.d)`nde ENDIF, pan := system_th.pa #) IN system_th.st WITH [pdb := LAMBDA (p1: patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].patient): IF p1 = system_th.p THEN patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].update_device_panel(system_th.d, system_th.pa, system_th.ps) ELSE system_th.st`pdb(p1) ENDIF, nde_state := node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].send_coord(system_th.pn, system_th.msg, system_th.st`nde_state)], system_th.ps`emode = coord_t_and_c_th.edit_patient -> LET msg = (# mhdr := node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].mmmsg, pat_nd := system_th.pn, msg_nd := IF ((system_th.ps`p_disp_top)`devs(system_th.d) = devices_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].vital_signs_device) THEN (system_th.ps`vital_signs)`nde ELSE (system_th.ps`ip_state)(system_th.d)`nde ENDIF, pan := system_th.pa #) IN system_th.st WITH [pdb := LAMBDA (p1: patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].patient): IF p1 = system_th.p THEN patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].update_main_panel(system_th.d, system_th.pa, system_th.ps) ELSE system_th.st`pdb(p1) ENDIF, nde_state := node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].send_coord(system_th.pn, system_th.msg, system_th.st`nde_state)], system_th.ps`emode = coord_t_and_c_th.edit_top -> LET msg = (# mhdr := node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].tmmsg, pat_nd := system_th.pn, msg_nd := IF ((system_th.ps`p_disp_top)`devs(system_th.d) = devices_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].vital_signs_device) THEN (system_th.ps`vital_signs)`nde ELSE (system_th.ps`ip_state)(system_th.d)`nde ENDIF, pan := system_th.pa #) IN system_th.st WITH [pdb := LAMBDA (p1: patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].patient): IF p1 = system_th.p THEN patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].update_top_panel(system_th.d, system_th.pa, system_th.ps) ELSE system_th.st`pdb(p1) ENDIF, nde_state := node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].send_coord(system_th.pn, system_th.msg, system_th.st`nde_state)], (system_th.ps`emode = coord_t_and_c_th.edit_constraint) -> system_th.mapping_to_ps(patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_ok_constraint, system_th.p, system_th.st), (system_th.ps`emode = coord_t_and_c_th.edit_rule) -> system_th.mapping_to_ps(patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].p_ok_rule, system_th.p, system_th.st), ELSE -> system_th.st ENDCOND"
+    "nil")))
+ (update_coord_panel_TCC1 0
+  (update_coord_panel_TCC1-1 nil 3813306072
+   ("" (cond-disjoint-tcc) nil nil)
+   ((NOT const-decl "[bool -> bool]" booleans nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil)
+    (patient type-eq-decl nil patient_th nil)
+    (device type-eq-decl nil devices_th nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (maxtime formal-const-decl
+     "{maxtime: posnat | maxinfuse <= maxtime}" system_th nil)
+    (<= const-decl "bool" reals nil)
+    (maxinfuse formal-const-decl "posnat" system_th nil)
+    (maxrate formal-const-decl "posnat" system_th nil)
+    (posnat nonempty-type-eq-decl nil integers nil)
+    (> const-decl "bool" reals nil)
+    (nonneg_int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (coord_node const-decl "node" node_th nil))
+   nil
+   (update_coord_panel disjointness
+    "COND system_th.mt = node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].tmmsg -> coordinator_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].setup_p_t_panel(system_th.p, system_th.d, system_th.pa, system_th.st`coord_st), system_th.mt = node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].pmmsg -> coordinator_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].setup_p_d_panel(system_th.p, system_th.d, system_th.pa, system_th.st`coord_st), system_th.mt = node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].mmmsg -> coordinator_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].setup_p_m_panel(system_th.p, system_th.d, system_th.pa, system_th.st`coord_st), system_th.mt = node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].updmsg -> coordinator_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].update_p_panel(system_th.p, system_th.d, system_th.pa, system_th.st`coord_st), ELSE -> coordinator_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].update_error(system_th.st`coord_st) ENDCOND"
+    "nil")))
+ (constraint_broken_to_coordinator_TCC1 0
+  (constraint_broken_to_coordinator_TCC1-1 nil 3813306072
+   ("" (cond-disjoint-tcc) nil nil)
+   ((NOT const-decl "[bool -> bool]" booleans nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil)
+    (patient type-eq-decl nil patient_th nil)
+    (climit const-decl "nat" coord_t_and_c_th nil)
+    (cindex type-eq-decl nil coord_t_and_c_th nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (device type-eq-decl nil devices_th nil)
+    (maxtime formal-const-decl
+     "{maxtime: posnat | maxinfuse <= maxtime}" system_th nil)
+    (<= const-decl "bool" reals nil)
+    (maxinfuse formal-const-decl "posnat" system_th nil)
+    (maxrate formal-const-decl "posnat" system_th nil)
+    (posnat nonempty-type-eq-decl nil integers nil)
+    (> const-decl "bool" reals nil)
+    (nonneg_int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (d_bot const-decl "device" devices_th nil))
+   nil
+   (constraint_broken_to_coordinator disjointness
+    "COND system_th.dtype = devices_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].infusion_pump -> nde(system_th.st`pdb(system_th.p)`ip_state(system_th.dv)), system_th.dtype = devices_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].vital_signs_device -> nde(system_th.ps`vital_signs), ELSE -> node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].no_node ENDCOND"
+    "nil")))
+ (check_rule_set_TCC1 0
+  (check_rule_set_TCC1-1 nil 3813306072 ("" (subtype-tcc) nil nil)
+   ((climit const-decl "nat" coord_t_and_c_th nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil (check_rule_set subtype "0" "cindex")))
+ (check_rule_set_TCC2 0
+  (check_rule_set_TCC2-1 nil 3813306072 ("" (subtype-tcc) nil nil)
+   ((maxtime formal-const-decl
+     "{maxtime: posnat | maxinfuse <= maxtime}" system_th nil)
+    (<= const-decl "bool" reals nil)
+    (maxinfuse formal-const-decl "posnat" system_th nil)
+    (maxrate formal-const-decl "posnat" system_th nil)
+    (posnat nonempty-type-eq-decl nil integers nil)
+    (> const-decl "bool" reals nil)
+    (nonneg_int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (d_bot const-decl "device" devices_th nil)
+    (climit const-decl "nat" coord_t_and_c_th nil))
+   nil (check_rule_set subtype "1" "cindex")))
+ (check_rule_set_TCC3 0
+  (check_rule_set_TCC3-1 nil 3813306072 ("" (subtype-tcc) nil nil)
+   ((maxtime formal-const-decl
+     "{maxtime: posnat | maxinfuse <= maxtime}" system_th nil)
+    (<= const-decl "bool" reals nil)
+    (maxinfuse formal-const-decl "posnat" system_th nil)
+    (maxrate formal-const-decl "posnat" system_th nil)
+    (posnat nonempty-type-eq-decl nil integers nil)
+    (> const-decl "bool" reals nil)
+    (nonneg_int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (d_bot const-decl "device" devices_th nil)
+    (climit const-decl "nat" coord_t_and_c_th nil))
+   nil (check_rule_set subtype "2" "cindex")))
+ (check_rule_set_TCC4 0
+  (check_rule_set_TCC4-1 nil 3813306072 ("" (subtype-tcc) nil nil)
+   ((maxtime formal-const-decl
+     "{maxtime: posnat | maxinfuse <= maxtime}" system_th nil)
+    (<= const-decl "bool" reals nil)
+    (maxinfuse formal-const-decl "posnat" system_th nil)
+    (maxrate formal-const-decl "posnat" system_th nil)
+    (posnat nonempty-type-eq-decl nil integers nil)
+    (> const-decl "bool" reals nil)
+    (nonneg_int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (d_bot const-decl "device" devices_th nil)
+    (climit const-decl "nat" coord_t_and_c_th nil))
+   nil (check_rule_set subtype "3" "cindex")))
+ (check_rule_set_TCC5 0
+  (check_rule_set_TCC5-1 nil 3813306072 ("" (subtype-tcc) nil nil)
+   ((maxtime formal-const-decl
+     "{maxtime: posnat | maxinfuse <= maxtime}" system_th nil)
+    (<= const-decl "bool" reals nil)
+    (maxinfuse formal-const-decl "posnat" system_th nil)
+    (maxrate formal-const-decl "posnat" system_th nil)
+    (posnat nonempty-type-eq-decl nil integers nil)
+    (> const-decl "bool" reals nil)
+    (nonneg_int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (d_bot const-decl "device" devices_th nil)
+    (climit const-decl "nat" coord_t_and_c_th nil))
+   nil (check_rule_set subtype "4" "cindex")))
+ (check_rule_set_TCC6 0
+  (check_rule_set_TCC6-1 nil 3813306072 ("" (subtype-tcc) nil nil)
+   ((maxtime formal-const-decl
+     "{maxtime: posnat | maxinfuse <= maxtime}" system_th nil)
+    (<= const-decl "bool" reals nil)
+    (maxinfuse formal-const-decl "posnat" system_th nil)
+    (maxrate formal-const-decl "posnat" system_th nil)
+    (posnat nonempty-type-eq-decl nil integers nil)
+    (> const-decl "bool" reals nil)
+    (nonneg_int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (d_bot const-decl "device" devices_th nil)
+    (climit const-decl "nat" coord_t_and_c_th nil))
+   nil (check_rule_set subtype "5" "cindex")))
+ (tick_pan_device_TCC1 0
+  (tick_pan_device_TCC1-1 nil 3816415253
+   ("" (cond-disjoint-tcc) nil nil)
+   ((boolean nonempty-type-decl nil booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (number nonempty-type-decl nil numbers nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (<= const-decl "bool" reals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (>= const-decl "bool" reals nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (nlimit const-decl "nat" coord_t_and_c_th nil)
+    (nonneg_int nonempty-type-eq-decl nil integers nil)
+    (> const-decl "bool" reals nil)
+    (posnat nonempty-type-eq-decl nil integers nil)
+    (maxrate formal-const-decl "posnat" system_th nil)
+    (maxinfuse formal-const-decl "posnat" system_th nil)
+    (maxtime formal-const-decl
+     "{maxtime: posnat | maxinfuse <= maxtime}" system_th nil)
+    (device type-eq-decl nil devices_th nil)
+    (patient type-eq-decl nil patient_th nil)
+    (node type-eq-decl nil node_th nil)
+    (real_le_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (/= const-decl "boolean" notequal nil))
+   nil
+   (tick_pan_device disjointness
+    "COND booleans.AND(((system_th.ps`p_disp_top)`devs(system_th.d) = devices_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].infusion_pump), ((system_th.ps`ip_state(system_th.d))`m /= coord_t_and_c_th.off)) -> LET ds = system_th.ps`ip_state(system_th.d), nd = nde(system_th.ds), ds = infusion_pumps_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].tick(system_th.ds), pa = infusion_pumps_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].available_act(system_th.ds`pan, system_th.ds), msg = (# mhdr := node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].updmsg, pat_nd := system_th.np, msg_nd := system_th.nd, pan := system_th.pa #) IN system_th.st WITH [nde_state := node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].pan_send(system_th.nd, system_th.np, system_th.msg, system_th.ns), pdb := LAMBDA (p1: patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].patient): IF p1 = system_th.p THEN system_th.ps WITH [ip_state := LAMBDA (d1: devices_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].device): IF (d1 = system_th.d) THEN system_th.ds ELSE (system_th.st`pdb(system_th.p))`ip_state(d1) ENDIF] ELSE system_th.st`pdb(p1) ENDIF], booleans.AND(((system_th.ps`p_disp_top)`devs(system_th.d) = devices_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].vital_signs_device), (system_th.ps`vital_signs)`power) -> LET vs = system_th.ps`vital_signs, nd = nde(system_th.vs), vs = vital_signs_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].tick_vs(system_th.vs), pa = vital_signs_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].available_act(system_th.vs`pan, system_th.vs), msg = (# mhdr := node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].updmsg, pat_nd := system_th.np, msg_nd := system_th.nd, pan := system_th.pa #) IN system_th.st WITH [nde_state := node_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].pan_send(system_th.nd, system_th.np, system_th.msg, system_th.ns), pdb := LAMBDA (p1: patient_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].patient): IF p1 = system_th.p THEN system_th.ps WITH [vital_signs := system_th.vs] ELSE system_th.st`pdb(p1) ENDIF], ELSE -> system_th.st ENDCOND"
+    "nil")))
+ (select_action_TCC1 0
+  (select_action_TCC1-1 nil 3813306072 ("" (cond-disjoint-tcc) nil nil)
+   nil nil
+   (select_action disjointness
+    "COND booleans.AND((system_th.is`mode = coord_t_and_c_th.d_mode), (system_th.is`disp_focus = coord_t_and_c_th.device_focus)) -> system_th.st WITH [coord_st := coordinator_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].i_select_ad(system_th.a, system_th.is)], booleans.AND((booleans.OR((system_th.is`mode = coord_t_and_c_th.d_mode), (system_th.is`mode = coord_t_and_c_th.p_mode))), (system_th.is`disp_focus = coord_t_and_c_th.patient_focus)) -> system_th.st WITH [coord_st := coordinator_th[system_th.maxrate, system_th.maxinfuse, system_th.maxtime].i_select_ap(system_th.a, system_th.is)], ELSE -> system_th.st ENDCOND"
+    "nil"))))
+

@@ -1,0 +1,32 @@
+(coordinator_th
+ (i_select_display_TCC1 0
+  (i_select_display_TCC1-1 nil 3813306066
+   ("" (cond-disjoint-tcc) nil nil) nil nil
+   (i_select_display disjointness
+    "COND coordinator_th.is`disp_focus = coord_t_and_c_th.top_focus -> coordinator_th.i_select_top(coordinator_th.is), coordinator_th.is`disp_focus = coord_t_and_c_th.patient_focus -> coordinator_th.i_select_p_mode(coordinator_th.is), coordinator_th.is`disp_focus = coord_t_and_c_th.device_focus -> coordinator_th.i_select_d_mode(coordinator_th.is), ELSE -> coordinator_th.is ENDCOND"
+    "nil")))
+ (i_select_action_TCC1 0
+  (i_select_action_TCC1-1 nil 3813306066
+   ("" (cond-disjoint-tcc) nil nil) nil nil
+   (i_select_action disjointness
+    "COND coordinator_th.is`mode = coord_t_and_c_th.p_mode -> coordinator_th.i_select_ap(coordinator_th.a, coordinator_th.is), coordinator_th.is`mode = coord_t_and_c_th.d_mode -> coordinator_th.i_select_ad(coordinator_th.a, coordinator_th.is), ELSE -> coordinator_th.is ENDCOND"
+    "nil")))
+ (i_up_display_TCC1 0
+  (i_up_display_TCC1-1 nil 3813306066 ("" (cond-disjoint-tcc) nil nil)
+   nil nil
+   (i_up_display disjointness
+    "COND coordinator_th.is`disp_focus = coord_t_and_c_th.no_focus -> coord_t_and_c_th.no_focus, coordinator_th.is`disp_focus = coord_t_and_c_th.top_focus -> coord_t_and_c_th.no_focus, coordinator_th.is`disp_focus = coord_t_and_c_th.patient_focus -> coord_t_and_c_th.top_focus, coordinator_th.is`disp_focus = coord_t_and_c_th.device_focus -> coord_t_and_c_th.patient_focus ENDCOND"
+    "nil")))
+ (i_up_display_TCC2 0
+  (i_up_display_TCC2-1 nil 3813306066 ("" (cond-coverage-tcc) nil nil)
+   nil nil
+   (i_up_display coverage
+    "COND coordinator_th.is`disp_focus = coord_t_and_c_th.no_focus -> coord_t_and_c_th.no_focus, coordinator_th.is`disp_focus = coord_t_and_c_th.top_focus -> coord_t_and_c_th.no_focus, coordinator_th.is`disp_focus = coord_t_and_c_th.patient_focus -> coord_t_and_c_th.top_focus, coordinator_th.is`disp_focus = coord_t_and_c_th.device_focus -> coord_t_and_c_th.patient_focus ENDCOND"
+    "nil")))
+ (i_down_display_TCC1 0
+  (i_down_display_TCC1-1 nil 3813306066
+   ("" (cond-disjoint-tcc) nil nil) nil nil
+   (i_down_display disjointness
+    "COND coordinator_th.is`disp_focus = coord_t_and_c_th.no_focus -> coord_t_and_c_th.top_focus, coordinator_th.is`disp_focus = coord_t_and_c_th.top_focus -> coord_t_and_c_th.patient_focus, coordinator_th.is`disp_focus = coord_t_and_c_th.patient_focus -> coord_t_and_c_th.device_focus, coordinator_th.is`disp_focus = coord_t_and_c_th.device_focus -> coord_t_and_c_th.no_focus ENDCOND"
+    "nil"))))
+

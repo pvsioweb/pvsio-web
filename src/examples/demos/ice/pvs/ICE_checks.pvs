@@ -1,0 +1,1045 @@
+ICE_checks_th[maxrate: posnat, 
+          maxinfuse: posnat, 
+          maxtime: {maxtime: posnat | maxinfuse <= maxtime}]:%,
+         % node_limit, max_index, aq_limit, pq_limit, d_limit: posnat, 
+         % p_limit: posnat]:
+
+THEORY 
+BEGIN 
+IMPORTING system_th[maxrate, 
+          maxinfuse, 
+          maxtime]%,
+      %   node_limit, max_index, aq_limit, pq_limit, d_limit, 
+      %    p_limit]
+
+
+d_state_transitions(pre, post: d_state): boolean =
+  (per_pause(pre) & post = fun_pause(pre)) OR  
+  (per_infuse(pre) & post = fun_infuse(pre)) OR
+  (per_choosetime(pre) & post = fun_choosetime(pre)) OR
+(per_chooserate(pre) & post = fun_chooserate(pre)) OR  
+ (per_choosevtbi(pre) & post = fun_choosevtbi(pre)) OR 
+(per_choosetime(pre) & post = fun_choosetime(pre)) OR
+  (per_confirm(pre) & post = fun_confirm(pre)) OR 
+(per_open_clamp(pre) & post = fun_open_clamp(pre)) OR
+(per_close_clamp(pre) & post = fun_close_clamp(pre)) OR
+  (per_incr(pre) & post = fun_incr(pre)) OR  
+(per_decr(pre) & post = fun_decr(pre)) OR
+(per_bolus(pre) & post = fun_bolus(pre))
+
+%coord_d_display(d: device, p: patient, st: state): panel
+% = LET pc = (st`coord_st)`coord_db(p) IN
+%    (# pars := pc`param_set,
+%       enum_disp := (pc`p_enum_params)(d),
+%       num_disp := (pc`p_num_params)(d),
+%       cmds := (pc`p_actions)(d) #)
+
+device_d_display(d: device, p: patient, st: state): panel
+  = LET dc = (st`pdb(p))`ip_state(d) IN dc`pan
+
+
+
+% checks that an action message is added to the appropriate buffer
+% QED 22/12/20
+interimupdcheck: THEOREM
+   FORALL (a: action_id, d: device, p: patient, st: state):
+       LET st1 = execute_patient_device(a, p, d, st),
+           ps = st`pdb(p),
+           ps1 = st1`pdb(p),
+           ds = (ps`ip_state)(d),
+           ns = st`nde_state,
+           n1 = ps`nde,
+           is = st`coord_st,
+           amsg: act_message_type = (# mhdr := actmsg,
+                     pat_nd := ps`nde,
+                     msg_nd := ds`nde,
+                     act := a
+                    #)
+       IN 
+          (ns`n_links(coord_node, n1) AND (mode(is) = d_mode) AND
+	  ((ps`p_disp_top)`devs(d) = infusion_pump) AND
+          ((is`disp_device)`current_device = d) AND
+	  ((is`disp_patient)`current_patient = p) AND
+          (is`disp_device)`av_c_disp(a) AND 
+          ((ns`act_msg_waiting(n1))`buf_status /= full))  IMPLIES
+         (st1`nde_state)`act_msg_waiting =
+          LAMBDA (n: node):
+               IF n = n1
+               THEN add_act_buff(amsg, ns`act_msg_waiting(n1))
+               ELSE ns`act_msg_waiting(n)
+               ENDIF
+
+% vital signs device
+%QED 22/11/20 
+interimupdcheckvs: THEOREM
+   FORALL (a: action_id, d: device, p: patient, st: state):
+       LET st1 = execute_patient_device(a, p, d, st),
+           ps = st`pdb(p),
+           ps1 = st1`pdb(p),
+           vs = ps`vital_signs,
+           ns = st`nde_state,
+           n1 = ps`nde,
+           is = st`coord_st,
+           amsg: act_message_type = (# mhdr := actmsg,
+                     pat_nd := ps`nde,
+                     msg_nd := vs`nde,
+                     act := a
+                    #)
+       IN 
+          (ns`n_links(coord_node, n1) AND (mode(is) = d_mode) AND
+	  ((ps`p_disp_top)`devs(d) = vital_signs_device) AND
+          ((is`disp_device)`current_device = d) AND
+	  ((is`disp_patient)`current_patient = p) AND
+          (is`disp_device)`av_c_disp(a) AND 
+          ((ns`act_msg_waiting(n1))`buf_status /= full))  IMPLIES
+         (st1`nde_state)`act_msg_waiting =
+          LAMBDA (n: node):
+               IF n = n1
+               THEN add_act_buff(amsg, ns`act_msg_waiting(n1))
+               ELSE ns`act_msg_waiting(n)
+               ENDIF
+
+%QED 22/12/20
+
+ interimupdcheck1a: THEOREM
+   FORALL (a: action_id, d: device, p: patient, st: state):
+       LET st1 = act_mono(st),
+           ps = st`pdb(p),
+           ps1 = st1`pdb(p),
+           ds = (ps`ip_state)(d),
+           ns = st`nde_state,
+           n1 = ps`nde,
+           is = st`coord_st,
+           acts = (is`disp_patient)`patient_actions(d),
+           amsg: act_message_type = (# mhdr := actmsg,
+                     pat_nd := ps`nde,
+                     msg_nd := ds`nde,
+                     act := a
+                    #)
+       IN 
+          (ns`n_links(coord_node, n1) AND (mode(is) = d_mode) AND
+	  ((ps`p_disp_top)`devs(d) = infusion_pump) AND
+          ((is`disp_patient)`selected_device = d) AND
+	  ((is`disp_device)`current_device = d) AND
+	  (is`disp_focus = patient_focus) AND
+	  ((is`disp_patient)`current_patient = p) AND
+          (is`disp_device)`av_c_disp(a) AND
+	  ((is`disp_patient)`selected_action = a) AND
+          ((ns`act_msg_waiting(n1))`buf_status /= full))  IMPLIES
+         (st1`nde_state)`act_msg_waiting(n1) =
+          add_act_buff(amsg, ns`act_msg_waiting(n1))
+
+%QED 22/12/20
+
+interimupdcheck1b: THEOREM
+   FORALL (a: action_id, d: device, p: patient, st: state):
+       LET st1 = act_mono(st),
+           ps = st`pdb(p),
+           ps1 = st1`pdb(p),
+           ds = (ps`ip_state)(d),
+           ns = st`nde_state,
+           n1 = ps`nde,
+           is = st`coord_st,
+           acts = (is`disp_patient)`patient_actions(d),
+           amsg: act_message_type = (# mhdr := actmsg,
+                     pat_nd := ps`nde,
+                     msg_nd := ds`nde,
+                     act := a
+                    #)
+       IN 
+          (ns`n_links(coord_node, n1) AND (mode(is) = d_mode) AND
+	  ((ps`p_disp_top)`devs(d) = infusion_pump) AND
+          ((is`disp_patient)`selected_device = d) AND
+	  ((is`disp_device)`current_device = d) AND
+	  (is`disp_focus = device_focus) AND
+	  ((is`disp_patient)`current_patient = p) AND
+          (is`disp_device)`av_c_disp(a) AND
+	  ((is`disp_device)`selected_action = a) AND
+          ((ns`act_msg_waiting(n1))`buf_status /= full) AND
+      (((is`disp_top)`menu_visible)(act)))  IMPLIES
+         (st1`nde_state)`act_msg_waiting(n1) =
+          add_act_buff(amsg, ns`act_msg_waiting(n1))
+%QED 22/12/20
+interimupdcheck1bm: THEOREM
+   FORALL (a: action_id, d: device, p: patient, st: state):
+       LET st1 = coord_act_mono(st),
+           ps = st`pdb(p),
+           ps1 = st1`pdb(p),
+           ds = (ps`ip_state)(d),
+           ns = st`nde_state,
+           n1 = ps`nde,
+           is = st`coord_st,
+           acts = (is`disp_patient)`patient_actions(d),
+           amsg: act_message_type = (# mhdr := actmsg,
+                     pat_nd := ps`nde,
+                     msg_nd := ds`nde,
+                     act := a
+                    #)
+       IN 
+          (ns`n_links(coord_node, n1) AND (mode(is) = d_mode) AND
+	  ((ps`p_disp_top)`devs(d) = infusion_pump) AND
+          ((is`disp_patient)`selected_device = d) AND
+	  ((is`disp_device)`current_device = d) AND
+	  (is`disp_focus = device_focus) AND
+	  ((is`disp_patient)`current_patient = p) AND
+          (is`disp_device)`av_c_disp(a) AND
+      ((is`disp_device)`selected_action = a) AND
+      ((is`disp_top)`ent_action = a) AND
+          ((ns`act_msg_waiting(n1))`buf_status /= full) AND
+      (((is`disp_top)`menu_visible)(act)))  IMPLIES
+         (st1`nde_state)`act_msg_waiting(n1) =
+          add_act_buff(amsg, ns`act_msg_waiting(n1))
+         
+	       
+% QED Run time  = 1.15 secs. 22/12/20
+   interimupdcheck1ap: THEOREM
+   FORALL (a: action_id, d: device, p: patient, st: state):
+       LET st1 = act_mono(st),
+           ps = st`pdb(p),
+           ps1 = st1`pdb(p),
+           ds = (ps`ip_state)(d),
+           ns = st`nde_state,
+           n1 = ps`nde,
+           is = st`coord_st,
+           acts = (is`disp_patient)`patient_actions(d),
+           amsg: act_message_type = (# mhdr := actmsg,
+                     pat_nd := ps`nde,
+                     msg_nd := ds`nde,
+                     act := a
+                    #)
+       IN 
+          (ns`n_links(coord_node, n1) AND (mode(is) = d_mode) AND
+	  ((ps`p_disp_top)`devs(d) = infusion_pump) AND
+          ((is`disp_patient)`selected_device = d) AND
+	 ((is`disp_device)`current_device = d) AND
+	  (is`disp_focus = patient_focus) AND
+	  ((is`disp_patient)`current_patient = p) AND
+          (is`disp_device)`av_c_disp(a) AND
+	  ((is`disp_patient)`selected_action = a) AND
+          ((ns`act_msg_waiting(n1))`buf_status /= full))  IMPLIES
+         (st1`nde_state)`act_msg_waiting =
+          LAMBDA (n: node):
+               IF n = n1
+               THEN add_act_buff(amsg, ns`act_msg_waiting(n1))
+               ELSE ns`act_msg_waiting(n)
+               ENDIF
+%QED Run time  = 0.48 secs. 22/12/20
+check_next_act_patient: THEOREM
+   FORALL (a: action_id, d: device, p: patient, st: state):
+       LET st1 = next_act_patient(p, st),
+           ps = st`pdb(p),
+           ps1 = st1`pdb(p),
+           ds = (ps`ip_state)(d),
+           ns = st`nde_state,
+           np = ps`nde,
+           nd = ds`nde,
+           amsg: act_message_type = (# mhdr := actmsg,
+                     pat_nd := ps`nde,
+                     msg_nd := ds`nde,
+                     act := a
+                    #),
+           amw = LAMBDA (n: node): empty_act_q
+       IN 
+          (ns`n_links(coord_node, np) AND ns`n_links(np, nd) AND
+	  ((ps`p_disp_top)`devs(d) = infusion_pump) AND
+          ((ns`act_msg_waiting(nd))`buf_status = empty) AND
+          ns`act_msg_waiting = LAMBDA (n: node):
+               IF n = np
+               THEN add_act_buff(amsg, amw(np))
+               ELSE amw(n)
+               ENDIF)  IMPLIES
+         (st1`nde_state)`current_act_msg = amsg
+
+check_tick_patient: THEOREM
+   FORALL (a: action_id, d: device, p: patient, st: state):
+       LET st1 = tick_act_patient(p, st),
+           ps = st`pdb(p),
+           ps1 = st1`pdb(p),
+           ds = (ps`ip_state)(d),
+           ns = st`nde_state,
+           np = ps`nde,
+           nd = ds`nde,
+           amsg: act_message_type = (# mhdr := actmsg,
+                     pat_nd := ps`nde,
+                     msg_nd := ds`nde,
+                     act := a
+                    #),
+           amw = LAMBDA (n: node): empty_act_q
+       IN 
+          (ns`n_links(coord_node, np) AND ns`n_links(np, nd) AND
+	  ((ps`p_disp_top)`devs(d) = infusion_pump) AND
+          ((ns`act_msg_waiting(nd))`buf_status = empty) AND
+          ns`act_msg_waiting = LAMBDA (n: node):
+               IF n = np
+               THEN add_act_buff(amsg, amw(np))
+               ELSE amw(n)
+               ENDIF)  IMPLIES
+         (st1`nde_state)`current_act_msg = amsg
+          
+%QED 22/12/20
+ interimupdcheck1apm: THEOREM
+   FORALL (a: action_id, d: device, p: patient, st: state):
+       LET st1 = coord_act_mono(st),
+           ps = st`pdb(p),
+           ps1 = st1`pdb(p),
+           ds = (ps`ip_state)(d),
+           ns = st`nde_state,
+           n1 = ps`nde,
+           is = st`coord_st,
+           acts = (is`disp_patient)`patient_actions(d),
+           amsg: act_message_type = (# mhdr := actmsg,
+                     pat_nd := ps`nde,
+                     msg_nd := ds`nde,
+                     act := a
+                    #)
+       IN 
+          (ns`n_links(coord_node, n1) AND (mode(is) = d_mode) AND
+	  ((ps`p_disp_top)`devs(d) = infusion_pump) AND
+          ((is`disp_patient)`selected_device = d) AND
+	 ((is`disp_device)`current_device = d) AND
+	  (is`disp_focus = patient_focus) AND
+	  ((is`disp_patient)`current_patient = p) AND
+          (is`disp_device)`av_c_disp(a) AND
+	  ((is`disp_patient)`selected_action = a) AND
+         ((is`disp_top)`ent_action = a) AND
+       ((ns`act_msg_waiting(n1))`buf_status /= full) AND
+      (((is`disp_top)`menu_visible)(act)))  IMPLIES
+         (st1`nde_state)`act_msg_waiting =
+          LAMBDA (n: node):
+               IF n = n1
+               THEN add_act_buff(amsg, ns`act_msg_waiting(n1))
+               ELSE ns`act_msg_waiting(n)
+               ENDIF
+
+%QED Run time  = 1.04 secs. 22/12/20	       
+ interimupdcheck1bp: THEOREM
+   FORALL (a: action_id, d: device, p: patient, st: state):
+       LET st1 = act_mono(st),
+           ps = st`pdb(p),
+           ps1 = st1`pdb(p),
+           ds = (ps`ip_state)(d),
+           ns = st`nde_state,
+           n1 = ps`nde,
+           is = st`coord_st,
+           acts = (is`disp_patient)`patient_actions(d),
+           amsg: act_message_type = (# mhdr := actmsg,
+                     pat_nd := ps`nde,
+                     msg_nd := ds`nde,
+                     act := a
+                    #)
+       IN 
+          (ns`n_links(coord_node, n1) AND (mode(is) = d_mode) AND
+	  ((ps`p_disp_top)`devs(d) = infusion_pump) AND
+          ((is`disp_patient)`selected_device = d) AND
+	 ((is`disp_device)`current_device = d) AND
+	  (is`disp_focus = device_focus) AND
+	  ((is`disp_patient)`current_patient = p) AND
+          (is`disp_device)`av_c_disp(a) AND
+	  ((is`disp_device)`selected_action = a) AND
+          ((ns`act_msg_waiting(n1))`buf_status /= full))  IMPLIES
+         (st1`nde_state)`act_msg_waiting =
+          LAMBDA (n: node):
+               IF n = n1
+               THEN add_act_buff(amsg, ns`act_msg_waiting(n1))
+               ELSE ns`act_msg_waiting(n)
+               ENDIF
+%QED 22/12/20
+interimupdcheck1bpm: THEOREM
+   FORALL (a: action_id, d: device, p: patient, st: state):
+       LET st1 = coord_act_mono(st),
+           ps = st`pdb(p),
+           ps1 = st1`pdb(p),
+           ds = (ps`ip_state)(d),
+           ns = st`nde_state,
+           n1 = ps`nde,
+           is = st`coord_st,
+           acts = (is`disp_patient)`patient_actions(d),
+           amsg: act_message_type = (# mhdr := actmsg,
+                     pat_nd := ps`nde,
+                     msg_nd := ds`nde,
+                     act := a
+                    #)
+       IN 
+          (ns`n_links(coord_node, n1) AND (mode(is) = d_mode) AND
+	  ((ps`p_disp_top)`devs(d) = infusion_pump) AND
+          ((is`disp_patient)`selected_device = d) AND
+	 ((is`disp_device)`current_device = d) AND
+	  (is`disp_focus = device_focus) AND
+	  ((is`disp_patient)`current_patient = p) AND
+          (is`disp_device)`av_c_disp(a) AND
+      ((is`disp_device)`selected_action = a) AND
+      ((is`disp_top)`ent_action = a) AND
+          ((ns`act_msg_waiting(n1))`buf_status /= full) AND
+      (((is`disp_top)`menu_visible)(act)))  IMPLIES
+         (st1`nde_state)`act_msg_waiting =
+          LAMBDA (n: node):
+               IF n = n1
+               THEN add_act_buff(amsg, ns`act_msg_waiting(n1))
+               ELSE ns`act_msg_waiting(n)
+               ENDIF
+
+newconstraint(a: action_id, d: device, p: patient, st: state): boolean =
+LET ps = st`pdb(p),
+    ds = (ps`ip_state)(d),
+    ns = st`nde_state,
+    pn = ps`nde,
+    dn = ds`nde,
+    is = st`coord_st,
+    acts = (is`disp_patient)`patient_actions(d),
+    amsg: act_message_type = (# mhdr := actmsg,
+    pat_nd := pn,
+    msg_nd := dn,
+    act := a #) IN
+ (ns`n_links(coord_node, pn) AND
+  ns`n_links(pn, dn) AND
+  (mode(is) = d_mode) AND
+  ((ps`p_disp_top)`devs(d) = infusion_pump) AND
+  ((is`disp_patient)`selected_device = d) AND
+  ((is`disp_device)`current_device = d) AND
+  (is`disp_focus = device_focus) AND
+  ((is`disp_patient)`current_patient = p) AND
+  (is`disp_device)`av_c_disp(a) AND
+  ((is`disp_device)`selected_action = a) AND
+  ((is`disp_top)`ent_action = a) AND
+  ((ns`act_msg_waiting(pn))`buf_status /= full) AND
+  ((ns`act_msg_waiting(dn))`buf_status /= full) AND
+  (((is`disp_top)`menu_visible)(act)) AND
+  (ns`act_msg_waiting =
+          LAMBDA (n: node):
+               IF n = pn
+               THEN add_act_buff(amsg, ns`act_msg_waiting(pn))
+               ELSE ns`act_msg_waiting(n)
+               ENDIF))
+%QED Run time  = 23.17 secs. 22/12/20
+ebuff0a: THEOREM
+   FORALL (a: action_id, d: device, p: patient, st: state):
+       LET st1 = coord_act_mono(st),
+           st2 = tick_act_patient(p, st1),
+           ps = st`pdb(p),
+           ps1 = st1`pdb(p),
+           ds = (ps`ip_state)(d),
+           ns = st`nde_state,
+	   ns1 = st1`nde_state,
+	   ns2 = st2`nde_state,
+           n1 = ps`nde,
+           is = st`coord_st,
+           acts = (is`disp_patient)`patient_actions(d),
+           amsg: act_message_type = (# mhdr := actmsg,
+                     pat_nd := ps`nde,
+                     msg_nd := ds`nde,
+                     act := a
+                    #)
+       IN 
+          (ns`n_links(coord_node, n1) AND (mode(is) = d_mode) AND
+	  ((ps`p_disp_top)`devs(d) = infusion_pump) AND
+          ((is`disp_patient)`selected_device = d) AND
+	 ((is`disp_device)`current_device = d) AND
+	  (is`disp_focus = device_focus) AND
+	  ((is`disp_patient)`current_patient = p) AND
+          (is`disp_device)`av_c_disp(a) AND
+      ((is`disp_device)`selected_action = a) AND
+      ((is`disp_top)`ent_action = a) AND
+           ((ns`act_msg_waiting(n1)) = empty_act_q) AND
+      (((is`disp_top)`menu_visible)(act)))  IMPLIES
+         ((st1`nde_state)`act_msg_waiting(n1) =
+          add_act_buff(amsg, ns`act_msg_waiting(n1)))
+                AND
+	  (ns2`current_act_msg = amsg)
+
+
+
+% QED Run time  = 53.53 secs. 22/12/20
+ebuff0: THEOREM
+   FORALL (a: action_id, d: device, p: patient, st: state):
+       LET st1 = coord_act_mono(st),
+           st2 = tick_act_patient(p, st1),
+           ps = st`pdb(p),
+           ps1 = st1`pdb(p),
+           ds = (ps`ip_state)(d),
+           ns = st`nde_state,
+	   ns1 = st1`nde_state,
+	   ns2 = st2`nde_state,
+           n1 = ps`nde,
+           is = st`coord_st,
+           acts = (is`disp_patient)`patient_actions(d),
+           amsg: act_message_type = (# mhdr := actmsg,
+                     pat_nd := ps`nde,
+                     msg_nd := ds`nde,
+                     act := a
+                    #)
+       IN 
+          (ns`n_links(coord_node, n1) AND (mode(is) = d_mode) AND
+	  ((ps`p_disp_top)`devs(d) = infusion_pump) AND
+          ((is`disp_patient)`selected_device = d) AND
+	 ((is`disp_device)`current_device = d) AND
+	  (is`disp_focus = device_focus) AND
+	  ((is`disp_patient)`current_patient = p) AND
+          (is`disp_device)`av_c_disp(a) AND
+      ((is`disp_device)`selected_action = a) AND
+      ((is`disp_top)`ent_action = a) AND
+           ((ns`act_msg_waiting(n1)) = empty_act_q) AND
+         (((is`disp_top)`menu_visible)(act)))  IMPLIES
+         ((st1`nde_state)`act_msg_waiting(n1) =
+          add_act_buff(amsg, ns`act_msg_waiting(n1)))
+                AND
+	  (ns2`current_act_msg = amsg)
+
+
+% QED Run time  = 48.11 secs 22/12/20
+ebuff1: THEOREM
+   FORALL (a: action_id, d: device, p: patient, st: state):
+       LET st1 = coord_act_mono(st),
+           st2 = tick_act_patient(p, st1),
+           ps = st`pdb(p),
+           ps1 = st1`pdb(p),
+           ds = (ps`ip_state)(d),
+           ns = st`nde_state,
+	   ns1 = st1`nde_state,
+	   ns2 = st2`nde_state,
+           n1 = ps`nde,
+           is = st`coord_st,
+           acts = (is`disp_patient)`patient_actions(d),
+           amsg: act_message_type = (# mhdr := actmsg,
+                     pat_nd := ps`nde,
+                     msg_nd := ds`nde,
+                     act := a
+                    #)
+       IN 
+          (ns`n_links(coord_node, n1) AND (mode(is) = d_mode) AND
+	  ((ps`p_disp_top)`devs(d) = infusion_pump) AND
+          ((is`disp_patient)`selected_device = d) AND
+	 ((is`disp_device)`current_device = d) AND
+	  (is`disp_focus = device_focus) AND
+	  ((is`disp_patient)`current_patient = p) AND
+          (is`disp_device)`av_c_disp(a) AND
+      ((is`disp_device)`selected_action = a) AND
+      ((is`disp_top)`ent_action = a) AND
+           ((ns`act_msg_waiting(n1)) = empty_act_q) AND
+          (((is`disp_top)`menu_visible)(act)))  IMPLIES
+         ((st1`nde_state)`act_msg_waiting =
+          LAMBDA (n: node):
+               IF n = n1
+               THEN add_act_buff(amsg, ns`act_msg_waiting(n1))
+               ELSE ns1`act_msg_waiting(n)
+               ENDIF) AND
+	  (ns2`current_act_msg = amsg)
+	  
+
+
+
+%QED Run time  = 0.54 secs. 22/12/20
+send_next_symmetry: THEOREM
+    FORALL(n1, n2: node, msg:act_message_type, ns: n_state):
+    ns`n_links(n1, n2) AND (ns`act_msg_waiting = LAMBDA (n: node): empty_act_q)
+    IMPLIES
+    LET ns1 = act_send(n1, n2, msg, ns) IN
+     (next_act_pm(n2, ns1)`current_act_msg = msg) AND
+     ((ns1`act_msg_waiting)(n2)`buf_status = functioning)
+     
+%QED Run time  = 0.73 secs. 22/12/20
+send_next_symmetry1: THEOREM
+    FORALL(n1, n2: node, msg:pan_message_type, ns: n_state):
+    ns`n_links(n1, n2) AND (ns`pan_msg_waiting = LAMBDA (n: node): empty_pan_q)
+    IMPLIES
+    LET ns1 = pan_send(n1, n2, msg, ns), ns2 = next_pan_pm(n2, ns1) IN
+     (ns2`current_pan_msg = msg) AND
+     ((ns1`pan_msg_waiting)(n2)`buf_status = functioning) AND
+     ((ns2`pan_msg_waiting)(n2)`buf_status = empty)
+     
+% Note this assumes that only type of device infusion_pump
+%QED Run time  = 0.46 secs. 22/12/20
+setup_check1: THEOREM
+FORALL (p: patient, st: state):
+LET st1 = connect_to_coordinator(p, st),
+    is1 = st1`coord_st,
+    ps1 = st1`pdb(p),
+    cnde = (st`nde_state)`current_node
+  IN (p /= p_null) AND ((st`pdb(p))`id = null_pid) AND (cnde < nlimit)
+  IMPLIES
+     (((is1`disp_alarm)`patient_connected)(p) = clear) AND
+     (is1`disp_alarm)`patient_updates(p) AND
+     (st1`ps)(p) AND (st1`p_nodes(cnde) = p) AND
+     st1`patient_nodes(cnde) AND ps1`id = p AND
+     (ps1`nde = cnde) AND (is1`disp_top)`patients(p)
+
+%QED Run time  = 63.91 secs. 22/12/20
+setup_check1a: THEOREM
+FORALL (p: patient, st: state):
+LET st1 = connect_to_coordinator(p, st),
+    is1 = st1`coord_st,
+    ps1 = st1`pdb(p),
+    cnde = (st`nde_state)`current_node
+  IN (p /= p_null) AND ((st`pdb(p))`id = null_pid) AND (cnde < nlimit) AND
+     (((st`pdb(p))`p_disp_top)`menu_visible)(connect)
+  IMPLIES
+     (((is1`disp_alarm)`patient_connected)(p) = clear) AND
+     (is1`disp_alarm)`patient_updates(p) AND
+     (st1`ps)(p) AND (st1`p_nodes(cnde) = p) AND
+     st1`patient_nodes(cnde) AND ps1`id = p AND
+     (ps1`nde = cnde) AND (is1`disp_top)`patients(p)
+
+first_constraint(p: patient, st: state): boolean =
+     (p /= p_null) AND ((st`pdb(p))`id = null_pid) AND
+     (((st`pdb(p))`p_disp_top)`menu_visible)(connect) AND
+     ((((st`coord_st)`disp_alarm)`patient_connected)(p) = clear) AND
+     ((st`coord_st)`disp_alarm)`patient_updates(p) AND
+     (st`ps)(p)
+      AND (st`pdb)(p)`id = p
+     AND ((st`coord_st)`disp_top)`patients(p)
+%QED Run time  = 227.06 secs. 22/12/20
+setup_check2: THEOREM
+FORALL (p: patient, d: device, st: state):
+LET st1 =  connect_device_to_patient(p, d, infusion_pump,
+                          st),
+    is1 = st1`coord_st,
+    ps1 = st1`pdb(p),
+    ds1 = ps1`ip_state(d),
+    cnde = (st`nde_state)`current_node,
+    cnde1 = (st1`nde_state)`current_node
+     IN first_constraint(p, st)
+     AND (d /= nil_device) AND ((is1`disp_patient)`selected_device = nil_device) AND
+     (p_devices((is1`coord_db(p)))(d) = no_device) AND  (cnde + 1 < nlimit) AND
+      (st`p_nodes(cnde) = p) AND st`patient_nodes(cnde) AND ((st`pdb)(p)`nde = cnde) 
+  IMPLIES
+     (((is1`disp_alarm)`patient_connected)(p) = clear) AND
+     (((is1`disp_alarm)`patient_device_connected(p))(d) = clear) AND
+     (is1`disp_alarm)`patient_updates(p) AND
+     (is1`disp_top)`patients(p) AND ((is1`disp_top)`patients)(p) AND
+     (st1`ps)(p) AND (st1`p_nodes(cnde) = p) AND
+     st1`patient_nodes(cnde) AND ps1`id = p AND
+     ((st1`d_nodes)(cnde1)`pat = p) AND ((st1`d_nodes)(cnde1)`dev = d ) AND
+     (ps1`nde = cnde) AND (is1`disp_top)`patients(p) AND
+     (ps1`patient_panels(d) = ds1`pan) AND (ds1`dev = d) AND
+     (ds1`nde = cnde1) AND (is1`disp_alarm)`device_update(d) AND
+     (is1`coord_db(p)`coord_devices(d) = empty_panel)
+
+check_constraint(p: patient, d: device, st: state, nde1, nde2: node): boolean =
+LET is = st`coord_st, ps = st`pdb(p), ds = ps`ip_state(d), ns = nde_state(st)  IN
+ns`n_links(nde1, coord_node) AND ns`n_links(nde1, nde2) AND nde1 /= nde2 AND coord_node /= nde1
+AND coord_node /= nde2 AND
+(p /= p_null) AND ((st`pdb(p))`id = null_pid) AND (nde1 + 1 < nlimit) AND
+     (nde2 + 1 < nlimit) AND (nde1 /= no_node) AND (nde2 /= no_node)
+     AND (d /= nil_device) AND ((is`disp_patient)`selected_device = nil_device) AND
+     (p_devices((is`coord_db(p)))(d) =infusion_pump) AND
+      (((is`disp_alarm)`patient_connected)(p) = clear) AND
+     (((is`disp_alarm)`patient_device_connected(p))(d) = clear) AND
+     (is`disp_alarm)`patient_updates(p) AND
+     (is`disp_top)`patients(p) AND
+     (st`ps)(p) AND (st`p_nodes(nde1) = p) AND
+     st`patient_nodes(nde1) AND ps`id = p AND
+     ((st`d_nodes)(nde1)`pat = p) AND ((st`d_nodes)(nde2)`dev = d ) AND
+     (ps`nde = nde1) AND
+     (ps`patient_panels(d) = ds`pan) AND (ds`dev = d) AND
+     (ds`nde = nde2) AND (is`disp_alarm)`device_update(d) AND
+     (is`coord_db(p)`coord_devices(d) = empty_panel) AND
+     (st`patient_menus = init_patient_menu)
+
+setup_check3a: THEOREM
+FORALL (p: patient, d: device, st: state, nde1, nde2: node):
+LET st1 = patient_menu_act(select, p, st),
+    ps = st`pdb(p),
+    ps1 = st1`pdb(p), ds1 = ps1`ip_state(d) IN 
+check_constraint(p, d, st, nde1, nde2) AND (ps`pmode = d_mode) AND
+(ps`emode = edit_none) AND ((ps`p_disp_top)`menu_visible = edit_none_menu)
+IMPLIES
+((ps1`prev_menu_visible = edit_none_menu) AND ((ps`p_disp_top)`menu_visible = enter_options_menu))
+
+% QED 22/12/20 Run time  = 44.48 secs. 
+setup_check3: THEOREM
+FORALL (p: patient, d: device, st: state, nde1, nde2: node):
+LET st1 = patient_menu_act(select, p, st),
+    st1 = patient_menu_act(display, p, st1), ps1 = st1`pdb(p), ds1 = ps1`ip_state(d) IN 
+check_constraint(p, d, st, nde1, nde2) AND (((st`pdb(p))`p_disp_top)`menu_visible)(select)
+IMPLIES
+(ps1`pmode = d_mode) AND (((ps1`p_disp_top)`sel_device)`dv = d) AND (ps1`p_disp_device = ds1`pan)
+
+check_constraint1(p: patient, d: device, st: state, nde1, nde2: node): boolean =
+LET ps = st`pdb(p) IN
+check_constraint(p, d, st, nde1, nde2) AND (ps`pmode = d_mode) AND (((ps`p_disp_top)`sel_device)`dv = d)
+
+check_constraintb1(p: patient, d: device, st: state, nde1, nde2: node): boolean =
+LET ps = st`pdb(p) IN
+check_constraint(p, d, st, nde1, nde2) AND (ps`pmode = d_mode) AND (((ps`p_disp_top)`sel_device)`dv = d)
+AND (ps`emode = edit_device) AND p_rules_display(ps)`select_pars(dpm) AND
+(ps`p_disp_device)`pars(rte) AND (ps`p_disp_device)`pars(vtb) AND
+(ps`p_disp_device)`pars(dpm) AND
+(ps`p_disp_top)`menu_visible(select)
+
+check_constraintc1(p: patient, d: device, st: state, nde1, nde2: node): boolean =
+LET ps = st`pdb(p) IN
+check_constraint(p, d, st, nde1, nde2) AND (ps`pmode = d_mode) AND (((ps`p_disp_top)`sel_device)`dv = d)
+AND (ps`emode = edit_device) AND p_rules_display(ps)`select_pars(dpm) AND
+     p_rules_display(ps)`select_pars(rte) AND p_rules_display(ps)`select_pars(vtb)
+
+check_constraintd1(p: patient, d: device, st: state, nde1, nde2: node): boolean =
+LET ps = st`pdb(p) IN
+check_constraintc1(p, d, st, nde1, nde2) AND
+p_rules_display(ps)`select_acts(powr) AND
+p_rules_display(ps)`select_acts(hold) AND p_rules_display(ps)`select_acts(start)
+
+check_constrainte1(p: patient, d: device, st: state, nde1, nde2: node): boolean =
+LET ps = st`pdb(p), pa = filter_panel(ps`patient_panels(d),
+                       p_rules_display(ps)`select_pars, p_rules_display(ps)`select_acts),
+    ns = st`nde_state,
+    pmq = ns`pan_msg_waiting(coord_node),
+    amq = ns`act_msg_waiting(coord_node) IN
+check_constraintd1(p, d, st, nde1, nde2) AND
+(ps`patient_panels(d) = pa) AND
+(pmq`buff(pmq`current_pos) = (# mhdr := pmmsg, pat_nd := nde1, msg_nd := nde2, pan := pa #)) AND
+(amq = empty_act_q)
+
+check_constraintf1(p: patient, d: device, st: state, nde1, nde2: node): boolean =
+LET ps = st`pdb(p), is = st`coord_st, ns = st`nde_state IN
+check_constrainte1(p, d, st, nde1, nde2) AND
+((is`coord_db(p))`coord_devices(d) = ps`patient_panels(d)) AND
+((ns`current_act_msg)`mhdr = nomsg)
+
+
+%QED Run time  = 91.92 secs. 22/12/20
+setup_check4a1: THEOREM
+FORALL (p: patient, d: device, st: state, nde1, nde2: node):
+LET st1 = patient_enter_device(d, p, st),
+    st1 = patient_menu_act(select, p, st1),
+    st1 = patient_menu_act(device, p, st1),
+    ps = st`pdb(p), ps1 = st1`pdb(p), ds1 = ps1`ip_state(d) IN
+check_constraint1(p, d, st, nde1, nde2) AND  (((st`pdb(p))`p_disp_top)`menu_visible)(select)
+AND (ps`p_disp_device)`pars(dpm) 
+IMPLIES
+(ps1`emode = edit_device)
+
+%QED Run time  = 11.08 secs. 22/12/20
+setup_check4a: THEOREM
+FORALL (p: patient, d: device, st: state, nde1, nde2: node):
+LET st1 = patient_enter_parameter(dpm, p, st),
+    st1 = patient_menu_act(select, p, st1),
+    st1 = patient_menu_act(parameter, p, st1),
+    ps = st`pdb(p), ps1 = st1`pdb(p) IN
+check_constraint1(p, d, st, nde1, nde2) AND  (ps`p_disp_top)`menu_visible(select)
+AND (ps`emode = edit_device) AND (ps`p_disp_device)`pars(dpm)
+IMPLIES
+p_rules_display(ps1)`select_pars(dpm)
+
+%QED Run time  = 63.72 secs 22/12/20
+setup_check4b1: THEOREM
+FORALL (p: patient, d: device, st: state, nde1, nde2: node):
+LET st1 = patient_enter_parameter(rte, p, st),
+    st1 = patient_menu_act(select, p, st1),
+    st1 = patient_menu_act(parameter, p, st1),
+    ps1 = st1`pdb(p), ds1 = ps1`ip_state(d) IN
+check_constraintb1(p, d, st, nde1, nde2) IMPLIES
+p_rules_display(ps1)`select_pars(rte)
+
+% QED Run time  = 66.12 secs. 22/12/20
+setup_check4b: THEOREM
+FORALL (p: patient, d: device, st: state, nde1, nde2: node):
+LET st1 = patient_enter_parameter(vtb, p, st),
+    st1 = patient_menu_act(select, p, st1),
+    st1 = patient_menu_act(parameter, p, st1),
+    ps1 = st1`pdb(p), ds1 = ps1`ip_state(d) IN
+check_constraintb1(p, d, st, nde1, nde2) AND p_rules_display(ps1)`select_pars(rte) IMPLIES
+p_rules_display(ps1)`select_pars(vtb)
+
+%QED Run time  = 10.65 secs. 22/12/20
+setup_check4c1: THEOREM
+FORALL (p: patient, d: device, st: state, nde1, nde2: node):
+LET st1 = patient_enter_action(powr, p, st),
+    st1 = patient_menu_act(select, p, st1),
+    st1 = patient_menu_act(action, p, st1),
+ps = st`pdb(p), ps1 = st1`pdb(p), ds1 = ps1`ip_state(d) IN
+check_constraintb1(p, d, st, nde1, nde2) AND  p_rules_display(ps)`select_pars(rte)
+AND  p_rules_display(ps)`select_pars(vtb) AND (ps`p_disp_device)`cmds(powr) IMPLIES
+p_rules_display(ps1)`select_acts(powr)
+
+check_constraintb1a(p: patient, d: device, st: state, nde1, nde2: node): boolean =
+LET ps = st`pdb(p) IN
+check_constraintb1(p, d, st, nde1, nde2) AND  p_rules_display(ps)`select_pars(rte)
+AND  p_rules_display(ps)`select_pars(vtb) AND (ps`p_disp_device)`cmds(powr) AND
+p_rules_display(ps)`select_acts(powr)
+
+%QED Run time  = 13.43 secs. 22/12/20
+setup_check4c2: THEOREM
+FORALL (p: patient, d: device, st: state, nde1, nde2: node):
+LET st1 = patient_enter_action(hold, p, st),
+    st1 = patient_menu_act(select, p, st1),
+    st1 = patient_menu_act(action, p, st1),
+ps = st`pdb(p), ps1 = st1`pdb(p), ds1 = ps1`ip_state(d) IN
+check_constraintb1a(p, d, st, nde1, nde2) AND (ps`p_disp_device)`cmds(hold) IMPLIES
+p_rules_display(ps1)`select_acts(hold)
+
+check_constraintb1b(p: patient, d: device, st: state, nde1, nde2: node): boolean =
+LET ps = st`pdb(p) IN
+check_constraintb1(p, d, st, nde1, nde2) AND  p_rules_display(ps)`select_pars(rte)
+AND  p_rules_display(ps)`select_pars(vtb) AND (ps`p_disp_device)`cmds(powr) AND
+p_rules_display(ps)`select_acts(powr) AND (ps`p_disp_device)`cmds(hold) AND
+(ps`p_disp_device)`cmds(start)
+
+%QED  22/12/20
+setup_check4c: THEOREM
+FORALL (p: patient, d: device, st: state, nde1, nde2: node):
+LET st1 = patient_enter_action(start, p, st),
+    st1 = patient_menu_act(select, p, st1),
+    st1 = patient_menu_act(action, p, st1),
+ps1 = st1`pdb(p) IN
+check_constraintb1b(p, d, st, nde1, nde2) IMPLIES
+p_rules_display(ps1)`select_acts(start)
+
+% QED 22/12/20
+
+setup_check4d: THEOREM
+FORALL (p: patient, d: device, st: state, nde1, nde2: node):
+LET st1 = act_patient_ok(p, st), ps = st`pdb(p), 
+pa = filter_panel(ps`patient_panels(d),
+                       p_rules_display(ps)`select_pars, p_rules_display(ps)`select_acts),
+ps1 = st1`pdb(p), ds1 = ps1`ip_state(d), ns1 = nde_state(st1),
+msg = next_cm(ns1)`current_pan_msg IN
+check_constraintd1(p, d, st, nde1, nde2) IMPLIES
+(ps1`patient_panels(d) = pa) AND (msg`mhdr = pmmsg)
+AND (msg`pan = pa)
+
+% QED 22/12/20
+setup_check4e: THEOREM
+FORALL (p: patient, d: device, st: state, nde1, nde2: node):
+LET ns = nde_state(st), st1 = tick_coordinator(st),
+is1 = st1`coord_st, ps1 = st1`pdb(p), ns1 = nde_state(st1) IN
+check_constrainte1(p, d, st, nde1, nde2) IMPLIES
+((is1`coord_db(p))`coord_devices(d) = ps1`patient_panels(d)) AND
+((ns1`current_act_msg)`mhdr = nomsg)
+%QED 22/12/20
+add_setup_check1apt0: THEOREM
+FORALL (p: patient, v: device, st: state, nde1, nde2, nde3: node):
+LET st1 = patient_enter_device_name(v, p, st),
+    st1 = patient_menu_act(enter, p, st1),
+    st1 = patient_menu_act(device, p, st1),
+   % st1 = patient_menu_invoke(p, vs_device, st1),
+    ps1 = st1`pdb(p)
+IN
+check_constraintf1(p, v, st, nde1, nde2) IMPLIES
+(((ps1`p_disp_top)`ent_device)`dv = v)
+ % AND ((ps1`ent_device)`dt = vital_signs_device))
+
+ check_constraintf1a(p: patient, v: device, st: state, nde1, nde2: node): boolean =
+ LET ps = st`pdb(p) IN 
+ check_constraintf1(p, v, st, nde1, nde2) AND 
+(((ps`p_disp_top)`ent_device)`dv = v)
+
+%QED 22/12/20
+add_setup_check1apt1: THEOREM
+FORALL (p: patient, v: device, st: state, nde1, nde2, nde3: node):
+LET st1 = patient_menu_act(vs_device, p, st),
+    ps1 = st1`pdb(p)
+IN
+check_constraintf1a(p, v, st, nde1, nde2) IMPLIES
+(((ps1`p_disp_top)`ent_device)`dt = vital_signs_device)
+
+check_constraintf1b(p: patient, v: device, st: state, nde1, nde2: node): boolean =
+ LET ps = st`pdb(p) IN 
+ check_constraintf1a(p, v, st, nde1, nde2) AND 
+(((ps`p_disp_top)`ent_device)`dt = vital_signs_device)
+
+% QED 22/12/20
+add_setup_check1a: THEOREM
+FORALL (p: patient, v: device, st: state, nde1, nde2, nde3: node):
+LET st1 = connect_device_to_patient(p, v, vital_signs_device, st),
+    is1 = st1`coord_st,
+    ps1 = st1`pdb(p),
+    vs1 = ps1`vital_signs
+IN
+check_constraintf1b(p, v, st, nde1, nde2) IMPLIES
+(((is1`disp_alarm)`patient_device_connected(p)(v) = clear) AND
+(nde3 = (st1`nde_state)`current_node) AND ((st1`d_nodes)(nde3)`pat = p) AND
+((st1`d_nodes)(nde3)`dev = v ) AND (ps1`patient_panels(v) = vs1`pan) AND
+(vs1`nde = nde3) AND (is1`disp_alarm)`device_update(v) AND
+(is1`coord_db(p)`coord_devices(v) = empty_panel))
+
+check_constraintg1(p: patient, d, v: device, st: state, nde1, nde2, nde3: node): boolean =
+LET is = st`coord_st, ps = st`pdb(p), vs = ps`vital_signs IN 
+check_constraintf1b(p, d, st, nde1, nde2) AND
+(((is`disp_alarm)`patient_device_connected(p)(v) = clear) AND
+(nde3 = (st`nde_state)`current_node) AND ((st`d_nodes)(nde3)`pat = p) AND
+((st`d_nodes)(nde3)`dev = v ) AND (ps`patient_panels(v) = vs`pan) AND
+(vs`nde = nde3) AND (is`disp_alarm)`device_update(v) AND
+(is`coord_db(p)`coord_devices(v) = empty_panel) AND (ps`disp_focus = device_focus))
+
+check_constrainth1(p: patient, d, v: device, st: state, nde1, nde2, nde3: node): boolean =
+LET is = st`coord_st, ps = st`pdb(p), vs = ps`vital_signs IN 
+check_constraintg1(p, d, v, st, nde1, nde2, nde3) AND
+(ps`pmode = d_mode) AND (((ps`p_disp_top)`sel_device)`dv = v) 
+AND (((ps`p_disp_top)`sel_device)`dt = vital_signs_device) AND (ps`p_disp_device = vs`pan) AND
+(ps`emode = edit_none)
+
+%QED  22/12/20
+add_setup_check1b: THEOREM
+FORALL (p: patient, d: device, v: device, st: state, nde1, nde2, nde3: node):
+LET st1 = patient_menu_act(select, p, st),
+    st1 = patient_menu_act(display, p, st1), 
+    ps1 = st1`pdb(p), vs1 = ps1`vital_signs IN 
+check_constraintg1(p, d, v, st, nde1, nde2, nde3) IMPLIES
+((ps1`pmode = d_mode) AND (((ps1`p_disp_top)`sel_device)`dv = v) AND (((ps1`p_disp_top)`sel_device)`dt = vital_signs_device) AND 
+(ps1`p_disp_device = vs1`pan))
+
+%QED 22/12/20
+add_setup_check1b1: THEOREM
+FORALL (p: patient, d: device, v: device, st: state, nde1, nde2, nde3: node):
+LET st1 = patient_menu_act(edit, p, st),
+    st1 = patient_menu_act(device, p, st1), 
+    ps1 = st1`pdb(p) IN 
+check_constrainth1(p, d, v, st, nde1, nde2, nde3) IMPLIES
+(ps1`emode = edit_device)
+
+check_constrainth2(p: patient, d, v: device, st: state, nde1, nde2, nde3: node): boolean =
+check_constrainth1(p, d, v, st, nde1, nde2, nde3) AND  ((st`pdb(p))`p_disp_device)`pars(hrte)
+AND (st`pdb(p))`emode = edit_device
+% QED 22/12/20
+setup_check1b2: THEOREM
+FORALL (p: patient, d, v: device, st: state, nde1, nde2, nde3: node):
+LET st1 = patient_enter_parameter(hrte, p, st),
+    st1 = patient_menu_act(select, p, st1),
+    st1 = patient_menu_act(parameter, p, st1), 
+    ps1 = st1`pdb(p) IN
+check_constrainth2(p, d, v, st, nde1, nde2, nde3)
+IMPLIES
+p_rules_display(ps1)`select_pars(hrte)
+
+check_constrainth3(p: patient, d, v: device, st: state, nde1, nde2, nde3: node): boolean =
+check_constrainth2(p, d, v, st, nde1, nde2, nde3) AND
+p_rules_display(st`pdb(p))`select_pars(hrte) AND
+((st`pdb(p))`p_disp_device)`pars(blpl)
+
+% QED 22/12/20
+setup_check1b3: THEOREM
+FORALL (p: patient, d, v: device, st: state, nde1, nde2, nde3: node):
+LET st1 = patient_enter_parameter(blpl, p, st),
+    st1 = patient_menu_act(select, p, st1),
+    st1 = patient_menu_act(parameter, p, st1), 
+    ps1 = st1`pdb(p) IN
+check_constrainth3(p, d, v, st, nde1, nde2, nde3)
+IMPLIES
+p_rules_display(ps1)`select_pars(blpl)
+
+check_constrainth4(p: patient, d, v: device, st: state, nde1, nde2, nde3: node): boolean =
+check_constrainth3(p, d, v, st, nde1, nde2, nde3) AND
+p_rules_display(st`pdb(p))`select_pars(blpl) AND
+((st`pdb(p))`p_disp_device)`pars(blph)
+
+% QED 22/12/20
+setup_check1b4: THEOREM
+FORALL (p: patient, d, v: device, st: state, nde1, nde2, nde3: node):
+LET st1 = patient_enter_parameter(blph, p, st),
+    st1 = patient_menu_act(select, p, st1),
+    st1 = patient_menu_act(parameter, p, st1), 
+    ps1 = st1`pdb(p) IN
+check_constrainth4(p, d, v, st, nde1, nde2, nde3)
+IMPLIES
+p_rules_display(ps1)`select_pars(blph)
+
+check_constrainth5(p: patient, d, v: device, st: state, nde1, nde2, nde3: node): boolean =
+check_constrainth4(p, d, v, st, nde1, nde2, nde3) AND
+p_rules_display(st`pdb(p))`select_pars(blph) AND
+((st`pdb(p))`p_disp_device)`pars(sp)
+
+% QED 22/12/20
+setup_check1b5: THEOREM
+FORALL (p: patient, d, v: device, st: state, nde1, nde2, nde3: node):
+LET st1 = patient_enter_parameter(sp, p, st),
+    st1 = patient_menu_act(select, p, st1),
+    st1 = patient_menu_act(parameter, p, st1), 
+    ps1 = st1`pdb(p) IN
+check_constrainth5(p, d, v, st, nde1, nde2, nde3)
+IMPLIES
+p_rules_display(ps1)`select_pars(sp)
+
+check_constrainth6(p: patient, d, v: device, st: state, nde1, nde2, nde3: node): boolean =
+check_constrainth5(p, d, v, st, nde1, nde2, nde3) AND
+p_rules_display(st`pdb(p))`select_pars(sp) 
+
+% QED  22/12/20
+setup_check1b6: THEOREM
+FORALL (p: patient, d, v: device, st: state, nde1, nde2, nde3: node):
+LET st1 = tick_coordinator(st),
+    is1 = st1`coord_st, ps1 = st1`pdb(p) IN
+check_constrainth6(p, d, v, st, nde1, nde2, nde3)
+IMPLIES
+((is1`coord_db(p))`coord_devices(v) = ps1`patient_panels(v)) AND
+((nde_state(st1)`current_act_msg)`mhdr = nomsg)
+%QED 22/12/20
+coordinator_sm_check: THEOREM
+FORALL (m: menu, st: state):
+LET is = st`coord_st,
+    st1 = coord_menu_act(m, st),
+    is1 = st1`coord_st IN
+    (((is`disp_top)`menu_visible)(m) IMPLIES
+    (is1`prev_menu_entry = m))
+
+% QED 22/12/20
+coordinator_sm1_check: THEOREM
+FORALL (p: patient, st: state):
+LET st1 = coordinator_enter_patient(p, st),
+    is = st`coord_st,
+    is1 = st1`coord_st
+IN ((is`mode = top) AND
+   (is`disp_top)`patients(p)) IMPLIES
+   ((is1`disp_top)`ent_patient = p)
+
+sm1_pred(p: patient, st: state): boolean =
+LET is = st`coord_st IN
+ ((is`mode = top) AND
+   (is`disp_top)`patients(p) AND
+   ((is`disp_top)`ent_patient = p))
+
+
+sm2_pred(p: patient, st: state): boolean =
+LET is = st`coord_st IN
+ ((is`mode = top) AND
+   (is`disp_top)`patients(p) AND
+   ((is`disp_top)`ent_patient = p) AND
+   ((is`disp_top)`menu_visible = top_menu) AND
+   (st`coord_menu = init_coord_menu))
+%QED 22/12/20
+coordinator_sm3_check: THEOREM
+FORALL (p: patient, st: state):
+LET st1 = coord_menu_act(select, st),
+    is = st`coord_st,
+    is1 = st1`coord_st
+IN sm2_pred(p, st) 
+   IMPLIES 
+   ((is1`disp_top)`menu_visible(patient) AND
+   ((is1`disp_top)`menu_visible = select_options_menu) AND
+   (is1`prev_menu_visible = top_menu))
+
+sm3_pred(p: patient, st: state): boolean =
+LET is = st`coord_st IN
+ ((is`mode = top) AND
+   (is`disp_top)`patients(p) AND
+   ((is`disp_top)`ent_patient = p) AND
+   (is`prev_menu_visible = top_menu) AND
+   ((is`disp_top)`menu_visible = select_options_menu) AND
+   (st`coord_menu = init_coord_menu))
+% QED 18/12/20
+
+
+sm4_pred(p: patient, st: state): boolean =
+LET is = st`coord_st IN
+ ((is`mode = top) AND
+   (is`disp_top)`patients(p) AND
+   ((is`disp_top)`ent_patient = p) AND
+   (is`prev_menu_entry = select) AND
+   (is`prev_menu_visible = top_menu) AND
+   ((is`disp_top)`menu_visible = 
+     select_options_menu) AND
+     (st`coord_menu = init_coord_menu))
+
+%QED 18/12/20
+coordinator_sm5_check: THEOREM
+FORALL (p: patient, st: state):
+LET st1 = coord_menu_act(patient, st),
+    is = st`coord_st,
+    is1 = st1`coord_st
+
+IN (sm4_pred(p, st) 
+   IMPLIES 
+   ((is1`disp_top)`selected_patient = p) AND
+   (is1`prev_menu_entry = select) AND
+   (is`prev_menu_visible = top_menu) AND
+   ((is1`disp_top)`menu_visible = top_menu))
+
+END ICE_checks_th

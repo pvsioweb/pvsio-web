@@ -1,0 +1,122 @@
+{
+ "vital_signs_th.init_vs_panel_TCC1": [
+  {
+   "info": {
+    "theory": "vital_signs_th",
+    "formula": "init_vs_panel_TCC1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "76fdfb5a3ff774595549607aa51b19372313c1189ccfad04e6506311c2ead677"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "init_vs_panel_TCC1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(cond-disjoint-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "vital_signs_th.tick_vs_TCC1": [
+  {
+   "info": {
+    "theory": "vital_signs_th",
+    "formula": "tick_vs_TCC1",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "a32b714085aeee00557fe73cd360fbf7df831d35848dffd941487a108811b7de"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "tick_vs_TCC1",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(subtype-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "vital_signs_th.tick_vs_TCC2": [
+  {
+   "info": {
+    "theory": "vital_signs_th",
+    "formula": "tick_vs_TCC2",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "a32b714085aeee00557fe73cd360fbf7df831d35848dffd941487a108811b7de"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "tick_vs_TCC2",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(subtype-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "vital_signs_th.tick_vs_TCC3": [
+  {
+   "info": {
+    "theory": "vital_signs_th",
+    "formula": "tick_vs_TCC3",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "a32b714085aeee00557fe73cd360fbf7df831d35848dffd941487a108811b7de"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "tick_vs_TCC3",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(subtype-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ],
+ "vital_signs_th.tick_vs_TCC4": [
+  {
+   "info": {
+    "theory": "vital_signs_th",
+    "formula": "tick_vs_TCC4",
+    "status": "proved",
+    "prover": "PVS 7.1.0 (Allegro CL Enterprise Edition)",
+    "shasum": "a32b714085aeee00557fe73cd360fbf7df831d35848dffd941487a108811b7de"
+   },
+   "proofTree": {
+    "branch": "",
+    "name": "tick_vs_TCC4",
+    "type": "root",
+    "rules": [
+     {
+      "branch": "",
+      "name": "(subtype-tcc)",
+      "type": "proof-command",
+      "rules": []
+     }
+    ]
+   }
+  }
+ ]
+}

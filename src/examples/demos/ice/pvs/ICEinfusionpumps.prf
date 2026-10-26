@@ -1,0 +1,492 @@
+(infusion_pumps_th
+ (vtbi_over_rate_lemma_TCC1 0
+  (vtbi_over_rate_lemma_TCC1-1 nil 3803381084
+   ("" (subtype-tcc) nil nil) nil nil
+   (vtbi_over_rate_lemma subtype "infusion_pumps_th.r" "nznum")))
+ (vtbi_over_rate_lemma 0
+  (vtbi_over_rate_lemma-1 nil 3813306384 ("" (postpone) nil nil) nil
+   shostak))
+ (vtbi_over_time_lemma 0
+  (vtbi_over_time_lemma-1 nil 3813306384 ("" (postpone) nil nil) nil
+   shostak))
+ (init_ip_panel_TCC1 0
+  (init_ip_panel_TCC1-1 nil 3803381084 ("" (cond-disjoint-tcc) nil nil)
+   nil nil
+   (init_ip_panel disjointness
+    "COND infusion_pumps_th.p = coord_t_and_c_th.dpm -> coord_t_and_c_th.xdblank, infusion_pumps_th.p = coord_t_and_c_th.er -> coord_t_and_c_th.xok, ELSE -> coord_t_and_c_th.xnilval ENDCOND"
+    "nil")))
+ (fun_incr_TCC1 0
+  (fun_incr_TCC1-1 nil 3803381084 ("" (subtype-tcc) nil nil)
+   ((real_lt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (/= const-decl "boolean" notequal nil))
+   nil (fun_incr subtype "time(infusion_pumps_th.ds)" "nznum")))
+ (fun_incr_TCC2 0
+  (fun_incr_TCC2-1 nil 3803381084
+   ("" (skosimp*)
+    (("" (lemma " vtbi_over_time_lemma") (("" (grind) nil nil)) nil))
+    nil)
+   ((vtbi_over_time_lemma formula-decl nil infusion_pumps_th nil)
+    (posreal_plus_nnreal_is_posreal application-judgement "posreal"
+     real_types nil)
+    (nnreal_plus_posreal_is_posreal application-judgement "posreal"
+     real_types nil)
+    (nzreal_div_nzreal_is_nzreal application-judgement "nzreal"
+     real_types nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_lt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (number nonempty-type-decl nil numbers nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (>= const-decl "bool" reals nil)
+    (ivols type-eq-decl nil coord_t_and_c_th nil)
+    (numfield nonempty-type-eq-decl nil number_fields nil)
+    (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
+    (itimes type-eq-decl nil coord_t_and_c_th nil)
+    (clamp_state type-decl nil coord_t_and_c_th nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (nonneg_int nonempty-type-eq-decl nil integers nil)
+    (> const-decl "bool" reals nil)
+    (posnat nonempty-type-eq-decl nil integers nil)
+    (maxrate formal-const-decl "posnat" infusion_pumps_th nil)
+    (maxinfuse formal-const-decl "posnat" infusion_pumps_th nil)
+    (<= const-decl "bool" reals nil)
+    (maxtime formal-const-decl
+     "{maxtime: posnat | maxinfuse <= maxtime}" infusion_pumps_th nil)
+    (device type-eq-decl nil devices_th nil)
+    (dispmode type-decl nil coord_t_and_c_th nil)
+    (mode type-decl nil coord_t_and_c_th nil)
+    (node type-eq-decl nil node_th nil)
+    (panel type-eq-decl nil coord_t_and_c_th nil)
+    (priority_type type-decl nil coord_t_and_c_th nil)
+    (irates type-eq-decl nil coord_t_and_c_th nil)
+    (d_state type-eq-decl nil infusion_pumps_th nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (= const-decl "[T, T -> boolean]" equalities nil))
+   nil
+   (fun_incr subtype
+    "number_fields./(((number_fields.+)(vtbi(infusion_pumps_th.ds), 1)), time(infusion_pumps_th.ds))"
+    "irates")))
+ (fun_incr_TCC3 0
+  (fun_incr_TCC3-1 nil 3803381084 ("" (subtype-tcc) nil nil)
+   ((real_lt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (/= const-decl "boolean" notequal nil))
+   nil (fun_incr subtype "rate(infusion_pumps_th.ds)" "nznum")))
+ (fun_incr_TCC4 0
+  (fun_incr_TCC4-1 nil 3803381084
+   ("" (skosimp*)
+    (("" (lemma " vtbi_over_rate_lemma") (("" (grind) nil nil)) nil))
+    nil)
+   ((vtbi_over_rate_lemma formula-decl nil infusion_pumps_th nil)
+    (posreal_plus_nnreal_is_posreal application-judgement "posreal"
+     real_types nil)
+    (nnreal_plus_posreal_is_posreal application-judgement "posreal"
+     real_types nil)
+    (nzreal_div_nzreal_is_nzreal application-judgement "nzreal"
+     real_types nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (real_lt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (number nonempty-type-decl nil numbers nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (>= const-decl "bool" reals nil)
+    (ivols type-eq-decl nil coord_t_and_c_th nil)
+    (numfield nonempty-type-eq-decl nil number_fields nil)
+    (+ const-decl "[numfield, numfield -> numfield]" number_fields nil)
+    (itimes type-eq-decl nil coord_t_and_c_th nil)
+    (clamp_state type-decl nil coord_t_and_c_th nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (nonneg_int nonempty-type-eq-decl nil integers nil)
+    (> const-decl "bool" reals nil)
+    (posnat nonempty-type-eq-decl nil integers nil)
+    (maxrate formal-const-decl "posnat" infusion_pumps_th nil)
+    (maxinfuse formal-const-decl "posnat" infusion_pumps_th nil)
+    (<= const-decl "bool" reals nil)
+    (maxtime formal-const-decl
+     "{maxtime: posnat | maxinfuse <= maxtime}" infusion_pumps_th nil)
+    (device type-eq-decl nil devices_th nil)
+    (dispmode type-decl nil coord_t_and_c_th nil)
+    (mode type-decl nil coord_t_and_c_th nil)
+    (node type-eq-decl nil node_th nil)
+    (panel type-eq-decl nil coord_t_and_c_th nil)
+    (priority_type type-decl nil coord_t_and_c_th nil)
+    (irates type-eq-decl nil coord_t_and_c_th nil)
+    (d_state type-eq-decl nil infusion_pumps_th nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (= const-decl "[T, T -> boolean]" equalities nil))
+   nil
+   (fun_incr subtype
+    "number_fields./(((number_fields.+)(vtbi(infusion_pumps_th.ds), 1)), rate(infusion_pumps_th.ds))"
+    "itimes")))
+ (fun_incr_TCC5 0
+  (fun_incr_TCC5-1 nil 3803381084 ("" (cond-disjoint-tcc) nil nil)
+   ((real_lt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil))
+   nil
+   (fun_incr disjointness
+    "COND (booleans.AND((infusion_pumps_th.ds`dm = coord_t_and_c_th.drate), (reals.<(infusion_pumps_th.ds`rate, infusion_pumps_th.maxrate)))) -> infusion_pumps_th.ds WITH [rate := (number_fields.+)(rate(infusion_pumps_th.ds), 1), time := number_fields./(vtbi(infusion_pumps_th.ds), ((number_fields.+)(rate(infusion_pumps_th.ds), 1))), clock := 0], (booleans.AND((infusion_pumps_th.ds`dm = coord_t_and_c_th.dtime), (reals.<(infusion_pumps_th.ds`time, infusion_pumps_th.maxtime)))) -> infusion_pumps_th.ds WITH [time := (number_fields.+)(time(infusion_pumps_th.ds), 1), rate := number_fields./(vtbi(infusion_pumps_th.ds), ((number_fields.+)(time(infusion_pumps_th.ds), 1))), clock := 0], (booleans.AND((infusion_pumps_th.ds`dm = coord_t_and_c_th.dvtbi), (reals.<(infusion_pumps_th.ds`vtbi, infusion_pumps_th.maxinfuse)))) -> infusion_pumps_th.ds WITH [vtbi := (number_fields.+)(vtbi(infusion_pumps_th.ds), 1), rate := IF booleans.AND((priority(infusion_pumps_th.ds) = coord_t_and_c_th.tme), (reals.>(time(infusion_pumps_th.ds), 0))) THEN number_fields./(((number_fields.+)(vtbi(infusion_pumps_th.ds), 1)), time(infusion_pumps_th.ds)) ELSE rate(infusion_pumps_th.ds) ENDIF, time := IF booleans.AND((priority(infusion_pumps_th.ds) = coord_t_and_c_th.rte), (reals.>(rate(infusion_pumps_th.ds), 0))) THEN number_fields./(((number_fields.+)(vtbi(infusion_pumps_th.ds), 1)), rate(infusion_pumps_th.ds)) ELSE time(infusion_pumps_th.ds) ENDIF, clock := 0], ELSE -> infusion_pumps_th.ds ENDCOND"
+    "nil")))
+ (fun_decr_TCC1 0
+  (fun_decr_TCC1-1 nil 3803381084 ("" (subtype-tcc) nil nil)
+   ((real_minus_real_is_real application-judgement "real" reals nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil
+   (fun_decr subtype "(number_fields.-)(rate(infusion_pumps_th.ds), 1)"
+    "irates")))
+ (fun_decr_TCC2 0
+  (fun_decr_TCC2-1 nil 3803381084 ("" (subtype-tcc) nil nil)
+   ((real_minus_real_is_real application-judgement "real" reals nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (/= const-decl "boolean" notequal nil))
+   nil
+   (fun_decr subtype
+    "((number_fields.-)(rate(infusion_pumps_th.ds), 1))" "nznum")))
+ (fun_decr_TCC3 0
+  (fun_decr_TCC3-1 nil 3803381084
+   ("" (skosimp*)
+    (("" (lemma " vtbi_over_rate_lemma") (("" (grind) nil nil)) nil))
+    nil)
+   ((vtbi_over_rate_lemma formula-decl nil infusion_pumps_th nil)
+    (real_minus_real_is_real application-judgement "real" reals nil)
+    (real_div_nzreal_is_real application-judgement "real" reals nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (number nonempty-type-decl nil numbers nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (>= const-decl "bool" reals nil)
+    (ivols type-eq-decl nil coord_t_and_c_th nil)
+    (itimes type-eq-decl nil coord_t_and_c_th nil)
+    (clamp_state type-decl nil coord_t_and_c_th nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (nonneg_int nonempty-type-eq-decl nil integers nil)
+    (> const-decl "bool" reals nil)
+    (posnat nonempty-type-eq-decl nil integers nil)
+    (maxrate formal-const-decl "posnat" infusion_pumps_th nil)
+    (maxinfuse formal-const-decl "posnat" infusion_pumps_th nil)
+    (<= const-decl "bool" reals nil)
+    (maxtime formal-const-decl
+     "{maxtime: posnat | maxinfuse <= maxtime}" infusion_pumps_th nil)
+    (device type-eq-decl nil devices_th nil)
+    (dispmode type-decl nil coord_t_and_c_th nil)
+    (mode type-decl nil coord_t_and_c_th nil)
+    (node type-eq-decl nil node_th nil)
+    (panel type-eq-decl nil coord_t_and_c_th nil)
+    (priority_type type-decl nil coord_t_and_c_th nil)
+    (irates type-eq-decl nil coord_t_and_c_th nil)
+    (d_state type-eq-decl nil infusion_pumps_th nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (= const-decl "[T, T -> boolean]" equalities nil)
+    (numfield nonempty-type-eq-decl nil number_fields nil)
+    (- const-decl "[numfield, numfield -> numfield]" number_fields
+       nil))
+   nil
+   (fun_decr subtype
+    "number_fields./(vtbi(infusion_pumps_th.ds), ((number_fields.-)(rate(infusion_pumps_th.ds), 1)))"
+    "itimes")))
+ (fun_decr_TCC4 0
+  (fun_decr_TCC4-1 nil 3803381084 ("" (subtype-tcc) nil nil)
+   ((real_minus_real_is_real application-judgement "real" reals nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (/= const-decl "boolean" notequal nil))
+   nil
+   (fun_decr subtype
+    "((number_fields.-)(time(infusion_pumps_th.ds), 1))" "nznum")))
+ (fun_decr_TCC5 0
+  (fun_decr_TCC5-1 nil 3803381084
+   ("" (skosimp*)
+    (("" (lemma " vtbi_over_time_lemma") (("" (grind) nil nil)) nil))
+    nil)
+   ((vtbi_over_time_lemma formula-decl nil infusion_pumps_th nil)
+    (real_minus_real_is_real application-judgement "real" reals nil)
+    (real_div_nzreal_is_real application-judgement "real" reals nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (number nonempty-type-decl nil numbers nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (>= const-decl "bool" reals nil)
+    (ivols type-eq-decl nil coord_t_and_c_th nil)
+    (itimes type-eq-decl nil coord_t_and_c_th nil)
+    (clamp_state type-decl nil coord_t_and_c_th nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (nonneg_int nonempty-type-eq-decl nil integers nil)
+    (> const-decl "bool" reals nil)
+    (posnat nonempty-type-eq-decl nil integers nil)
+    (maxrate formal-const-decl "posnat" infusion_pumps_th nil)
+    (maxinfuse formal-const-decl "posnat" infusion_pumps_th nil)
+    (<= const-decl "bool" reals nil)
+    (maxtime formal-const-decl
+     "{maxtime: posnat | maxinfuse <= maxtime}" infusion_pumps_th nil)
+    (device type-eq-decl nil devices_th nil)
+    (dispmode type-decl nil coord_t_and_c_th nil)
+    (mode type-decl nil coord_t_and_c_th nil)
+    (node type-eq-decl nil node_th nil)
+    (panel type-eq-decl nil coord_t_and_c_th nil)
+    (priority_type type-decl nil coord_t_and_c_th nil)
+    (irates type-eq-decl nil coord_t_and_c_th nil)
+    (d_state type-eq-decl nil infusion_pumps_th nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (= const-decl "[T, T -> boolean]" equalities nil)
+    (numfield nonempty-type-eq-decl nil number_fields nil)
+    (- const-decl "[numfield, numfield -> numfield]" number_fields
+       nil))
+   nil
+   (fun_decr subtype
+    "number_fields./(vtbi(infusion_pumps_th.ds), ((number_fields.-)(time(infusion_pumps_th.ds), 1)))"
+    "irates")))
+ (fun_decr_TCC6 0
+  (fun_decr_TCC6-1 nil 3803381084 ("" (subtype-tcc) nil nil)
+   ((real_minus_real_is_real application-judgement "real" reals nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil
+   (fun_decr subtype "(number_fields.-)(time(infusion_pumps_th.ds), 1)"
+    "itimes")))
+ (fun_decr_TCC7 0
+  (fun_decr_TCC7-1 nil 3803381084
+   ("" (skosimp*)
+    (("" (lemma " vtbi_over_time_lemma") (("" (grind) nil nil)) nil))
+    nil)
+   ((vtbi_over_time_lemma formula-decl nil infusion_pumps_th nil)
+    (real_minus_real_is_real application-judgement "real" reals nil)
+    (real_div_nzreal_is_real application-judgement "real" reals nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (number nonempty-type-decl nil numbers nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (>= const-decl "bool" reals nil)
+    (ivols type-eq-decl nil coord_t_and_c_th nil)
+    (numfield nonempty-type-eq-decl nil number_fields nil)
+    (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
+    (itimes type-eq-decl nil coord_t_and_c_th nil)
+    (clamp_state type-decl nil coord_t_and_c_th nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (nonneg_int nonempty-type-eq-decl nil integers nil)
+    (> const-decl "bool" reals nil)
+    (posnat nonempty-type-eq-decl nil integers nil)
+    (maxrate formal-const-decl "posnat" infusion_pumps_th nil)
+    (maxinfuse formal-const-decl "posnat" infusion_pumps_th nil)
+    (<= const-decl "bool" reals nil)
+    (maxtime formal-const-decl
+     "{maxtime: posnat | maxinfuse <= maxtime}" infusion_pumps_th nil)
+    (device type-eq-decl nil devices_th nil)
+    (dispmode type-decl nil coord_t_and_c_th nil)
+    (mode type-decl nil coord_t_and_c_th nil)
+    (node type-eq-decl nil node_th nil)
+    (panel type-eq-decl nil coord_t_and_c_th nil)
+    (priority_type type-decl nil coord_t_and_c_th nil)
+    (irates type-eq-decl nil coord_t_and_c_th nil)
+    (d_state type-eq-decl nil infusion_pumps_th nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (= const-decl "[T, T -> boolean]" equalities nil))
+   nil
+   (fun_decr subtype
+    "number_fields./(((number_fields.-)(vtbi(infusion_pumps_th.ds), 1)), time(infusion_pumps_th.ds))"
+    "irates")))
+ (fun_decr_TCC8 0
+  (fun_decr_TCC8-1 nil 3803381084
+   ("" (skosimp*)
+    (("" (lemma " vtbi_over_rate_lemma") (("" (grind) nil nil)) nil))
+    nil)
+   ((vtbi_over_rate_lemma formula-decl nil infusion_pumps_th nil)
+    (real_minus_real_is_real application-judgement "real" reals nil)
+    (real_div_nzreal_is_real application-judgement "real" reals nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (number nonempty-type-decl nil numbers nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (>= const-decl "bool" reals nil)
+    (ivols type-eq-decl nil coord_t_and_c_th nil)
+    (numfield nonempty-type-eq-decl nil number_fields nil)
+    (- const-decl "[numfield, numfield -> numfield]" number_fields nil)
+    (itimes type-eq-decl nil coord_t_and_c_th nil)
+    (clamp_state type-decl nil coord_t_and_c_th nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (nonneg_int nonempty-type-eq-decl nil integers nil)
+    (> const-decl "bool" reals nil)
+    (posnat nonempty-type-eq-decl nil integers nil)
+    (maxrate formal-const-decl "posnat" infusion_pumps_th nil)
+    (maxinfuse formal-const-decl "posnat" infusion_pumps_th nil)
+    (<= const-decl "bool" reals nil)
+    (maxtime formal-const-decl
+     "{maxtime: posnat | maxinfuse <= maxtime}" infusion_pumps_th nil)
+    (device type-eq-decl nil devices_th nil)
+    (dispmode type-decl nil coord_t_and_c_th nil)
+    (mode type-decl nil coord_t_and_c_th nil)
+    (node type-eq-decl nil node_th nil)
+    (panel type-eq-decl nil coord_t_and_c_th nil)
+    (priority_type type-decl nil coord_t_and_c_th nil)
+    (irates type-eq-decl nil coord_t_and_c_th nil)
+    (d_state type-eq-decl nil infusion_pumps_th nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (= const-decl "[T, T -> boolean]" equalities nil))
+   nil
+   (fun_decr subtype
+    "number_fields./(((number_fields.-)(vtbi(infusion_pumps_th.ds), 1)), rate(infusion_pumps_th.ds))"
+    "itimes")))
+ (fun_decr_TCC9 0
+  (fun_decr_TCC9-1 nil 3803381084 ("" (subtype-tcc) nil nil)
+   ((real_minus_real_is_real application-judgement "real" reals nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil
+   (fun_decr subtype "(number_fields.-)(vtbi(infusion_pumps_th.ds), 1)"
+    "ivols")))
+ (fun_decr_TCC10 0
+  (fun_decr_TCC10-1 nil 3803381084 ("" (cond-disjoint-tcc) nil nil)
+   ((real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil
+   (fun_decr disjointness
+    "COND (booleans.AND((infusion_pumps_th.ds`dm = coord_t_and_c_th.drate), (reals.>=(infusion_pumps_th.ds`rate, 1)))) -> infusion_pumps_th.ds WITH [rate := (number_fields.-)(rate(infusion_pumps_th.ds), 1), time := IF rate(infusion_pumps_th.ds) /= 1 THEN number_fields./(vtbi(infusion_pumps_th.ds), ((number_fields.-)(rate(infusion_pumps_th.ds), 1))) ELSE 0 ENDIF, clock := 0], (booleans.AND((infusion_pumps_th.ds`dm = coord_t_and_c_th.dtime), (reals.>=(infusion_pumps_th.ds`time, 1)))) -> infusion_pumps_th.ds WITH [time := (number_fields.-)(time(infusion_pumps_th.ds), 1), rate := IF time(infusion_pumps_th.ds) /= 1 THEN number_fields./(vtbi(infusion_pumps_th.ds), ((number_fields.-)(time(infusion_pumps_th.ds), 1))) ELSE 0 ENDIF, clock := 0], (booleans.AND((infusion_pumps_th.ds`dm = coord_t_and_c_th.dvtbi), (reals.>=(infusion_pumps_th.ds`vtbi, 1)))) -> infusion_pumps_th.ds WITH [vtbi := (number_fields.-)(vtbi(infusion_pumps_th.ds), 1), rate := IF booleans.AND((priority(infusion_pumps_th.ds) = coord_t_and_c_th.tme), (time(infusion_pumps_th.ds) /= 0)) THEN number_fields./(((number_fields.-)(vtbi(infusion_pumps_th.ds), 1)), time(infusion_pumps_th.ds)) ELSE rate(infusion_pumps_th.ds) ENDIF, time := IF booleans.AND((priority(infusion_pumps_th.ds) = coord_t_and_c_th.rte), (rate(infusion_pumps_th.ds) /= 0)) THEN number_fields./(((number_fields.-)(vtbi(infusion_pumps_th.ds), 1)), rate(infusion_pumps_th.ds)) ELSE time(infusion_pumps_th.ds) ENDIF, clock := 0], ELSE -> infusion_pumps_th.ds ENDCOND"
+    "nil")))
+ (upd_pan_TCC1 0
+  (upd_pan_TCC1-1 nil 3803381084 ("" (cond-disjoint-tcc) nil nil) nil
+   nil
+   (upd_pan disjointness
+    "COND dm(infusion_pumps_th.ds) = coord_t_and_c_th.mainmenu -> coord_t_and_c_th.xmainmenu, dm(infusion_pumps_th.ds) = coord_t_and_c_th.dvtbi -> coord_t_and_c_th.xdvtbi, dm(infusion_pumps_th.ds) = coord_t_and_c_th.drate -> coord_t_and_c_th.xdrate, dm(infusion_pumps_th.ds) = coord_t_and_c_th.dtime -> coord_t_and_c_th.xdtime, dm(infusion_pumps_th.ds) = coord_t_and_c_th.dinfusing -> coord_t_and_c_th.xdinfusing, dm(infusion_pumps_th.ds) = coord_t_and_c_th.dalarm -> coord_t_and_c_th.xdalarm, dm(infusion_pumps_th.ds) = coord_t_and_c_th.dkvo -> coord_t_and_c_th.xdkvo, dm(infusion_pumps_th.ds) = coord_t_and_c_th.dblank -> coord_t_and_c_th.xdblank ENDCOND"
+    "nil")))
+ (upd_pan_TCC2 0
+  (upd_pan_TCC2-1 nil 3803381084 ("" (cond-coverage-tcc) nil nil) nil
+   nil
+   (upd_pan coverage
+    "COND dm(infusion_pumps_th.ds) = coord_t_and_c_th.mainmenu -> coord_t_and_c_th.xmainmenu, dm(infusion_pumps_th.ds) = coord_t_and_c_th.dvtbi -> coord_t_and_c_th.xdvtbi, dm(infusion_pumps_th.ds) = coord_t_and_c_th.drate -> coord_t_and_c_th.xdrate, dm(infusion_pumps_th.ds) = coord_t_and_c_th.dtime -> coord_t_and_c_th.xdtime, dm(infusion_pumps_th.ds) = coord_t_and_c_th.dinfusing -> coord_t_and_c_th.xdinfusing, dm(infusion_pumps_th.ds) = coord_t_and_c_th.dalarm -> coord_t_and_c_th.xdalarm, dm(infusion_pumps_th.ds) = coord_t_and_c_th.dkvo -> coord_t_and_c_th.xdkvo, dm(infusion_pumps_th.ds) = coord_t_and_c_th.dblank -> coord_t_and_c_th.xdblank ENDCOND"
+    "nil")))
+ (upd_pan_TCC3 0
+  (upd_pan_TCC3-1 nil 3803381084 ("" (cond-disjoint-tcc) nil nil) nil
+   nil
+   (upd_pan disjointness
+    "COND m(infusion_pumps_th.ds) = coord_t_and_c_th.off -> coord_t_and_c_th.xoff, m(infusion_pumps_th.ds) = coord_t_and_c_th.pause -> coord_t_and_c_th.xpause, m(infusion_pumps_th.ds) = coord_t_and_c_th.infuse -> coord_t_and_c_th.xinfuse ENDCOND"
+    "nil")))
+ (upd_pan_TCC4 0
+  (upd_pan_TCC4-1 nil 3803381084 ("" (cond-coverage-tcc) nil nil) nil
+   nil
+   (upd_pan coverage
+    "COND m(infusion_pumps_th.ds) = coord_t_and_c_th.off -> coord_t_and_c_th.xoff, m(infusion_pumps_th.ds) = coord_t_and_c_th.pause -> coord_t_and_c_th.xpause, m(infusion_pumps_th.ds) = coord_t_and_c_th.infuse -> coord_t_and_c_th.xinfuse ENDCOND"
+    "nil")))
+ (upd_pan_TCC5 0
+  (upd_pan_TCC5-1 nil 3803381084 ("" (cond-disjoint-tcc) nil nil) nil
+   nil
+   (upd_pan disjointness
+    "COND infusion_pumps_th.p = coord_t_and_c_th.dpm -> COND dm(infusion_pumps_th.ds) = coord_t_and_c_th.mainmenu -> coord_t_and_c_th.xmainmenu, dm(infusion_pumps_th.ds) = coord_t_and_c_th.dvtbi -> coord_t_and_c_th.xdvtbi, dm(infusion_pumps_th.ds) = coord_t_and_c_th.drate -> coord_t_and_c_th.xdrate, dm(infusion_pumps_th.ds) = coord_t_and_c_th.dtime -> coord_t_and_c_th.xdtime, dm(infusion_pumps_th.ds) = coord_t_and_c_th.dinfusing -> coord_t_and_c_th.xdinfusing, dm(infusion_pumps_th.ds) = coord_t_and_c_th.dalarm -> coord_t_and_c_th.xdalarm, dm(infusion_pumps_th.ds) = coord_t_and_c_th.dkvo -> coord_t_and_c_th.xdkvo, dm(infusion_pumps_th.ds) = coord_t_and_c_th.dblank -> coord_t_and_c_th.xdblank ENDCOND, infusion_pumps_th.p = coord_t_and_c_th.mde -> COND m(infusion_pumps_th.ds) = coord_t_and_c_th.off -> coord_t_and_c_th.xoff, m(infusion_pumps_th.ds) = coord_t_and_c_th.pause -> coord_t_and_c_th.xpause, m(infusion_pumps_th.ds) = coord_t_and_c_th.infuse -> coord_t_and_c_th.xinfuse ENDCOND, infusion_pumps_th.p = coord_t_and_c_th.er -> IF ip_error(infusion_pumps_th.ds) THEN coord_t_and_c_th.xalarm ELSE coord_t_and_c_th.xok ENDIF, ELSE -> coord_t_and_c_th.xnilval ENDCOND"
+    "nil")))
+ (upd_pan_TCC6 0
+  (upd_pan_TCC6-1 nil 3803381084 ("" (cond-disjoint-tcc) nil nil) nil
+   nil
+   (upd_pan disjointness
+    "COND infusion_pumps_th.p = coord_t_and_c_th.rte -> rate(infusion_pumps_th.ds), infusion_pumps_th.p = coord_t_and_c_th.vtb -> vtbi(infusion_pumps_th.ds), infusion_pumps_th.p = coord_t_and_c_th.tme -> time(infusion_pumps_th.ds), ELSE -> coord_t_and_c_th.null_value ENDCOND"
+    "nil")))
+ (tick_TCC1 0
+  (tick_TCC1-1 nil 3803381084 ("" (subtype-tcc) nil nil)
+   ((real_minus_real_is_real application-judgement "real" reals nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil
+   (tick subtype
+    "(number_fields.-)(bolus_time(infusion_pumps_th.ds), 1)"
+    "itimes")))
+ (tick_TCC2 0
+  (tick_TCC2-1 nil 3803381084 ("" (subtype-tcc) nil nil)
+   ((real_minus_real_is_real application-judgement "real" reals nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil))
+   nil
+   (tick subtype "(number_fields.-)(time(infusion_pumps_th.ds), 1)"
+    "itimes")))
+ (tick_TCC3 0
+  (tick_TCC3-1 nil 3803381084 ("" (subtype-tcc) nil nil)
+   ((real_minus_real_is_real application-judgement "real" reals nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil)
+    (bolus_rate const-decl "irates" infusion_pumps_th nil))
+   nil
+   (tick subtype
+    "(number_fields.-)(vtbi(infusion_pumps_th.ds), infusion_pumps_th.bolus_rate)"
+    "ivols")))
+ (tick_TCC4 0
+  (tick_TCC4-1 nil 3803381084 ("" (subtype-tcc) nil nil)
+   ((real_minus_real_is_real application-judgement "real" reals nil)
+    (real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (real_gt_is_strict_total_order name-judgement
+     "(strict_total_order?[real])" real_props nil))
+   nil
+   (tick subtype
+    "(number_fields.-)(vtbi(infusion_pumps_th.ds), rate(infusion_pumps_th.ds))"
+    "ivols")))
+ (execute_ip_TCC1 0
+  (execute_ip_TCC1-1 nil 3803381084 ("" (cond-disjoint-tcc) nil nil)
+   nil nil
+   (execute_ip disjointness
+    "COND infusion_pumps_th.a = coord_t_and_c_th.powr -> infusion_pumps_th.fun_power(infusion_pumps_th.ds), infusion_pumps_th.a = coord_t_and_c_th.incr -> IF infusion_pumps_th.per_incr(infusion_pumps_th.ds) THEN infusion_pumps_th.fun_incr(infusion_pumps_th.ds) ELSE infusion_pumps_th.ds WITH [ip_error := booleans.TRUE] ENDIF, infusion_pumps_th.a = coord_t_and_c_th.decr -> IF infusion_pumps_th.per_decr(infusion_pumps_th.ds) THEN infusion_pumps_th.fun_decr(infusion_pumps_th.ds) ELSE infusion_pumps_th.ds WITH [ip_error := booleans.TRUE] ENDIF, infusion_pumps_th.a = coord_t_and_c_th.bolus -> IF infusion_pumps_th.per_bolus(infusion_pumps_th.ds) THEN infusion_pumps_th.fun_bolus(infusion_pumps_th.ds) ELSE infusion_pumps_th.ds WITH [ip_error := booleans.TRUE] ENDIF, infusion_pumps_th.a = coord_t_and_c_th.confirm -> IF infusion_pumps_th.per_confirm(infusion_pumps_th.ds) THEN infusion_pumps_th.fun_confirm(infusion_pumps_th.ds) ELSE infusion_pumps_th.ds WITH [ip_error := booleans.TRUE] ENDIF, infusion_pumps_th.a = coord_t_and_c_th.choosetime -> IF infusion_pumps_th.per_choosetime(infusion_pumps_th.ds) THEN infusion_pumps_th.fun_choosetime(infusion_pumps_th.ds) ELSE infusion_pumps_th.ds WITH [ip_error := booleans.TRUE] ENDIF, infusion_pumps_th.a = coord_t_and_c_th.choosevtbi -> IF infusion_pumps_th.per_choosevtbi(infusion_pumps_th.ds) THEN infusion_pumps_th.fun_choosevtbi(infusion_pumps_th.ds) ELSE infusion_pumps_th.ds WITH [ip_error := booleans.TRUE] ENDIF, infusion_pumps_th.a = coord_t_and_c_th.chooserate -> IF infusion_pumps_th.per_chooserate(infusion_pumps_th.ds) THEN infusion_pumps_th.fun_chooserate(infusion_pumps_th.ds) ELSE infusion_pumps_th.ds WITH [ip_error := booleans.TRUE] ENDIF, infusion_pumps_th.a = coord_t_and_c_th.start -> IF infusion_pumps_th.per_infuse(infusion_pumps_th.ds) THEN infusion_pumps_th.fun_infuse(infusion_pumps_th.ds) ELSE infusion_pumps_th.ds WITH [ip_error := booleans.TRUE] ENDIF, infusion_pumps_th.a = coord_t_and_c_th.hold -> IF infusion_pumps_th.per_pause(infusion_pumps_th.ds) THEN infusion_pumps_th.fun_pause(infusion_pumps_th.ds) ELSE infusion_pumps_th.ds WITH [ip_error := booleans.TRUE] ENDIF, ELSE -> infusion_pumps_th.ds WITH [ip_error := booleans.TRUE] ENDCOND"
+    "nil"))))
+
