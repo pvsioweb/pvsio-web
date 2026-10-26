@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width">
+
+        <link href="../../node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../node_modules/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+        <link href='http://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body class="noselect" style="background:#999999";>
+        <script src="../../node_modules/jquery/dist/jquery.min.js"></script>
+        <script src="../../node_modules/handlebars/dist/handlebars.min.js"></script>
+        <script src="../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="../../node_modules/underscore/underscore-min.js"></script>
+        <script src="../../node_modules/backbone/backbone.js"></script>
+        <script src="../../node_modules/requirejs/require.js" data-main="index.js"></script>
+
+        <!-- visual appearance of the prototype -->
+        <div id="loader" style="display:content;position:absolute;width: 100vw;height: 100vh;display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: scroll;"></div>
+        <div id="content" class="content" style="display:none;position:absolute;">
+            <!-- picture of the device -->
+            <img draggable="false" src="pillbox.png">
+            <div id = "screen" class="screen">
+                <div id = "scrollBar" class="scrollBar"></div>
+            </div>
+        </div>
+        <div id="console" style="display: none;width: 641px; height: 964px; top: 0px; position: absolute; left: 1242px; background: var(--Mine-Shatf-2, #3E3E3E);">
+            <label
+                style="position: absolute;width: 99px;height: 42px;left: 271px;top: 0px;" class="consoleHeader">Console:</label>
+            <label
+                style="position: absolute;width: 162px;height: 44px;left: 0px;top: 66px;" class="consoleSmallMenu">Choose State Mode:</label>
+                <pre id="consoleState" style="position: absolute;width: 469px;height: 895px;left: 162px;top: 66px; overflow-y: scroll;" class="state">
+                </pre>
+
+                <label
+                style="position: absolute;width: 162px;height: 44px;left: 0px;top: 920px;" class="consoleSmallMenu">Password: pass</label>
+        </div>
+        
+    </body>
+</html>

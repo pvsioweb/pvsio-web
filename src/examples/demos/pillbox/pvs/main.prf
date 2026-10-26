@@ -1,0 +1,229 @@
+(main
+ (init_TCC1 0
+  (init_TCC1-1 nil 3868609809 ("" (subtype-tcc) nil nil) nil nil
+   (init subtype "pilldispenser_th.init_pillbox(0)"
+    "(pilldispenser_th.per_act_key1)")))
+ (init_TCC2 0
+  (init_TCC2-1 nil 3868609809 ("" (subtype-tcc) nil nil)
+   ((init_pillbox const-decl "state" pilldispenser_th nil)
+    (clear_screen const-decl "state" pilldispenser_th nil)
+    (init_screen const-decl "state" pilldispenser_th nil)
+    (act_key1 const-decl "state" pilldispenser_th nil)
+    (per_act_key2 const-decl "boolean" pilldispenser_th nil))
+   nil
+   (init subtype "pilldispenser_th.init_pillbox(0)"
+    "(pilldispenser_th.per_act_key2)")))
+ (init_TCC3 0
+  (init_TCC3-1 nil 3868609809 ("" (subtype-tcc) nil nil)
+   ((init_pillbox const-decl "state" pilldispenser_th nil)
+    (clear_screen const-decl "state" pilldispenser_th nil)
+    (init_screen const-decl "state" pilldispenser_th nil)
+    (act_key1 const-decl "state" pilldispenser_th nil)
+    (pwd_screen const-decl "state" pilldispenser_th nil)
+    (act_key2 const-decl "state" pilldispenser_th nil)
+    (per_act_key3 const-decl "boolean" pilldispenser_th nil))
+   nil
+   (init subtype "pilldispenser_th.init_pillbox(0)"
+    "(pilldispenser_th.per_act_key3)")))
+ (init_TCC4 0
+  (init_TCC4-1 nil 3868609809 ("" (subtype-tcc) nil nil)
+   ((init_pillbox const-decl "state" pilldispenser_th nil)
+    (clear_screen const-decl "state" pilldispenser_th nil)
+    (init_screen const-decl "state" pilldispenser_th nil)
+    (act_key1 const-decl "state" pilldispenser_th nil)
+    (pwd_screen const-decl "state" pilldispenser_th nil)
+    (act_key2 const-decl "state" pilldispenser_th nil)
+    (db_pwd_screen const-decl "state" pilldispenser_th nil)
+    (act_key3 const-decl "state" pilldispenser_th nil)
+    (mlimit const-decl "posnat" pd_t_and_c_th nil)
+    (plimit const-decl "posnat" pd_t_and_c_th nil))
+   nil (init subtype "main.x1`meds_db" "patient_db_type[2, 3, 3, 2]")))
+ (init_TCC5 0
+  (init_TCC5-1 nil 3868609809 ("" (subtype-tcc) nil nil)
+   ((real_ge_is_total_order name-judgement "(total_order?[real])"
+     real_props nil)
+    (nat nonempty-type-eq-decl nil naturalnumbers nil)
+    (int nonempty-type-eq-decl nil integers nil)
+    (integer_pred const-decl "[rational -> boolean]" integers nil)
+    (rational nonempty-type-from-decl nil rationals nil)
+    (rational_pred const-decl "[real -> boolean]" rationals nil)
+    (>= const-decl "bool" reals nil)
+    (real nonempty-type-from-decl nil reals nil)
+    (real_pred const-decl "[number_field -> boolean]" reals nil)
+    (number_field nonempty-type-from-decl nil number_fields nil)
+    (number_field_pred const-decl "[number -> boolean]" number_fields
+     nil)
+    (number nonempty-type-decl nil numbers nil)
+    (NOT const-decl "[bool -> bool]" booleans nil)
+    (bool nonempty-type-eq-decl nil booleans nil)
+    (boolean nonempty-type-decl nil booleans nil)
+    (init_pillbox const-decl "state" pilldispenser_th nil)
+    (clear_screen const-decl "state" pilldispenser_th nil)
+    (init_screen const-decl "state" pilldispenser_th nil)
+    (act_key1 const-decl "state" pilldispenser_th nil)
+    (pwd_screen const-decl "state" pilldispenser_th nil)
+    (act_key2 const-decl "state" pilldispenser_th nil)
+    (db_pwd_screen const-decl "state" pilldispenser_th nil)
+    (act_key3 const-decl "state" pilldispenser_th nil)
+    (slimit const-decl "posnat" pd_t_and_c_th nil)
+    (plimit const-decl "posnat" pd_t_and_c_th nil))
+   nil
+   (init subtype "main.x1`script_line"
+    "patient_id_line_type[2, 3, 3, 2]")))
+ (init_TCC6 0
+  (init_TCC6-1 nil 3868609809 ("" (subtype-tcc) nil nil) nil nil
+   (init subtype
+    "(LAMBDA (x1: pilldispenser_th.state): (# action := conversions.available_actions_T2X(x1`action), field := conversions.available_fields_T2X(x1`field), meds_db := conversions.patient_db_T2X(x1`meds_db), med_id_line := conversions.patient_id_line_T2X(x1`med_id_line), mode := x1`mode, m_current := x1`m_current, m_lower := x1`m_lower, m_max := x1`m_max, m_upper := x1`m_upper, new_patient_record := conversions.available_fields_T2X(x1`new_patient_record), patients_db := conversions.patient_db_T2X(x1`patients_db), patient_id_line := conversions.patient_id_line_T2X(x1`patient_id_line), p_current := x1`p_current, p_lower := x1`p_lower, p_max := x1`p_max, p_upper := x1`p_upper, scan_counter := x1`scan_counter, scripts_db := conversions.script_db_T2X(x1`scripts_db), script_line := conversions.patient_id_line_T2X(x1`script_line), s_current := x1`s_current, s_lower := x1`s_lower, s_upper := x1`s_upper #))(LET precompile = pilldispenser_th.act_key1(pilldispenser_th.init_pillbox(0)), precompile = pilldispenser_th.act_key2(pilldispenser_th.init_pillbox(0)), precompile = pilldispenser_th.act_key3(pilldispenser_th.init_pillbox(0)) IN pilldispenser_th.init_pillbox(0))"
+    "execState")))
+ (autocomplete_new_patient_details_TCC1 0
+  (autocomplete_new_patient_details_TCC1-1 nil 3868609809
+   ("" (cond-disjoint-tcc) nil nil) nil nil
+   (autocomplete_new_patient_details disjointness
+    "COND main.x = pd_t_and_c_th[2, 3, 3, 2].name -> field(main.st)(pd_t_and_c_th[2, 3, 3, 2].name) WITH [entered := booleans.TRUE], main.x = pd_t_and_c_th[2, 3, 3, 2].dob -> field(main.st)(pd_t_and_c_th[2, 3, 3, 2].dob) WITH [entered := booleans.TRUE], main.x = pd_t_and_c_th[2, 3, 3, 2].id_card -> field(main.st)(pd_t_and_c_th[2, 3, 3, 2].id_card) WITH [entered := booleans.TRUE], main.x = pd_t_and_c_th[2, 3, 3, 2].carer -> field(main.st)(pd_t_and_c_th[2, 3, 3, 2].carer) WITH [entered := booleans.TRUE], main.x = pd_t_and_c_th[2, 3, 3, 2].mob -> field(main.st)(pd_t_and_c_th[2, 3, 3, 2].mob) WITH [entered := booleans.TRUE], ELSE -> field(main.st)(main.x) ENDCOND"
+    "nil")))
+ (autocomplete_new_medicine_TCC1 0
+  (autocomplete_new_medicine_TCC1-1 nil 3868609809
+   ("" (cond-disjoint-tcc) nil nil) nil nil
+   (autocomplete_new_medicine disjointness
+    "COND main.x = pd_t_and_c_th[2, 3, 3, 2].medicine -> field(main.st)(pd_t_and_c_th[2, 3, 3, 2].medicine) WITH [entered := booleans.TRUE], main.x = pd_t_and_c_th[2, 3, 3, 2].dosage -> field(main.st)(pd_t_and_c_th[2, 3, 3, 2].dosage) WITH [entered := booleans.TRUE], main.x = pd_t_and_c_th[2, 3, 3, 2].validity -> field(main.st)(pd_t_and_c_th[2, 3, 3, 2].validity) WITH [entered := booleans.TRUE], main.x = pd_t_and_c_th[2, 3, 3, 2].quantity -> field(main.st)(pd_t_and_c_th[2, 3, 3, 2].quantity) WITH [entered := booleans.TRUE], main.x = pd_t_and_c_th[2, 3, 3, 2].column -> field(main.st)(pd_t_and_c_th[2, 3, 3, 2].column) WITH [entered := booleans.TRUE], ELSE -> field(main.st)(main.x) ENDCOND"
+    "nil")))
+ (click_key1_TCC1 0
+  (click_key1_TCC1-1 nil 3868609809 ("" (subtype-tcc) nil nil)
+   ((per_act_key1 const-decl "boolean" pilldispenser_th nil)
+    (clear_screen const-decl "state" pilldispenser_th nil)
+    (init_screen const-decl "state" pilldispenser_th nil)
+    (act_key1 const-decl "state" pilldispenser_th nil)
+    (mlimit const-decl "posnat" pd_t_and_c_th nil)
+    (plimit const-decl "posnat" pd_t_and_c_th nil))
+   nil
+   (click_key1 subtype "main.x`meds_db"
+    "patient_db_type[2, 3, 3, 2]")))
+ (click_key1_TCC2 0
+  (click_key1_TCC2-1 nil 3868609809 ("" (subtype-tcc) nil nil) nil nil
+   (click_key1 subtype "main.x`script_line"
+    "patient_id_line_type[2, 3, 3, 2]")))
+ (click_key1_TCC3 0
+  (click_key1_TCC3-1 nil 3868609809 ("" (subtype-tcc) nil nil) nil nil
+   (click_key1 subtype
+    "(LAMBDA (x: pilldispenser_th.state): (# action := conversions.available_actions_T2X(x`action), field := conversions.available_fields_T2X(x`field), meds_db := conversions.patient_db_T2X(x`meds_db), med_id_line := conversions.patient_id_line_T2X(x`med_id_line), mode := x`mode, m_current := x`m_current, m_lower := x`m_lower, m_max := x`m_max, m_upper := x`m_upper, new_patient_record := conversions.available_fields_T2X(x`new_patient_record), patients_db := conversions.patient_db_T2X(x`patients_db), patient_id_line := conversions.patient_id_line_T2X(x`patient_id_line), p_current := x`p_current, p_lower := x`p_lower, p_max := x`p_max, p_upper := x`p_upper, scan_counter := x`scan_counter, scripts_db := conversions.script_db_T2X(x`scripts_db), script_line := conversions.patient_id_line_T2X(x`script_line), s_current := x`s_current, s_lower := x`s_lower, s_upper := x`s_upper #))(COND pilldispenser_th.per_act_key1(main.st) -> pilldispenser_th.act_key1(main.st), ELSE -> main.st ENDCOND)"
+    "execState")))
+ (click_key2_TCC1 0
+  (click_key2_TCC1-1 nil 3868609809 ("" (subtype-tcc) nil nil)
+   ((per_act_key2 const-decl "boolean" pilldispenser_th nil)
+    (mlimit const-decl "posnat" pd_t_and_c_th nil)
+    (plimit const-decl "posnat" pd_t_and_c_th nil))
+   nil
+   (click_key2 subtype "main.x`meds_db"
+    "patient_db_type[2, 3, 3, 2]")))
+ (click_key2_TCC2 0
+  (click_key2_TCC2-1 nil 3868609809 ("" (subtype-tcc) nil nil) nil nil
+   (click_key2 subtype "main.x`script_line"
+    "patient_id_line_type[2, 3, 3, 2]")))
+ (click_key2_TCC3 0
+  (click_key2_TCC3-1 nil 3868609809 ("" (subtype-tcc) nil nil) nil nil
+   (click_key2 subtype
+    "(LAMBDA (x: pilldispenser_th.state): (# action := conversions.available_actions_T2X(x`action), field := conversions.available_fields_T2X(x`field), meds_db := conversions.patient_db_T2X(x`meds_db), med_id_line := conversions.patient_id_line_T2X(x`med_id_line), mode := x`mode, m_current := x`m_current, m_lower := x`m_lower, m_max := x`m_max, m_upper := x`m_upper, new_patient_record := conversions.available_fields_T2X(x`new_patient_record), patients_db := conversions.patient_db_T2X(x`patients_db), patient_id_line := conversions.patient_id_line_T2X(x`patient_id_line), p_current := x`p_current, p_lower := x`p_lower, p_max := x`p_max, p_upper := x`p_upper, scan_counter := x`scan_counter, scripts_db := conversions.script_db_T2X(x`scripts_db), script_line := conversions.patient_id_line_T2X(x`script_line), s_current := x`s_current, s_lower := x`s_lower, s_upper := x`s_upper #))(COND pilldispenser_th.per_act_key2(main.st) -> main.autocomplete_password(pilldispenser_th.act_key2(main.st)), ELSE -> main.st ENDCOND)"
+    "execState")))
+ (click_key3_TCC1 0
+  (click_key3_TCC1-1 nil 3868609809 ("" (subtype-tcc) nil nil) nil nil
+   (click_key3 subtype "main.x`meds_db"
+    "patient_db_type[2, 3, 3, 2]")))
+ (click_key3_TCC2 0
+  (click_key3_TCC2-1 nil 3868609809 ("" (subtype-tcc) nil nil) nil nil
+   (click_key3 subtype "main.x`script_line"
+    "patient_id_line_type[2, 3, 3, 2]")))
+ (click_key3_TCC3 0
+  (click_key3_TCC3-1 nil 3868609809 ("" (subtype-tcc) nil nil) nil nil
+   (click_key3 subtype
+    "(LAMBDA (x: pilldispenser_th.state): (# action := conversions.available_actions_T2X(x`action), field := conversions.available_fields_T2X(x`field), meds_db := conversions.patient_db_T2X(x`meds_db), med_id_line := conversions.patient_id_line_T2X(x`med_id_line), mode := x`mode, m_current := x`m_current, m_lower := x`m_lower, m_max := x`m_max, m_upper := x`m_upper, new_patient_record := conversions.available_fields_T2X(x`new_patient_record), patients_db := conversions.patient_db_T2X(x`patients_db), patient_id_line := conversions.patient_id_line_T2X(x`patient_id_line), p_current := x`p_current, p_lower := x`p_lower, p_max := x`p_max, p_upper := x`p_upper, scan_counter := x`scan_counter, scripts_db := conversions.script_db_T2X(x`scripts_db), script_line := conversions.patient_id_line_T2X(x`script_line), s_current := x`s_current, s_lower := x`s_lower, s_upper := x`s_upper #))(COND pilldispenser_th.per_act_key3(main.st) -> main.autocomplete_password(pilldispenser_th.act_key3(main.st)), ELSE -> main.st ENDCOND)"
+    "execState")))
+ (click_confirm_TCC1 0
+  (click_confirm_TCC1-1 nil 3868609809 ("" (subtype-tcc) nil nil) nil
+   nil
+   (click_confirm subtype "main.x`meds_db"
+    "patient_db_type[2, 3, 3, 2]")))
+ (click_confirm_TCC2 0
+  (click_confirm_TCC2-1 nil 3868609809 ("" (subtype-tcc) nil nil) nil
+   nil
+   (click_confirm subtype "main.x`script_line"
+    "patient_id_line_type[2, 3, 3, 2]")))
+ (click_confirm_TCC3 0
+  (click_confirm_TCC3-1 nil 3868609809 ("" (subtype-tcc) nil nil) nil
+   nil
+   (click_confirm subtype
+    "(LAMBDA (x: pilldispenser_th.state): (# action := conversions.available_actions_T2X(x`action), field := conversions.available_fields_T2X(x`field), meds_db := conversions.patient_db_T2X(x`meds_db), med_id_line := conversions.patient_id_line_T2X(x`med_id_line), mode := x`mode, m_current := x`m_current, m_lower := x`m_lower, m_max := x`m_max, m_upper := x`m_upper, new_patient_record := conversions.available_fields_T2X(x`new_patient_record), patients_db := conversions.patient_db_T2X(x`patients_db), patient_id_line := conversions.patient_id_line_T2X(x`patient_id_line), p_current := x`p_current, p_lower := x`p_lower, p_max := x`p_max, p_upper := x`p_upper, scan_counter := x`scan_counter, scripts_db := conversions.script_db_T2X(x`scripts_db), script_line := conversions.patient_id_line_T2X(x`script_line), s_current := x`s_current, s_lower := x`s_lower, s_upper := x`s_upper #))(COND pilldispenser_th.per_act_confirm(main.st) -> pilldispenser_th.act_confirm(main.st), ELSE -> main.st ENDCOND)"
+    "execState")))
+ (click_quit_TCC1 0
+  (click_quit_TCC1-1 nil 3868609809 ("" (subtype-tcc) nil nil) nil nil
+   (click_quit subtype "main.x`meds_db"
+    "patient_db_type[2, 3, 3, 2]")))
+ (click_quit_TCC2 0
+  (click_quit_TCC2-1 nil 3868609809 ("" (subtype-tcc) nil nil) nil nil
+   (click_quit subtype "main.x`script_line"
+    "patient_id_line_type[2, 3, 3, 2]")))
+ (click_quit_TCC3 0
+  (click_quit_TCC3-1 nil 3868609809 ("" (subtype-tcc) nil nil) nil nil
+   (click_quit subtype
+    "(LAMBDA (x: pilldispenser_th.state): (# action := conversions.available_actions_T2X(x`action), field := conversions.available_fields_T2X(x`field), meds_db := conversions.patient_db_T2X(x`meds_db), med_id_line := conversions.patient_id_line_T2X(x`med_id_line), mode := x`mode, m_current := x`m_current, m_lower := x`m_lower, m_max := x`m_max, m_upper := x`m_upper, new_patient_record := conversions.available_fields_T2X(x`new_patient_record), patients_db := conversions.patient_db_T2X(x`patients_db), patient_id_line := conversions.patient_id_line_T2X(x`patient_id_line), p_current := x`p_current, p_lower := x`p_lower, p_max := x`p_max, p_upper := x`p_upper, scan_counter := x`scan_counter, scripts_db := conversions.script_db_T2X(x`scripts_db), script_line := conversions.patient_id_line_T2X(x`script_line), s_current := x`s_current, s_lower := x`s_lower, s_upper := x`s_upper #))(COND pilldispenser_th.per_act_quit(main.st) -> pilldispenser_th.act_quit(main.st), ELSE -> main.st ENDCOND)"
+    "execState")))
+ (click_create_TCC1 0
+  (click_create_TCC1-1 nil 3868609809 ("" (subtype-tcc) nil nil) nil
+   nil
+   (click_create subtype "main.x`meds_db"
+    "patient_db_type[2, 3, 3, 2]")))
+ (click_create_TCC2 0
+  (click_create_TCC2-1 nil 3868609809 ("" (subtype-tcc) nil nil) nil
+   nil
+   (click_create subtype "main.x`script_line"
+    "patient_id_line_type[2, 3, 3, 2]")))
+ (click_create_TCC3 0
+  (click_create_TCC3-1 nil 3868609809 ("" (subtype-tcc) nil nil) nil
+   nil
+   (click_create subtype
+    "(LAMBDA (x: pilldispenser_th.state): (# action := conversions.available_actions_T2X(x`action), field := conversions.available_fields_T2X(x`field), meds_db := conversions.patient_db_T2X(x`meds_db), med_id_line := conversions.patient_id_line_T2X(x`med_id_line), mode := x`mode, m_current := x`m_current, m_lower := x`m_lower, m_max := x`m_max, m_upper := x`m_upper, new_patient_record := conversions.available_fields_T2X(x`new_patient_record), patients_db := conversions.patient_db_T2X(x`patients_db), patient_id_line := conversions.patient_id_line_T2X(x`patient_id_line), p_current := x`p_current, p_lower := x`p_lower, p_max := x`p_max, p_upper := x`p_upper, scan_counter := x`scan_counter, scripts_db := conversions.script_db_T2X(x`scripts_db), script_line := conversions.patient_id_line_T2X(x`script_line), s_current := x`s_current, s_lower := x`s_lower, s_upper := x`s_upper #))(COND pilldispenser_th.per_act_create(main.st) -> main.autocomplete(pilldispenser_th.act_create(main.st)), ELSE -> main.st ENDCOND)"
+    "execState")))
+ (tap_fingerprint_scanner_TCC1 0
+  (tap_fingerprint_scanner_TCC1-1 nil 3868609809
+   ("" (subtype-tcc) nil nil) nil nil
+   (tap_fingerprint_scanner subtype "main.x`meds_db"
+    "patient_db_type[2, 3, 3, 2]")))
+ (tap_fingerprint_scanner_TCC2 0
+  (tap_fingerprint_scanner_TCC2-1 nil 3868609809
+   ("" (subtype-tcc) nil nil) nil nil
+   (tap_fingerprint_scanner subtype "main.x`script_line"
+    "patient_id_line_type[2, 3, 3, 2]")))
+ (tap_fingerprint_scanner_TCC3 0
+  (tap_fingerprint_scanner_TCC3-1 nil 3868609809
+   ("" (subtype-tcc) nil nil) nil nil
+   (tap_fingerprint_scanner subtype
+    "(LAMBDA (x: pilldispenser_th.state): (# action := conversions.available_actions_T2X(x`action), field := conversions.available_fields_T2X(x`field), meds_db := conversions.patient_db_T2X(x`meds_db), med_id_line := conversions.patient_id_line_T2X(x`med_id_line), mode := x`mode, m_current := x`m_current, m_lower := x`m_lower, m_max := x`m_max, m_upper := x`m_upper, new_patient_record := conversions.available_fields_T2X(x`new_patient_record), patients_db := conversions.patient_db_T2X(x`patients_db), patient_id_line := conversions.patient_id_line_T2X(x`patient_id_line), p_current := x`p_current, p_lower := x`p_lower, p_max := x`p_max, p_upper := x`p_upper, scan_counter := x`scan_counter, scripts_db := conversions.script_db_T2X(x`scripts_db), script_line := conversions.patient_id_line_T2X(x`script_line), s_current := x`s_current, s_lower := x`s_lower, s_upper := x`s_upper #))(COND mode(main.st) = pd_t_and_c_th[2, 3, 3, 2].scan -> pilldispenser_th.scan_enabled_screen(main.st), ELSE -> main.st ENDCOND)"
+    "execState")))
+ (tick_TCC1 0
+  (tick_TCC1-1 nil 3868609809 ("" (subtype-tcc) nil nil) nil nil
+   (tick subtype "main.x`meds_db" "patient_db_type[2, 3, 3, 2]")))
+ (tick_TCC2 0
+  (tick_TCC2-1 nil 3868609809 ("" (subtype-tcc) nil nil) nil nil
+   (tick subtype "main.x`script_line"
+    "patient_id_line_type[2, 3, 3, 2]")))
+ (tick_TCC3 0
+  (tick_TCC3-1 nil 3868609809 ("" (subtype-tcc) nil nil) nil nil
+   (tick subtype
+    "(LAMBDA (x: pilldispenser_th.state): (# action := conversions.available_actions_T2X(x`action), field := conversions.available_fields_T2X(x`field), meds_db := conversions.patient_db_T2X(x`meds_db), med_id_line := conversions.patient_id_line_T2X(x`med_id_line), mode := x`mode, m_current := x`m_current, m_lower := x`m_lower, m_max := x`m_max, m_upper := x`m_upper, new_patient_record := conversions.available_fields_T2X(x`new_patient_record), patients_db := conversions.patient_db_T2X(x`patients_db), patient_id_line := conversions.patient_id_line_T2X(x`patient_id_line), p_current := x`p_current, p_lower := x`p_lower, p_max := x`p_max, p_upper := x`p_upper, scan_counter := x`scan_counter, scripts_db := conversions.script_db_T2X(x`scripts_db), script_line := conversions.patient_id_line_T2X(x`script_line), s_current := x`s_current, s_lower := x`s_lower, s_upper := x`s_upper #))(COND mode(main.st) = pd_t_and_c_th[2, 3, 3, 2].scan_enabled -> pilldispenser_th.act(pd_t_and_c_th[2, 3, 3, 2].tick, main.st), ELSE -> main.st ENDCOND)"
+    "execState")))
+ (click_medicines_TCC1 0
+  (click_medicines_TCC1-1 nil 3868609809 ("" (subtype-tcc) nil nil) nil
+   nil
+   (click_medicines subtype "main.x`meds_db"
+    "patient_db_type[2, 3, 3, 2]")))
+ (click_medicines_TCC2 0
+  (click_medicines_TCC2-1 nil 3868609809 ("" (subtype-tcc) nil nil) nil
+   nil
+   (click_medicines subtype "main.x`script_line"
+    "patient_id_line_type[2, 3, 3, 2]")))
+ (click_medicines_TCC3 0
+  (click_medicines_TCC3-1 nil 3868609809 ("" (subtype-tcc) nil nil) nil
+   nil
+   (click_medicines subtype
+    "(LAMBDA (x: pilldispenser_th.state): (# action := conversions.available_actions_T2X(x`action), field := conversions.available_fields_T2X(x`field), meds_db := conversions.patient_db_T2X(x`meds_db), med_id_line := conversions.patient_id_line_T2X(x`med_id_line), mode := x`mode, m_current := x`m_current, m_lower := x`m_lower, m_max := x`m_max, m_upper := x`m_upper, new_patient_record := conversions.available_fields_T2X(x`new_patient_record), patients_db := conversions.patient_db_T2X(x`patients_db), patient_id_line := conversions.patient_id_line_T2X(x`patient_id_line), p_current := x`p_current, p_lower := x`p_lower, p_max := x`p_max, p_upper := x`p_upper, scan_counter := x`scan_counter, scripts_db := conversions.script_db_T2X(x`scripts_db), script_line := conversions.patient_id_line_T2X(x`script_line), s_current := x`s_current, s_lower := x`s_lower, s_upper := x`s_upper #))(COND pilldispenser_th.per_act_medicines(main.st) -> pilldispenser_th.act_medicines(main.st), ELSE -> main.st ENDCOND)"
+    "execState"))))
+
